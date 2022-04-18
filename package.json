@@ -6,7 +6,8 @@
     "bip39": "^3.0.4",
     "eth-gas-reporter": "^0.2.24",
     "ethereumjs-wallet": "^1.0.2",
-    "web3": "^1.7.0"
+    "web3": "^1.7.0",
+    "as-table": "1.0.55"
   },
   "directories": {
     "src": "src",

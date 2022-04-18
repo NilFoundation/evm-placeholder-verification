@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "dependencies": {
     "@truffle/hdwallet-provider": "^2.0.1",
+    "as-table": "^1.0.55",
     "bip39": "^3.0.4",
     "chai": "^4.3.6",
     "eth-gas-reporter": "^0.2.25",
