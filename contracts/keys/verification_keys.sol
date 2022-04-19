@@ -20,7 +20,7 @@ pragma experimental ABIEncoderV2;
 
 import '../types.sol';
 
-import './redshift_vk.sol';
+import './placeholder_vk.sol';
 
 /**
  * @title Verification keys library

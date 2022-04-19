@@ -1,5 +1,5 @@
 const myModule = require("./auxProofGen.js");
-const myModule2 = require('./verifyRedshiftUnifiedAddition.js');
+const myModule2 = require('./verifyPlaceholderUnifiedAddition.js');
 const fs = require("fs");
 const web3 = require('web3');
 const bip39 = require('bip39');

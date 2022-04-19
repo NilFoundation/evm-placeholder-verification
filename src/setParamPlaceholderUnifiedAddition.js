@@ -63,7 +63,7 @@ web3.eth.net.isListening()
     .then(() => console.log('web3 is connected'))
     .catch(e => console.log('Wow. Something went wrong'));
 const contract_data = JSON.parse(
-    fs.readFileSync("TestRedshiftVerifierUnifiedAddition.json")
+    fs.readFileSync("TestPlaceholderVerifierUnifiedAddition.json")
 );
 
 

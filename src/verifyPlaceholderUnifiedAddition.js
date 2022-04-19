@@ -1,9 +1,9 @@
 const common = require('./common.js');
 const fs = require("fs");
 
-function verifyRedshiftUnifiedAddition(proof) {
+function verifyPlaceholderUnifiedAddition(proof) {
     const contract_data = JSON.parse(
-        fs.readFileSync("TestRedshiftVerifierUnifiedAddition.json")
+        fs.readFileSync("TestPlaceholderVerifierUnifiedAddition.json")
     );
 
     contractAdress = contract_data.networks["3"].address;
@@ -25,6 +25,6 @@ function verifyRedshiftUnifiedAddition(proof) {
 //
 // var text = fs.readFileSync(file).toString('utf-8');
 // text = text.slice(0, -1);
-// x = verifyRedshiftUnifiedAddition(text);
+// x = verifyPlaceholderUnifiedAddition(text);
 
-module.exports = {verifyRedshiftUnifiedAddition};
+module.exports = {verifyRedshiftUnifiedAddition: verifyPlaceholderUnifiedAddition};
