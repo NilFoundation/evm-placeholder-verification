@@ -1,24 +1,16 @@
 const common = require('./common.js');
 const fs = require("fs");
 
-function verifyPlaceholderUnifiedAddition(proof) {
+async function verifyPlaceholderUnifiedAddition(proof) {
     const contract_data = JSON.parse(
         fs.readFileSync("TestPlaceholderVerifierUnifiedAddition.json")
     );
 
-    contractAdress = contract_data.networks["3"].address;
+    contractAdress = contract_data.networks["80001"].address;
     contractAbi = contract_data.abi;
 
-    x = common.sendProof(contractAdress, contractAbi, proof);
-    x.then(result => {
-        if (result === true) {
-            console.log("Verified");
-            return "Verified!";
-        } else {
-            console.log("Error verified");
-            return "Error verified!";
-        }
-    });
+    x = await common.sendProof(contractAdress, contractAbi, proof);
+    return x;
 }
 
 // file = process.argv[2];
