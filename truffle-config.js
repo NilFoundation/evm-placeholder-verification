@@ -21,9 +21,7 @@
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 
 const fs = require('fs');
-// const mnemonic = fs.readFileSync("/Users/Zerg/Projects/evm-solana-verification/share/state-proof-verify/.secret").toString().trim();
-// const mnemonic = "***REMOVED***";
-const mnemonic = "***REMOVED***";
+const mnemonic = fs.readFileSync(".secret").toString().trim();
 
 module.exports = {
     /**
