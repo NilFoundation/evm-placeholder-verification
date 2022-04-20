@@ -25,7 +25,6 @@ import '../verifier_poseidon_component.sol';
 contract TestRedshiftVerifierPoseidon {
     types.lpc_params_type m_lpc_params;
     types.placeholder_common_data m_common_data;
-    bool m_result;
 
     function set_initial_params(
         uint256 modulus,
@@ -77,7 +76,6 @@ contract TestRedshiftVerifierPoseidon {
         bytes memory init_blob = hex"";
         types.transcript_data memory tr_state;
         transcript.init_transcript(tr_state, init_blob);
-        m_result = placeholder_verifier_poseidon_component.parse_verify_proof_be(blob, 0, tr_state, proof_map, m_lpc_params, m_common_data);
-        require(m_result, "Proof is not correct!");
+        require(placeholder_verifier_poseidon_component.parse_verify_proof_be(blob, 0, tr_state, proof_map, m_lpc_params, m_common_data), "Proof is not correct!");
     }
 }

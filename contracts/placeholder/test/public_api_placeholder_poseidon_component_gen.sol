@@ -30,11 +30,10 @@ contract TestRedshiftVerifierPoseidonGen {
         types.lpc_params_type lpc_params;
         types.placeholder_common_data common_data;
     }
-    bool public m_result;
 
     function verify(
         bytes calldata blob,
-        // [modulus, lambda, r, m, max_degree, rows_amount, omega]
+    // [modulus, lambda, r, m, max_degree, rows_amount, omega]
         uint256[] calldata params,
         uint256[] calldata D_omegas,
         uint256[] calldata q,
@@ -42,7 +41,7 @@ contract TestRedshiftVerifierPoseidonGen {
     ) public {
         test_local_vars memory vars;
         (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser_calldata
-            .parse_be(blob, 0);
+        .parse_be(blob, 0);
         require(
             vars.proof_size == blob.length,
             "Proof length was detected incorrectly!"
@@ -63,15 +62,13 @@ contract TestRedshiftVerifierPoseidonGen {
         vars.common_data.omega = params[6];
         vars.common_data.columns_rotations = columns_rotations;
 
-        m_result =
-        placeholder_verifier_poseidon_gen
-            .verify_proof_be(
+        require(placeholder_verifier_poseidon_gen
+        .verify_proof_be(
                 blob,
                 vars.tr_state,
                 vars.proof_map,
                 vars.lpc_params,
                 vars.common_data
-            );
-        require(m_result, "Proof is not correct!");
+            ), "Proof is not correct!");
     }
 }

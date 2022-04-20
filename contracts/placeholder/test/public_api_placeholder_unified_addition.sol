@@ -25,7 +25,6 @@ import '../verifier_unified_addition_component.sol';
 contract TestRedshiftVerifierUnifiedAddition {
     types.lpc_params_type m_lpc_params;
     types.placeholder_common_data m_common_data;
-    bool m_result;
 
     function set_initial_params(uint256 modulus, uint256 r, uint256 max_degree, uint256 lambda, uint256 m, uint256 rows_amount, uint256 omega, uint256 columns_number) public {
         m_lpc_params.modulus = modulus;
@@ -70,8 +69,6 @@ contract TestRedshiftVerifierUnifiedAddition {
         transcript.init_transcript(tr_state, init_blob);
         types.lpc_params_type memory lpc_params = m_lpc_params;
         types.placeholder_common_data memory common_data = m_common_data;
-        m_result =
-        placeholder_verifier_unified_addition_component.parse_verify_proof_be(blob, 0, tr_state, proof_map, lpc_params, common_data);
-        require(m_result, "Proof is not correct!");
+        require(placeholder_verifier_unified_addition_component.parse_verify_proof_be(blob, 0, tr_state, proof_map, lpc_params, common_data), "Proof is not correct!");
     }
 }
