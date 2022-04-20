@@ -47,6 +47,7 @@ function verify_encoded(encoded, adress) {
         to : adress.address,
         gasPrice: web3.utils.toHex(web3.utils.toWei('20', 'gwei')),
         gasLimit: 100000,
+        data: encoded
     }
     console.log()
 
@@ -56,7 +57,8 @@ function verify_encoded(encoded, adress) {
 }
 
 const web3 = new Web3(new Web3.providers.HttpProvider(
-    "https://ropsten.infura.io/v3/6f3d827e1a7241859cf304c63a4f3167"
+    // "https://ropsten.infura.io/v3/6f3d827e1a7241859cf304c63a4f3167"
+    "https://rpc-mumbai.matic.today"
 ));
 
 web3.eth.net.isListening()
@@ -74,26 +76,41 @@ web3.eth.getBalance(adress[0].address).then(console.log)
 
 // var contract = new web3.eth.Contract(contract_data.abi, "0x2ab4343f34cd01088af926b436bd7043e7945fbe");
 // new
-var contract = new web3.eth.Contract(contract_data.abi, "0x8EFde6959Bc5CA35A8C26221de6aa8d732877df9");
+// var contract = new web3.eth.Contract(contract_data.abi, "0x8EFde6959Bc5CA35A8C26221de6aa8d732877df9");
+var contract = new web3.eth.Contract(contract_data.abi, "0x2c5706F0DC2080b83AF5B3dA9a44C773f6a62fdc");
 
 
-verify_encoded(contract.methods.set_q([0, 0, 1]).encodeABI(), adress[0]);
+// verify_encoded(contract.methods.set_q([0, 0, 1]).encodeABI(), adress[0]);
+//
+// verify_encoded(contract.methods.set_initial_params(
+//     new BN('40000000000000000000000000000000224698fc094cf91b992d30ed00000001', 16),
+//     1,
+//     3,
+//     1,
+//     2,
+//     4,
+//     new BN('24760239192664116622385963963284001971067308018068707868888628426778644166363', 10),
+//     13
+// ).encodeABI(), adress[0]);
 
-verify_encoded(contract.methods.set_initial_params(
-    new BN('40000000000000000000000000000000224698fc094cf91b992d30ed00000001', 16),
-    1,
-    3,
-    1,
-    2,
-    4,
-    new BN('24760239192664116622385963963284001971067308018068707868888628426778644166363', 10),
-    13
-).encodeABI(), adress[0]);
+// verify_encoded(contract.methods.set_D_omegas([new BN('24760239192664116622385963963284001971067308018068707868888628426778644166363', 10),]).encodeABI(), adress[0]);
 
-verify_encoded(contract.methods.set_D_omegas([new BN('24760239192664116622385963963284001971067308018068707868888628426778644166363', 10),]).encodeABI(), adress[0]);
-
-for (var i = 0; i < 13; i++) {
-    verify_encoded(contract.methods.set_column_rotations([0,], i).encodeABI(), adress[0]);
-}
-
-verify_encoded(contract.methods.set_column_rotations([0,], 1).encodeABI(), adress[0]);
+// for (var i = 0; i < 13; i++) {
+//     verify_encoded(contract.methods.set_column_rotations([0,], i).encodeABI(), adress[0]);
+// }
+// verify_encoded(contract.methods.set_column_rotations([0,], 0).encodeABI(), adress[0]);
+// verify_encoded(contract.methods.set_column_rotations([0,], 1).encodeABI(), adress[0]);
+// verify_encoded(contract.methods.set_column_rotations([0,], 2).encodeABI(), adress[0]);
+// verify_encoded(contract.methods.set_column_rotations([0,], 3).encodeABI(), adress[0]);
+// verify_encoded(contract.methods.set_column_rotations([0,], 4).encodeABI(), adress[0]);
+// verify_encoded(contract.methods.set_column_rotations([0,], 5).encodeABI(), adress[0]);
+// verify_encoded(contract.methods.set_column_rotations([0,], 6).encodeABI(), adress[0]);
+// verify_encoded(contract.methods.set_column_rotations([0,], 7).encodeABI(), adress[0]);
+// verify_encoded(contract.methods.set_column_rotations([0,], 8).encodeABI(), adress[0]);
+// verify_encoded(contract.methods.set_column_rotations([0,], 9).encodeABI(), adress[0]);
+// verify_encoded(contract.methods.set_column_rotations([0,], 10).encodeABI(), adress[0]);
+// verify_encoded(contract.methods.set_column_rotations([0,], 11).encodeABI(), adress[0]);
+// verify_encoded(contract.methods.set_column_rotations([0,], 12).encodeABI(), adress[0]);
+//
+// verify_encoded(contract.methods.set_column_rotations([0,], 1).encodeABI(), adress[0]);
+verify_encoded(contract.methods.verify('0x0122222').encodeABI(), adress[0]);
