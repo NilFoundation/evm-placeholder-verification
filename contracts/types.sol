@@ -236,7 +236,7 @@ library types {
         uint256 q_last_eval;
     }
 
-    struct redshift_proof_map {
+    struct placeholder_proof_map {
         uint256 witness_commitments_offset;
         uint256 T_commitments_offset;
         uint256 eval_proof_offset;
@@ -251,7 +251,7 @@ library types {
         uint256 eval_proof_special_selectors_offset;
     }
 
-    struct redshift_proof_map_calldata {
+    struct placeholder_proof_map_calldata {
         uint256 v_perm_commitment_offset;
         // 0x20
         uint256 witness_commitments_offset;
@@ -279,18 +279,18 @@ library types {
         uint256 eval_proof_special_selectors_offset;
     }
 
-    struct redshift_column_rotations {
+    struct placeholder_column_rotations {
         int256[] rotations;
     }
 
-    struct redshift_common_data {
+    struct placeholder_common_data {
         uint256 rows_amount;
         // 0x20
         uint256 omega;
         int256[][] columns_rotations; 
     }
 
-    struct redshift_local_variables {
+    struct placeholder_local_variables {
         uint256 len;
         // 0x20
         uint256 offset;
@@ -321,7 +321,7 @@ library types {
         bool status;
     }
 
-    struct redshift_local_variables_calldata {
+    struct placeholder_local_variables_calldata {
         uint256 len;
         // 0x20
         uint256 offset;

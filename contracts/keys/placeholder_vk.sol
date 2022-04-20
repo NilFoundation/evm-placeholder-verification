@@ -21,7 +21,7 @@ pragma experimental ABIEncoderV2;
 import '../types.sol';
 import '../algebra/bn254.sol';
 
-library redshift_vk {
+library placeholder_vk {
     using bn254_crypto for types.g1_point;
     using bn254_crypto for types.g2_point;
 

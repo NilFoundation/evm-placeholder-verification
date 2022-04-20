@@ -25,7 +25,7 @@ import "../components/poseidon.sol";
 import "../basic_marshalling.sol";
 import "../algebra/field.sol";
 
-library redshift_verifier_poseidon_component {
+library placeholder_verifier_poseidon_component {
     uint256 constant f_parts = 9;
 
     function verify_lpc_commitments(
@@ -33,7 +33,7 @@ library redshift_verifier_poseidon_component {
         uint256 offset,
         types.transcript_data memory tr_state,
         types.lpc_params_type memory lpc_params,
-        types.redshift_local_variables memory local_vars
+        types.placeholder_local_variables memory local_vars
     ) internal view returns (bool) {
         (local_vars.len, local_vars.offset) = basic_marshalling.get_skip_length(
             blob,
@@ -62,11 +62,11 @@ library redshift_verifier_poseidon_component {
         bytes memory blob,
         uint256 offset,
         types.transcript_data memory tr_state,
-        types.redshift_proof_map memory proof_map,
+        types.placeholder_proof_map memory proof_map,
         types.lpc_params_type memory lpc_params,
-        types.redshift_common_data memory common_data
+        types.placeholder_common_data memory common_data
     ) internal view returns (bool result) {
-        types.redshift_local_variables memory local_vars;
+        types.placeholder_local_variables memory local_vars;
         // 3. append witness commitments to transcript
         (local_vars.len, local_vars.offset) = basic_marshalling.get_skip_length(
             blob,

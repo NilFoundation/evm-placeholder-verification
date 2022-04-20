@@ -31,9 +31,9 @@ contract TestPoseidonComponentSplitGen {
         int256[][] calldata columns_rotations
     ) public {
         (
-            types.redshift_proof_map_calldata memory proof_map,
+            types.placeholder_proof_map_calldata memory proof_map,
             uint256 proof_size
-        ) = redshift_proof_map_parser_calldata.parse_be(blob, 0);
+        ) = placeholder_proof_map_parser_calldata.parse_be(blob, 0);
         require(
             proof_size == blob.length,
             "Proof length was detected incorrectly!"

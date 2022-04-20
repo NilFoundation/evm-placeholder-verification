@@ -24,7 +24,7 @@ import '../verifier_unified_addition_component.sol';
 
 contract TestRedshiftVerifierUnifiedAddition {
     types.lpc_params_type m_lpc_params;
-    types.redshift_common_data m_common_data;
+    types.placeholder_common_data m_common_data;
     bool m_result;
 
     function set_initial_params(uint256 modulus, uint256 r, uint256 max_degree, uint256 lambda, uint256 m, uint256 rows_amount, uint256 omega, uint256 columns_number) public {
@@ -63,15 +63,15 @@ contract TestRedshiftVerifierUnifiedAddition {
     }
 
     function verify(bytes calldata blob) public {
-        (types.redshift_proof_map memory proof_map, uint256 proof_size) = redshift_proof_map_parser.parse_be(blob, 0);
+        (types.placeholder_proof_map memory proof_map, uint256 proof_size) = placeholder_proof_map_parser.parse_be(blob, 0);
         require(proof_size == blob.length, "Proof length was detected incorrectly!");
         bytes memory init_blob = hex"";
         types.transcript_data memory tr_state;
         transcript.init_transcript(tr_state, init_blob);
         types.lpc_params_type memory lpc_params = m_lpc_params;
-        types.redshift_common_data memory common_data = m_common_data;
+        types.placeholder_common_data memory common_data = m_common_data;
         m_result =
-        redshift_verifier_unified_addition_component.parse_verify_proof_be(blob, 0, tr_state, proof_map, lpc_params, common_data);
+        placeholder_verifier_unified_addition_component.parse_verify_proof_be(blob, 0, tr_state, proof_map, lpc_params, common_data);
         require(m_result, "Proof is not correct!");
     }
 }

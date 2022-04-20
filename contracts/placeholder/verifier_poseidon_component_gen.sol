@@ -25,7 +25,7 @@ import "../components/poseidon_split_gen.sol";
 import "../basic_marshalling_calldata.sol";
 import "../algebra/field.sol";
 
-library redshift_verifier_poseidon_gen {
+library placeholder_verifier_poseidon_gen {
     uint256 constant f_parts = 9;
 
     uint256 constant OMEGA_OFFSET = 0x20;
@@ -45,7 +45,7 @@ library redshift_verifier_poseidon_gen {
         uint256 offset,
         types.transcript_data memory tr_state,
         types.lpc_params_type memory lpc_params,
-        types.redshift_local_variables_calldata memory local_vars
+        types.placeholder_local_variables_calldata memory local_vars
     ) internal view returns (bool) {
         (local_vars.len, local_vars.offset) = basic_marshalling_calldata
             .get_skip_length(blob, offset);
@@ -71,11 +71,11 @@ library redshift_verifier_poseidon_gen {
     function verify_proof_be(
         bytes calldata blob,
         types.transcript_data memory tr_state,
-        types.redshift_proof_map_calldata memory proof_map,
+        types.placeholder_proof_map_calldata memory proof_map,
         types.lpc_params_type memory lpc_params,
-        types.redshift_common_data memory common_data
+        types.placeholder_common_data memory common_data
     ) internal view returns (bool result) {
-        types.redshift_local_variables_calldata memory local_vars;
+        types.placeholder_local_variables_calldata memory local_vars;
         // 3. append witness commitments to transcript
         (local_vars.len, local_vars.offset) = basic_marshalling_calldata
             .get_skip_length(blob, proof_map.witness_commitments_offset);

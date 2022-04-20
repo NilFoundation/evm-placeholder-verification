@@ -24,11 +24,11 @@ import "../verifier_poseidon_component_gen.sol";
 
 contract TestRedshiftVerifierPoseidonGen {
     struct test_local_vars {
-        types.redshift_proof_map_calldata proof_map;
+        types.placeholder_proof_map_calldata proof_map;
         uint256 proof_size;
         types.transcript_data tr_state;
         types.lpc_params_type lpc_params;
-        types.redshift_common_data common_data;
+        types.placeholder_common_data common_data;
     }
     bool public m_result;
 
@@ -41,7 +41,7 @@ contract TestRedshiftVerifierPoseidonGen {
         int256[][] calldata columns_rotations
     ) public {
         test_local_vars memory vars;
-        (vars.proof_map, vars.proof_size) = redshift_proof_map_parser_calldata
+        (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser_calldata
             .parse_be(blob, 0);
         require(
             vars.proof_size == blob.length,
@@ -64,7 +64,7 @@ contract TestRedshiftVerifierPoseidonGen {
         vars.common_data.columns_rotations = columns_rotations;
 
         m_result =
-        redshift_verifier_poseidon_gen
+        placeholder_verifier_poseidon_gen
             .verify_proof_be(
                 blob,
                 vars.tr_state,

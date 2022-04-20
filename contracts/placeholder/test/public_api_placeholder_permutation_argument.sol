@@ -24,7 +24,7 @@ import "../permutation_argument_calldata.sol";
 
 contract TestPermutationArgument {
     types.lpc_params_type m_lpc_params;
-    types.redshift_common_data m_common_data;
+    types.placeholder_common_data m_common_data;
     uint256[] public m_result;
 
     function set_initial_params(
@@ -75,9 +75,9 @@ contract TestPermutationArgument {
 
     function eval_argument(bytes calldata blob) public {
         (
-            types.redshift_proof_map_calldata memory proof_map,
+            types.placeholder_proof_map_calldata memory proof_map,
             uint256 proof_size
-        ) = redshift_proof_map_parser_calldata.parse_be(blob, 0);
+        ) = placeholder_proof_map_parser_calldata.parse_be(blob, 0);
         require(
             proof_size == blob.length,
             "Proof length was detected incorrectly!"
@@ -85,7 +85,7 @@ contract TestPermutationArgument {
         bytes memory init_blob = hex"";
         types.transcript_data memory tr_state;
         transcript.init_transcript(tr_state, init_blob);
-        types.redshift_local_variables_calldata memory local_vars;
+        types.placeholder_local_variables_calldata memory local_vars;
         (local_vars.len, local_vars.offset) = basic_marshalling_calldata
             .get_skip_length(blob, proof_map.witness_commitments_offset);
         for (uint256 i = 0; i < local_vars.len; i++) {
@@ -98,7 +98,7 @@ contract TestPermutationArgument {
                 .skip_octet_vector_32_be(blob, local_vars.offset);
         }
         types.lpc_params_type memory lpc_params = m_lpc_params;
-        types.redshift_common_data memory common_data = m_common_data;
+        types.placeholder_common_data memory common_data = m_common_data;
         m_result =
         permutation_argument_calldata.verify_eval_be(
             blob,

@@ -24,12 +24,12 @@ import "../permutation_argument_calldata.sol";
 
 contract TestPermutationArgumentCalldataInput {
     struct test_local_vars {
-        types.redshift_proof_map_calldata proof_map;
+        types.placeholder_proof_map_calldata proof_map;
         uint256 proof_size;
-        types.redshift_local_variables_calldata local_vars;
+        types.placeholder_local_variables_calldata local_vars;
         types.transcript_data tr_state;
         types.lpc_params_type lpc_params;
-        types.redshift_common_data common_data;
+        types.placeholder_common_data common_data;
     }
     uint256[] public m_result;
 
@@ -42,7 +42,7 @@ contract TestPermutationArgumentCalldataInput {
         int256[][] calldata columns_rotations
     ) public {
         test_local_vars memory vars;
-        (vars.proof_map, vars.proof_size) = redshift_proof_map_parser_calldata
+        (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser_calldata
             .parse_be(blob, 0);
         require(
             vars.proof_size == blob.length,

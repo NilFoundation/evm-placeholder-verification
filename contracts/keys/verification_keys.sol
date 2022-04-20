@@ -36,7 +36,7 @@ library verification_keys {
         types.verification_key memory vk;
 
         if (_keyId == 0) {
-            vk = redshift_vk.get_verification_key();
+            vk = placeholder_vk.get_verification_key();
         }
         return vk;
     }

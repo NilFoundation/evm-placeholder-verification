@@ -21,7 +21,7 @@ import "../types.sol";
 import "../commitments/lpc_verifier_calldata.sol";
 import "../basic_marshalling_calldata.sol";
 
-library redshift_proof_map_parser_calldata {
+library placeholder_proof_map_parser_calldata {
     /**
      * Proof structure: https://github.com/NilFoundation/crypto3-zk-marshalling/blob/master/include/nil/crypto3/marshalling/zk/types/redshift/proof.hpp
      */
@@ -29,7 +29,7 @@ library redshift_proof_map_parser_calldata {
         internal
         pure
         returns (
-            types.redshift_proof_map_calldata memory proof_map,
+            types.placeholder_proof_map_calldata memory proof_map,
             uint256 proof_size
         )
     {
