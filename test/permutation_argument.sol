@@ -21,7 +21,7 @@ pragma experimental ABIEncoderV2;
 
 import "truffle/Assert.sol";
 import '../contracts/types.sol';
-import '../contracts/redshift/permutation_argument.sol';
+import '../contracts/placeholder/permutation_argument.sol';
 
 contract TestPermutationArgumentNative {
     function test_permutation_argument_case1() public {

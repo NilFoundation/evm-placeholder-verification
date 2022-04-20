@@ -23,7 +23,7 @@ import "../basic_marshalling_calldata.sol";
 
 library placeholder_proof_map_parser_calldata {
     /**
-     * Proof structure: https://github.com/NilFoundation/crypto3-zk-marshalling/blob/master/include/nil/crypto3/marshalling/zk/types/redshift/proof.hpp
+     * Proof structure: https://github.com/NilFoundation/crypto3-zk-marshalling/blob/master/include/nil/crypto3/marshalling/zk/types/placeholder/proof.hpp
      */
     function parse_be(bytes calldata blob, uint256 offset)
         internal

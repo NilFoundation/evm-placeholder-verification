@@ -19,7 +19,7 @@ pragma solidity >=0.8.4;
 
 import "../../types.sol";
 import "../poseidon_split_gen.sol";
-import "../../redshift/proof_map_parser_calldata.sol";
+import "../../placeholder/proof_map_parser_calldata.sol";
 
 contract TestPoseidonComponentSplitGen {
     uint256 public m_evaluation_result;
