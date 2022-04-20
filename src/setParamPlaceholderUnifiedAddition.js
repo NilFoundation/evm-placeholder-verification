@@ -22,37 +22,18 @@ function generateAddressesFromSeed(mnemonic, count) {
     return accounts;
 }
 
-function sendProof(address, abi, proof) {
-    var contract = new web3.eth.Contract(abi, address);
+contract_address = "0x9cF57Df512ADf3a14b98a1793106444B9aE999b7"
 
-    contract.methods.verify(proof).send({from: generateAddressesFromSeed(mnemonic, count)}, function (error, transactionHash) {
-
-    });
-}
-
-function estimateGas(address, abi, proof) {
-    var contract = new web3.eth.Contract(abi, address);
-
-    contract.methods.verify(proof).estimateGas({gas: 5000000}, function (error, gasAmount) {
-        if (gasAmount === 5000000) {
-            console.log('Method ran out of gas');
-        } else {
-            console.log(gasAmount);
-        }
-    });
-}
-
-function verify_encoded(encoded, adress) {
+function verify_encoded(encoded, adsress) {
     var tx = {
-        to : adress.address,
+        to : contract_address,
         gasPrice: web3.utils.toHex(web3.utils.toWei('20', 'gwei')),
-        gasLimit: 100000,
+        gasLimit: 5500000,
         data: encoded
     }
-    console.log()
 
-    web3.eth.accounts.signTransaction(tx, adress.privateKey).then(signed => {
-        web3.eth.sendSignedTransaction(signed.rawTransaction).on('receipt', console.log)
+    web3.eth.accounts.signTransaction(tx, adsress.privateKey).then(signed => {
+        web3.eth.sendSignedTransaction(signed.rawTransaction).on('receipt', console.log).on("error", console.log)
     });
 }
 
@@ -68,17 +49,15 @@ const contract_data = JSON.parse(
     fs.readFileSync("TestPlaceholderVerifierUnifiedAddition.json")
 );
 
+var address = generateAddressesFromSeed(mnemonic, 1);
 
-var adress = generateAddressesFromSeed(mnemonic, 1);
-
-console.log(adress[0].address)
-web3.eth.getBalance(adress[0].address).then(console.log)
+console.log(address[0].address)
+web3.eth.getBalance(address[0].address).then(console.log)
 
 // var contract = new web3.eth.Contract(contract_data.abi, "0x2ab4343f34cd01088af926b436bd7043e7945fbe");
 // new
 // var contract = new web3.eth.Contract(contract_data.abi, "0x8EFde6959Bc5CA35A8C26221de6aa8d732877df9");
-var contract = new web3.eth.Contract(contract_data.abi, "0x2c5706F0DC2080b83AF5B3dA9a44C773f6a62fdc");
-
+var contract = new web3.eth.Contract(contract_data.abi, contract_address);
 
 // verify_encoded(contract.methods.set_q([0, 0, 1]).encodeABI(), adress[0]);
 //
@@ -112,5 +91,4 @@ var contract = new web3.eth.Contract(contract_data.abi, "0x2c5706F0DC2080b83AF5B
 // verify_encoded(contract.methods.set_column_rotations([0,], 11).encodeABI(), adress[0]);
 // verify_encoded(contract.methods.set_column_rotations([0,], 12).encodeABI(), adress[0]);
 //
-// verify_encoded(contract.methods.set_column_rotations([0,], 1).encodeABI(), adress[0]);
-verify_encoded(contract.methods.verify('0x0122222').encodeABI(), adress[0]);
+verify_encoded(contract.methods.verify('').encodeABI(), address[0]);
