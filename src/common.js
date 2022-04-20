@@ -26,15 +26,15 @@ function generateAddressesFromSeed(mnemonic, count) {
     return accounts;
 }
 
-function sendProof(address, abi, proof, privateKey) {
-    var contract = new web3.eth.Contract(abi, address);
+function sendProof(contractAdress, abi, proof) {
+    var contract = new web3.eth.Contract(abi, contractAdress);
     // return contract.methods.verify(proof).call({from: generateAddressesFromSeed(mnemonic, count)[0].address}).then(res => {
     //     return true
     // }).catch(res => {
     //     return false
     // });
     var tx = {
-        to : "0x9cF57Df512ADf3a14b98a1793106444B9aE999b7",
+        to : contractAdress,
         gasPrice: web3.utils.toHex(web3.utils.toWei('20', 'gwei')),
         gasLimit: 5500000,
         data: contract.methods.verify(proof).encodeABI()
