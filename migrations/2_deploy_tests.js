@@ -20,10 +20,10 @@ const PoseidonComponentSplitLib9 = artifacts.require("poseidon_gate9");
 const PoseidonComponentSplitLib10 = artifacts.require("poseidon_gate10");
 const TestPoseidonComponentSplitGen = artifacts.require("TestPoseidonComponentSplitGen");
 
-const TestRedshiftVerifierUnifiedAddition = artifacts.require("TestRedshiftVerifierUnifiedAddition");
-const TestRedshiftVerifierUnifiedAdditionCalldataInput = artifacts.require("TestRedshiftVerifierUnifiedAdditionCalldataInput");
-const TestRedshiftVerifierPoseidon = artifacts.require("TestRedshiftVerifierPoseidon");
-const TestRedshiftVerifierPoseidonGen = artifacts.require("TestRedshiftVerifierPoseidonGen");
+const TestPlaceholderVerifierUnifiedAddition = artifacts.require("TestPlaceholderVerifierUnifiedAddition");
+const TestPlaceholderVerifierUnifiedAdditionCalldataInput = artifacts.require("TestPlaceholderVerifierUnifiedAdditionCalldataInput");
+const TestPlaceholderVerifierPoseidon = artifacts.require("TestPlaceholderVerifierPoseidon");
+const TestPlaceholderVerifierPoseidonGen = artifacts.require("TestPlaceholderVerifierPoseidonGen");
 
 module.exports = function (deployer) {
   deployer.deploy(TestMerkleProofVerifier);
@@ -59,20 +59,20 @@ module.exports = function (deployer) {
   deployer.link(PoseidonComponentSplitLib10, TestPoseidonComponentSplitGen);
   deployer.deploy(TestPoseidonComponentSplitGen);
 
-  deployer.deploy(TestRedshiftVerifierUnifiedAddition);
-  deployer.deploy(TestRedshiftVerifierUnifiedAdditionCalldataInput);
-  deployer.deploy(TestRedshiftVerifierPoseidon);
+  deployer.deploy(TestPlaceholderVerifierUnifiedAddition);
+  deployer.deploy(TestPlaceholderVerifierUnifiedAdditionCalldataInput);
+  deployer.deploy(TestPlaceholderVerifierPoseidon);
 
-  deployer.link(PoseidonComponentSplitLib0, TestRedshiftVerifierPoseidonGen);
-  deployer.link(PoseidonComponentSplitLib1, TestRedshiftVerifierPoseidonGen);
-  deployer.link(PoseidonComponentSplitLib2, TestRedshiftVerifierPoseidonGen);
-  deployer.link(PoseidonComponentSplitLib3, TestRedshiftVerifierPoseidonGen);
-  deployer.link(PoseidonComponentSplitLib4, TestRedshiftVerifierPoseidonGen);
-  deployer.link(PoseidonComponentSplitLib5, TestRedshiftVerifierPoseidonGen);
-  deployer.link(PoseidonComponentSplitLib6, TestRedshiftVerifierPoseidonGen);
-  deployer.link(PoseidonComponentSplitLib7, TestRedshiftVerifierPoseidonGen);
-  deployer.link(PoseidonComponentSplitLib8, TestRedshiftVerifierPoseidonGen);
-  deployer.link(PoseidonComponentSplitLib9, TestRedshiftVerifierPoseidonGen);
-  deployer.link(PoseidonComponentSplitLib10, TestRedshiftVerifierPoseidonGen);
-  deployer.deploy(TestRedshiftVerifierPoseidonGen);
+  deployer.link(PoseidonComponentSplitLib0, TestPlaceholderVerifierPoseidonGen);
+  deployer.link(PoseidonComponentSplitLib1, TestPlaceholderVerifierPoseidonGen);
+  deployer.link(PoseidonComponentSplitLib2, TestPlaceholderVerifierPoseidonGen);
+  deployer.link(PoseidonComponentSplitLib3, TestPlaceholderVerifierPoseidonGen);
+  deployer.link(PoseidonComponentSplitLib4, TestPlaceholderVerifierPoseidonGen);
+  deployer.link(PoseidonComponentSplitLib5, TestPlaceholderVerifierPoseidonGen);
+  deployer.link(PoseidonComponentSplitLib6, TestPlaceholderVerifierPoseidonGen);
+  deployer.link(PoseidonComponentSplitLib7, TestPlaceholderVerifierPoseidonGen);
+  deployer.link(PoseidonComponentSplitLib8, TestPlaceholderVerifierPoseidonGen);
+  deployer.link(PoseidonComponentSplitLib9, TestPlaceholderVerifierPoseidonGen);
+  deployer.link(PoseidonComponentSplitLib10, TestPlaceholderVerifierPoseidonGen);
+  deployer.deploy(TestPlaceholderVerifierPoseidonGen);
 };
