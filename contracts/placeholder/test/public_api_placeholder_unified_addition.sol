@@ -61,7 +61,7 @@ contract TestPlaceholderVerifierUnifiedAddition {
         m_common_data.columns_rotations[i] = rotations;
     }
 
-    function verify(bytes calldata blob) public returns (bool) {
+    function verify(bytes calldata blob) public {
         (types.placeholder_proof_map memory proof_map, uint256 proof_size) = placeholder_proof_map_parser.parse_be(blob, 0);
         require(proof_size == blob.length, "Proof length was detected incorrectly!");
         bytes memory init_blob = hex"";
@@ -69,7 +69,7 @@ contract TestPlaceholderVerifierUnifiedAddition {
         transcript.init_transcript(tr_state, init_blob);
         types.lpc_params_type memory lpc_params = m_lpc_params;
         types.placeholder_common_data memory common_data = m_common_data;
-        return placeholder_verifier_unified_addition_component.parse_verify_proof_be(blob, 0, tr_state,
-            proof_map, lpc_params, common_data);
+        require (placeholder_verifier_unified_addition_component.parse_verify_proof_be(blob, 0, tr_state,
+            proof_map, lpc_params, common_data), "Invalid proof");
     }
 }
