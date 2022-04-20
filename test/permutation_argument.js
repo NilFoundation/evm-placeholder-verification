@@ -1,9 +1,9 @@
 const BN = require('bn.js');
-const RedshiftVerifier = artifacts.require("TestPermutationArgument");
+const PlaceholderVerifier = artifacts.require("TestPermutationArgument");
 
 contract("Permutation argument", accounts => {
     it("Case 1", async () => {
-        const instance = await RedshiftVerifier.deployed();
+        const instance = await PlaceholderVerifier.deployed();
         await instance.set_initial_params(
             new BN('28948022309329048855892746252171976963363056481941560715954676764349967630337', 10),
             1,

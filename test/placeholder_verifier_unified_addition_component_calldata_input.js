@@ -1,7 +1,7 @@
 const BN = require('bn.js');
-const TestVerifier = artifacts.require("TestRedshiftVerifierUnifiedAdditionCalldataInput");
+const TestVerifier = artifacts.require("TestPlaceholderVerifierUnifiedAdditionCalldataInput");
 
-contract("Redshift verifier unified addition component", accounts => {
+contract("Placeholder verifier unified addition component", accounts => {
     it("Case 1", async () => {
         const instance = await TestVerifier.deployed();
         var params = [

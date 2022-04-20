@@ -27,4 +27,4 @@ function verifyPlaceholderUnifiedAddition(proof) {
 // text = text.slice(0, -1);
 // x = verifyPlaceholderUnifiedAddition(text);
 
-module.exports = {verifyRedshiftUnifiedAddition: verifyPlaceholderUnifiedAddition};
+module.exports = {verifyPlaceholderUnifiedAddition: verifyPlaceholderUnifiedAddition};

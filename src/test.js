@@ -13,5 +13,5 @@ var result = myModule.onRuntimeInitialized = () => {
     );
     t = t.slice(0, -1); // remove /n from the end
     // console.log(t)
-    myModule2.verifyRedshiftUnifiedAddition(t);
+    myModule2.verifyPlaceholderUnifiedAddition(t);
 }

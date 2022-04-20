@@ -1,7 +1,7 @@
 const BN = require('bn.js');
-const TestVerifier = artifacts.require("TestRedshiftVerifierPoseidonGen");
+const TestVerifier = artifacts.require("TestPlaceholderVerifierPoseidonGen");
 
-contract("Redshift verifier generated poseidon component", accounts => {
+contract("Placeholder verifier generated poseidon component", accounts => {
     it("Case 1", async () => {
         const instance = await TestVerifier.deployed();
         var params = [

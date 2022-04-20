@@ -22,7 +22,7 @@ import "../../cryptography/transcript.sol";
 import "../proof_map_parser_calldata.sol";
 import "../verifier_poseidon_component_gen.sol";
 
-contract TestRedshiftVerifierPoseidonGen {
+contract TestPlaceholderVerifierPoseidonGen {
     struct test_local_vars {
         types.placeholder_proof_map_calldata proof_map;
         uint256 proof_size;

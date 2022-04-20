@@ -1,9 +1,9 @@
 const BN = require('bn.js');
-const RedshiftVerifier = artifacts.require("TestRedshiftVerifierUnifiedAddition");
+const PlaceholderVerifier = artifacts.require("TestPlaceholderVerifierUnifiedAddition");
 
-contract("Redshift verifier unified addition component", accounts => {
+contract("Placeholder verifier unified addition component", accounts => {
     it("Case 1", async () => {
-        const instance = await RedshiftVerifier.deployed();
+        const instance = await PlaceholderVerifier.deployed();
         await instance.set_initial_params(
             new BN('28948022309329048855892746252171976963363056481941560715954676764349967630337', 10),
             1,
@@ -24,7 +24,7 @@ contract("Redshift verifier unified addition component", accounts => {
     });
 
     it("Case 2", async () => {
-        const instance = await RedshiftVerifier.deployed();
+        const instance = await PlaceholderVerifier.deployed();
         await instance.set_initial_params(
             new BN('28948022309329048855892746252171976963363056481941560715954676764349967630337', 10),
             1,
@@ -45,7 +45,7 @@ contract("Redshift verifier unified addition component", accounts => {
     });
 
     // it("Case 3", async () => {
-    //     const instance = await RedshiftVerifier.deployed();
+    //     const instance = await PlaceholderVerifier.deployed();
     //     await instance.set_initial_params(
     //         new BN('28948022309329048855892746252171976963363056481941560715954676764349967630337', 10),
     //         1,
@@ -66,7 +66,7 @@ contract("Redshift verifier unified addition component", accounts => {
     // });
 
     // it("Case 4", async () => {
-    //     const instance = await RedshiftVerifier.deployed();
+    //     const instance = await PlaceholderVerifier.deployed();
     //     await instance.set_initial_params(
     //         new BN('28948022309329048855892746252171976963363056481941560715954676764349967630337', 10),
     //         1,

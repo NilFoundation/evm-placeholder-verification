@@ -22,7 +22,7 @@ import '../../cryptography/transcript.sol';
 import '../proof_map_parser.sol';
 import '../verifier_poseidon_component.sol';
 
-contract TestRedshiftVerifierPoseidon {
+contract TestPlaceholderVerifierPoseidon {
     types.lpc_params_type m_lpc_params;
     types.placeholder_common_data m_common_data;
 
