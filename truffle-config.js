@@ -19,8 +19,8 @@
  */
 
 const HDWalletProvider = require('@truffle/hdwallet-provider');
-
 const fs = require('fs');
+
 const mnemonic = fs.readFileSync(".secret").toString().trim();
 
 module.exports = {
@@ -97,6 +97,14 @@ module.exports = {
         // network_id: 2111,   // This network is yours, in the cloud.
         // production: true    // Treats this network as if it was a public net. (default: false)
         // }
+    },
+
+    neonlabs: {
+        provider: () => new HDWalletProvider(mnemonic, `https://proxy.devnet.neonlabs.org/solana`),
+        from: "xxxxxxxxxxxxxxxxxxxxxxxxxxxx", // Specify public key corresponding to private key defined above
+        network_id: "*",
+        gas: 3000000000,
+        gasPrice: 443065000000,
     },
 
     // Set default mocha options here, use special reporters etc.

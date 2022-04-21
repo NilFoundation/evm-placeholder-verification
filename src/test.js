@@ -1,21 +1,17 @@
-const myModule = require("./auxProofGen.js");
-const myModule2 = require('./verifyPlaceholderUnifiedAddition.js');
-const fs = require("fs");
-const web3 = require('web3');
-const bip39 = require('bip39');
-const {hdkey} = require('ethereumjs-wallet');
+myBundle = require("./verifyPlaceholderUnifiedAddition.js")
+Module = require("./auxProofGen.js")
 
-
-function runTest() {
-    var result = myModule.onRuntimeInitialized = async () => {
-        var t = myModule.ccall('proof_gen', // name of C function
-            'string', // return type
-            null, // argument types
-            null // arguments
-        );
-        t = t.slice(0, -1); // remove /n from the end
-        console.log(await myModule2.verifyPlaceholderUnifiedAddition(t));
-    }
+Module['onRuntimeInitialized'] = function() {
+    var t = Module.ccall('proof_gen', // name of C function
+        'string', // return type
+        null, // argument types
+        null // arguments
+    );
+    t = t.slice(0, -1); // remove /n from the end
+    // console.log(t)
+    // document.writeln("Blob:");
+    // document.writeln(t);
+    // myBundle.verifyPlaceholderUnifiedAddition(t).then(res => document.writeln("Result verify: ", res))
+    // myBundle.estimateGasPlaceholderUnifiedAddition(t).then(res => document.writeln("Gas: ", res));
+    myBundle.verifyPlaceholderUnifiedAddition(t).then(res => console.log("Result verify: ", res.verify, ' Gas used:', res.gasUsed))
 }
-
-runTest()
