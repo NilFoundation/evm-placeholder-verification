@@ -193,4 +193,118 @@ library merkle_verifier {
 
         result = (verified_data == root);
     }
+
+    function parse_verify_merkle_proof_not_pre_hash_be(
+        bytes calldata blob,
+        uint256 offset,
+        bytes32 verified_data
+    ) internal pure returns (bool result, uint256 proof_size) {
+        bytes32 root;
+        assembly {
+            root := calldataload(add(blob.offset, add(offset, 16)))
+        }
+
+        uint256 depth;
+        assembly {
+            depth := shr(0xc0, calldataload(add(blob.offset, add(offset, 48))))
+        }
+
+        proof_size = LAYERS_OFFSET + LAYER_OCTETS * depth;
+        uint256 layer_offset = offset + LAYERS_OFFSET;
+        uint256 layer_hash_offset = 0;
+
+        // save leaf data to required position
+        assembly {
+            let first_pos := shr(
+                0xc0,
+                calldataload(add(blob.offset, add(layer_offset, 8)))
+            )
+            switch first_pos
+            case 0 {
+                mstore(0x20, verified_data)
+            }
+            case 1 {
+                mstore(0x00, verified_data)
+            }
+        }
+
+        for (uint256 cur_layer_i = 0; cur_layer_i < depth - 1; cur_layer_i++) {
+            layer_offset = offset + LAYERS_OFFSET + LAYER_OCTETS * cur_layer_i;
+            layer_hash_offset = layer_offset + 24;
+            assembly {
+                let pos := shr(
+                    0xc0,
+                    calldataload(add(blob.offset, add(layer_offset, 8)))
+                )
+                let next_pos := shr(
+                    0xc0,
+                    calldataload(
+                        add(
+                            blob.offset,
+                            add(add(layer_offset, 8), LAYER_OCTETS)
+                        )
+                    )
+                )
+                switch pos
+                case 0 {
+                    mstore(
+                        0x00,
+                        calldataload(add(blob.offset, layer_hash_offset))
+                    )
+                    switch next_pos
+                    case 0 {
+                        mstore(0x20, keccak256(0, 0x40))
+                    }
+                    case 1 {
+                        mstore(0, keccak256(0, 0x40))
+                    }
+                }
+                case 1 {
+                    mstore(
+                        0x20,
+                        calldataload(add(blob.offset, layer_hash_offset))
+                    )
+                    switch next_pos
+                    case 0 {
+                        mstore(0x20, keccak256(0, 0x40))
+                    }
+                    case 1 {
+                        mstore(0, keccak256(0, 0x40))
+                    }
+                }
+            }
+        }
+
+        layer_offset = offset + LAYERS_OFFSET + LAYER_OCTETS * (depth - 1);
+        layer_hash_offset = layer_offset + 24;
+        assembly {
+            let pos := shr(
+                0xc0,
+                calldataload(add(blob.offset, add(layer_offset, 8)))
+            )
+            switch pos
+            case 0 {
+                mstore(0x00, calldataload(add(blob.offset, layer_hash_offset)))
+                verified_data := keccak256(0, 0x40)
+            }
+            case 1 {
+                mstore(0x20, calldataload(add(blob.offset, layer_hash_offset)))
+                verified_data := keccak256(0, 0x40)
+            }
+        }
+
+        result = (verified_data == root);
+    }
+
+    function parse_verify_merkle_proof_bytes_be(
+        bytes calldata blob,
+        uint256 offset,
+        bytes memory verified_data
+    ) internal pure returns (bool result, uint256 proof_size) {
+        (result, proof_size) = parse_verify_merkle_proof_not_pre_hash_be(
+            blob,
+            offset,
+            keccak256(verified_data)
+        );
+    }
 }
