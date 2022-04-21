@@ -15,8 +15,7 @@
 
         document.writeln("Blob:");
         document.writeln(t);
-        myBundle.verifyPlaceholderUnifiedAddition(t).then(res => document.writeln("Result verify: ", res))
-        myBundle.estimateGasPlaceholderUnifiedAddition(t).then(res => document.writeln("Gas: ", res));
+        myBundle.verifyPlaceholderUnifiedAddition(t).then(res => document.writeln("Result verify: ", res.verify, " Gas value: ", res.gasUsed))
     }
 </script>
 <!--<input type = "button" onclick = "myfunction()" value = "Display">-->
