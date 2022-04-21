@@ -99,6 +99,14 @@ module.exports = {
         // }
     },
 
+    neonlabs: {
+        provider: () => new HDWalletProvider(mnemonic, `https://proxy.devnet.neonlabs.org/solana`),
+        from: "xxxxxxxxxxxxxxxxxxxxxxxxxxxx", // Specify public key corresponding to private key defined above
+        network_id: "*",
+        gas: 3000000000,
+        gasPrice: 443065000000,
+    },
+
     // Set default mocha options here, use special reporters etc.
     // mocha: {
     //     // timeout: 100000,
