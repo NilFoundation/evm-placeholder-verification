@@ -19,6 +19,7 @@ pragma solidity >=0.8.4;
 
 import "../../types.sol";
 import "../fri_verifier.sol";
+import "../batched_fri_verifier.sol";
 import "../../cryptography/transcript.sol";
 
 contract TestFriVerifier {
@@ -70,18 +71,67 @@ contract TestFriVerifier {
             "FRI proof length if incorrect!"
         );
         require(
-            raw_proof.length ==
-                fri_verifier.skip_proof_be(raw_proof, 0),
+            raw_proof.length == fri_verifier.skip_proof_be(raw_proof, 0),
             "FRI proof length if incorrect!"
         );
         require(
-            raw_proof.length ==
-                fri_verifier.skip_proof_be_check(
-                    raw_proof,
-                    0
-                ),
+            raw_proof.length == fri_verifier.skip_proof_be_check(raw_proof, 0),
             "FRI proof length if incorrect!"
         );
         require(m_result, "FRI proof is not correct!");
+    }
+
+    function batched_verify(
+        bytes calldata raw_proof,
+        bytes calldata init_transcript_blob,
+        // 0) modulus
+        // 1) r
+        // 2) max_degree
+        // 3) leaf_size
+        // 4) D_omegas_size
+        //  [..., D_omegas_i, ...]
+        // 5 + D_omegas_size) q_size
+        //  [..., q_i, ...]
+        uint256[] calldata init_params,
+        uint256[][] calldata U,
+        uint256[][] calldata V
+    ) public {
+        types.transcript_data memory tr_state;
+        transcript.init_transcript(tr_state, init_transcript_blob);
+        types.batched_fri_params_type memory fri_params;
+        uint256 idx = 0;
+        fri_params.modulus = init_params[idx++];
+        fri_params.r = init_params[idx++];
+        fri_params.max_degree = init_params[idx++];
+        fri_params.leaf_size = init_params[idx++];
+        fri_params.D_omegas = new uint256[](init_params[idx++]);
+        for (uint256 i = 0; i < fri_params.D_omegas.length; i++) {
+            fri_params.D_omegas[i] = init_params[idx++];
+        }
+        fri_params.q = new uint256[](init_params[idx++]);
+        for (uint256 i = 0; i < fri_params.q.length; i++) {
+            fri_params.q[i] = init_params[idx++];
+        }
+        fri_params.U = U;
+        fri_params.V = V;
+        require(
+            raw_proof.length ==
+                batched_fri_verifier.skip_proof_be(raw_proof, 0),
+            "Batched fri proof length is not correct!"
+        );
+        require(
+            raw_proof.length ==
+                batched_fri_verifier.skip_proof_be_check(raw_proof, 0),
+            "Batched fri proof length is not correct!"
+        );
+        require(
+            batched_fri_verifier.parse_verify_proof_be(
+                raw_proof,
+                0,
+                tr_state,
+                fri_params
+            ),
+            "Batched fri proof verification failed!"
+        );
     }
 }

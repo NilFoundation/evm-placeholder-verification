@@ -28,7 +28,7 @@ library batched_fri_verifier {
     struct local_vars_type {
         uint256 colinear_value;
         // 0x20
-        bytes32 T_root;
+        uint256 T_root_offset;
         // 0x40
         uint256 final_poly_offset;
         // 0x60
@@ -185,18 +185,18 @@ library batched_fri_verifier {
         n = basic_marshalling.get_length(blob, result_offset);
     }
 
-    function get_round_proof_T_root_be(bytes calldata blob, uint256 offset)
+    function skip_to_round_proof_T_root_be(bytes calldata blob, uint256 offset)
         internal
         pure
-        returns (bytes32 T_root)
+        returns (uint256 result_offset)
     {
         // colinear_value
-        uint256 result_offset = basic_marshalling.skip_vector_of_uint256_be(
+        result_offset = basic_marshalling.skip_vector_of_uint256_be(
             blob,
             offset
         );
         // T_root
-        T_root = basic_marshalling.get_octet_vector_32_be(blob, result_offset);
+        result_offset = basic_marshalling.skip_length(blob, result_offset);
     }
 
     function skip_to_first_round_proof_be(bytes calldata blob, uint256 offset)
@@ -584,11 +584,15 @@ library batched_fri_verifier {
 
             if (i < fri_params.r - 1) {
                 // get round_proofs[i + 1].T_root
-                local_vars.T_root = get_round_proof_T_root_be(
+                local_vars.T_root_offset = skip_to_round_proof_T_root_be(
                     blob,
                     skip_round_proof_be(blob, local_vars.round_proof_offset)
                 );
-                transcript.update_transcript_b32(tr_state, local_vars.T_root);
+                transcript.update_transcript_b32_by_offset_calldata(
+                    tr_state,
+                    blob,
+                    local_vars.T_root_offset
+                );
                 (local_vars.status, ) = merkle_verifier
                     .parse_verify_merkle_proof_bytes_be(
                         blob,
@@ -601,13 +605,13 @@ library batched_fri_verifier {
                 if (!local_vars.status) {
                     return false;
                 }
+                local_vars.round_proof_offset = skip_round_proof_be(
+                    blob,
+                    local_vars.round_proof_offset
+                );
             }
 
             local_vars.x = local_vars.x_next;
-            local_vars.round_proof_offset = skip_round_proof_be(
-                blob,
-                local_vars.round_proof_offset
-            );
         }
 
         require(
@@ -636,7 +640,8 @@ library batched_fri_verifier {
             if (
                 polynomial.evaluate_by_ptr(
                     blob,
-                    local_vars.final_poly_offset,
+                    local_vars.final_poly_offset +
+                        basic_marshalling.LENGTH_OCTETS,
                     basic_marshalling.get_length(
                         blob,
                         local_vars.final_poly_offset
