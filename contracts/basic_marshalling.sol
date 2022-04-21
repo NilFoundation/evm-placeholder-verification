@@ -169,6 +169,36 @@ library basic_marshalling {
         }
     }
 
+    function get_i_j_uint256_from_vector_of_vectors(
+        bytes calldata blob,
+        uint256 offset,
+        uint256 i,
+        uint256 j
+    ) internal pure returns (uint256 result) {
+        offset = skip_length(blob, offset);
+        if (i > 0) {
+            for (uint256 _i = 0; _i < i; _i++) {
+                offset = skip_vector_of_uint256_be(blob, offset);
+            }
+        }
+        result = get_i_uint256_from_vector(blob, offset, j);
+    }
+
+    function get_i_j_uint256_ptr_from_vector_of_vectors(
+        bytes calldata blob,
+        uint256 offset,
+        uint256 i,
+        uint256 j
+    ) internal pure returns (uint256 result_ptr) {
+        offset = skip_length(blob, offset);
+        if (i > 0) {
+            for (uint256 _i = 0; _i < i; _i++) {
+                offset = skip_vector_of_uint256_be(blob, offset);
+            }
+        }
+        result_ptr = get_i_uint256_ptr_from_vector(blob, offset, j);
+    }
+
     function get_uint256_be(bytes calldata blob, uint256 offset)
         internal
         pure
@@ -328,6 +358,36 @@ library basic_marshalling {
                 add(add(offset, LENGTH_OCTETS), mul(i, 0x20))
             )
         }
+    }
+
+    function get_i_j_uint256_from_vector_of_vectors_check(
+        bytes calldata blob,
+        uint256 offset,
+        uint256 i,
+        uint256 j
+    ) internal pure returns (uint256 result) {
+        offset = skip_length_check(blob, offset);
+        if (i > 0) {
+            for (uint256 _i = 0; _i < i; _i++) {
+                offset = skip_vector_of_uint256_be_check(blob, offset);
+            }
+        }
+        result = get_i_uint256_from_vector_check(blob, offset, j);
+    }
+
+    function get_i_j_uint256_ptr_from_vector_of_vectors_check(
+        bytes calldata blob,
+        uint256 offset,
+        uint256 i,
+        uint256 j
+    ) internal pure returns (uint256 result_ptr) {
+        offset = skip_length_check(blob, offset);
+        if (i > 0) {
+            for (uint256 _i = 0; _i < i; _i++) {
+                offset = skip_vector_of_uint256_be_check(blob, offset);
+            }
+        }
+        result_ptr = get_i_uint256_ptr_from_vector_check(blob, offset, j);
     }
 
     function get_uint256_be_check(bytes calldata blob, uint256 offset)
