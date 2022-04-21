@@ -45,7 +45,7 @@ library placeholder_verifier_unified_addition_component {
         uint256 offset,
         types.transcript_data memory tr_state,
         types.lpc_params_type memory lpc_params,
-        types.placeholder_local_variables_calldata memory local_vars
+        types.placeholder_local_variables memory local_vars
     ) internal view returns (bool) {
         (local_vars.len, local_vars.offset) = basic_marshalling
             .get_skip_length(blob, offset);
@@ -71,11 +71,11 @@ library placeholder_verifier_unified_addition_component {
     function verify_proof_be(
         bytes calldata blob,
         types.transcript_data memory tr_state,
-        types.placeholder_proof_map_calldata memory proof_map,
+        types.placeholder_proof_map memory proof_map,
         types.lpc_params_type memory lpc_params,
         types.placeholder_common_data memory common_data
     ) internal view returns (bool result) {
-        types.placeholder_local_variables_calldata memory local_vars;
+        types.placeholder_local_variables memory local_vars;
         // 3. append witness commitments to transcript
         (local_vars.len, local_vars.offset) = basic_marshalling
             .get_skip_length(blob, proof_map.witness_commitments_offset);

@@ -31,7 +31,7 @@ contract TestUnifiedAdditionComponent {
         int256[][] calldata columns_rotations
     ) public {
         (
-            types.placeholder_proof_map_calldata memory proof_map,
+            types.placeholder_proof_map memory proof_map,
             uint256 proof_size
         ) = placeholder_proof_map_parser.parse_be(blob, 0);
         require(

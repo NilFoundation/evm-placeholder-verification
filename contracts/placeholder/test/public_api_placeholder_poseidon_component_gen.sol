@@ -24,7 +24,7 @@ import "../verifier_poseidon_component_gen.sol";
 
 contract TestPlaceholderVerifierPoseidonGen {
     struct test_local_vars {
-        types.placeholder_proof_map_calldata proof_map;
+        types.placeholder_proof_map proof_map;
         uint256 proof_size;
         types.transcript_data tr_state;
         types.lpc_params_type lpc_params;

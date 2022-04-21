@@ -29,7 +29,7 @@ library placeholder_proof_map_parser {
         internal
         pure
         returns (
-            types.placeholder_proof_map_calldata memory proof_map,
+            types.placeholder_proof_map memory proof_map,
             uint256 proof_size
         )
     {

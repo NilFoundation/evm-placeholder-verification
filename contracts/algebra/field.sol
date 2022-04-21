@@ -142,4 +142,10 @@ library field {
     function inverse_static(uint256 val, uint256 modulus) internal view returns (uint256) {
         return expmod_static(val, modulus - 2, modulus);
     }
+
+    function double(uint256 val, uint256 modulus) internal pure returns (uint256 result) {
+        assembly {
+            result := mulmod(2, val, modulus)
+        }
+    }
 }

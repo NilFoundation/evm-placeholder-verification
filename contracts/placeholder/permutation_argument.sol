@@ -39,7 +39,7 @@ library permutation_argument {
 
     function eval_permutations_at_challenge(
         types.lpc_params_type memory lpc_params,
-        types.placeholder_local_variables_calldata memory local_vars,
+        types.placeholder_local_variables memory local_vars,
         uint256 column_polynomials_values_i
     ) internal pure {
         assembly {
@@ -104,10 +104,10 @@ library permutation_argument {
     function verify_eval_be(
         bytes calldata blob,
         types.transcript_data memory tr_state,
-        types.placeholder_proof_map_calldata memory proof_map,
+        types.placeholder_proof_map memory proof_map,
         types.lpc_params_type memory lpc_params,
         types.placeholder_common_data memory common_data,
-        types.placeholder_local_variables_calldata memory local_vars
+        types.placeholder_local_variables memory local_vars
     ) internal pure returns (uint256[] memory F) {
         local_vars.beta = transcript.get_field_challenge(
             tr_state,

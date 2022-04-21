@@ -24,9 +24,9 @@ import "../permutation_argument.sol";
 
 contract TestPermutationArgument {
     struct test_local_vars {
-        types.placeholder_proof_map_calldata proof_map;
+        types.placeholder_proof_map proof_map;
         uint256 proof_size;
-        types.placeholder_local_variables_calldata local_vars;
+        types.placeholder_local_variables local_vars;
         types.transcript_data tr_state;
         types.lpc_params_type lpc_params;
         types.placeholder_common_data common_data;

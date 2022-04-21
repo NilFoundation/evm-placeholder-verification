@@ -163,6 +163,19 @@ library types {
         uint256[] V;
     }
 
+    struct batched_fri_params_type {
+        uint256 modulus;
+        uint256 r;
+        uint256 max_degree;
+        uint256 leaf_size;
+
+        uint256[] D_omegas;
+        uint256[] q;
+
+        uint256[][] U;
+        uint256[][] V;
+    }
+
     struct fri_round_proof_type {
         uint256 colinear_value;
         bytes32 T_root;
@@ -194,64 +207,7 @@ library types {
         fri_proof_type[] fri_proof;
     }
 
-    struct gate_eval_params {
-        uint256 modulus;
-        // 0x20
-        uint256 theta_acc;
-        // 0x40
-        uint256 theta;
-        // 0x60
-        uint256[] selector_evaluations_ptrs;
-        // 0x80
-        uint256 constraint_eval;
-        // 0xa0
-        uint256 gate_evaluation;
-        // 0xc0
-        bytes mds;
-        // 0xe0
-        bytes round_constants;
-    }
-    
-    struct permutation_argument_eval_params {
-        uint256 modulus;
-        // 0x20
-        uint256 challenge;
-        // 0x40
-        uint256[] column_polynomials_values;
-        // 0x60
-        uint256[] id_permutation_ptrs;
-        // 0x80
-        uint256[] sigma_permutation_ptrs;
-        // 0xa0
-        uint256 perm_polynomial_value;
-        // 0xc0
-        uint256 perm_polynomial_shifted_value;
-        // 0xe0
-        uint256 beta;
-        // 0x100
-        uint256 gamma;
-        // 0x120
-        uint256 q_blind_eval;
-        // 0x140
-        uint256 q_last_eval;
-    }
-
     struct placeholder_proof_map {
-        uint256 witness_commitments_offset;
-        uint256 T_commitments_offset;
-        uint256 eval_proof_offset;
-        uint256 eval_proof_witness_offset;
-        uint256 eval_proof_permutation_offset;
-        uint256 eval_proof_quotient_offset;
-        uint256 eval_proof_id_permutation_offset;
-        uint256 eval_proof_sigma_permutation_offset;
-        uint256 eval_proof_public_input_offset;
-        uint256 eval_proof_constant_offset;
-        uint256 eval_proof_selector_offset;
-        uint256 eval_proof_special_selectors_offset;
-    }
-
-    struct placeholder_proof_map_calldata {
         uint256 v_perm_commitment_offset;
         // 0x20
         uint256 witness_commitments_offset;
@@ -291,37 +247,6 @@ library types {
     }
 
     struct placeholder_local_variables {
-        uint256 len;
-        // 0x20
-        uint256 offset;
-        // 0x40
-        uint256 zero_index;
-        // 0x60
-        uint256[] permutation_argument;
-        // 0x80
-        uint256 gate_argument;
-        // 0xa0
-        uint256[] alphas;
-        // 0xc0
-        uint256 challenge;
-        // 0xe0
-        uint256 e;
-        // 0x100
-        uint256[] evaluation_points;
-        // 0x120
-        uint256[] F;
-        // 0x140
-        uint256 F_consolidated;
-        // 0x160
-        uint256 T_consolidated;
-        // 0x180
-        uint256 Z_at_challenge;
-        // 0x1a0
-        uint256 tmp1;
-        bool status;
-    }
-
-    struct placeholder_local_variables_calldata {
         uint256 len;
         // 0x20
         uint256 offset;
