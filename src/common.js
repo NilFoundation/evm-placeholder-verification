@@ -49,16 +49,10 @@ function sendProof(contractAdress, abi, proof) {
     });
 }
 
-function estimateGas(address, abi, proof) {
+async function estimateGas(address, abi, proof) {
     var contract = new web3.eth.Contract(abi, address);
 
-    contract.methods.verify(proof).estimateGas({gas: 5000000}, function (error, gasAmount) {
-        if (gasAmount === 5000000) {
-            console.log('Method ran out of gas');
-        } else {
-            console.log(gasAmount);
-        }
-    });
+    return await contract.methods.verify(proof).estimateGas({gas: 5000000})
 }
 
 module.exports = {generateAddressesFromSeed, sendProof, estimateGas};

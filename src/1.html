@@ -1,0 +1,24 @@
+<html>
+<head>
+    <script src="bundle.js"></script>
+    <script src="auxProofGen.js"></script>
+</head>
+<body>
+<script>
+    Module['onRuntimeInitialized'] = function() {
+        var t = ccall('proof_gen', // name of C function
+            'string', // return type
+            null, // argument types
+            null // arguments
+        );
+        t = t.slice(0, -1); // remove /n from the end
+
+        document.writeln("Blob:");
+        document.writeln(t);
+        myBundle.verifyPlaceholderUnifiedAddition(t).then(res => document.writeln("Result verify: ", res))
+        myBundle.estimateGasPlaceholderUnifiedAddition(t).then(res => document.writeln("Gas: ", res));
+    }
+</script>
+<!--<input type = "button" onclick = "myfunction()" value = "Display">-->
+</body>
+</html>

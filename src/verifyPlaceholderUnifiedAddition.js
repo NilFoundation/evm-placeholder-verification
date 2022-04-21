@@ -13,10 +13,21 @@ async function verifyPlaceholderUnifiedAddition(proof) {
     return x;
 }
 
+function estimateGasPlaceholderUnifiedAddition(proof) {
+    const contract_data = JSON.parse(
+        fs.readFileSync("TestPlaceholderVerifierUnifiedAddition.json")
+    );
+
+    contractAdress = contract_data.networks["80001"].address;
+    contractAbi = contract_data.abi;
+
+    return common.estimateGas(contractAdress, contractAbi, proof);
+}
+
 // file = process.argv[2];
 //
 // var text = fs.readFileSync(file).toString('utf-8');
 // text = text.slice(0, -1);
 // x = verifyPlaceholderUnifiedAddition(text);
 
-module.exports = {verifyPlaceholderUnifiedAddition: verifyPlaceholderUnifiedAddition};
+module.exports = {verifyPlaceholderUnifiedAddition: verifyPlaceholderUnifiedAddition, estimateGasPlaceholderUnifiedAddition};
