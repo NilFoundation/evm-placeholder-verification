@@ -36,6 +36,7 @@ library merkle_verifier {
     // [0:8] - co-path element position on the layer
     // [8:16] - co-path element hash value length (which is always 32 bytes in current implementation)
     // [16:48] - co-path element hash value
+    uint256 constant ROOT_OFFSET = 16;
     uint256 constant DEPTH_OFFSET = 48;
     uint256 constant LAYERS_OFFSET = 56;
     // only one co-element on each layer as arity is always 2
@@ -98,12 +99,12 @@ library merkle_verifier {
     ) internal pure returns (bool result, uint256 proof_size) {
         bytes32 root;
         assembly {
-            root := calldataload(add(blob.offset, add(offset, 16)))
+            root := calldataload(add(blob.offset, add(offset, ROOT_OFFSET)))
         }
 
         uint256 depth;
         assembly {
-            depth := shr(0xc0, calldataload(add(blob.offset, add(offset, 48))))
+            depth := shr(0xc0, calldataload(add(blob.offset, add(offset, DEPTH_OFFSET))))
         }
 
         proof_size = LAYERS_OFFSET + LAYER_OCTETS * depth;
@@ -201,12 +202,12 @@ library merkle_verifier {
     ) internal pure returns (bool result, uint256 proof_size) {
         bytes32 root;
         assembly {
-            root := calldataload(add(blob.offset, add(offset, 16)))
+            root := calldataload(add(blob.offset, add(offset, ROOT_OFFSET)))
         }
 
         uint256 depth;
         assembly {
-            depth := shr(0xc0, calldataload(add(blob.offset, add(offset, 48))))
+            depth := shr(0xc0, calldataload(add(blob.offset, add(offset, DEPTH_OFFSET))))
         }
 
         proof_size = LAYERS_OFFSET + LAYER_OCTETS * depth;
