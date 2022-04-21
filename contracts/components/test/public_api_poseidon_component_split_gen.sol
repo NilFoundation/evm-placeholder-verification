@@ -19,7 +19,7 @@ pragma solidity >=0.8.4;
 
 import "../../types.sol";
 import "../poseidon_split_gen.sol";
-import "../../placeholder/proof_map_parser_calldata.sol";
+import "../../placeholder/proof_map_parser.sol";
 
 contract TestPoseidonComponentSplitGen {
     uint256 public m_evaluation_result;
@@ -33,7 +33,7 @@ contract TestPoseidonComponentSplitGen {
         (
             types.placeholder_proof_map_calldata memory proof_map,
             uint256 proof_size
-        ) = placeholder_proof_map_parser_calldata.parse_be(blob, 0);
+        ) = placeholder_proof_map_parser.parse_be(blob, 0);
         require(
             proof_size == blob.length,
             "Proof length was detected incorrectly!"

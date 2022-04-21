@@ -18,8 +18,8 @@
 pragma solidity >=0.8.4;
 
 import "../types.sol";
-import "../basic_marshalling_calldata.sol";
-import "../commitments/lpc_verifier_calldata.sol";
+import "../basic_marshalling.sol";
+import "../commitments/lpc_verifier.sol";
 import "./poseidon/poseidon_gate0.sol";
 import "./poseidon/poseidon_gate1.sol";
 import "./poseidon/poseidon_gate2.sol";
@@ -50,16 +50,16 @@ library poseidon_split_gen {
         gate_params.witness_evaluations = new uint256[][](WITNESSES_N);
         gate_params.offset =
             gate_params.eval_proof_witness_offset +
-            basic_marshalling_calldata.LENGTH_OCTETS;
+            basic_marshalling.LENGTH_OCTETS;
         for (uint256 i = 0; i < WITNESSES_N; i++) {
             gate_params.witness_evaluations[i] = new uint256[](
                 columns_rotations[i].length
             );
             for (uint256 j = 0; j < columns_rotations[i].length; j++) {
-                gate_params.witness_evaluations[i][j] = lpc_verifier_calldata
+                gate_params.witness_evaluations[i][j] = lpc_verifier
                     .get_z_i_from_proof_be(blob, gate_params.offset, j);
             }
-            gate_params.offset = lpc_verifier_calldata.skip_proof_be(
+            gate_params.offset = lpc_verifier.skip_proof_be(
                 blob,
                 gate_params.offset
             );
@@ -67,11 +67,11 @@ library poseidon_split_gen {
         gate_params.selector_evaluations = new uint256[](GATES_N);
         gate_params.offset =
             gate_params.eval_proof_selector_offset +
-            basic_marshalling_calldata.LENGTH_OCTETS;
+            basic_marshalling.LENGTH_OCTETS;
         for (uint256 i = 0; i < GATES_N; i++) {
-            gate_params.selector_evaluations[i] = lpc_verifier_calldata
+            gate_params.selector_evaluations[i] = lpc_verifier
                 .get_z_i_from_proof_be(blob, gate_params.offset, 0);
-            gate_params.offset = lpc_verifier_calldata.skip_proof_be(
+            gate_params.offset = lpc_verifier.skip_proof_be(
                 blob,
                 gate_params.offset
             );

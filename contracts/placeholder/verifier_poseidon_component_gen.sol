@@ -19,10 +19,10 @@ pragma solidity >=0.8.4;
 
 import "../types.sol";
 import "../cryptography/transcript.sol";
-import "../commitments/lpc_verifier_calldata.sol";
-import "./permutation_argument_calldata.sol";
+import "../commitments/lpc_verifier.sol";
+import "./permutation_argument.sol";
 import "../components/poseidon_split_gen.sol";
-import "../basic_marshalling_calldata.sol";
+import "../basic_marshalling.sol";
 import "../algebra/field.sol";
 
 library placeholder_verifier_poseidon_gen {
@@ -47,10 +47,10 @@ library placeholder_verifier_poseidon_gen {
         types.lpc_params_type memory lpc_params,
         types.placeholder_local_variables_calldata memory local_vars
     ) internal view returns (bool) {
-        (local_vars.len, local_vars.offset) = basic_marshalling_calldata
+        (local_vars.len, local_vars.offset) = basic_marshalling
             .get_skip_length(blob, offset);
         for (uint256 i = 0; i < local_vars.len; i++) {
-            (local_vars.status, ) = lpc_verifier_calldata.parse_verify_proof_be(
+            (local_vars.status, ) = lpc_verifier.parse_verify_proof_be(
                 blob,
                 local_vars.offset,
                 local_vars.evaluation_points,
@@ -60,7 +60,7 @@ library placeholder_verifier_poseidon_gen {
             if (!local_vars.status) {
                 return false;
             }
-            local_vars.offset = lpc_verifier_calldata.skip_proof_be(
+            local_vars.offset = lpc_verifier.skip_proof_be(
                 blob,
                 local_vars.offset
             );
@@ -77,21 +77,21 @@ library placeholder_verifier_poseidon_gen {
     ) internal view returns (bool result) {
         types.placeholder_local_variables_calldata memory local_vars;
         // 3. append witness commitments to transcript
-        (local_vars.len, local_vars.offset) = basic_marshalling_calldata
+        (local_vars.len, local_vars.offset) = basic_marshalling
             .get_skip_length(blob, proof_map.witness_commitments_offset);
         for (uint256 i = 0; i < local_vars.len; i++) {
             transcript.update_transcript_b32_by_offset_calldata(
                 tr_state,
                 blob,
-                local_vars.offset + basic_marshalling_calldata.LENGTH_OCTETS
+                local_vars.offset + basic_marshalling.LENGTH_OCTETS
             );
-            local_vars.offset = basic_marshalling_calldata
+            local_vars.offset = basic_marshalling
                 .skip_octet_vector_32_be(blob, local_vars.offset);
         }
 
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
         // 5. permutation argument
-        local_vars.permutation_argument = permutation_argument_calldata
+        local_vars.permutation_argument = permutation_argument
             .verify_eval_be(
                 blob,
                 tr_state,
@@ -128,15 +128,15 @@ library placeholder_verifier_poseidon_gen {
         );
 
         // 9. Evaluation proof check
-        (local_vars.len, local_vars.offset) = basic_marshalling_calldata
+        (local_vars.len, local_vars.offset) = basic_marshalling
             .get_skip_length(blob, proof_map.T_commitments_offset);
         for (uint256 i = 0; i < local_vars.len; i++) {
             transcript.update_transcript_b32_by_offset_calldata(
                 tr_state,
                 blob,
-                local_vars.offset + basic_marshalling_calldata.LENGTH_OCTETS
+                local_vars.offset + basic_marshalling.LENGTH_OCTETS
             );
-            local_vars.offset = basic_marshalling_calldata
+            local_vars.offset = basic_marshalling
                 .skip_octet_vector_32_be(blob, local_vars.offset);
         }
         local_vars.challenge = transcript.get_field_challenge(
@@ -145,7 +145,7 @@ library placeholder_verifier_poseidon_gen {
         );
         if (
             local_vars.challenge !=
-            basic_marshalling_calldata.get_uint256_be(
+            basic_marshalling.get_uint256_be(
                 blob,
                 proof_map.eval_proof_offset
             )
@@ -154,7 +154,7 @@ library placeholder_verifier_poseidon_gen {
         }
 
         // witnesses
-        (local_vars.len, local_vars.offset) = basic_marshalling_calldata
+        (local_vars.len, local_vars.offset) = basic_marshalling
             .get_skip_length(blob, proof_map.eval_proof_witness_offset);
         for (uint256 i = 0; i < local_vars.len; i++) {
             local_vars.evaluation_points = new uint256[](
@@ -200,7 +200,7 @@ library placeholder_verifier_poseidon_gen {
                     )
                 }
             }
-            (local_vars.status, ) = lpc_verifier_calldata.parse_verify_proof_be(
+            (local_vars.status, ) = lpc_verifier.parse_verify_proof_be(
                 blob,
                 local_vars.offset,
                 local_vars.evaluation_points,
@@ -210,7 +210,7 @@ library placeholder_verifier_poseidon_gen {
             if (!local_vars.status) {
                 return false;
             }
-            local_vars.offset = lpc_verifier_calldata.skip_proof_be(
+            local_vars.offset = lpc_verifier.skip_proof_be(
                 blob,
                 local_vars.offset
             );
@@ -389,10 +389,10 @@ library placeholder_verifier_poseidon_gen {
         }
 
         local_vars.T_consolidated = 0;
-        (local_vars.len, local_vars.offset) = basic_marshalling_calldata
+        (local_vars.len, local_vars.offset) = basic_marshalling
             .get_skip_length(blob, proof_map.eval_proof_quotient_offset);
         for (uint256 i = 0; i < local_vars.len; i++) {
-            local_vars.zero_index = lpc_verifier_calldata.get_z_i_from_proof_be(
+            local_vars.zero_index = lpc_verifier.get_z_i_from_proof_be(
                 blob,
                 local_vars.offset,
                 0
@@ -430,7 +430,7 @@ library placeholder_verifier_poseidon_gen {
                     )
                 )
             }
-            local_vars.offset = lpc_verifier_calldata.skip_proof_be(
+            local_vars.offset = lpc_verifier.skip_proof_be(
                 blob,
                 local_vars.offset
             );

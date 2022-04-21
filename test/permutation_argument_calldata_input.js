@@ -1,5 +1,5 @@
 const BN = require('bn.js');
-const TestArgument = artifacts.require("TestPermutationArgumentCalldataInput");
+const TestArgument = artifacts.require("TestPermutationArgument");
 
 contract("Permutation argument", accounts => {
     it("Case 1", async () => {

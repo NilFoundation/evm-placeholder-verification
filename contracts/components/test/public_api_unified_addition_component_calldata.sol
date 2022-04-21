@@ -18,10 +18,10 @@
 pragma solidity >=0.8.4;
 
 import "../../types.sol";
-import "../unified_addition_calldata.sol";
-import "../../placeholder/proof_map_parser_calldata.sol";
+import "../unified_addition.sol";
+import "../../placeholder/proof_map_parser.sol";
 
-contract TestUnifiedAdditionComponentCalldataInput {
+contract TestUnifiedAdditionComponent {
     uint256 public m_evaluation_result;
 
     function evaluate(
@@ -33,7 +33,7 @@ contract TestUnifiedAdditionComponentCalldataInput {
         (
             types.placeholder_proof_map_calldata memory proof_map,
             uint256 proof_size
-        ) = placeholder_proof_map_parser_calldata.parse_be(blob, 0);
+        ) = placeholder_proof_map_parser.parse_be(blob, 0);
         require(
             proof_size == blob.length,
             "Proof length was detected incorrectly!"
@@ -46,7 +46,7 @@ contract TestUnifiedAdditionComponentCalldataInput {
         gate_params.eval_proof_selector_offset = proof_map
             .eval_proof_selector_offset;
 
-        m_evaluation_result = unified_addition_component_calldata
+        m_evaluation_result = unified_addition_component
             .evaluate_gates_be(blob, gate_params, columns_rotations);
     }
 }

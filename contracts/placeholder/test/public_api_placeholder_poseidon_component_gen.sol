@@ -19,7 +19,7 @@ pragma solidity >=0.8.4;
 
 import "../../types.sol";
 import "../../cryptography/transcript.sol";
-import "../proof_map_parser_calldata.sol";
+import "../proof_map_parser.sol";
 import "../verifier_poseidon_component_gen.sol";
 
 contract TestPlaceholderVerifierPoseidonGen {
@@ -40,7 +40,7 @@ contract TestPlaceholderVerifierPoseidonGen {
         int256[][] calldata columns_rotations
     ) public {
         test_local_vars memory vars;
-        (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser_calldata
+        (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser
         .parse_be(blob, 0);
         require(
             vars.proof_size == blob.length,

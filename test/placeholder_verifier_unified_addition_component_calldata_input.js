@@ -1,5 +1,5 @@
 const BN = require('bn.js');
-const TestVerifier = artifacts.require("TestPlaceholderVerifierUnifiedAdditionCalldataInput");
+const TestVerifier = artifacts.require("TestPlaceholderVerifierUnifiedAddition");
 
 contract("Placeholder verifier unified addition component", accounts => {
     it("Case 1", async () => {

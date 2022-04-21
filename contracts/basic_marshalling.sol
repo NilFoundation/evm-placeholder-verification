@@ -26,7 +26,7 @@ library basic_marshalling {
     // Bounds non-checking functions
     //================================================================================================================
     // TODO: general case
-    function skip_octet_vector_32_be(bytes memory blob, uint256 offset)
+    function skip_octet_vector_32_be(bytes calldata blob, uint256 offset)
         internal
         pure
         returns (uint256 result_offset)
@@ -36,7 +36,7 @@ library basic_marshalling {
 
     // TODO: general case
     function skip_vector_of_octet_vectors_32_be(
-        bytes memory blob,
+        bytes calldata blob,
         uint256 offset
     ) internal pure returns (uint256 result_offset) {
         result_offset = offset + LENGTH_OCTETS;
@@ -47,14 +47,14 @@ library basic_marshalling {
                     add(LENGTH_OCTETS, 0x20),
                     shr(
                         LENGTH_RESTORING_SHIFT,
-                        mload(add(add(blob, 0x20), offset))
+                        calldataload(add(blob.offset, offset))
                     )
                 )
             )
         }
     }
 
-    function skip_uint256_be(bytes memory blob, uint256 offset)
+    function skip_uint256_be(bytes calldata blob, uint256 offset)
         internal
         pure
         returns (uint256 result_offset)
@@ -62,7 +62,7 @@ library basic_marshalling {
         result_offset = offset + 32;
     }
 
-    function skip_vector_of_uint256_be(bytes memory blob, uint256 offset)
+    function skip_vector_of_uint256_be(bytes calldata blob, uint256 offset)
         internal
         pure
         returns (uint256 result_offset)
@@ -75,14 +75,14 @@ library basic_marshalling {
                     0x20,
                     shr(
                         LENGTH_RESTORING_SHIFT,
-                        mload(add(add(blob, 0x20), offset))
+                        calldataload(add(blob.offset, offset))
                     )
                 )
             )
         }
     }
 
-    function skip_length(bytes memory blob, uint256 offset)
+    function skip_length(bytes calldata blob, uint256 offset)
         internal
         pure
         returns (uint256 result_offset)
@@ -90,7 +90,7 @@ library basic_marshalling {
         result_offset = offset + LENGTH_OCTETS;
     }
 
-    function get_length(bytes memory blob, uint256 offset)
+    function get_length(bytes calldata blob, uint256 offset)
         internal
         pure
         returns (uint256 result_length)
@@ -98,12 +98,12 @@ library basic_marshalling {
         assembly {
             result_length := shr(
                 LENGTH_RESTORING_SHIFT,
-                mload(add(add(blob, 0x20), offset))
+                calldataload(add(blob.offset, offset))
             )
         }
     }
 
-    function get_skip_length(bytes memory blob, uint256 offset)
+    function get_skip_length(bytes calldata blob, uint256 offset)
         internal
         pure
         returns (uint256 result_length, uint256 result_offset)
@@ -111,47 +111,44 @@ library basic_marshalling {
         assembly {
             result_length := shr(
                 LENGTH_RESTORING_SHIFT,
-                mload(add(add(blob, 0x20), offset))
+                calldataload(add(blob.offset, offset))
             )
         }
         result_offset = offset + LENGTH_OCTETS;
     }
 
     function get_i_uint256_from_vector(
-        bytes memory blob,
+        bytes calldata blob,
         uint256 offset,
         uint256 i
     ) internal pure returns (uint256 result) {
         assembly {
-            result := mload(
-                add(
-                    add(blob, 0x20),
-                    add(add(offset, LENGTH_OCTETS), mul(i, 0x20))
-                )
+            result := calldataload(
+                add(blob.offset, add(add(offset, LENGTH_OCTETS), mul(i, 0x20)))
             )
         }
     }
 
     function get_i_uint256_ptr_from_vector(
-        bytes memory blob,
+        bytes calldata blob,
         uint256 offset,
         uint256 i
     ) internal pure returns (uint256 result_ptr) {
         assembly {
             result_ptr := add(
-                add(blob, 0x20),
+                blob.offset,
                 add(add(offset, LENGTH_OCTETS), mul(i, 0x20))
             )
         }
     }
 
-    function get_uint256_be(bytes memory blob, uint256 offset)
+    function get_uint256_be(bytes calldata blob, uint256 offset)
         internal
         pure
         returns (uint256 result)
     {
         assembly {
-            result := mload(add(add(blob, 0x20), offset))
+            result := calldataload(add(blob.offset, offset))
         }
     }
 
@@ -159,7 +156,7 @@ library basic_marshalling {
     // Bounds checking functions
     //================================================================================================================
     // TODO: general case
-    function skip_octet_vector_32_be_check(bytes memory blob, uint256 offset)
+    function skip_octet_vector_32_be_check(bytes calldata blob, uint256 offset)
         internal
         pure
         returns (uint256 result_offset)
@@ -170,7 +167,7 @@ library basic_marshalling {
 
     // TODO: general case
     function skip_vector_of_octet_vectors_32_be_check(
-        bytes memory blob,
+        bytes calldata blob,
         uint256 offset
     ) internal pure returns (uint256 result_offset) {
         result_offset = offset + LENGTH_OCTETS;
@@ -182,7 +179,7 @@ library basic_marshalling {
                     add(LENGTH_OCTETS, 0x20),
                     shr(
                         LENGTH_RESTORING_SHIFT,
-                        mload(add(add(blob, 0x20), offset))
+                        calldataload(add(blob.offset, offset))
                     )
                 )
             )
@@ -190,7 +187,7 @@ library basic_marshalling {
         require(result_offset <= blob.length);
     }
 
-    function skip_uint256_be_check(bytes memory blob, uint256 offset)
+    function skip_uint256_be_check(bytes calldata blob, uint256 offset)
         internal
         pure
         returns (uint256 result_offset)
@@ -199,11 +196,10 @@ library basic_marshalling {
         require(result_offset <= blob.length);
     }
 
-    function skip_vector_of_uint256_be_check(bytes memory blob, uint256 offset)
-        internal
-        pure
-        returns (uint256 result_offset)
-    {
+    function skip_vector_of_uint256_be_check(
+        bytes calldata blob,
+        uint256 offset
+    ) internal pure returns (uint256 result_offset) {
         result_offset = offset + LENGTH_OCTETS;
         require(result_offset <= blob.length);
         assembly {
@@ -213,7 +209,7 @@ library basic_marshalling {
                     0x20,
                     shr(
                         LENGTH_RESTORING_SHIFT,
-                        mload(add(add(blob, 0x20), offset))
+                        calldataload(add(blob.offset, offset))
                     )
                 )
             )
@@ -221,7 +217,7 @@ library basic_marshalling {
         require(result_offset <= blob.length);
     }
 
-    function skip_length_check(bytes memory blob, uint256 offset)
+    function skip_length_check(bytes calldata blob, uint256 offset)
         internal
         pure
         returns (uint256 result_offset)
@@ -230,7 +226,7 @@ library basic_marshalling {
         require(result_offset < blob.length);
     }
 
-    function get_length_check(bytes memory blob, uint256 offset)
+    function get_length_check(bytes calldata blob, uint256 offset)
         internal
         pure
         returns (uint256 result_length)
@@ -239,12 +235,12 @@ library basic_marshalling {
         assembly {
             result_length := shr(
                 LENGTH_RESTORING_SHIFT,
-                mload(add(add(blob, 0x20), offset))
+                calldataload(add(blob.offset, offset))
             )
         }
     }
 
-    function get_skip_length_check(bytes memory blob, uint256 offset)
+    function get_skip_length_check(bytes calldata blob, uint256 offset)
         internal
         pure
         returns (uint256 result_length, uint256 result_offset)
@@ -254,49 +250,46 @@ library basic_marshalling {
         assembly {
             result_length := shr(
                 LENGTH_RESTORING_SHIFT,
-                mload(add(add(blob, 0x20), offset))
+                calldataload(add(blob.offset, offset))
             )
         }
     }
 
     function get_i_uint256_from_vector_check(
-        bytes memory blob,
+        bytes calldata blob,
         uint256 offset,
         uint256 i
     ) internal pure returns (uint256 result) {
         require(offset + LENGTH_OCTETS + (i + 1) * 0x20 <= blob.length);
         assembly {
-            result := mload(
-                add(
-                    add(blob, 0x20),
-                    add(add(offset, LENGTH_OCTETS), mul(i, 0x20))
-                )
+            result := calldataload(
+                add(blob.offset, add(add(offset, LENGTH_OCTETS), mul(i, 0x20)))
             )
         }
     }
 
     function get_i_uint256_ptr_from_vector_check(
-        bytes memory blob,
+        bytes calldata blob,
         uint256 offset,
         uint256 i
     ) internal pure returns (uint256 result_ptr) {
         require(offset + LENGTH_OCTETS + (i + 1) * 0x20 <= blob.length);
         assembly {
             result_ptr := add(
-                add(blob, 0x20),
+                blob.offset,
                 add(add(offset, LENGTH_OCTETS), mul(i, 0x20))
             )
         }
     }
 
-    function get_uint256_be_check(bytes memory blob, uint256 offset)
+    function get_uint256_be_check(bytes calldata blob, uint256 offset)
         internal
         pure
         returns (uint256 result)
     {
         require(offset + 0x20 <= blob.length);
         assembly {
-            result := mload(add(add(blob, 0x20), offset))
+            result := calldataload(add(blob.offset, offset))
         }
     }
 }

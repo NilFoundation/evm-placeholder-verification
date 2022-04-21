@@ -1,5 +1,5 @@
 const BN = require('bn.js');
-const TestArgument = artifacts.require("TestUnifiedAdditionComponentCalldataInput");
+const TestArgument = artifacts.require("TestUnifiedAdditionComponent");
 
 contract("Permutation argument", accounts => {
     it("Case 1", async () => {

@@ -18,7 +18,7 @@
 pragma solidity >=0.8.4;
 
 import "../../types.sol";
-import "../lpc_verifier_calldata.sol";
+import "../lpc_verifier.sol";
 import "../../cryptography/transcript.sol";
 
 contract TestLpcVerifier {
@@ -67,7 +67,7 @@ contract TestLpcVerifier {
     ) public {
         types.transcript_data memory tr_state;
         transcript.init_transcript(tr_state, init_transcript_blob);
-        (m_result, m_proof_size) = lpc_verifier_calldata.parse_verify_proof_be(
+        (m_result, m_proof_size) = lpc_verifier.parse_verify_proof_be(
             raw_proof,
             0,
             evaluation_points,
@@ -81,12 +81,12 @@ contract TestLpcVerifier {
         require(m_result, "LPC proof is not correct!");
         require(
             raw_proof.length ==
-                lpc_verifier_calldata.skip_proof_be(raw_proof, 0),
+                lpc_verifier.skip_proof_be(raw_proof, 0),
             "LPC proof length if incorrect!"
         );
         require(
             raw_proof.length ==
-                lpc_verifier_calldata.skip_proof_be_check(raw_proof, 0),
+                lpc_verifier.skip_proof_be_check(raw_proof, 0),
             "LPC proof length if incorrect!"
         );
     }

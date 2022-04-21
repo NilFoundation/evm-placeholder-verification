@@ -18,7 +18,7 @@
 pragma solidity >=0.8.4;
 
 import "../../types.sol";
-import "../fri_verifier_calldata.sol";
+import "../fri_verifier.sol";
 import "../../cryptography/transcript.sol";
 
 contract TestFriVerifier {
@@ -59,7 +59,7 @@ contract TestFriVerifier {
     ) public {
         types.transcript_data memory tr_state;
         transcript.init_transcript(tr_state, init_transcript_blob);
-        (m_result, m_proof_size) = fri_verifier_calldata.parse_verify_proof_be(
+        (m_result, m_proof_size) = fri_verifier.parse_verify_proof_be(
             raw_proof,
             0,
             tr_state,
@@ -71,12 +71,12 @@ contract TestFriVerifier {
         );
         require(
             raw_proof.length ==
-                fri_verifier_calldata.skip_proof_be(raw_proof, 0),
+                fri_verifier.skip_proof_be(raw_proof, 0),
             "FRI proof length if incorrect!"
         );
         require(
             raw_proof.length ==
-                fri_verifier_calldata.skip_proof_be_check(
+                fri_verifier.skip_proof_be_check(
                     raw_proof,
                     0
                 ),

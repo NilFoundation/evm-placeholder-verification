@@ -28,17 +28,27 @@ import "../algebra/field.sol";
 library placeholder_verifier_unified_addition_component {
     uint256 constant f_parts = 9;
 
+    uint256 constant OMEGA_OFFSET = 0x20;
+
+    uint256 constant ZERO_INDEX_OFFSET = 0x40;
+    uint256 constant E_OFFSET = 0xe0;
+    uint256 constant ALPHAS_OFFSET = 0xa0;
+    uint256 constant CHALLENGE_OFFSET = 0xc0;
+    uint256 constant EVALUATION_POINTS_OFFSET = 0x100;
+    uint256 constant F_OFFSET = 0x120;
+    uint256 constant F_CONSOLIDATED_OFFSET = 0x140;
+    uint256 constant T_CONSOLIDATED_OFFSET = 0x160;
+    uint256 constant Z_AT_CHALLENGE_OFFSET = 0x180;
+
     function verify_lpc_commitments(
-        bytes memory blob,
+        bytes calldata blob,
         uint256 offset,
         types.transcript_data memory tr_state,
         types.lpc_params_type memory lpc_params,
-        types.placeholder_local_variables memory local_vars
+        types.placeholder_local_variables_calldata memory local_vars
     ) internal view returns (bool) {
-        (local_vars.len, local_vars.offset) = basic_marshalling.get_skip_length(
-            blob,
-            offset
-        );
+        (local_vars.len, local_vars.offset) = basic_marshalling
+            .get_skip_length(blob, offset);
         for (uint256 i = 0; i < local_vars.len; i++) {
             (local_vars.status, ) = lpc_verifier.parse_verify_proof_be(
                 blob,
@@ -58,253 +68,56 @@ library placeholder_verifier_unified_addition_component {
         return true;
     }
 
-    function parse_verify_proof_be(
-        bytes memory blob,
-        uint256 offset,
+    function verify_proof_be(
+        bytes calldata blob,
         types.transcript_data memory tr_state,
-        types.placeholder_proof_map memory proof_map,
+        types.placeholder_proof_map_calldata memory proof_map,
         types.lpc_params_type memory lpc_params,
         types.placeholder_common_data memory common_data
     ) internal view returns (bool result) {
-        types.placeholder_local_variables memory local_vars;
+        types.placeholder_local_variables_calldata memory local_vars;
         // 3. append witness commitments to transcript
-        (local_vars.len, local_vars.offset) = basic_marshalling.get_skip_length(
-            blob,
-            proof_map.witness_commitments_offset
-        );
+        (local_vars.len, local_vars.offset) = basic_marshalling
+            .get_skip_length(blob, proof_map.witness_commitments_offset);
         for (uint256 i = 0; i < local_vars.len; i++) {
-            transcript.update_transcript_b32_by_offset(
+            transcript.update_transcript_b32_by_offset_calldata(
                 tr_state,
                 blob,
                 local_vars.offset + basic_marshalling.LENGTH_OCTETS
             );
-            local_vars.offset = basic_marshalling.skip_octet_vector_32_be(
-                blob,
-                local_vars.offset
-            );
+            local_vars.offset = basic_marshalling
+                .skip_octet_vector_32_be(blob, local_vars.offset);
         }
 
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
-        local_vars.len = basic_marshalling.get_length(
-            blob,
-            proof_map.eval_proof_id_permutation_offset
-        );
-        types.permutation_argument_eval_params
-            memory permutation_argument_params;
-        permutation_argument_params.column_polynomials_values = new uint256[](
-            local_vars.len
-        );
-        uint256 witness_columns_amount = basic_marshalling.get_length(
-            blob,
-            proof_map.eval_proof_witness_offset
-        );
-        for (uint256 i = 0; i < local_vars.len; i++) {
-            for (
-                uint256 j = 0;
-                j < common_data.columns_rotations[i].length;
-                j++
-            ) {
-                if (common_data.columns_rotations[i][j] == 0) {
-                    local_vars.zero_index = j;
-                }
-            }
-            if (i < witness_columns_amount) {
-                permutation_argument_params.column_polynomials_values[
-                        i
-                    ] = lpc_verifier.get_z_i_from_proof_be(
-                    blob,
-                    lpc_verifier.skip_n_proofs_in_vector_be(
-                        blob,
-                        proof_map.eval_proof_witness_offset,
-                        i
-                    ),
-                    local_vars.zero_index
-                );
-            } else if (
-                i <
-                witness_columns_amount +
-                    basic_marshalling.get_length(
-                        blob,
-                        proof_map.eval_proof_public_input_offset
-                    )
-            ) {
-                permutation_argument_params.column_polynomials_values[
-                        i
-                    ] = lpc_verifier.get_z_i_from_proof_be(
-                    blob,
-                    lpc_verifier.skip_n_proofs_in_vector_be(
-                        blob,
-                        proof_map.eval_proof_public_input_offset,
-                        i - witness_columns_amount
-                    ),
-                    local_vars.zero_index
-                );
-            } else {
-                local_vars.tmp1 =
-                    i -
-                    witness_columns_amount -
-                    basic_marshalling.get_length(
-                        blob,
-                        proof_map.eval_proof_public_input_offset
-                    );
-                permutation_argument_params.column_polynomials_values[
-                        i
-                    ] = lpc_verifier.get_z_i_from_proof_be(
-                    blob,
-                    lpc_verifier.skip_n_proofs_in_vector_be(
-                        blob,
-                        proof_map.eval_proof_constant_offset,
-                        local_vars.tmp1
-                    ),
-                    local_vars.zero_index
-                );
-            }
-        }
-
         // 5. permutation argument
-        permutation_argument_params.modulus = lpc_params.modulus;
-        permutation_argument_params.challenge = basic_marshalling
-            .get_uint256_be(blob, proof_map.eval_proof_offset);
-        permutation_argument_params.id_permutation_ptrs = new uint256[](
-            basic_marshalling.get_length(
+        local_vars.permutation_argument = permutation_argument
+            .verify_eval_be(
                 blob,
-                proof_map.eval_proof_id_permutation_offset
-            )
-        );
-        local_vars.offset =
-            proof_map.eval_proof_id_permutation_offset +
-            basic_marshalling.LENGTH_OCTETS;
-        for (
-            uint256 i = 0;
-            i < permutation_argument_params.id_permutation_ptrs.length;
-            i++
-        ) {
-            permutation_argument_params.id_permutation_ptrs[i] = lpc_verifier
-                .get_z_0_ptr_from_proof_be(blob, local_vars.offset);
-            local_vars.offset = lpc_verifier.skip_proof_be(
-                blob,
-                local_vars.offset
+                tr_state,
+                proof_map,
+                lpc_params,
+                common_data,
+                local_vars
             );
-        }
-        permutation_argument_params.sigma_permutation_ptrs = new uint256[](
-            basic_marshalling.get_length(
-                blob,
-                proof_map.eval_proof_sigma_permutation_offset
-            )
-        );
-        local_vars.offset =
-            proof_map.eval_proof_sigma_permutation_offset +
-            basic_marshalling.LENGTH_OCTETS;
-        for (
-            uint256 i = 0;
-            i < permutation_argument_params.sigma_permutation_ptrs.length;
-            i++
-        ) {
-            permutation_argument_params.sigma_permutation_ptrs[i] = lpc_verifier
-                .get_z_0_ptr_from_proof_be(blob, local_vars.offset);
-            local_vars.offset = lpc_verifier.skip_proof_be(
-                blob,
-                local_vars.offset
-            );
-        }
-        permutation_argument_params.perm_polynomial_value = lpc_verifier
-            .get_z_i_from_proof_be(
-                blob,
-                proof_map.eval_proof_permutation_offset +
-                    basic_marshalling.LENGTH_OCTETS,
-                0
-            );
-        permutation_argument_params.perm_polynomial_shifted_value = lpc_verifier
-            .get_z_i_from_proof_be(
-                blob,
-                proof_map.eval_proof_permutation_offset +
-                    basic_marshalling.LENGTH_OCTETS,
-                1
-            );
-        permutation_argument_params.beta = transcript.get_field_challenge(
-            tr_state,
-            lpc_params.modulus
-        );
-        permutation_argument_params.gamma = transcript.get_field_challenge(
-            tr_state,
-            lpc_params.modulus
-        );
-        transcript.update_transcript_b32_by_offset(
-            tr_state,
-            blob,
-            offset + basic_marshalling.LENGTH_OCTETS
-        );
-        permutation_argument_params.q_last_eval = lpc_verifier
-            .get_z_i_from_proof_be(
-                blob,
-                proof_map.eval_proof_special_selectors_offset +
-                    basic_marshalling.LENGTH_OCTETS,
-                0
-            );
-        permutation_argument_params.q_blind_eval = lpc_verifier
-            .get_z_i_from_proof_be(
-                blob,
-                lpc_verifier.skip_proof_be(
-                    blob,
-                    proof_map.eval_proof_special_selectors_offset +
-                        basic_marshalling.LENGTH_OCTETS
-                ),
-                0
-            );
-        local_vars.permutation_argument = permutation_argument.verify_eval_be(
-            permutation_argument_params
-        );
 
         // 7. gate argument
-        uint256[] memory assignments_ptrs = new uint256[](
-            unified_addition_component.WITNESS_ASSIGNMENTS_N
-        );
-        local_vars.tmp1 = 0;
-        local_vars.offset =
-            proof_map.eval_proof_witness_offset +
-            basic_marshalling.LENGTH_OCTETS;
-        for (
-            uint256 i = 0;
-            i < unified_addition_component.WITNESS_ASSIGNMENTS_N;
-            i++
-        ) {
-            // TODO: remove for general case
-            require(common_data.columns_rotations[i].length == 1);
-            for (
-                uint256 j = 0;
-                j < common_data.columns_rotations[i].length;
-                j++
-            ) {
-                // TODO: remove for general case
-                require(common_data.columns_rotations[i][j] == 0);
-                assignments_ptrs[local_vars.tmp1] = lpc_verifier
-                    .get_z_i_ptr_from_proof_be(blob, local_vars.offset, j);
-                local_vars.tmp1++;
-            }
-            local_vars.offset = lpc_verifier.skip_proof_be(
-                blob,
-                local_vars.offset
-            );
-        }
-        types.gate_eval_params memory gate_params;
+        types.gate_argument_local_vars memory gate_params;
         gate_params.modulus = lpc_params.modulus;
-        gate_params.theta_acc = 1;
         gate_params.theta = transcript.get_field_challenge(
             tr_state,
             lpc_params.modulus
         );
-        gate_params.selector_evaluations_ptrs = new uint256[](1);
-        gate_params.selector_evaluations_ptrs[0] = lpc_verifier
-            .get_z_i_ptr_from_proof_be(
+        gate_params.eval_proof_witness_offset = proof_map
+            .eval_proof_witness_offset;
+        gate_params.eval_proof_selector_offset = proof_map
+            .eval_proof_selector_offset;
+        local_vars.gate_argument = unified_addition_component
+            .evaluate_gates_be(
                 blob,
-                proof_map.eval_proof_selector_offset +
-                    basic_marshalling.LENGTH_OCTETS,
-                0
+                gate_params,
+                common_data.columns_rotations
             );
-        local_vars.gate_argument = unified_addition_component.evaluate_gates_be(
-            assignments_ptrs,
-            gate_params
-        );
 
         // 8. alphas computations
         local_vars.alphas = new uint256[](f_parts);
@@ -315,20 +128,16 @@ library placeholder_verifier_unified_addition_component {
         );
 
         // 9. Evaluation proof check
-        (local_vars.len, local_vars.offset) = basic_marshalling.get_skip_length(
-            blob,
-            proof_map.T_commitments_offset
-        );
+        (local_vars.len, local_vars.offset) = basic_marshalling
+            .get_skip_length(blob, proof_map.T_commitments_offset);
         for (uint256 i = 0; i < local_vars.len; i++) {
-            transcript.update_transcript_b32_by_offset(
+            transcript.update_transcript_b32_by_offset_calldata(
                 tr_state,
                 blob,
                 local_vars.offset + basic_marshalling.LENGTH_OCTETS
             );
-            local_vars.offset = basic_marshalling.skip_octet_vector_32_be(
-                blob,
-                local_vars.offset
-            );
+            local_vars.offset = basic_marshalling
+                .skip_octet_vector_32_be(blob, local_vars.offset);
         }
         local_vars.challenge = transcript.get_field_challenge(
             tr_state,
@@ -336,16 +145,17 @@ library placeholder_verifier_unified_addition_component {
         );
         if (
             local_vars.challenge !=
-            basic_marshalling.get_uint256_be(blob, proof_map.eval_proof_offset)
+            basic_marshalling.get_uint256_be(
+                blob,
+                proof_map.eval_proof_offset
+            )
         ) {
             return false;
         }
 
         // witnesses
-        (local_vars.len, local_vars.offset) = basic_marshalling.get_skip_length(
-            blob,
-            proof_map.eval_proof_witness_offset
-        );
+        (local_vars.len, local_vars.offset) = basic_marshalling
+            .get_skip_length(blob, proof_map.eval_proof_witness_offset);
         for (uint256 i = 0; i < local_vars.len; i++) {
             local_vars.evaluation_points = new uint256[](
                 common_data.columns_rotations[i].length
@@ -370,15 +180,20 @@ library placeholder_verifier_unified_addition_component {
                     mstore(
                         // evaluation_points[j]
                         add(
-                            add(mload(add(local_vars, 0x100)), 0x20),
+                            add(
+                                mload(
+                                    add(local_vars, EVALUATION_POINTS_OFFSET)
+                                ),
+                                0x20
+                            ),
                             mul(0x20, j)
                         ),
                         // challenge * omega^rotation_gates[j]
                         mulmod(
                             // challenge
-                            mload(add(local_vars, 0xc0)),
+                            mload(add(local_vars, CHALLENGE_OFFSET)),
                             // e = omega^rotation_gates[j]
-                            mload(add(local_vars, 0xe0)),
+                            mload(add(local_vars, E_OFFSET)),
                             // modulus
                             mload(lpc_params)
                         )
@@ -408,13 +223,13 @@ library placeholder_verifier_unified_addition_component {
         assembly {
             mstore(
                 // local_vars.evaluation_points[1]
-                add(mload(add(local_vars, 0x100)), 0x40),
+                add(mload(add(local_vars, EVALUATION_POINTS_OFFSET)), 0x40),
                 // (local_vars.challenge * common_data.omega) % lpc_params.modulus
                 mulmod(
                     // local_vars.challenge
-                    mload(add(local_vars, 0xc0)),
+                    mload(add(local_vars, CHALLENGE_OFFSET)),
                     // common_data.omega
-                    mload(add(common_data, 0x20)),
+                    mload(add(common_data, OMEGA_OFFSET)),
                     // modulus
                     mload(lpc_params)
                 )
@@ -541,22 +356,25 @@ library placeholder_verifier_unified_addition_component {
             assembly {
                 mstore(
                     // local_vars.F_consolidated
-                    add(local_vars, 0x140),
+                    add(local_vars, F_CONSOLIDATED_OFFSET),
                     addmod(
                         // F_consolidated
-                        mload(add(local_vars, 0x140)),
+                        mload(add(local_vars, F_CONSOLIDATED_OFFSET)),
                         mulmod(
-                            // alpha[i]
+                            // alphas[i]
                             mload(
                                 add(
-                                    add(mload(add(local_vars, 0xa0)), 0x20),
+                                    add(
+                                        mload(add(local_vars, ALPHAS_OFFSET)),
+                                        0x20
+                                    ),
                                     mul(0x20, i)
                                 )
                             ),
                             // F[i]
                             mload(
                                 add(
-                                    add(mload(add(local_vars, 0x120)), 0x20),
+                                    add(mload(add(local_vars, F_OFFSET)), 0x20),
                                     mul(0x20, i)
                                 )
                             ),
@@ -571,10 +389,8 @@ library placeholder_verifier_unified_addition_component {
         }
 
         local_vars.T_consolidated = 0;
-        (local_vars.len, local_vars.offset) = basic_marshalling.get_skip_length(
-            blob,
-            proof_map.eval_proof_quotient_offset
-        );
+        (local_vars.len, local_vars.offset) = basic_marshalling
+            .get_skip_length(blob, proof_map.eval_proof_quotient_offset);
         for (uint256 i = 0; i < local_vars.len; i++) {
             local_vars.zero_index = lpc_verifier.get_z_i_from_proof_be(
                 blob,
@@ -589,26 +405,26 @@ library placeholder_verifier_unified_addition_component {
             assembly {
                 mstore(
                     // local_vars.zero_index
-                    add(local_vars, 0x40),
+                    add(local_vars, ZERO_INDEX_OFFSET),
                     // local_vars.zero_index * local_vars.e
                     mulmod(
                         // local_vars.zero_index
-                        mload(add(local_vars, 0x40)),
+                        mload(add(local_vars, ZERO_INDEX_OFFSET)),
                         // local_vars.e
-                        mload(add(local_vars, 0xe0)),
+                        mload(add(local_vars, E_OFFSET)),
                         // modulus
                         mload(lpc_params)
                     )
                 )
                 mstore(
                     // local_vars.T_consolidated
-                    add(local_vars, 0x160),
+                    add(local_vars, T_CONSOLIDATED_OFFSET),
                     // local_vars.T_consolidated + local_vars.zero_index
                     addmod(
                         // local_vars.T_consolidated
-                        mload(add(local_vars, 0x160)),
+                        mload(add(local_vars, T_CONSOLIDATED_OFFSET)),
                         // local_vars.zero_index
-                        mload(add(local_vars, 0x40)),
+                        mload(add(local_vars, ZERO_INDEX_OFFSET)),
                         // modulus
                         mload(lpc_params)
                     )
@@ -628,11 +444,11 @@ library placeholder_verifier_unified_addition_component {
         assembly {
             mstore(
                 // local_vars.Z_at_challenge
-                add(local_vars, 0x180),
+                add(local_vars, Z_AT_CHALLENGE_OFFSET),
                 // local_vars.Z_at_challenge - 1
                 addmod(
                     // Z_at_challenge
-                    mload(add(local_vars, 0x180)),
+                    mload(add(local_vars, Z_AT_CHALLENGE_OFFSET)),
                     // -1
                     sub(mload(lpc_params), 1),
                     // modulus
@@ -641,13 +457,13 @@ library placeholder_verifier_unified_addition_component {
             )
             mstore(
                 // local_vars.Z_at_challenge
-                add(local_vars, 0x180),
+                add(local_vars, Z_AT_CHALLENGE_OFFSET),
                 // Z_at_challenge * T_consolidated
                 mulmod(
                     // Z_at_challenge
-                    mload(add(local_vars, 0x180)),
+                    mload(add(local_vars, Z_AT_CHALLENGE_OFFSET)),
                     // T_consolidated
-                    mload(add(local_vars, 0x160)),
+                    mload(add(local_vars, T_CONSOLIDATED_OFFSET)),
                     // modulus
                     mload(lpc_params)
                 )

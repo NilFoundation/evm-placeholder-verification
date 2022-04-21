@@ -18,348 +18,773 @@
 pragma solidity >=0.8.4;
 
 import "../types.sol";
+import "../basic_marshalling.sol";
+import "../commitments/lpc_verifier.sol";
 
 library unified_addition_component {
-    uint256 constant WITNESS_ASSIGNMENTS_N = 11;
+    uint256 constant WITNESSES_N = 11;
+    uint256 constant WITNESSES_TOTAL_N = 11;
     uint256 constant GATES_N = 1;
 
+    uint256 constant THETA_OFFSET = 0x20;
+    uint256 constant CONSTRAINT_EVAL_OFFSET = 0x40;
+    uint256 constant GATE_EVAL_OFFSET = 0x60;
+    uint256 constant WITNESS_EVALUATIONS_OFFSET = 0x80;
+    uint256 constant SELECTOR_EVALUATIONS_OFFSET = 0xa0;
+
+    // TODO: columns_rotations could be hard-coded
     function evaluate_gates_be(
-        uint256[] memory assignment_pointers,
-        types.gate_eval_params memory params
-    ) internal pure returns (uint256 gate_evaluation) {
-        require(assignment_pointers.length >= WITNESS_ASSIGNMENTS_N);
-        require(params.selector_evaluations_ptrs.length >= GATES_N);
+        bytes calldata blob,
+        types.gate_argument_local_vars memory gate_params,
+        int256[][] memory columns_rotations
+    ) internal pure returns (uint256 gates_evaluation) {
+        // TODO: check witnesses number in proof
+
+        gate_params.witness_evaluations = new uint256[][](WITNESSES_N);
+        gate_params.offset =
+            gate_params.eval_proof_witness_offset +
+            basic_marshalling.LENGTH_OCTETS;
+        for (uint256 i = 0; i < WITNESSES_N; i++) {
+            gate_params.witness_evaluations[i] = new uint256[](
+                columns_rotations[i].length
+            );
+            for (uint256 j = 0; j < columns_rotations[i].length; j++) {
+                gate_params.witness_evaluations[i][j] = lpc_verifier
+                    .get_z_i_from_proof_be(blob, gate_params.offset, j);
+            }
+            gate_params.offset = lpc_verifier.skip_proof_be(
+                blob,
+                gate_params.offset
+            );
+        }
+        gate_params.selector_evaluations = new uint256[](GATES_N);
+        gate_params.offset =
+            gate_params.eval_proof_selector_offset +
+            basic_marshalling.LENGTH_OCTETS;
+        for (uint256 i = 0; i < GATES_N; i++) {
+            gate_params.selector_evaluations[i] = lpc_verifier
+                .get_z_i_from_proof_be(blob, gate_params.offset, 0);
+            gate_params.offset = lpc_verifier.skip_proof_be(
+                blob,
+                gate_params.offset
+            );
+        }
 
         assembly {
-            gate_evaluation := 0
-            let modulus := mload(params)
-            let theta_acc := mload(add(params, 0x20))
-            let theta := mload(add(params, 0x40))
+            let modulus := mload(gate_params)
+            let theta_acc := 1
+            mstore(add(gate_params, GATE_EVAL_OFFSET), 0)
+
+            function get_W_i_by_rotation_idx(idx, rot_idx, ptr) -> result {
+                result := mload(
+                    add(
+                        add(mload(add(add(ptr, 0x20), mul(0x20, idx))), 0x20),
+                        mul(0x20, rot_idx)
+                    )
+                )
+            }
+
+            function get_selector_i(idx, ptr) -> result {
+                result := mload(add(add(ptr, 0x20), mul(0x20, idx)))
+            }
 
             //==========================================================================================================
             // 1. w_7 * (w_2 - w_0)
-            let constraint_eval := mulmod(
-                // w_7
-                mload(mload(add(assignment_pointers, 0x100))),
-                // w_2 - w_0
-                addmod(
-                    // w_2
-                    mload(mload(add(assignment_pointers, 0x60))),
-                    // -w_0
-                    sub(modulus, mload(mload(add(assignment_pointers, 0x20)))),
-                    modulus
-                ),
-                modulus
-            )
-            // gate_evaluation += constraint_eval * theta_acc
-            gate_evaluation := addmod(
-                gate_evaluation,
-                mulmod(constraint_eval, theta_acc, modulus),
-                modulus
-            )
-            // theta_acc *= theta
-            theta_acc := mulmod(theta_acc, theta, modulus)
-
-            //==========================================================================================================
-            // 2. (w_2 - w_0) * w_10 - (1 - w_7)
-            constraint_eval := addmod(
-                // (w_2 - w_0) * w_10
+            mstore(
+                add(gate_params, CONSTRAINT_EVAL_OFFSET),
                 mulmod(
-                    // (w_2 - w_0)
+                    // w_7
+                    get_W_i_by_rotation_idx(
+                        7,
+                        0,
+                        mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                    ),
+                    // w_2 - w_0
                     addmod(
                         // w_2
-                        mload(mload(add(assignment_pointers, 0x60))),
+                        get_W_i_by_rotation_idx(
+                            2,
+                            0,
+                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                        ),
                         // -w_0
                         sub(
                             modulus,
-                            mload(mload(add(assignment_pointers, 0x20)))
-                        ),
-                        modulus
-                    ),
-                    // w_10
-                    mload(mload(add(assignment_pointers, 0x160))),
-                    modulus
-                ),
-                // -(1 - w_7)
-                sub(
-                    modulus,
-                    addmod(
-                        1,
-                        // -w_7
-                        sub(
-                            modulus,
-                            mload(mload(add(assignment_pointers, 0x100)))
-                        ),
-                        modulus
-                    )
-                ),
-                modulus
-            )
-            // gate_evaluation += constraint_2_eval * theta_acc
-            gate_evaluation := addmod(
-                gate_evaluation,
-                mulmod(constraint_eval, theta_acc, modulus),
-                modulus
-            )
-            // theta_acc *= theta
-            theta_acc := mulmod(theta_acc, theta, modulus)
-
-            //==========================================================================================================
-            // 3. w_7 * (2 * w_8 * w_1 - 3 * w_0 * w_0) + (1 - w_7) * ((w_2 - w_0) * w_8 - (w_3 - w_1))
-            constraint_eval := addmod(
-                // w_7 * (2 * w_8 * w_1 - 3 * w_0 * w_0)
-                mulmod(
-                    // w_7
-                    mload(mload(add(assignment_pointers, 0x100))),
-                    // (2 * w_8 * w_1 - 3 * w_0 * w_0)
-                    addmod(
-                        // 2 * w_8 * w_1
-                        mulmod(
-                            2,
-                            // w_8 * w_1
-                            mulmod(
-                                // w_8
-                                mload(mload(add(assignment_pointers, 0x120))),
-                                // w_1
-                                mload(mload(add(assignment_pointers, 0x40))),
-                                modulus
-                            ),
-                            modulus
-                        ),
-                        // 3 * w_0 * w_0
-                        mulmod(
-                            3,
-                            // w_0 * w_0
-                            mulmod(
-                                // w_0
-                                mload(mload(add(assignment_pointers, 0x20))),
-                                // w_0
-                                mload(mload(add(assignment_pointers, 0x20))),
-                                modulus
-                            ),
-                            modulus
-                        ),
-                        modulus
-                    ),
-                    modulus
-                ),
-                // (1 - w_7) * ((w_2 - w_0) * w_8 - (w_3 - w_1))
-                mulmod(
-                    // 1 - w_7
-                    addmod(
-                        1,
-                        // -w_7
-                        sub(
-                            modulus,
-                            mload(mload(add(assignment_pointers, 0x100)))
-                        ),
-                        modulus
-                    ),
-                    // (w_2 - w_0) * w_8 - (w_3 - w_1)
-                    addmod(
-                        // (w_2 - w_0) * w_8
-                        mulmod(
-                            //w_2 - w_0
-                            addmod(
-                                // w_2
-                                mload(mload(add(assignment_pointers, 0x60))),
-                                // -w_0
-                                sub(
-                                    modulus,
-                                    mload(mload(add(assignment_pointers, 0x20)))
-                                ),
-                                modulus
-                            ),
-                            // w_8
-                            mload(mload(add(assignment_pointers, 0x120))),
-                            modulus
-                        ),
-                        // -(w_3 - w_1)
-                        sub(
-                            modulus,
-                            // w_3 - w_1
-                            addmod(
-                                // w_3
-                                mload(mload(add(assignment_pointers, 0x80))),
-                                // -w_1
-                                sub(
-                                    modulus,
-                                    mload(mload(add(assignment_pointers, 0x40)))
-                                ),
-                                modulus
+                            get_W_i_by_rotation_idx(
+                                0,
+                                0,
+                                mload(
+                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                )
                             )
                         ),
                         modulus
                     ),
                     modulus
-                ),
-                modulus
+                )
             )
             // gate_evaluation += constraint_eval * theta_acc
-            gate_evaluation := addmod(
-                gate_evaluation,
-                mulmod(constraint_eval, theta_acc, modulus),
-                modulus
+            mstore(
+                add(gate_params, GATE_EVAL_OFFSET),
+                addmod(
+                    mload(add(gate_params, GATE_EVAL_OFFSET)),
+                    mulmod(
+                        mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),
+                        theta_acc,
+                        modulus
+                    ),
+                    modulus
+                )
             )
             // theta_acc *= theta
-            theta_acc := mulmod(theta_acc, theta, modulus)
+            theta_acc := mulmod(
+                theta_acc,
+                mload(add(gate_params, THETA_OFFSET)),
+                modulus
+            )
 
             //==========================================================================================================
-            // 4. w_8 * w_8 - (w_0 + w_2 + w_4)
-            constraint_eval := addmod(
-                // w_8 * w_8
-                mulmod(
-                    // w_8
-                    mload(mload(add(assignment_pointers, 0x120))),
-                    // w_8
-                    mload(mload(add(assignment_pointers, 0x120))),
-                    modulus
-                ),
-                // -(w_0 + w_2 + w_4)
-                sub(
-                    modulus,
-                    // w_0 + w_2 + w_4
-                    addmod(
-                        // w_0 + w_2
+            // 2. (w_2 - w_0) * w_10 - (1 - w_7)
+            mstore(
+                add(gate_params, CONSTRAINT_EVAL_OFFSET),
+                addmod(
+                    // (w_2 - w_0) * w_10
+                    mulmod(
+                        // (w_2 - w_0)
                         addmod(
-                            // w_0
-                            mload(mload(add(assignment_pointers, 0x20))),
                             // w_2
-                            mload(mload(add(assignment_pointers, 0x60))),
+                            get_W_i_by_rotation_idx(
+                                2,
+                                0,
+                                mload(
+                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                )
+                            ),
+                            // -w_0
+                            sub(
+                                modulus,
+                                get_W_i_by_rotation_idx(
+                                    0,
+                                    0,
+                                    mload(
+                                        add(
+                                            gate_params,
+                                            WITNESS_EVALUATIONS_OFFSET
+                                        )
+                                    )
+                                )
+                            ),
                             modulus
                         ),
-                        // w_4
-                        mload(mload(add(assignment_pointers, 0xa0))),
+                        // w_10
+                        get_W_i_by_rotation_idx(
+                            10,
+                            0,
+                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                        ),
                         modulus
-                    )
-                ),
-                modulus
+                    ),
+                    // -(1 - w_7)
+                    sub(
+                        modulus,
+                        addmod(
+                            1,
+                            // -w_7
+                            sub(
+                                modulus,
+                                get_W_i_by_rotation_idx(
+                                    7,
+                                    0,
+                                    mload(
+                                        add(
+                                            gate_params,
+                                            WITNESS_EVALUATIONS_OFFSET
+                                        )
+                                    )
+                                )
+                            ),
+                            modulus
+                        )
+                    ),
+                    modulus
+                )
             )
             // gate_evaluation += constraint_eval * theta_acc
-            gate_evaluation := addmod(
-                gate_evaluation,
-                mulmod(constraint_eval, theta_acc, modulus),
-                modulus
+            mstore(
+                add(gate_params, GATE_EVAL_OFFSET),
+                addmod(
+                    mload(add(gate_params, GATE_EVAL_OFFSET)),
+                    mulmod(
+                        mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),
+                        theta_acc,
+                        modulus
+                    ),
+                    modulus
+                )
             )
             // theta_acc *= theta
-            theta_acc := mulmod(theta_acc, theta, modulus)
+            theta_acc := mulmod(
+                theta_acc,
+                mload(add(gate_params, THETA_OFFSET)),
+                modulus
+            )
 
             //==========================================================================================================
-            // 5. w_5 - (w_8 * (w_0 - w_4) - w_1)
-            constraint_eval := addmod(
-                // w_5
-                mload(mload(add(assignment_pointers, 0xc0))),
-                // -(w_8 * (w_0 - w_4) - w_1)
-                sub(
-                    modulus,
-                    // w_8 * (w_0 - w_4) - w_1
-                    addmod(
-                        // w_8 * (w_0 - w_4)
-                        mulmod(
-                            // w_8
-                            mload(mload(add(assignment_pointers, 0x120))),
-                            // w_0 - w_4
-                            addmod(
-                                // w_0
-                                mload(mload(add(assignment_pointers, 0x20))),
-                                // -w_4
-                                sub(
-                                    modulus,
-                                    mload(mload(add(assignment_pointers, 0xa0)))
+            // 3. w_7 * (2 * w_8 * w_1 - 3 * w_0 * w_0) + (1 - w_7) * ((w_2 - w_0) * w_8 - (w_3 - w_1))
+            mstore(
+                add(gate_params, CONSTRAINT_EVAL_OFFSET),
+                addmod(
+                    // w_7 * (2 * w_8 * w_1 - 3 * w_0 * w_0)
+                    mulmod(
+                        // w_7
+                        get_W_i_by_rotation_idx(
+                            7,
+                            0,
+                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                        ),
+                        // (2 * w_8 * w_1 - 3 * w_0 * w_0)
+                        addmod(
+                            // 2 * w_8 * w_1
+                            mulmod(
+                                2,
+                                // w_8 * w_1
+                                mulmod(
+                                    // w_8
+                                    get_W_i_by_rotation_idx(
+                                        8,
+                                        0,
+                                        mload(
+                                            add(
+                                                gate_params,
+                                                WITNESS_EVALUATIONS_OFFSET
+                                            )
+                                        )
+                                    ),
+                                    // w_1
+                                    get_W_i_by_rotation_idx(
+                                        1,
+                                        0,
+                                        mload(
+                                            add(
+                                                gate_params,
+                                                WITNESS_EVALUATIONS_OFFSET
+                                            )
+                                        )
+                                    ),
+                                    modulus
+                                ),
+                                modulus
+                            ),
+                            // 3 * w_0 * w_0
+                            mulmod(
+                                3,
+                                // w_0 * w_0
+                                mulmod(
+                                    // w_0
+                                    get_W_i_by_rotation_idx(
+                                        0,
+                                        0,
+                                        mload(
+                                            add(
+                                                gate_params,
+                                                WITNESS_EVALUATIONS_OFFSET
+                                            )
+                                        )
+                                    ),
+                                    // w_0
+                                    get_W_i_by_rotation_idx(
+                                        0,
+                                        0,
+                                        mload(
+                                            add(
+                                                gate_params,
+                                                WITNESS_EVALUATIONS_OFFSET
+                                            )
+                                        )
+                                    ),
+                                    modulus
                                 ),
                                 modulus
                             ),
                             modulus
                         ),
-                        // -w_1
-                        sub(
-                            modulus,
-                            mload(mload(add(assignment_pointers, 0x40)))
+                        modulus
+                    ),
+                    // (1 - w_7) * ((w_2 - w_0) * w_8 - (w_3 - w_1))
+                    mulmod(
+                        // 1 - w_7
+                        addmod(
+                            1,
+                            // -w_7
+                            sub(
+                                modulus,
+                                get_W_i_by_rotation_idx(
+                                    7,
+                                    0,
+                                    mload(
+                                        add(
+                                            gate_params,
+                                            WITNESS_EVALUATIONS_OFFSET
+                                        )
+                                    )
+                                )
+                            ),
+                            modulus
+                        ),
+                        // (w_2 - w_0) * w_8 - (w_3 - w_1)
+                        addmod(
+                            // (w_2 - w_0) * w_8
+                            mulmod(
+                                //w_2 - w_0
+                                addmod(
+                                    // w_2
+                                    get_W_i_by_rotation_idx(
+                                        2,
+                                        0,
+                                        mload(
+                                            add(
+                                                gate_params,
+                                                WITNESS_EVALUATIONS_OFFSET
+                                            )
+                                        )
+                                    ),
+                                    // -w_0
+                                    sub(
+                                        modulus,
+                                        get_W_i_by_rotation_idx(
+                                            0,
+                                            0,
+                                            mload(
+                                                add(
+                                                    gate_params,
+                                                    WITNESS_EVALUATIONS_OFFSET
+                                                )
+                                            )
+                                        )
+                                    ),
+                                    modulus
+                                ),
+                                // w_8
+                                get_W_i_by_rotation_idx(
+                                    8,
+                                    0,
+                                    mload(
+                                        add(
+                                            gate_params,
+                                            WITNESS_EVALUATIONS_OFFSET
+                                        )
+                                    )
+                                ),
+                                modulus
+                            ),
+                            // -(w_3 - w_1)
+                            sub(
+                                modulus,
+                                // w_3 - w_1
+                                addmod(
+                                    // w_3
+                                    get_W_i_by_rotation_idx(
+                                        3,
+                                        0,
+                                        mload(
+                                            add(
+                                                gate_params,
+                                                WITNESS_EVALUATIONS_OFFSET
+                                            )
+                                        )
+                                    ),
+                                    // -w_1
+                                    sub(
+                                        modulus,
+                                        get_W_i_by_rotation_idx(
+                                            1,
+                                            0,
+                                            mload(
+                                                add(
+                                                    gate_params,
+                                                    WITNESS_EVALUATIONS_OFFSET
+                                                )
+                                            )
+                                        )
+                                    ),
+                                    modulus
+                                )
+                            ),
+                            modulus
                         ),
                         modulus
-                    )
-                ),
-                modulus
+                    ),
+                    modulus
+                )
             )
             // gate_evaluation += constraint_eval * theta_acc
-            gate_evaluation := addmod(
-                gate_evaluation,
-                mulmod(constraint_eval, theta_acc, modulus),
-                modulus
+            mstore(
+                add(gate_params, GATE_EVAL_OFFSET),
+                addmod(
+                    mload(add(gate_params, GATE_EVAL_OFFSET)),
+                    mulmod(
+                        mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),
+                        theta_acc,
+                        modulus
+                    ),
+                    modulus
+                )
             )
             // theta_acc *= theta
-            theta_acc := mulmod(theta_acc, theta, modulus)
+            theta_acc := mulmod(
+                theta_acc,
+                mload(add(gate_params, THETA_OFFSET)),
+                modulus
+            )
+
+            //==========================================================================================================
+            // 4. w_8 * w_8 - (w_0 + w_2 + w_4)
+            mstore(
+                add(gate_params, CONSTRAINT_EVAL_OFFSET),
+                addmod(
+                    // w_8 * w_8
+                    mulmod(
+                        // w_8
+                        get_W_i_by_rotation_idx(
+                            8,
+                            0,
+                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                        ),
+                        // w_8
+                        get_W_i_by_rotation_idx(
+                            8,
+                            0,
+                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                        ),
+                        modulus
+                    ),
+                    // -(w_0 + w_2 + w_4)
+                    sub(
+                        modulus,
+                        // w_0 + w_2 + w_4
+                        addmod(
+                            // w_0 + w_2
+                            addmod(
+                                // w_0
+                                get_W_i_by_rotation_idx(
+                                    0,
+                                    0,
+                                    mload(
+                                        add(
+                                            gate_params,
+                                            WITNESS_EVALUATIONS_OFFSET
+                                        )
+                                    )
+                                ),
+                                // w_2
+                                get_W_i_by_rotation_idx(
+                                    2,
+                                    0,
+                                    mload(
+                                        add(
+                                            gate_params,
+                                            WITNESS_EVALUATIONS_OFFSET
+                                        )
+                                    )
+                                ),
+                                modulus
+                            ),
+                            // w_4
+                            get_W_i_by_rotation_idx(
+                                4,
+                                0,
+                                mload(
+                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                )
+                            ),
+                            modulus
+                        )
+                    ),
+                    modulus
+                )
+            )
+            // gate_evaluation += constraint_eval * theta_acc
+            mstore(
+                add(gate_params, GATE_EVAL_OFFSET),
+                addmod(
+                    mload(add(gate_params, GATE_EVAL_OFFSET)),
+                    mulmod(
+                        mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),
+                        theta_acc,
+                        modulus
+                    ),
+                    modulus
+                )
+            )
+            // theta_acc *= theta
+            theta_acc := mulmod(
+                theta_acc,
+                mload(add(gate_params, THETA_OFFSET)),
+                modulus
+            )
+
+            //==========================================================================================================
+            // 5. w_5 - (w_8 * (w_0 - w_4) - w_1)
+            mstore(
+                add(gate_params, CONSTRAINT_EVAL_OFFSET),
+                addmod(
+                    // w_5
+                    get_W_i_by_rotation_idx(
+                        5,
+                        0,
+                        mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                    ),
+                    // -(w_8 * (w_0 - w_4) - w_1)
+                    sub(
+                        modulus,
+                        // w_8 * (w_0 - w_4) - w_1
+                        addmod(
+                            // w_8 * (w_0 - w_4)
+                            mulmod(
+                                // w_8
+                                get_W_i_by_rotation_idx(
+                                    8,
+                                    0,
+                                    mload(
+                                        add(
+                                            gate_params,
+                                            WITNESS_EVALUATIONS_OFFSET
+                                        )
+                                    )
+                                ),
+                                // w_0 - w_4
+                                addmod(
+                                    // w_0
+                                    get_W_i_by_rotation_idx(
+                                        0,
+                                        0,
+                                        mload(
+                                            add(
+                                                gate_params,
+                                                WITNESS_EVALUATIONS_OFFSET
+                                            )
+                                        )
+                                    ),
+                                    // -w_4
+                                    sub(
+                                        modulus,
+                                        get_W_i_by_rotation_idx(
+                                            4,
+                                            0,
+                                            mload(
+                                                add(
+                                                    gate_params,
+                                                    WITNESS_EVALUATIONS_OFFSET
+                                                )
+                                            )
+                                        )
+                                    ),
+                                    modulus
+                                ),
+                                modulus
+                            ),
+                            // -w_1
+                            sub(
+                                modulus,
+                                get_W_i_by_rotation_idx(
+                                    1,
+                                    0,
+                                    mload(
+                                        add(
+                                            gate_params,
+                                            WITNESS_EVALUATIONS_OFFSET
+                                        )
+                                    )
+                                )
+                            ),
+                            modulus
+                        )
+                    ),
+                    modulus
+                )
+            )
+            // gate_evaluation += constraint_eval * theta_acc
+            mstore(
+                add(gate_params, GATE_EVAL_OFFSET),
+                addmod(
+                    mload(add(gate_params, GATE_EVAL_OFFSET)),
+                    mulmod(
+                        mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),
+                        theta_acc,
+                        modulus
+                    ),
+                    modulus
+                )
+            )
+            // theta_acc *= theta
+            theta_acc := mulmod(
+                theta_acc,
+                mload(add(gate_params, THETA_OFFSET)),
+                modulus
+            )
 
             //==========================================================================================================
             // 6. (w_3 - w_1) * (w_7 - w_6)
-            constraint_eval := mulmod(
-                // w_3 - w_1
-                addmod(
-                    // w_3
-                    mload(mload(add(assignment_pointers, 0x80))),
-                    // -w_1
-                    sub(modulus, mload(mload(add(assignment_pointers, 0x40)))),
-                    modulus
-                ),
-                // w_7 - w_6
-                addmod(
-                    // w_7
-                    mload(mload(add(assignment_pointers, 0x100))),
-                    // -w_6
-                    sub(modulus, mload(mload(add(assignment_pointers, 0xe0)))),
-                    modulus
-                ),
-                modulus
-            )
-            // gate_evaluation += constraint_eval * theta_acc
-            gate_evaluation := addmod(
-                gate_evaluation,
-                mulmod(constraint_eval, theta_acc, modulus),
-                modulus
-            )
-            // theta_acc *= theta
-            theta_acc := mulmod(theta_acc, theta, modulus)
-
-            //==========================================================================================================
-            // 7. (w_3 - w_1) * w_9 - w_6
-            constraint_eval := addmod(
-                // (w_3 - w_1) * w_9
+            mstore(
+                add(gate_params, CONSTRAINT_EVAL_OFFSET),
                 mulmod(
                     // w_3 - w_1
                     addmod(
                         // w_3
-                        mload(mload(add(assignment_pointers, 0x80))),
+                        get_W_i_by_rotation_idx(
+                            3,
+                            0,
+                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                        ),
                         // -w_1
                         sub(
                             modulus,
-                            mload(mload(add(assignment_pointers, 0x40)))
+                            get_W_i_by_rotation_idx(
+                                1,
+                                0,
+                                mload(
+                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                )
+                            )
                         ),
                         modulus
                     ),
-                    // w_9
-                    mload(mload(add(assignment_pointers, 0x140))),
+                    // w_7 - w_6
+                    addmod(
+                        // w_7
+                        get_W_i_by_rotation_idx(
+                            7,
+                            0,
+                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                        ),
+                        // -w_6
+                        sub(
+                            modulus,
+                            get_W_i_by_rotation_idx(
+                                6,
+                                0,
+                                mload(
+                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                )
+                            )
+                        ),
+                        modulus
+                    ),
                     modulus
-                ),
-                // -w_6
-                sub(modulus, mload(mload(add(assignment_pointers, 0xe0)))),
-                modulus
+                )
             )
             // gate_evaluation += constraint_eval * theta_acc
-            gate_evaluation := addmod(
-                gate_evaluation,
-                mulmod(constraint_eval, theta_acc, modulus),
-                modulus
+            mstore(
+                add(gate_params, GATE_EVAL_OFFSET),
+                addmod(
+                    mload(add(gate_params, GATE_EVAL_OFFSET)),
+                    mulmod(
+                        mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),
+                        theta_acc,
+                        modulus
+                    ),
+                    modulus
+                )
             )
             // theta_acc *= theta
-            theta_acc := mulmod(theta_acc, theta, modulus)
-            mstore(add(params, 0x20), theta_acc)
-
-            //==========================================================================================================
-            gate_evaluation := mulmod(
-                gate_evaluation,
-                mload(mload(add(mload(add(params, 0x60)), 0x20))),
+            theta_acc := mulmod(
+                theta_acc,
+                mload(add(gate_params, THETA_OFFSET)),
                 modulus
             )
+
+            //==========================================================================================================
+            // 7. (w_3 - w_1) * w_9 - w_6
+            mstore(
+                add(gate_params, CONSTRAINT_EVAL_OFFSET),
+                addmod(
+                    // (w_3 - w_1) * w_9
+                    mulmod(
+                        // w_3 - w_1
+                        addmod(
+                            // w_3
+                            get_W_i_by_rotation_idx(
+                                3,
+                                0,
+                                mload(
+                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                )
+                            ),
+                            // -w_1
+                            sub(
+                                modulus,
+                                get_W_i_by_rotation_idx(
+                                    1,
+                                    0,
+                                    mload(
+                                        add(
+                                            gate_params,
+                                            WITNESS_EVALUATIONS_OFFSET
+                                        )
+                                    )
+                                )
+                            ),
+                            modulus
+                        ),
+                        // w_9
+                        get_W_i_by_rotation_idx(
+                            9,
+                            0,
+                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                        ),
+                        modulus
+                    ),
+                    // -w_6
+                    sub(
+                        modulus,
+                        get_W_i_by_rotation_idx(
+                            6,
+                            0,
+                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                        )
+                    ),
+                    modulus
+                )
+            )
+            // gate_evaluation += constraint_eval * theta_acc
+            mstore(
+                add(gate_params, GATE_EVAL_OFFSET),
+                addmod(
+                    mload(add(gate_params, GATE_EVAL_OFFSET)),
+                    mulmod(
+                        mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),
+                        theta_acc,
+                        modulus
+                    ),
+                    modulus
+                )
+            )
+            // theta_acc *= theta
+            theta_acc := mulmod(
+                theta_acc,
+                mload(add(gate_params, THETA_OFFSET)),
+                modulus
+            )
+
+            //==========================================================================================================
+            mstore(
+                add(gate_params, GATE_EVAL_OFFSET),
+                mulmod(
+                    mload(add(gate_params, GATE_EVAL_OFFSET)),
+                    get_selector_i(
+                        0,
+                        mload(add(gate_params, SELECTOR_EVALUATIONS_OFFSET))
+                    ),
+                    modulus
+                )
+            )
+
+            gates_evaluation := addmod(
+                gates_evaluation,
+                mload(add(gate_params, GATE_EVAL_OFFSET)),
+                modulus
+            )
+            mstore(add(gate_params, GATE_EVAL_OFFSET), 0)
         }
     }
 }
