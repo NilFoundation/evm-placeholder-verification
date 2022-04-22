@@ -22,7 +22,6 @@ import "../basic_marshalling.sol";
 import "../cryptography/transcript.sol";
 import "../commitments/lpc_verifier.sol";
 import "../commitments/batched_lpc_verifier.sol";
-import "../logging.sol";
 
 library permutation_argument {
     uint256 constant ARGUMENT_SIZE = 3;
