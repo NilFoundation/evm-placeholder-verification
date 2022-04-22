@@ -60,23 +60,19 @@ contract TestFriVerifier {
     ) public {
         types.transcript_data memory tr_state;
         transcript.init_transcript(tr_state, init_transcript_blob);
-        (m_result, m_proof_size) = fri_verifier.parse_verify_proof_be(
+        (m_result, ) = fri_verifier.parse_verify_proof_be(
             raw_proof,
             0,
             tr_state,
             m_params
         );
         require(
-            raw_proof.length == m_proof_size,
-            "FRI proof length if incorrect!"
-        );
-        require(
             raw_proof.length == fri_verifier.skip_proof_be(raw_proof, 0),
-            "FRI proof length if incorrect!"
+            "FRI proof length is incorrect!"
         );
         require(
             raw_proof.length == fri_verifier.skip_proof_be_check(raw_proof, 0),
-            "FRI proof length if incorrect!"
+            "FRI proof length is incorrect!"
         );
         require(m_result, "FRI proof is not correct!");
     }

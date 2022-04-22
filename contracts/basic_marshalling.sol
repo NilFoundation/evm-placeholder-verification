@@ -156,6 +156,18 @@ library basic_marshalling {
         }
     }
 
+    function get_i_bytes32_from_vector(
+        bytes calldata blob,
+        uint256 offset,
+        uint256 i
+    ) internal pure returns (bytes32 result) {
+        assembly {
+            result := calldataload(
+                add(blob.offset, add(add(offset, LENGTH_OCTETS), mul(i, 0x20)))
+            )
+        }
+    }
+
     function get_i_uint256_ptr_from_vector(
         bytes calldata blob,
         uint256 offset,

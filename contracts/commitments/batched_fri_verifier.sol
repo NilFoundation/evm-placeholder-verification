@@ -61,7 +61,6 @@ library batched_fri_verifier {
     uint256 constant Y_POLYNOM_INDEX_J_OFFSET = 0x160;
 
     uint256 constant m = 2;
-    uint256 constant ROUND_PROOF_Y_OFFSET = 0x48;
 
     function skip_round_proof_be(bytes calldata blob, uint256 offset)
         internal
