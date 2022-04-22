@@ -18,7 +18,7 @@
 pragma solidity >=0.8.4;
 
 import "../../types.sol";
-import "../unified_addition.sol";
+import "../unified_addition_gen.sol";
 import "../../placeholder/proof_map_parser.sol";
 
 contract TestUnifiedAdditionComponent {
@@ -46,7 +46,7 @@ contract TestUnifiedAdditionComponent {
         gate_params.eval_proof_selector_offset = proof_map
             .eval_proof_selector_offset;
 
-        m_evaluation_result = unified_addition_component
+        m_evaluation_result = unified_addition_component_gen
             .evaluate_gates_be(blob, gate_params, columns_rotations);
     }
 }

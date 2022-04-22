@@ -20,6 +20,7 @@ pragma solidity >=0.8.4;
 import "../types.sol";
 import "../basic_marshalling.sol";
 import "../commitments/lpc_verifier.sol";
+import "../commitments/batched_lpc_verifier.sol";
 
 library unified_addition_component_gen {
     uint256 constant WITNESSES_N = 11;
@@ -41,21 +42,19 @@ library unified_addition_component_gen {
         // TODO: check witnesses number in proof
 
         gate_params.witness_evaluations = new uint256[][](WITNESSES_N);
-        gate_params.offset =
-            gate_params.eval_proof_witness_offset +
-            basic_marshalling.LENGTH_OCTETS;
         for (uint256 i = 0; i < WITNESSES_N; i++) {
             gate_params.witness_evaluations[i] = new uint256[](
                 columns_rotations[i].length
             );
             for (uint256 j = 0; j < columns_rotations[i].length; j++) {
-                gate_params.witness_evaluations[i][j] = lpc_verifier
-                    .get_z_i_from_proof_be(blob, gate_params.offset, j);
+                gate_params.witness_evaluations[i][j] = batched_lpc_verifier
+                    .get_z_i_j_from_proof_be(
+                        blob,
+                        gate_params.eval_proof_witness_offset,
+                        i,
+                        j
+                    );
             }
-            gate_params.offset = lpc_verifier.skip_proof_be(
-                blob,
-                gate_params.offset
-            );
         }
         gate_params.selector_evaluations = new uint256[](GATES_N);
         gate_params.offset =

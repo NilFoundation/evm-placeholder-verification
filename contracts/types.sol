@@ -282,6 +282,8 @@ library types {
         uint256 S_id_i;
         // 0x2c0
         uint256 S_sigma_i;
+        // 0x2e0
+        uint256[][] witness_evaluation_points;
         uint256 tmp1;
         uint256 tmp2;
         uint256 tmp3;
