@@ -21,6 +21,8 @@ import "../types.sol";
 import "../basic_marshalling.sol";
 import "../cryptography/transcript.sol";
 import "../commitments/lpc_verifier.sol";
+import "../commitments/batched_lpc_verifier.sol";
+import "../logging.sol";
 
 library permutation_argument {
     uint256 constant ARGUMENT_SIZE = 3;
@@ -38,12 +40,12 @@ library permutation_argument {
     uint256 constant S_SIGMA_I_OFFSET = 0x2c0;
 
     function eval_permutations_at_challenge(
-        types.lpc_params_type memory lpc_params,
+        types.batched_fri_params_type memory fri_params,
         types.placeholder_local_variables memory local_vars,
         uint256 column_polynomials_values_i
     ) internal pure {
         assembly {
-            let modulus := mload(lpc_params)
+            let modulus := mload(fri_params)
             mstore(
                 add(local_vars, G_OFFSET),
                 mulmod(
@@ -105,23 +107,22 @@ library permutation_argument {
         bytes calldata blob,
         types.transcript_data memory tr_state,
         types.placeholder_proof_map memory proof_map,
-        types.lpc_params_type memory lpc_params,
+        types.batched_fri_params_type memory fri_params,
         types.placeholder_common_data memory common_data,
         types.placeholder_local_variables memory local_vars
     ) internal pure returns (uint256[] memory F) {
         local_vars.beta = transcript.get_field_challenge(
             tr_state,
-            lpc_params.modulus
+            fri_params.modulus
         );
         local_vars.gamma = transcript.get_field_challenge(
             tr_state,
-            lpc_params.modulus
+            fri_params.modulus
         );
         transcript.update_transcript_b32_by_offset_calldata(
             tr_state,
             blob,
-            proof_map.v_perm_commitment_offset +
-                basic_marshalling.LENGTH_OCTETS
+            proof_map.v_perm_commitment_offset + basic_marshalling.LENGTH_OCTETS
         );
 
         local_vars.len = basic_marshalling.get_length(
@@ -136,18 +137,20 @@ library permutation_argument {
                 ),
             "id_permutation length is not equal to sigma_permutation length!"
         );
-        local_vars.tmp1 = basic_marshalling.get_length(
+        local_vars.tmp1 = batched_lpc_verifier.get_z_n_be(
             blob,
             proof_map.eval_proof_witness_offset
         );
         local_vars.g = 1;
         local_vars.h = 1;
-        local_vars.tmp2 =
-            proof_map.eval_proof_id_permutation_offset +
-            basic_marshalling.LENGTH_OCTETS;
-        local_vars.tmp3 =
-            proof_map.eval_proof_sigma_permutation_offset +
-            basic_marshalling.LENGTH_OCTETS;
+        local_vars.tmp2 = basic_marshalling.skip_length(
+            blob,
+            proof_map.eval_proof_id_permutation_offset
+        );
+        local_vars.tmp3 = basic_marshalling.skip_length(
+            blob,
+            proof_map.eval_proof_sigma_permutation_offset
+        );
         for (
             local_vars.idx1 = 0;
             local_vars.idx1 < local_vars.len;
@@ -173,34 +176,23 @@ library permutation_argument {
                 local_vars.tmp2,
                 0
             );
-            local_vars.tmp2 = lpc_verifier.skip_proof_be(
-                blob,
-                local_vars.tmp2
-            );
+            local_vars.tmp2 = lpc_verifier.skip_proof_be(blob, local_vars.tmp2);
 
             local_vars.S_sigma_i = lpc_verifier.get_z_i_from_proof_be(
                 blob,
                 local_vars.tmp3,
                 0
             );
-            local_vars.tmp3 = lpc_verifier.skip_proof_be(
-                blob,
-                local_vars.tmp3
-            );
+            local_vars.tmp3 = lpc_verifier.skip_proof_be(blob, local_vars.tmp3);
 
             if (local_vars.idx1 < local_vars.tmp1) {
-                local_vars.offset = lpc_verifier
-                    .skip_n_proofs_in_vector_be(
+                eval_permutations_at_challenge(
+                    fri_params,
+                    local_vars,
+                    batched_lpc_verifier.get_z_i_j_from_proof_be(
                         blob,
                         proof_map.eval_proof_witness_offset,
-                        local_vars.idx1
-                    );
-                eval_permutations_at_challenge(
-                    lpc_params,
-                    local_vars,
-                    lpc_verifier.get_z_i_from_proof_be(
-                        blob,
-                        local_vars.offset,
+                        local_vars.idx1,
                         local_vars.zero_index
                     )
                 );
@@ -212,14 +204,13 @@ library permutation_argument {
                         proof_map.eval_proof_public_input_offset
                     )
             ) {
-                local_vars.offset = lpc_verifier
-                    .skip_n_proofs_in_vector_be(
-                        blob,
-                        proof_map.eval_proof_public_input_offset,
-                        local_vars.idx1 - local_vars.tmp1
-                    );
+                local_vars.offset = lpc_verifier.skip_n_proofs_in_vector_be(
+                    blob,
+                    proof_map.eval_proof_public_input_offset,
+                    local_vars.idx1 - local_vars.tmp1
+                );
                 eval_permutations_at_challenge(
-                    lpc_params,
+                    fri_params,
                     local_vars,
                     lpc_verifier.get_z_i_from_proof_be(
                         blob,
@@ -235,14 +226,13 @@ library permutation_argument {
                         blob,
                         proof_map.eval_proof_public_input_offset
                     );
-                local_vars.offset = lpc_verifier
-                    .skip_n_proofs_in_vector_be(
-                        blob,
-                        proof_map.eval_proof_constant_offset,
-                        local_vars.offset
-                    );
+                local_vars.offset = lpc_verifier.skip_n_proofs_in_vector_be(
+                    blob,
+                    proof_map.eval_proof_constant_offset,
+                    local_vars.offset
+                );
                 eval_permutations_at_challenge(
-                    lpc_params,
+                    fri_params,
                     local_vars,
                     lpc_verifier.get_z_i_from_proof_be(
                         blob,
@@ -253,13 +243,12 @@ library permutation_argument {
             }
         }
 
-        local_vars.perm_polynomial_value = lpc_verifier
-            .get_z_i_from_proof_be(
-                blob,
-                proof_map.eval_proof_permutation_offset +
-                    basic_marshalling.LENGTH_OCTETS,
-                0
-            );
+        local_vars.perm_polynomial_value = lpc_verifier.get_z_i_from_proof_be(
+            blob,
+            proof_map.eval_proof_permutation_offset +
+                basic_marshalling.LENGTH_OCTETS,
+            0
+        );
         local_vars.perm_polynomial_shifted_value = lpc_verifier
             .get_z_i_from_proof_be(
                 blob,
@@ -289,7 +278,7 @@ library permutation_argument {
             proof_map.eval_proof_offset
         );
         assembly {
-            let modulus := mload(lpc_params)
+            let modulus := mload(fri_params)
 
             // F[0]
             switch mload(add(local_vars, CHALLENGE_OFFSET))

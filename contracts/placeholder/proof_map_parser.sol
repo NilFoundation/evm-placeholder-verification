@@ -19,6 +19,7 @@ pragma solidity >=0.8.4;
 
 import "../types.sol";
 import "../commitments/lpc_verifier.sol";
+import "../commitments/batched_lpc_verifier.sol";
 import "../basic_marshalling.sol";
 
 library placeholder_proof_map_parser {
@@ -33,15 +34,36 @@ library placeholder_proof_map_parser {
             uint256 proof_size
         )
     {
-        proof_map.v_perm_commitment_offset = offset;
-        // skip v_perm_commitment
-        proof_map.witness_commitments_offset = basic_marshalling
-            .skip_octet_vector_32_be_check(blob, offset);
-        // skip witness_commitments
-        proof_map.T_commitments_offset = basic_marshalling
-            .skip_vector_of_octet_vectors_32_be_check(
+        proof_map.witness_commitment_offset = offset;
+        // skip witness_commitment
+        proof_map.v_perm_commitment_offset = basic_marshalling
+            .skip_octet_vector_32_be_check(
                 blob,
-                proof_map.witness_commitments_offset
+                proof_map.witness_commitment_offset
+            );
+        // skip v_perm_commitment
+        proof_map.input_perm_commitment_offset = basic_marshalling
+            .skip_octet_vector_32_be_check(
+                blob,
+                proof_map.v_perm_commitment_offset
+            );
+        // skip input_perm_commitment
+        proof_map.value_perm_commitment_offset = basic_marshalling
+            .skip_octet_vector_32_be_check(
+                blob,
+                proof_map.input_perm_commitment_offset
+            );
+        // skip value_perm_commitment
+        proof_map.v_l_perm_commitment_offset = basic_marshalling
+            .skip_octet_vector_32_be_check(
+                blob,
+                proof_map.value_perm_commitment_offset
+            );
+        // skip v_l_perm_commitment
+        proof_map.T_commitments_offset = basic_marshalling
+            .skip_octet_vector_32_be_check(
+                blob,
+                proof_map.v_l_perm_commitment_offset
             );
         // skip T_commitments
         proof_map.eval_proof_offset = basic_marshalling
@@ -53,11 +75,8 @@ library placeholder_proof_map_parser {
         proof_map.eval_proof_witness_offset = basic_marshalling
             .skip_uint256_be_check(blob, proof_map.eval_proof_offset);
         // skip witness
-        proof_map.eval_proof_permutation_offset = lpc_verifier
-            .skip_vector_of_proofs_be_check(
-                blob,
-                proof_map.eval_proof_witness_offset
-            );
+        proof_map.eval_proof_permutation_offset = batched_lpc_verifier
+            .skip_proof_be_check(blob, proof_map.eval_proof_witness_offset);
         // skip permutation
         proof_map.eval_proof_quotient_offset = lpc_verifier
             .skip_vector_of_proofs_be_check(
@@ -65,10 +84,16 @@ library placeholder_proof_map_parser {
                 proof_map.eval_proof_permutation_offset
             );
         // skip quotient
-        proof_map.eval_proof_id_permutation_offset = lpc_verifier
+        proof_map.eval_proof_lookups_offset = lpc_verifier
             .skip_vector_of_proofs_be_check(
                 blob,
                 proof_map.eval_proof_quotient_offset
+            );
+        // skip lookups
+        proof_map.eval_proof_id_permutation_offset = lpc_verifier
+            .skip_vector_of_proofs_be_check(
+                blob,
+                proof_map.eval_proof_lookups_offset
             );
         // skip id_permutation
         proof_map.eval_proof_sigma_permutation_offset = lpc_verifier
