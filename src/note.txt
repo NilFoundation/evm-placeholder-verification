@@ -1,3 +1,0 @@
-python -m http.server
-// browserify verifyPlaceholderUnifiedAddition.js -t brfs --standalone myBundle >  bundle.js
-open 1.html on http://localhost:8000/
