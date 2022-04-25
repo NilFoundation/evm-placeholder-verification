@@ -342,7 +342,7 @@ library batched_fri_verifier {
         uint256 i,
         uint256 j,
         uint256 polynom_index,
-        types.batched_fri_params_type memory fri_params
+        types.fri_params_type memory fri_params
     ) internal view returns (uint256 result) {
         result = basic_marshalling.get_i_uint256_from_vector(
             blob,
@@ -356,13 +356,13 @@ library batched_fri_verifier {
                 U_evaluated_neg =
                     fri_params.modulus -
                     polynomial.evaluate(
-                        fri_params.U[polynom_index],
+                        fri_params.batched_U[polynom_index],
                         local_vars.x,
                         fri_params.modulus
                     );
                 V_evaluated_inv = field.inverse_static(
                     polynomial.evaluate(
-                        fri_params.V[polynom_index],
+                        fri_params.batched_V[polynom_index],
                         local_vars.x,
                         fri_params.modulus
                     ),
@@ -372,13 +372,13 @@ library batched_fri_verifier {
                 U_evaluated_neg =
                     fri_params.modulus -
                     polynomial.evaluate(
-                        fri_params.U[polynom_index],
+                        fri_params.batched_U[polynom_index],
                         fri_params.modulus - local_vars.x,
                         fri_params.modulus
                     );
                 V_evaluated_inv = field.inverse_static(
                     polynomial.evaluate(
-                        fri_params.V[polynom_index],
+                        fri_params.batched_V[polynom_index],
                         fri_params.modulus - local_vars.x,
                         fri_params.modulus
                     ),
@@ -414,7 +414,7 @@ library batched_fri_verifier {
     function parse_verify_round_proof_be(
         bytes calldata blob,
         uint256 round_proof_offset,
-        types.batched_fri_params_type memory fri_params,
+        types.fri_params_type memory fri_params,
         local_vars_type memory local_vars
     ) internal pure returns (bool result) {
         require(
@@ -486,7 +486,7 @@ library batched_fri_verifier {
         bytes calldata blob,
         uint256 offset,
         types.transcript_data memory tr_state,
-        types.batched_fri_params_type memory fri_params
+        types.fri_params_type memory fri_params
     ) internal view returns (bool result) {
         result = false;
 

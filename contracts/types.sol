@@ -155,38 +155,16 @@ library types {
         uint256 modulus;
         uint256 r;
         uint256 max_degree;
-
-        uint256[] D_omegas;
-        uint256[] q;
-
-        uint256[] U;
-        uint256[] V;
-    }
-
-    struct batched_fri_params_type {
-        uint256 modulus;
-        uint256 r;
-        uint256 max_degree;
         uint256 leaf_size;
         uint256 lambda;
 
         uint256[] D_omegas;
         uint256[] q;
 
-        uint256[][] U;
-        uint256[][] V;
-    }
-
-    struct lpc_params_type {
-        uint256 modulus;
-        // 0x20
-        uint256 lambda;
-        // 0x40
-        uint256 r;
-        // 0x60
-        uint256 m;
-        // 0x80
-        fri_params_type fri_params;
+        uint256[] U;
+        uint256[] V;
+        uint256[][] batched_U;
+        uint256[][] batched_V;
     }
 
     struct placeholder_proof_map {

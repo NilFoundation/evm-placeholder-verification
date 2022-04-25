@@ -27,8 +27,7 @@ contract TestPlaceholderVerifierUnifiedAddition {
         types.placeholder_proof_map proof_map;
         uint256 proof_size;
         types.transcript_data tr_state;
-        types.lpc_params_type lpc_params;
-        types.batched_fri_params_type fri_params;
+        types.fri_params_type fri_params;
         types.placeholder_common_data common_data;
     }
 
@@ -77,23 +76,11 @@ contract TestPlaceholderVerifierUnifiedAddition {
             vars.fri_params.q[i] = init_params[idx++];
         }
 
-        vars.lpc_params.modulus = vars.fri_params.modulus;
-        vars.lpc_params.lambda = vars.fri_params.lambda;
-        vars.lpc_params.r = vars.fri_params.r;
-        vars.lpc_params.m = 2;
-        vars.lpc_params.fri_params.D_omegas = vars.fri_params.D_omegas;
-        vars.lpc_params.fri_params.q = vars.fri_params.q;
-
-        vars.lpc_params.fri_params.modulus = vars.fri_params.modulus;
-        vars.lpc_params.fri_params.max_degree = vars.fri_params.max_degree;
-        vars.lpc_params.fri_params.r = vars.fri_params.r;
-
         require(
             placeholder_verifier_unified_addition_component.verify_proof_be(
                 blob,
                 vars.tr_state,
                 vars.proof_map,
-                vars.lpc_params,
                 vars.fri_params,
                 vars.common_data
             ),

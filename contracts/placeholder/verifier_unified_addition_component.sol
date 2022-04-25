@@ -47,7 +47,7 @@ library placeholder_verifier_unified_addition_component {
         bytes calldata blob,
         uint256 offset,
         types.transcript_data memory tr_state,
-        types.lpc_params_type memory lpc_params,
+        types.fri_params_type memory fri_params,
         types.placeholder_local_variables memory local_vars
     ) internal view returns (bool) {
         (local_vars.len, local_vars.offset) = basic_marshalling.get_skip_length(
@@ -60,7 +60,7 @@ library placeholder_verifier_unified_addition_component {
                 local_vars.offset,
                 local_vars.evaluation_points,
                 tr_state,
-                lpc_params
+                fri_params
             );
             if (!local_vars.status) {
                 return false;
@@ -77,8 +77,7 @@ library placeholder_verifier_unified_addition_component {
         bytes calldata blob,
         types.transcript_data memory tr_state,
         types.placeholder_proof_map memory proof_map,
-        types.lpc_params_type memory lpc_params,
-        types.batched_fri_params_type memory fri_params,
+        types.fri_params_type memory fri_params,
         types.placeholder_common_data memory common_data
     ) internal view returns (bool result) {
         types.placeholder_local_variables memory local_vars;
@@ -105,10 +104,10 @@ library placeholder_verifier_unified_addition_component {
 
         // 7. gate argument
         types.gate_argument_local_vars memory gate_params;
-        gate_params.modulus = lpc_params.modulus;
+        gate_params.modulus = fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(
             tr_state,
-            lpc_params.modulus
+            fri_params.modulus
         );
         gate_params.eval_proof_witness_offset = proof_map
             .eval_proof_witness_offset;
@@ -126,7 +125,7 @@ library placeholder_verifier_unified_addition_component {
         transcript.get_field_challenges(
             tr_state,
             local_vars.alphas,
-            lpc_params.modulus
+            fri_params.modulus
         );
 
         // 9. Evaluation proof check
@@ -147,7 +146,7 @@ library placeholder_verifier_unified_addition_component {
         }
         local_vars.challenge = transcript.get_field_challenge(
             tr_state,
-            lpc_params.modulus
+            fri_params.modulus
         );
         if (
             local_vars.challenge !=
@@ -172,13 +171,13 @@ library placeholder_verifier_unified_addition_component {
                 local_vars.e =
                     uint256(
                         common_data.columns_rotations[i][j] +
-                            int256(lpc_params.modulus)
+                            int256(fri_params.modulus)
                     ) %
-                    lpc_params.modulus;
+                    fri_params.modulus;
                 local_vars.e = field.expmod_static(
                     common_data.omega,
                     local_vars.e,
-                    lpc_params.modulus
+                    fri_params.modulus
                 );
                 assembly {
                     mstore(
@@ -190,7 +189,7 @@ library placeholder_verifier_unified_addition_component {
                             // e = omega^rotation_gates[j]
                             mload(add(local_vars, E_OFFSET)),
                             // modulus
-                            mload(lpc_params)
+                            mload(fri_params)
                         )
                     )
                 }
@@ -211,19 +210,19 @@ library placeholder_verifier_unified_addition_component {
         // permutation
         local_vars.evaluation_points = new uint256[](2);
         local_vars.evaluation_points[0] = local_vars.challenge;
-        // local_vars.evaluation_points_permutation[1] = (local_vars.challenge * common_data.omega) % lpc_params.modulus;
+        // local_vars.evaluation_points_permutation[1] = (local_vars.challenge * common_data.omega) % fri_params.modulus;
         assembly {
             mstore(
                 // local_vars.evaluation_points[1]
                 add(mload(add(local_vars, EVALUATION_POINTS_OFFSET)), 0x40),
-                // (local_vars.challenge * common_data.omega) % lpc_params.modulus
+                // (local_vars.challenge * common_data.omega) % fri_params.modulus
                 mulmod(
                     // local_vars.challenge
                     mload(add(local_vars, CHALLENGE_OFFSET)),
                     // common_data.omega
                     mload(add(common_data, OMEGA_OFFSET)),
                     // modulus
-                    mload(lpc_params)
+                    mload(fri_params)
                 )
             )
         }
@@ -232,7 +231,7 @@ library placeholder_verifier_unified_addition_component {
                 blob,
                 proof_map.eval_proof_permutation_offset,
                 tr_state,
-                lpc_params,
+                fri_params,
                 local_vars
             )
         ) {
@@ -247,7 +246,7 @@ library placeholder_verifier_unified_addition_component {
                 blob,
                 proof_map.eval_proof_quotient_offset,
                 tr_state,
-                lpc_params,
+                fri_params,
                 local_vars
             )
         ) {
@@ -260,7 +259,7 @@ library placeholder_verifier_unified_addition_component {
                 blob,
                 proof_map.eval_proof_id_permutation_offset,
                 tr_state,
-                lpc_params,
+                fri_params,
                 local_vars
             )
         ) {
@@ -273,7 +272,7 @@ library placeholder_verifier_unified_addition_component {
                 blob,
                 proof_map.eval_proof_sigma_permutation_offset,
                 tr_state,
-                lpc_params,
+                fri_params,
                 local_vars
             )
         ) {
@@ -286,7 +285,7 @@ library placeholder_verifier_unified_addition_component {
                 blob,
                 proof_map.eval_proof_public_input_offset,
                 tr_state,
-                lpc_params,
+                fri_params,
                 local_vars
             )
         ) {
@@ -299,7 +298,7 @@ library placeholder_verifier_unified_addition_component {
                 blob,
                 proof_map.eval_proof_constant_offset,
                 tr_state,
-                lpc_params,
+                fri_params,
                 local_vars
             )
         ) {
@@ -312,7 +311,7 @@ library placeholder_verifier_unified_addition_component {
                 blob,
                 proof_map.eval_proof_selector_offset,
                 tr_state,
-                lpc_params,
+                fri_params,
                 local_vars
             )
         ) {
@@ -325,7 +324,7 @@ library placeholder_verifier_unified_addition_component {
                 blob,
                 proof_map.eval_proof_special_selectors_offset,
                 tr_state,
-                lpc_params,
+                fri_params,
                 local_vars
             )
         ) {
@@ -371,10 +370,10 @@ library placeholder_verifier_unified_addition_component {
                                 )
                             ),
                             // modulus
-                            mload(lpc_params)
+                            mload(fri_params)
                         ),
                         // modulus
-                        mload(lpc_params)
+                        mload(fri_params)
                     )
                 )
             }
@@ -393,8 +392,8 @@ library placeholder_verifier_unified_addition_component {
             );
             local_vars.e = field.expmod_static(
                 local_vars.challenge,
-                (lpc_params.fri_params.max_degree + 1) * i,
-                lpc_params.modulus
+                (fri_params.max_degree + 1) * i,
+                fri_params.modulus
             );
             assembly {
                 mstore(
@@ -407,7 +406,7 @@ library placeholder_verifier_unified_addition_component {
                         // local_vars.e
                         mload(add(local_vars, E_OFFSET)),
                         // modulus
-                        mload(lpc_params)
+                        mload(fri_params)
                     )
                 )
                 mstore(
@@ -420,7 +419,7 @@ library placeholder_verifier_unified_addition_component {
                         // local_vars.zero_index
                         mload(add(local_vars, ZERO_INDEX_OFFSET)),
                         // modulus
-                        mload(lpc_params)
+                        mload(fri_params)
                     )
                 )
             }
@@ -433,7 +432,7 @@ library placeholder_verifier_unified_addition_component {
         local_vars.Z_at_challenge = field.expmod_static(
             local_vars.challenge,
             common_data.rows_amount,
-            lpc_params.modulus
+            fri_params.modulus
         );
         assembly {
             mstore(
@@ -444,9 +443,9 @@ library placeholder_verifier_unified_addition_component {
                     // Z_at_challenge
                     mload(add(local_vars, Z_AT_CHALLENGE_OFFSET)),
                     // -1
-                    sub(mload(lpc_params), 1),
+                    sub(mload(fri_params), 1),
                     // modulus
-                    mload(lpc_params)
+                    mload(fri_params)
                 )
             )
             mstore(
@@ -459,7 +458,7 @@ library placeholder_verifier_unified_addition_component {
                     // T_consolidated
                     mload(add(local_vars, T_CONSOLIDATED_OFFSET)),
                     // modulus
-                    mload(lpc_params)
+                    mload(fri_params)
                 )
             )
         }

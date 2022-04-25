@@ -29,7 +29,6 @@ library batched_lpc_verifier {
     }
 
     uint256 constant m = 2;
-    uint256 constant PROOF_Z_OFFSET = 0x28;
 
     function skip_proof_be(bytes calldata blob, uint256 offset)
         internal
@@ -112,7 +111,7 @@ library batched_lpc_verifier {
         // 0x28 (skip T_root)
         z_i_j = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(
             blob,
-            offset + PROOF_Z_OFFSET,
+            basic_marshalling.skip_octet_vector_32_be(blob, offset),
             i,
             j
         );
@@ -128,7 +127,7 @@ library batched_lpc_verifier {
         z_i_j_ptr = basic_marshalling
             .get_i_j_uint256_ptr_from_vector_of_vectors(
                 blob,
-                offset + PROOF_Z_OFFSET,
+                basic_marshalling.skip_octet_vector_32_be(blob, offset),
                 i,
                 j
             );
@@ -234,7 +233,7 @@ library batched_lpc_verifier {
         // 0x28 (skip T_root)
         z_i_j = basic_marshalling.get_i_j_uint256_from_vector_of_vectors_check(
             blob,
-            offset + PROOF_Z_OFFSET,
+            basic_marshalling.skip_octet_vector_32_be_check(blob, offset),
             i,
             j
         );
@@ -250,7 +249,7 @@ library batched_lpc_verifier {
         z_i_j_ptr = basic_marshalling
             .get_i_j_uint256_ptr_from_vector_of_vectors_check(
                 blob,
-                offset + PROOF_Z_OFFSET,
+                basic_marshalling.skip_octet_vector_32_be_check(blob, offset),
                 i,
                 j
             );
@@ -261,7 +260,7 @@ library batched_lpc_verifier {
         uint256 offset,
         uint256[][] memory evaluation_points,
         types.transcript_data memory tr_state,
-        types.batched_fri_params_type memory fri_params
+        types.fri_params_type memory fri_params
     ) internal view returns (bool result) {
         result = false;
 
@@ -279,7 +278,7 @@ library batched_lpc_verifier {
         );
 
         local_vars_type memory local_vars;
-        fri_params.U = new uint256[][](fri_params.leaf_size);
+        fri_params.batched_U = new uint256[][](fri_params.leaf_size);
         local_vars.z = new uint256[][](fri_params.leaf_size);
         for (
             uint256 polynom_index = 0;
@@ -309,14 +308,14 @@ library batched_lpc_verifier {
             polynom_index < fri_params.leaf_size;
             polynom_index++
         ) {
-            fri_params.U[polynom_index] = polynomial.interpolate(
+            fri_params.batched_U[polynom_index] = polynomial.interpolate(
                 evaluation_points[polynom_index],
                 local_vars.z[polynom_index],
                 fri_params.modulus
             );
         }
 
-        fri_params.V = new uint256[][](fri_params.leaf_size);
+        fri_params.batched_V = new uint256[][](fri_params.leaf_size);
         local_vars.z[0] = new uint256[](2);
         local_vars.z[0][1] = 1;
         for (
@@ -324,8 +323,8 @@ library batched_lpc_verifier {
             polynom_index < fri_params.leaf_size;
             polynom_index++
         ) {
-            fri_params.V[polynom_index] = new uint256[](1);
-            fri_params.V[polynom_index][0] = 1;
+            fri_params.batched_V[polynom_index] = new uint256[](1);
+            fri_params.batched_V[polynom_index][0] = 1;
             for (
                 uint256 point_index = 0;
                 point_index < evaluation_points[polynom_index].length;
@@ -334,8 +333,8 @@ library batched_lpc_verifier {
                 local_vars.z[0][0] =
                     fri_params.modulus -
                     evaluation_points[polynom_index][point_index];
-                fri_params.V[polynom_index] = polynomial.mul_poly(
-                    fri_params.V[polynom_index],
+                fri_params.batched_V[polynom_index] = polynomial.mul_poly(
+                    fri_params.batched_V[polynom_index],
                     local_vars.z[0],
                     fri_params.modulus
                 );

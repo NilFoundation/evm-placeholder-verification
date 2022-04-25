@@ -94,7 +94,7 @@ contract TestFriVerifier {
     ) public {
         types.transcript_data memory tr_state;
         transcript.init_transcript(tr_state, init_transcript_blob);
-        types.batched_fri_params_type memory fri_params;
+        types.fri_params_type memory fri_params;
         uint256 idx = 0;
         fri_params.modulus = init_params[idx++];
         fri_params.r = init_params[idx++];
@@ -108,8 +108,8 @@ contract TestFriVerifier {
         for (uint256 i = 0; i < fri_params.q.length; i++) {
             fri_params.q[i] = init_params[idx++];
         }
-        fri_params.U = U;
-        fri_params.V = V;
+        fri_params.batched_U = U;
+        fri_params.batched_V = V;
         require(
             raw_proof.length ==
                 batched_fri_verifier.skip_proof_be(raw_proof, 0),

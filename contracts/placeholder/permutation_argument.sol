@@ -39,7 +39,7 @@ library permutation_argument {
     uint256 constant S_SIGMA_I_OFFSET = 0x2c0;
 
     function eval_permutations_at_challenge(
-        types.batched_fri_params_type memory fri_params,
+        types.fri_params_type memory fri_params,
         types.placeholder_local_variables memory local_vars,
         uint256 column_polynomials_values_i
     ) internal pure {
@@ -106,7 +106,7 @@ library permutation_argument {
         bytes calldata blob,
         types.transcript_data memory tr_state,
         types.placeholder_proof_map memory proof_map,
-        types.batched_fri_params_type memory fri_params,
+        types.fri_params_type memory fri_params,
         types.placeholder_common_data memory common_data,
         types.placeholder_local_variables memory local_vars
     ) internal pure returns (uint256[] memory F) {
