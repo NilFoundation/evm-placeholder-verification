@@ -263,9 +263,8 @@ library lpc_verifier {
         uint256[] memory evaluation_points,
         types.transcript_data memory tr_state,
         types.fri_params_type memory fri_params
-    ) internal view returns (bool result, uint256 todo_delete) {
+    ) internal view returns (bool result) {
         result = false;
-        todo_delete = skip_proof_be(blob, offset) - offset;
 
         require(
             fri_params.lambda == get_fri_proof_n_be(blob, offset),
@@ -296,14 +295,14 @@ library lpc_verifier {
         }
         offset = skip_to_first_fri_proof_be(blob, offset);
         for (uint256 round_id = 0; round_id < fri_params.lambda; round_id++) {
-            (local_vars.status, ) = fri_verifier.parse_verify_proof_be(
+            local_vars.status = fri_verifier.parse_verify_proof_be(
                 blob,
                 offset,
                 tr_state,
                 fri_params
             );
             if (!local_vars.status) {
-                return (false, 0);
+                return false;
             }
             offset = fri_verifier.skip_proof_be(blob, offset);
         }

@@ -64,7 +64,7 @@ contract TestLpcVerifier {
             raw_proof.length == lpc_verifier.skip_proof_be_check(raw_proof, 0),
             "lpc proof length is not correct!"
         );
-        (bool status, ) = lpc_verifier.parse_verify_proof_be(
+        bool status = lpc_verifier.parse_verify_proof_be(
             raw_proof,
             0,
             evaluation_points,

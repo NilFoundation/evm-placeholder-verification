@@ -55,7 +55,7 @@ library placeholder_verifier_unified_addition_component {
             offset
         );
         for (uint256 i = 0; i < local_vars.len; i++) {
-            (local_vars.status, ) = lpc_verifier.parse_verify_proof_be(
+            local_vars.status = lpc_verifier.parse_verify_proof_be(
                 blob,
                 local_vars.offset,
                 local_vars.evaluation_points,

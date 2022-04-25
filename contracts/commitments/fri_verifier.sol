@@ -400,7 +400,7 @@ library fri_verifier {
         uint256 offset,
         types.transcript_data memory tr_state,
         types.fri_params_type memory fri_params
-    ) internal view returns (bool result, uint256 todo_delete) {
+    ) internal view returns (bool result) {
         result = false;
 
         require(
@@ -437,7 +437,7 @@ library fri_verifier {
                 local_vars
             );
             if (!local_vars.status) {
-                return (false, 0);
+                return false;
             }
 
             for (uint256 j = 0; j < m; j++) {
@@ -467,7 +467,7 @@ library fri_verifier {
                     fri_params.modulus
                 ) != local_vars.colinear_value
             ) {
-                return (false, 0);
+                return false;
             }
 
             if (i < fri_params.r - 1) {
@@ -492,7 +492,7 @@ library fri_verifier {
                         bytes32(local_vars.colinear_value)
                     );
                 if (!local_vars.status) {
-                    return (false, 0);
+                    return false;
                 }
 
                 local_vars.round_proof_offset = skip_round_proof_be(
@@ -509,7 +509,7 @@ library fri_verifier {
             uint256(2)**(field.log2(fri_params.max_degree + 1) - fri_params.r) -
                 1
         ) {
-            return (false, 0);
+            return false;
         }
 
         if (
@@ -521,11 +521,9 @@ library fri_verifier {
                 fri_params.modulus
             ) != local_vars.colinear_value
         ) {
-            return (false, 0);
+            return false;
         }
 
         result = true;
-        // TODO: delete
-        todo_delete = skip_proof_be(blob, offset) - offset;
     }
 }
