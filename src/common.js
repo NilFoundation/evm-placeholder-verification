@@ -49,7 +49,11 @@ function sendProof(contractAddress, encodeABI, mnemonic) {
         return web3.eth.sendSignedTransaction(signed.rawTransaction).then(res => {
            return new VerifyResult(true, res.gasUsed)
         }).catch(res => {
-           return new VerifyResult(false, res.receipt.gasUsed);
+            try {
+                return new VerifyResult(false, res.receipt.gasUsed);
+            } catch (e) {
+                return new VerifyResult(false, 0);
+            }
         });
     });
 }
