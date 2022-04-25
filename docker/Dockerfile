@@ -21,5 +21,6 @@ RUN cd boost_1_76_0 && ./bootstrap.sh && ./b2 && ./b2 install
 RUN mkdir /home/app/build
 RUN cd /home/app/build && cmake ..
 RUN cd /home/app/build && cmake --build . -t state-proof-gen state-mock
+RUN cd /home/app/build && cmake --build . -t blueprint_plonk_variable_base_endo_scalar_mul_test blueprint_plonk_variable_base_scalar_mul_test blueprint_plonk_unified_addition_test
 
 ENTRYPOINT ["/home/app/share/state-proof-verify/docker/entrypoint.sh"]
