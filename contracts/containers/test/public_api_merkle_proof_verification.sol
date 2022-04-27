@@ -22,17 +22,12 @@ import "../merkle_verifier.sol";
 
 contract TestMerkleProofVerifier {
     bool m_result;
-    uint256 m_proof_size;
 
     function verify(bytes calldata raw_proof, bytes32 verified_data) public {
-        (m_result, m_proof_size) = merkle_verifier.parse_verify_merkle_proof_be(
+        m_result = merkle_verifier.parse_verify_merkle_proof_be(
             raw_proof,
             0,
             verified_data
-        );
-        require(
-            raw_proof.length == m_proof_size,
-            "Merkle proof length if incorrect!"
         );
         require(
             raw_proof.length ==
@@ -50,11 +45,10 @@ contract TestMerkleProofVerifier {
     function verify_bytes(bytes calldata raw_proof, bytes memory verified_data)
         public
     {
-        (m_result, m_proof_size) = merkle_verifier
-            .parse_verify_merkle_proof_bytes_be(raw_proof, 0, verified_data);
-        require(
-            raw_proof.length == m_proof_size,
-            "Merkle proof length if incorrect!"
+        m_result = merkle_verifier.parse_verify_merkle_proof_bytes_be(
+            raw_proof,
+            0,
+            verified_data
         );
         require(
             raw_proof.length ==

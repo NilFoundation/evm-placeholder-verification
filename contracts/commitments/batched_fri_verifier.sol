@@ -467,7 +467,7 @@ library batched_fri_verifier {
                         local_vars.round_proof_y_offset
                     );
             }
-            (local_vars.status, ) = merkle_verifier
+            local_vars.status = merkle_verifier
                 .parse_verify_merkle_proof_bytes_be(
                     blob,
                     local_vars.round_proof_p_offset,
@@ -592,7 +592,7 @@ library batched_fri_verifier {
                     blob,
                     local_vars.T_root_offset
                 );
-                (local_vars.status, ) = merkle_verifier
+                local_vars.status = merkle_verifier
                     .parse_verify_merkle_proof_bytes_be(
                         blob,
                         skip_to_round_proof_colinear_path_be(

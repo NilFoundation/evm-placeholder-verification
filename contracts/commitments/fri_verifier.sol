@@ -380,12 +380,11 @@ library fri_verifier {
                     local_vars.round_proof_y_offset,
                     j
                 );
-            (local_vars.status, ) = merkle_verifier
-                .parse_verify_merkle_proof_be(
-                    blob,
-                    local_vars.round_proof_p_offset,
-                    local_vars.verified_data
-                );
+            local_vars.status = merkle_verifier.parse_verify_merkle_proof_be(
+                blob,
+                local_vars.round_proof_p_offset,
+                local_vars.verified_data
+            );
             if (!local_vars.status) {
                 return false;
             }
@@ -482,7 +481,7 @@ library fri_verifier {
                     local_vars.T_root_offset
                 );
 
-                (local_vars.status, ) = merkle_verifier
+                local_vars.status = merkle_verifier
                     .parse_verify_merkle_proof_be(
                         blob,
                         skip_to_round_proof_colinear_path_be(
