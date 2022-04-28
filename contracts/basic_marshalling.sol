@@ -17,6 +17,93 @@
 //---------------------------------------------------------------------------//
 pragma solidity >=0.8.4;
 
+//================================================================================================================
+// Bounds non-checking macros
+//================================================================================================================
+
+// #def get_length(_blob, _offset, _var) assembly {\
+//     _var := shr(\
+//         $(LENGTH_RESTORING_SHIFT),\
+//         calldataload(add(_blob.offset, _offset))\
+//     )\
+// }
+
+// #def skip_length(_blob, _offset, _result_offset) _result_offset = _offset + $(LENGTH_OCTETS);
+
+// #def get_skip_length(_blob, _offset, _var, _result_offset) $(get_length(_blob, _offset, _var))\
+// $(skip_length(_blob, _offset, _result_offset))
+
+// #def mstore_length(_blob, _offset, _var_memory, var_offset) assembly {\
+//     mstore(\
+//         add(_var_memory, var_offset),\
+//         shr(\
+//             $(LENGTH_RESTORING_SHIFT),\
+//             calldataload(add(_blob.offset, _offset))\
+//         )\
+//     )\
+// }
+
+// #def skip_uint256_be(_blob, _offset, _result_offset) _result_offset = _offset + 32;
+
+// #def skip_octet_vector_32_be(_blob, _offset, _result_offset) _result_offset = _offset + $$(LENGTH_OCTETS + 32);
+
+// #def skip_vector_of_uint256_be(_blob, _offset, _result_offset) assembly {\
+//     _result_offset := add(\
+//         add(\
+//             _offset,\
+//             mul(\
+//                 0x20,\
+//                 shr(\
+//                     $(LENGTH_RESTORING_SHIFT),\
+//                     calldataload(add(blob.offset, _offset))\
+//                 )\
+//             )\
+//         ),\
+//         $(LENGTH_OCTETS)\
+//     )\
+// }
+
+//================================================================================================================
+// Bounds checking macros
+//================================================================================================================
+
+// #def get_length_check(_blob, _offset, _var) require(_offset + $(LENGTH_OCTETS) <= _blob.length);\
+// assembly {\
+//     _var := shr(\
+//         $(LENGTH_RESTORING_SHIFT),\
+//         calldataload(add(_blob.offset, _offset))\
+//     )\
+// }
+
+// #def skip_length_check(_blob, _offset, _result_offset) _result_offset = _offset + $(LENGTH_OCTETS);\
+// require(_result_offset <= _blob.length);
+
+// #def get_skip_length_check(_blob, _offset, _var, _result_offset) $(get_length_check(_blob, _offset, _var))\
+// $(skip_length(_blob, _offset, _result_offset))
+
+// #def skip_uint256_be_check(_blob, _offset, _result_offset) _result_offset = _offset + 32;\
+// require(_result_offset <= _blob.length);
+
+// #def skip_octet_vector_32_be_check(_blob, _offset, _result_offset) _result_offset = _offset + $$(LENGTH_OCTETS + 32);\
+// require(_result_offset <= _blob.length);
+
+// #def skip_vector_of_uint256_be_check(_blob, _offset, _result_offset) assembly {\
+//     _result_offset := add(\
+//         add(\
+//             _offset,\
+//             mul(\
+//                 0x20,\
+//                 shr(\
+//                     $(LENGTH_RESTORING_SHIFT),\
+//                     calldataload(add(blob.offset, _offset))\
+//                 )\
+//             )\
+//         ),\
+//         $(LENGTH_OCTETS)\
+//     )\
+// }\
+// require(_result_offset <= _blob.length);
+
 library basic_marshalling {
     uint256 constant LENGTH_OCTETS = 8;
     // 256 - 8 * LENGTH_OCTETS
@@ -77,17 +164,19 @@ library basic_marshalling {
         pure
         returns (uint256 result_offset)
     {
-        result_offset = offset + LENGTH_OCTETS;
         assembly {
             result_offset := add(
-                result_offset,
-                mul(
-                    0x20,
-                    shr(
-                        LENGTH_RESTORING_SHIFT,
-                        calldataload(add(blob.offset, offset))
+                add(
+                    offset,
+                    mul(
+                        0x20,
+                        shr(
+                            LENGTH_RESTORING_SHIFT,
+                            calldataload(add(blob.offset, offset))
+                        )
                     )
-                )
+                ),
+                LENGTH_OCTETS
             )
         }
     }
@@ -269,18 +358,19 @@ library basic_marshalling {
         bytes calldata blob,
         uint256 offset
     ) internal pure returns (uint256 result_offset) {
-        result_offset = offset + LENGTH_OCTETS;
-        require(result_offset <= blob.length);
         assembly {
             result_offset := add(
-                result_offset,
-                mul(
-                    0x20,
-                    shr(
-                        LENGTH_RESTORING_SHIFT,
-                        calldataload(add(blob.offset, offset))
+                add(
+                    offset,
+                    mul(
+                        0x20,
+                        shr(
+                            LENGTH_RESTORING_SHIFT,
+                            calldataload(add(blob.offset, offset))
+                        )
                     )
-                )
+                ),
+                LENGTH_OCTETS
             )
         }
         require(result_offset <= blob.length);
