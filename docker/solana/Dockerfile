@@ -2,7 +2,7 @@ FROM ghcr.io/nilfoundation/evm-solana-verification/environment
 
 WORKDIR /home
 
-COPY .. /home/app
+COPY . /home/app
 # Disable Prompt During Packages Installation
 RUN mkdir /home/app/build
 RUN cd /home/app/build && cmake -DCMAKE_BUILD_TYPE=Release ..
