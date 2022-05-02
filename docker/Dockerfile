@@ -19,7 +19,7 @@ RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_
 RUN tar --bzip2 -xf boost_1_76_0.tar.bz2
 RUN cd boost_1_76_0 && ./bootstrap.sh && ./b2 && ./b2 install
 RUN mkdir /home/app/build
-RUN cd /home/app/build && cmake ..
+RUN cd /home/app/build && cmake -DCMAKE_BUILD_TYPE=Release ..
 RUN cd /home/app/build && cmake --build . -t state-proof-gen state-mock
 RUN cd /home/app/build && cmake --build . -t blueprint_plonk_variable_base_endo_scalar_mul_test blueprint_plonk_variable_base_scalar_mul_test blueprint_plonk_unified_addition_test
 
