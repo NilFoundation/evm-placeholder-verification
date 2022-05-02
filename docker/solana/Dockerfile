@@ -10,4 +10,4 @@ RUN cd /home/app/build && cmake --build --parallel $(nproc) . -t state-proof-gen
 RUN cd /home/app/build && cmake --build --parallel $(nproc) . -t blueprint_plonk_variable_base_endo_scalar_mul_test \
     blueprint_plonk_variable_base_scalar_mul_test blueprint_plonk_unified_addition_test
 
-ENTRYPOINT ["/home/app/share/state-proof-verify/docker/entrypoint.sh"]
+ENTRYPOINT ["/home/app/share/state-proof-verify/docker/solana/entrypoint.sh"]
