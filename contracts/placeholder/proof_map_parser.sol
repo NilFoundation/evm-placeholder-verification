@@ -65,9 +65,9 @@ library placeholder_proof_map_parser {
                 blob,
                 proof_map.v_l_perm_commitment_offset
             );
-        // skip T_commitments
+        // skip T_commitment
         proof_map.eval_proof_offset = basic_marshalling
-            .skip_vector_of_octet_vectors_32_be_check(
+            .skip_octet_vector_32_be_check(
                 blob,
                 proof_map.T_commitments_offset
             );
@@ -78,17 +78,13 @@ library placeholder_proof_map_parser {
         proof_map.eval_proof_permutation_offset = batched_lpc_verifier
             .skip_proof_be_check(blob, proof_map.eval_proof_witness_offset);
         // skip permutation
-        proof_map.eval_proof_quotient_offset = lpc_verifier
-            .skip_vector_of_proofs_be_check(
-                blob,
-                proof_map.eval_proof_permutation_offset
-            );
+        proof_map.eval_proof_quotient_offset = lpc_verifier.skip_proof_be_check(
+            blob,
+            proof_map.eval_proof_permutation_offset
+        );
         // skip quotient
-        proof_map.eval_proof_lookups_offset = lpc_verifier
-            .skip_vector_of_proofs_be_check(
-                blob,
-                proof_map.eval_proof_quotient_offset
-            );
+        proof_map.eval_proof_lookups_offset = batched_lpc_verifier
+            .skip_proof_be_check(blob, proof_map.eval_proof_quotient_offset);
         // skip lookups
         proof_map.eval_proof_id_permutation_offset = lpc_verifier
             .skip_vector_of_proofs_be_check(
@@ -96,38 +92,32 @@ library placeholder_proof_map_parser {
                 proof_map.eval_proof_lookups_offset
             );
         // skip id_permutation
-        proof_map.eval_proof_sigma_permutation_offset = lpc_verifier
-            .skip_vector_of_proofs_be_check(
+        proof_map.eval_proof_sigma_permutation_offset = batched_lpc_verifier
+            .skip_proof_be_check(
                 blob,
                 proof_map.eval_proof_id_permutation_offset
             );
         // skip sigma_permutation
-        proof_map.eval_proof_public_input_offset = lpc_verifier
-            .skip_vector_of_proofs_be_check(
+        proof_map.eval_proof_public_input_offset = batched_lpc_verifier
+            .skip_proof_be_check(
                 blob,
                 proof_map.eval_proof_sigma_permutation_offset
             );
         // skip public_input
-        proof_map.eval_proof_constant_offset = lpc_verifier
-            .skip_vector_of_proofs_be_check(
+        proof_map.eval_proof_constant_offset = batched_lpc_verifier
+            .skip_proof_be_check(
                 blob,
                 proof_map.eval_proof_public_input_offset
             );
         // skip constant
-        proof_map.eval_proof_selector_offset = lpc_verifier
-            .skip_vector_of_proofs_be_check(
-                blob,
-                proof_map.eval_proof_constant_offset
-            );
+        proof_map.eval_proof_selector_offset = batched_lpc_verifier
+            .skip_proof_be_check(blob, proof_map.eval_proof_constant_offset);
         // skip selector
-        proof_map.eval_proof_special_selectors_offset = lpc_verifier
-            .skip_vector_of_proofs_be_check(
-                blob,
-                proof_map.eval_proof_selector_offset
-            );
+        proof_map.eval_proof_special_selectors_offset = batched_lpc_verifier
+            .skip_proof_be_check(blob, proof_map.eval_proof_selector_offset);
         // skip special_selectors
         proof_size =
-            lpc_verifier.skip_vector_of_proofs_be_check(
+            batched_lpc_verifier.skip_proof_be_check(
                 blob,
                 proof_map.eval_proof_special_selectors_offset
             ) -

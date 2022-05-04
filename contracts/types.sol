@@ -140,23 +140,12 @@ library types {
         bytes32 current_challenge;
     }
 
-    struct path_element {
-        uint256 position;
-        bytes32 hash;
-    }
-
-    struct merkle_proof {
-        uint256 li;
-        bytes32 root;
-        path_element[] path;
-    }
-
     struct fri_params_type {
         uint256 modulus;
         uint256 r;
         uint256 max_degree;
-        uint256 leaf_size;
         uint256 lambda;
+        uint256 leaf_size;
 
         uint256[] D_omegas;
         uint256[] q;
@@ -201,10 +190,6 @@ library types {
         uint256 eval_proof_selector_offset;
         // 0x200
         uint256 eval_proof_special_selectors_offset;
-    }
-
-    struct placeholder_column_rotations {
-        int256[] rotations;
     }
 
     struct placeholder_common_data {

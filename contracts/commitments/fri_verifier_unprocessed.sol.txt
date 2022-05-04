@@ -26,34 +26,35 @@ import "../basic_marshalling.sol";
 
 library fri_verifier {
     struct local_vars_type {
+        // 0x0
         uint256 colinear_value;
         // 0x20
-        uint256 T_root_offset;
-        // 0x40
-        uint256 final_poly_offset;
-        // 0x60
         uint256 x;
-        // 0x80
+        // 0x40
         uint256 x_next;
-        // 0xa0
+        // 0x60
         uint256 alpha;
-        // 0xc0
-        uint256[] y;
-        // 0xe0
-        bytes32 verified_data;
-        // 0x100
+        // 0x80
         uint256 round_proof_offset;
-        // 0x120
+        // 0xa0
         uint256 round_proof_y_offset;
-        // 0x140
+        // 0xc0
         uint256 round_proof_p_offset;
-        // 0x160
+        // 0xe0
         uint256 len;
+        // 0x100
         bool status;
     }
 
-    uint256 constant VERIFIED_DATA_OFFSET = 0xe0;
-    uint256 constant LEN_OFFSET = 0x160;
+    uint256 constant COLINEAR_VALUE_OFFSET =  0x0;
+    uint256 constant X_OFFSET =  0x20;
+    uint256 constant X_NEXT_OFFSET =  0x40;
+    uint256 constant ALPHA_OFFSET =  0x60;
+    uint256 constant ROUND_PROOF_OFFSET_OFFSET =  0x80;
+    uint256 constant ROUND_PROOF_Y_OFFSET_OFFSET =  0xa0;
+    uint256 constant ROUND_PROOF_P_OFFSET_OFFSET =  0xc0;
+    uint256 constant LEN_OFFSET =  0xe0;
+    uint256 constant STATUS_OFFSET =  0x100;
 
     uint256 constant m = 2;
 
@@ -328,16 +329,14 @@ library fri_verifier {
             round_proof_offset
         );
         for (uint256 j = 0; j < m; j++) {
-            local_vars.verified_data = basic_marshalling
-                .get_i_bytes32_from_vector(
-                    blob,
-                    local_vars.round_proof_y_offset,
-                    j
-                );
             local_vars.status = merkle_verifier.parse_verify_merkle_proof_be(
                 blob,
                 local_vars.round_proof_p_offset,
-                local_vars.verified_data
+                basic_marshalling.get_i_bytes32_from_vector(
+                    blob,
+                    local_vars.round_proof_y_offset,
+                    j
+                )
             );
             if (!local_vars.status) {
                 return false;
@@ -362,7 +361,6 @@ library fri_verifier {
         );
 
         local_vars_type memory local_vars;
-        local_vars.y = new uint256[](m);
         local_vars.x = field.expmod_static(
             fri_params.D_omegas[0],
             transcript.get_integral_challenge_be(tr_state, 8),
@@ -393,15 +391,6 @@ library fri_verifier {
                 return false;
             }
 
-            for (uint256 j = 0; j < m; j++) {
-                local_vars.y[j] = eval_y_from_blob(
-                    blob,
-                    local_vars,
-                    i,
-                    j,
-                    fri_params
-                );
-            }
             // get colinear_value
             local_vars.colinear_value = basic_marshalling.get_uint256_be(
                 blob,
@@ -414,8 +403,8 @@ library fri_verifier {
                         field.double(local_vars.x, fri_params.modulus),
                         fri_params.modulus
                     ),
-                    local_vars.y[0],
-                    local_vars.y[1],
+                    eval_y_from_blob(blob, local_vars, i, 0, fri_params),
+                    eval_y_from_blob(blob, local_vars, i, 1, fri_params),
                     local_vars.alpha,
                     fri_params.modulus
                 ) != local_vars.colinear_value
@@ -425,14 +414,13 @@ library fri_verifier {
 
             if (i < fri_params.r - 1) {
                 // get round_proofs[i + 1].T_root
-                local_vars.T_root_offset = skip_to_round_proof_T_root_be(
-                    blob,
-                    skip_round_proof_be(blob, local_vars.round_proof_offset)
-                );
                 transcript.update_transcript_b32_by_offset_calldata(
                     tr_state,
                     blob,
-                    local_vars.T_root_offset
+                    skip_to_round_proof_T_root_be(
+                        blob,
+                        skip_round_proof_be(blob, local_vars.round_proof_offset)
+                    )
                 );
 
                 local_vars.status = merkle_verifier

@@ -124,13 +124,13 @@ library permutation_argument {
             proof_map.v_perm_commitment_offset + basic_marshalling.LENGTH_OCTETS
         );
 
-        local_vars.len = basic_marshalling.get_length(
+        local_vars.len = batched_lpc_verifier.get_z_n_be(
             blob,
             proof_map.eval_proof_id_permutation_offset
         );
         require(
             local_vars.len ==
-                basic_marshalling.get_length(
+                batched_lpc_verifier.get_z_n_be(
                     blob,
                     proof_map.eval_proof_sigma_permutation_offset
                 ),
@@ -140,16 +140,16 @@ library permutation_argument {
             blob,
             proof_map.eval_proof_witness_offset
         );
+        local_vars.tmp2 = batched_lpc_verifier.get_z_n_be(
+            blob,
+            proof_map.eval_proof_public_input_offset
+        );
+        local_vars.tmp3 = batched_lpc_verifier.get_z_n_be(
+            blob,
+            proof_map.eval_proof_constant_offset
+        );
         local_vars.g = 1;
         local_vars.h = 1;
-        local_vars.tmp2 = basic_marshalling.skip_length(
-            blob,
-            proof_map.eval_proof_id_permutation_offset
-        );
-        local_vars.tmp3 = basic_marshalling.skip_length(
-            blob,
-            proof_map.eval_proof_sigma_permutation_offset
-        );
         for (
             local_vars.idx1 = 0;
             local_vars.idx1 < local_vars.len;
@@ -170,19 +170,18 @@ library permutation_argument {
                 }
             }
 
-            local_vars.S_id_i = lpc_verifier.get_z_i_from_proof_be(
+            local_vars.S_id_i = batched_lpc_verifier.get_z_i_j_from_proof_be(
                 blob,
-                local_vars.tmp2,
+                proof_map.eval_proof_id_permutation_offset,
+                local_vars.idx1,
                 0
             );
-            local_vars.tmp2 = lpc_verifier.skip_proof_be(blob, local_vars.tmp2);
-
-            local_vars.S_sigma_i = lpc_verifier.get_z_i_from_proof_be(
+            local_vars.S_sigma_i = batched_lpc_verifier.get_z_i_j_from_proof_be(
                 blob,
-                local_vars.tmp3,
+                proof_map.eval_proof_sigma_permutation_offset,
+                local_vars.idx1,
                 0
             );
-            local_vars.tmp3 = lpc_verifier.skip_proof_be(blob, local_vars.tmp3);
 
             if (local_vars.idx1 < local_vars.tmp1) {
                 eval_permutations_at_challenge(
@@ -195,47 +194,28 @@ library permutation_argument {
                         local_vars.zero_index
                     )
                 );
-            } else if (
-                local_vars.idx1 <
-                local_vars.tmp1 +
-                    basic_marshalling.get_length(
-                        blob,
-                        proof_map.eval_proof_public_input_offset
-                    )
-            ) {
-                local_vars.offset = lpc_verifier.skip_n_proofs_in_vector_be(
-                    blob,
-                    proof_map.eval_proof_public_input_offset,
-                    local_vars.idx1 - local_vars.tmp1
-                );
+            } else if (local_vars.idx1 < local_vars.tmp1 + local_vars.tmp2) {
                 eval_permutations_at_challenge(
                     fri_params,
                     local_vars,
-                    lpc_verifier.get_z_i_from_proof_be(
+                    batched_lpc_verifier.get_z_i_j_from_proof_be(
                         blob,
-                        local_vars.offset,
+                        proof_map.eval_proof_public_input_offset,
+                        local_vars.idx1 - local_vars.tmp1,
                         local_vars.zero_index
                     )
                 );
-            } else {
-                local_vars.offset =
-                    local_vars.idx1 -
-                    local_vars.tmp1 -
-                    basic_marshalling.get_length(
-                        blob,
-                        proof_map.eval_proof_public_input_offset
-                    );
-                local_vars.offset = lpc_verifier.skip_n_proofs_in_vector_be(
-                    blob,
-                    proof_map.eval_proof_constant_offset,
-                    local_vars.offset
-                );
+            } else if (
+                local_vars.idx1 <
+                local_vars.tmp1 + local_vars.tmp2 + local_vars.tmp3
+            ) {
                 eval_permutations_at_challenge(
                     fri_params,
                     local_vars,
-                    lpc_verifier.get_z_i_from_proof_be(
+                    batched_lpc_verifier.get_z_i_j_from_proof_be(
                         blob,
-                        local_vars.offset,
+                        proof_map.eval_proof_constant_offset,
+                        local_vars.idx1 - local_vars.tmp1 - local_vars.tmp2,
                         local_vars.zero_index
                     )
                 );
@@ -244,30 +224,25 @@ library permutation_argument {
 
         local_vars.perm_polynomial_value = lpc_verifier.get_z_i_from_proof_be(
             blob,
-            proof_map.eval_proof_permutation_offset +
-                basic_marshalling.LENGTH_OCTETS,
+            proof_map.eval_proof_permutation_offset,
             0
         );
         local_vars.perm_polynomial_shifted_value = lpc_verifier
             .get_z_i_from_proof_be(
                 blob,
-                proof_map.eval_proof_permutation_offset +
-                    basic_marshalling.LENGTH_OCTETS,
+                proof_map.eval_proof_permutation_offset,
                 1
             );
-        local_vars.q_last_eval = lpc_verifier.get_z_i_from_proof_be(
+        local_vars.q_last_eval = batched_lpc_verifier.get_z_i_j_from_proof_be(
             blob,
-            proof_map.eval_proof_special_selectors_offset +
-                basic_marshalling.LENGTH_OCTETS,
+            proof_map.eval_proof_special_selectors_offset,
+            0,
             0
         );
-        local_vars.q_blind_eval = lpc_verifier.get_z_i_from_proof_be(
+        local_vars.q_blind_eval = batched_lpc_verifier.get_z_i_j_from_proof_be(
             blob,
-            lpc_verifier.skip_proof_be(
-                blob,
-                proof_map.eval_proof_special_selectors_offset +
-                    basic_marshalling.LENGTH_OCTETS
-            ),
+            proof_map.eval_proof_special_selectors_offset,
+            1,
             0
         );
 

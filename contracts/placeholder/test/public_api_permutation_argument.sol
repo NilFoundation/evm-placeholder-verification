@@ -38,13 +38,12 @@ contract TestPermutationArgument {
         // 0) modulus
         // 1) r
         // 2) max_degree
-        // 3) leaf_size
-        // 4) lambda
-        // 5) rows_amount
-        // 6) omega
-        // 7) D_omegas_size
+        // 3) lambda
+        // 4) rows_amount
+        // 5) omega
+        // 6) D_omegas_size
         //  [..., D_omegas_i, ...]
-        // 8 + D_omegas_size) q_size
+        // 7 + D_omegas_size) q_size
         //  [..., q_i, ...]
         uint256[] calldata init_params,
         int256[][] calldata columns_rotations
@@ -70,7 +69,6 @@ contract TestPermutationArgument {
         vars.fri_params.modulus = init_params[idx++];
         vars.fri_params.r = init_params[idx++];
         vars.fri_params.max_degree = init_params[idx++];
-        vars.fri_params.leaf_size = init_params[idx++];
         vars.fri_params.lambda = init_params[idx++];
 
         vars.common_data.rows_amount = init_params[idx++];
