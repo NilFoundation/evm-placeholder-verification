@@ -57,16 +57,14 @@ library unified_addition_component_gen {
             }
         }
         gate_params.selector_evaluations = new uint256[](GATES_N);
-        gate_params.offset =
-            gate_params.eval_proof_selector_offset +
-            basic_marshalling.LENGTH_OCTETS;
         for (uint256 i = 0; i < GATES_N; i++) {
-            gate_params.selector_evaluations[i] = lpc_verifier
-                .get_z_i_from_proof_be(blob, gate_params.offset, 0);
-            gate_params.offset = lpc_verifier.skip_proof_be(
-                blob,
-                gate_params.offset
-            );
+            gate_params.selector_evaluations[i] = batched_lpc_verifier
+                .get_z_i_j_from_proof_be(
+                    blob,
+                    gate_params.eval_proof_selector_offset,
+                    i,
+                    0
+                );
         }
 
         assembly {
