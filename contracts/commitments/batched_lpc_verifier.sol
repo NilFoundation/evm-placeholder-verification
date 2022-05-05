@@ -357,4 +357,95 @@ library batched_lpc_verifier {
         }
         result = true;
     }
+
+    function parse_verify_proof_be(
+        bytes calldata blob,
+        uint256 offset,
+        uint256[] memory evaluation_points,
+        types.transcript_data memory tr_state,
+        types.fri_params_type memory fri_params
+    ) internal view returns (bool result) {
+        result = false;
+
+        // require(
+        //     fri_params.leaf_size == get_z_n_be(blob, offset),
+        //     "Z array size is not equal to leaf_size!"
+        // );
+        fri_params.leaf_size = get_z_n_be(blob, offset);
+        // require(
+        //     fri_params.leaf_size == evaluation_points.length,
+        //     "Array of evaluation points size is not equal to leaf_size!"
+        // );
+        require(
+            fri_params.lambda == get_fri_proof_n_be(blob, offset),
+            "Fri proofs number is not equal to lambda!"
+        );
+
+        local_vars_type memory local_vars;
+        fri_params.batched_U = new uint256[][](fri_params.leaf_size);
+        local_vars.z = new uint256[][](fri_params.leaf_size);
+        for (
+            uint256 polynom_index = 0;
+            polynom_index < fri_params.leaf_size;
+            polynom_index++
+        ) {
+            local_vars.z[polynom_index] = new uint256[](
+                evaluation_points.length
+            );
+            for (
+                uint256 point_index = 0;
+                point_index < evaluation_points.length;
+                point_index++
+            ) {
+                local_vars.z[polynom_index][
+                    point_index
+                ] = get_z_i_j_from_proof_be(
+                    blob,
+                    offset,
+                    polynom_index,
+                    point_index
+                );
+            }
+        }
+        for (
+            uint256 polynom_index = 0;
+            polynom_index < fri_params.leaf_size;
+            polynom_index++
+        ) {
+            fri_params.batched_U[polynom_index] = polynomial.interpolate(
+                evaluation_points,
+                local_vars.z[polynom_index],
+                fri_params.modulus
+            );
+        }
+
+        fri_params.V = new uint256[](1);
+        fri_params.V[0] = 1;
+        uint256[] memory a_poly = new uint256[](2);
+        a_poly[1] = 1;
+        for (uint256 j = 0; j < evaluation_points.length; j++) {
+            a_poly[0] = fri_params.modulus - evaluation_points[j];
+            fri_params.V = polynomial.mul_poly(
+                fri_params.V,
+                a_poly,
+                fri_params.modulus
+            );
+        }
+
+        offset = skip_to_first_fri_proof_be(blob, offset);
+        for (uint256 round_id = 0; round_id < fri_params.lambda; round_id++) {
+            local_vars.status = batched_fri_verifier
+                .parse_verify_proof_single_V_be(
+                    blob,
+                    offset,
+                    tr_state,
+                    fri_params
+                );
+            if (!local_vars.status) {
+                return false;
+            }
+            offset = batched_fri_verifier.skip_proof_be(blob, offset);
+        }
+        result = true;
+    }
 }
