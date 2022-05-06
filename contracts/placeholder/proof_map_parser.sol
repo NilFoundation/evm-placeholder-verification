@@ -123,4 +123,13 @@ library placeholder_proof_map_parser {
             ) -
             offset;
     }
+
+    function init(
+        types.fri_params_type memory fri_params,
+        uint256 batched_fri_verified_data_max_size
+    ) internal pure {
+        fri_params.batched_fri_verified_data = new bytes(
+            batched_fri_verified_data_max_size
+        );
+    }
 }

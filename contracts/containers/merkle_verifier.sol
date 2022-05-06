@@ -262,4 +262,24 @@ library merkle_verifier {
             keccak256(verified_data)
         );
     }
+
+    function parse_verify_merkle_proof_bytes_be(
+        bytes calldata blob,
+        uint256 offset,
+        bytes memory verified_data_bytes,
+        uint256 verified_data_bytes_len
+    ) internal pure returns (bool result) {
+        bytes32 verified_data;
+        assembly {
+            verified_data := keccak256(
+                add(verified_data_bytes, 0x20),
+                verified_data_bytes_len
+            )
+        }
+        result = parse_verify_merkle_proof_not_pre_hash_be(
+            blob,
+            offset,
+            verified_data
+        );
+    }
 }

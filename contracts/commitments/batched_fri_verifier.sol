@@ -40,16 +40,18 @@ library batched_fri_verifier {
         uint256 alpha;
         // round proof verification variables
         // 0xc0
-        bytes verified_data;
-        // 0xc1
         uint256 round_proof_offset;
-        // 0xe1
+        // 0xe0
         uint256 round_proof_y_offset;
-        // 0x101
+        // 0x100
         uint256 round_proof_p_offset;
-        // 0x121
+        // 0x120
         uint256 y_polynom_index_j;
-        // 0x141
+        // 0x140
+        uint256 y_j_offset;
+        // 0x160
+        uint256 y_j_size;
+        // 0x180
         bool status;
     }
 
@@ -59,12 +61,15 @@ library batched_fri_verifier {
     uint256 constant X_OFFSET = 0x60;
     uint256 constant X_NEXT_OFFSET = 0x80;
     uint256 constant ALPHA_OFFSET = 0xa0;
-    uint256 constant VERIFIED_DATA_OFFSET = 0xc0;
-    uint256 constant ROUND_PROOF_OFFSET_OFFSET = 0xc1;
-    uint256 constant ROUND_PROOF_Y_OFFSET_OFFSET = 0xe1;
-    uint256 constant ROUND_PROOF_P_OFFSET_OFFSET = 0x101;
-    uint256 constant Y_POLYNOM_INDEX_J_OFFSET = 0x121;
-    uint256 constant STATUS_OFFSET = 0x141;
+    uint256 constant ROUND_PROOF_OFFSET_OFFSET = 0xc0;
+    uint256 constant ROUND_PROOF_Y_OFFSET_OFFSET = 0xe0;
+    uint256 constant ROUND_PROOF_P_OFFSET_OFFSET = 0x100;
+    uint256 constant Y_POLYNOM_INDEX_J_OFFSET = 0x120;
+    uint256 constant Y_J_OFFSET_OFFSET = 0x140;
+    uint256 constant Y_J_SIZE_OFFSET = 0x160;
+    uint256 constant STATUS_OFFSET = 0x180;
+
+    uint256 constant BATCHED_FRI_VERIFIED_DATA_OFFSET = 0x160;
 
     uint256 constant m = 2;
 
@@ -347,13 +352,12 @@ library batched_fri_verifier {
         local_vars_type memory local_vars,
         uint256 i,
         uint256 j,
-        // uint256 polynom_index,
         types.fri_params_type memory fri_params
     ) internal view returns (uint256 result) {
         result = basic_marshalling.get_i_uint256_from_vector(
             blob,
-            local_vars.round_proof_y_offset,
-            j
+            local_vars.y_j_offset,
+            local_vars.y_polynom_index_j
         );
         if (i == 0) {
             uint256 U_evaluated_neg;
@@ -399,6 +403,10 @@ library batched_fri_verifier {
                 )
             }
         }
+        local_vars.y_j_offset = basic_marshalling.skip_vector_of_uint256_be(
+            blob,
+            local_vars.y_j_offset
+        );
     }
 
     function eval_y_from_blob_single_V(
@@ -406,13 +414,12 @@ library batched_fri_verifier {
         local_vars_type memory local_vars,
         uint256 i,
         uint256 j,
-        // uint256 polynom_index,
         types.fri_params_type memory fri_params
     ) internal view returns (uint256 result) {
         result = basic_marshalling.get_i_uint256_from_vector(
             blob,
-            local_vars.round_proof_y_offset,
-            j
+            local_vars.y_j_offset,
+            local_vars.y_polynom_index_j
         );
         if (i == 0) {
             uint256 U_evaluated_neg;
@@ -458,17 +465,26 @@ library batched_fri_verifier {
                 )
             }
         }
+        local_vars.y_j_offset = basic_marshalling.skip_vector_of_uint256_be(
+            blob,
+            local_vars.y_j_offset
+        );
     }
 
     function store_i_chunk_in_verified_data(
-        local_vars_type memory local_vars,
+        types.fri_params_type memory fri_params,
         uint256 chunk,
         uint256 i
     ) internal pure {
         assembly {
             mstore(
                 add(
-                    add(mload(add(local_vars, VERIFIED_DATA_OFFSET)), 0x20),
+                    add(
+                        mload(
+                            add(fri_params, BATCHED_FRI_VERIFIED_DATA_OFFSET)
+                        ),
+                        0x20
+                    ),
                     mul(0x20, i)
                 ),
                 chunk
@@ -483,11 +499,6 @@ library batched_fri_verifier {
         local_vars_type memory local_vars
     ) internal pure returns (bool result) {
         require(
-            fri_params.leaf_size ==
-                get_round_proof_y_n_be(blob, round_proof_offset),
-            "Round proof y size is not equal to params.leaf_size!"
-        );
-        require(
             m == get_round_proof_p_n_be(blob, round_proof_offset),
             "Round proof p size is not equal to m!"
         );
@@ -496,53 +507,57 @@ library batched_fri_verifier {
             blob,
             round_proof_offset
         );
+        local_vars.round_proof_y_offset = skip_to_first_round_proof_y_be(
+            blob,
+            round_proof_offset
+        );
 
         for (uint256 j = 0; j < m; j++) {
-            local_vars.round_proof_y_offset = skip_to_first_round_proof_y_be(
+            local_vars.y_j_offset = basic_marshalling.skip_length(
                 blob,
-                round_proof_offset
+                local_vars.round_proof_y_offset
             );
-            for (
-                uint256 polynom_index = 0;
-                polynom_index < fri_params.leaf_size;
-                polynom_index++
-            ) {
-                require(
-                    m ==
-                        basic_marshalling.get_length(
-                            blob,
-                            local_vars.round_proof_y_offset
+            local_vars.y_j_size =
+                0x20 *
+                basic_marshalling.get_length(
+                    blob,
+                    local_vars.round_proof_y_offset
+                );
+            require(
+                fri_params.batched_fri_verified_data.length >=
+                    local_vars.y_j_size,
+                "Not enough memory to hold data for merkle proof verification!"
+            );
+            assembly {
+                calldatacopy(
+                    add(
+                        mload(
+                            add(fri_params, BATCHED_FRI_VERIFIED_DATA_OFFSET)
                         ),
-                    "y[polynom_index] size is not equal to m!"
-                );
-                local_vars.y_polynom_index_j = basic_marshalling
-                    .get_i_uint256_from_vector(
-                        blob,
-                        local_vars.round_proof_y_offset,
-                        j
-                    );
-                store_i_chunk_in_verified_data(
-                    local_vars,
-                    local_vars.y_polynom_index_j,
-                    polynom_index
-                );
-                local_vars.round_proof_y_offset = basic_marshalling
-                    .skip_vector_of_uint256_be(
-                        blob,
-                        local_vars.round_proof_y_offset
-                    );
+                        0x20
+                    ),
+                    add(blob.offset, mload(add(local_vars, Y_J_OFFSET_OFFSET))),
+                    mload(add(local_vars, Y_J_SIZE_OFFSET))
+                )
             }
+
             local_vars.status = merkle_verifier
                 .parse_verify_merkle_proof_bytes_be(
                     blob,
                     local_vars.round_proof_p_offset,
-                    local_vars.verified_data
+                    fri_params.batched_fri_verified_data,
+                    local_vars.y_j_size
                 );
             if (!local_vars.status) {
                 return false;
             }
             local_vars.round_proof_p_offset = merkle_verifier
                 .skip_merkle_proof_be(blob, local_vars.round_proof_p_offset);
+            local_vars.round_proof_y_offset = basic_marshalling
+                .skip_vector_of_uint256_be(
+                    blob,
+                    local_vars.round_proof_y_offset
+                );
         }
         result = true;
     }
@@ -578,7 +593,6 @@ library batched_fri_verifier {
             blob,
             offset
         );
-        local_vars.verified_data = new bytes(0x20 * fri_params.leaf_size);
 
         for (uint256 i = 0; i < fri_params.r; i++) {
             local_vars.alpha = transcript.get_field_challenge(
@@ -601,10 +615,6 @@ library batched_fri_verifier {
                 return false;
             }
 
-            local_vars.round_proof_y_offset = skip_to_first_round_proof_y_be(
-                blob,
-                local_vars.round_proof_offset
-            );
             for (
                 local_vars.y_polynom_index_j = 0;
                 local_vars.y_polynom_index_j < fri_params.leaf_size;
@@ -617,9 +627,13 @@ library batched_fri_verifier {
                         local_vars.y_polynom_index_j
                     );
                 store_i_chunk_in_verified_data(
-                    local_vars,
+                    fri_params,
                     local_vars.colinear_value,
                     local_vars.y_polynom_index_j
+                );
+                local_vars.y_j_offset = skip_to_first_round_proof_y_be(
+                    blob,
+                    local_vars.round_proof_offset
                 );
                 if (
                     polynomial.interpolate_evaluate_by_2_points_neg_x(
@@ -636,11 +650,6 @@ library batched_fri_verifier {
                 ) {
                     return false;
                 }
-                local_vars.round_proof_y_offset = basic_marshalling
-                    .skip_vector_of_uint256_be(
-                        blob,
-                        local_vars.round_proof_y_offset
-                    );
             }
 
             if (i < fri_params.r - 1) {
@@ -661,7 +670,8 @@ library batched_fri_verifier {
                             blob,
                             local_vars.round_proof_offset
                         ),
-                        local_vars.verified_data
+                        fri_params.batched_fri_verified_data,
+                        0x20 * fri_params.leaf_size
                     );
                 if (!local_vars.status) {
                     return false;
@@ -753,7 +763,6 @@ library batched_fri_verifier {
             blob,
             offset
         );
-        local_vars.verified_data = new bytes(0x20 * fri_params.leaf_size);
 
         for (uint256 i = 0; i < fri_params.r; i++) {
             local_vars.alpha = transcript.get_field_challenge(
@@ -776,10 +785,6 @@ library batched_fri_verifier {
                 return false;
             }
 
-            local_vars.round_proof_y_offset = skip_to_first_round_proof_y_be(
-                blob,
-                local_vars.round_proof_offset
-            );
             for (
                 local_vars.y_polynom_index_j = 0;
                 local_vars.y_polynom_index_j < fri_params.leaf_size;
@@ -792,9 +797,13 @@ library batched_fri_verifier {
                         local_vars.y_polynom_index_j
                     );
                 store_i_chunk_in_verified_data(
-                    local_vars,
+                    fri_params,
                     local_vars.colinear_value,
                     local_vars.y_polynom_index_j
+                );
+                local_vars.y_j_offset = skip_to_first_round_proof_y_be(
+                    blob,
+                    local_vars.round_proof_offset
                 );
                 if (
                     polynomial.interpolate_evaluate_by_2_points_neg_x(
@@ -823,11 +832,6 @@ library batched_fri_verifier {
                 ) {
                     return false;
                 }
-                local_vars.round_proof_y_offset = basic_marshalling
-                    .skip_vector_of_uint256_be(
-                        blob,
-                        local_vars.round_proof_y_offset
-                    );
             }
 
             if (i < fri_params.r - 1) {
@@ -848,7 +852,8 @@ library batched_fri_verifier {
                             blob,
                             local_vars.round_proof_offset
                         ),
-                        local_vars.verified_data
+                        fri_params.batched_fri_verified_data,
+                        0x20 * fri_params.leaf_size
                     );
                 if (!local_vars.status) {
                     return false;

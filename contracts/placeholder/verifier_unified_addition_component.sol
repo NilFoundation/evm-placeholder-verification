@@ -344,18 +344,18 @@ library placeholder_verifier_unified_addition_component {
         }
 
         local_vars.T_consolidated = 0;
-        // (local_vars.len, local_vars.offset) = basic_marshalling.get_skip_length(
-        //     blob,
-        //     proof_map.eval_proof_quotient_offset
-        // );
-        local_vars.len = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_quotient_offset);
+        local_vars.len = batched_lpc_verifier.get_z_n_be(
+            blob,
+            proof_map.eval_proof_quotient_offset
+        );
         for (uint256 i = 0; i < local_vars.len; i++) {
-            local_vars.zero_index = batched_lpc_verifier.get_z_i_j_from_proof_be(
-                blob,
-                proof_map.eval_proof_quotient_offset,
-                i,
-                0
-            );
+            local_vars.zero_index = batched_lpc_verifier
+                .get_z_i_j_from_proof_be(
+                    blob,
+                    proof_map.eval_proof_quotient_offset,
+                    i,
+                    0
+                );
             local_vars.e = field.expmod_static(
                 local_vars.challenge,
                 (fri_params.max_degree + 1) * i,
@@ -389,10 +389,6 @@ library placeholder_verifier_unified_addition_component {
                     )
                 )
             }
-            // local_vars.offset = lpc_verifier.skip_proof_be(
-            //     blob,
-            //     local_vars.offset
-            // );
         }
 
         local_vars.Z_at_challenge = field.expmod_static(

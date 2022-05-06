@@ -39,9 +39,10 @@ contract TestPlaceholderVerifierUnifiedAddition {
         // 3) lambda
         // 4) rows_amount
         // 5) omega
-        // 6) D_omegas_size
+        // 6) batched_fri_verified_data_max_size
+        // 7) D_omegas_size
         //  [..., D_omegas_i, ...]
-        // 7 + D_omegas_size) q_size
+        // 8 + D_omegas_size) q_size
         //  [..., q_i, ...]
         uint256[] calldata init_params,
         int256[][] calldata columns_rotations
@@ -63,6 +64,8 @@ contract TestPlaceholderVerifierUnifiedAddition {
 
         vars.common_data.rows_amount = init_params[idx++];
         vars.common_data.omega = init_params[idx++];
+        placeholder_proof_map_parser.init(vars.fri_params, init_params[idx++]);
+
         vars.common_data.columns_rotations = columns_rotations;
 
         vars.fri_params.D_omegas = new uint256[](init_params[idx++]);
