@@ -70,6 +70,52 @@ pragma solidity >=0.8.4;
 // }
 
 //================================================================================================================
+// Bounds non-checking macros with temporary variables
+//================================================================================================================
+
+// #def get_length_tmp(_blob, _offset, _var) uint256 _tmp_var;\
+// uint256 _tmp_offset = _offset;\
+// assembly {\
+//     _tmp_var := shr(\
+//         $(LENGTH_RESTORING_SHIFT),\
+//         calldataload(add(_blob.offset, _tmp_offset))\
+//     )\
+// }\
+// _var = _tmp_var;
+
+// #def get_skip_length_tmp(_blob, _offset, _var, _result_offset) $(get_length_tmp(_blob, _offset, _var))\
+// $(skip_length(_blob, _offset, _result_offset))
+
+// #def skip_vector_of_uint256_tmp_be(_blob, _offset, _result_offset) uint256 _tmp_result_offset;\
+// uint256 _tmp_offset = _offset;\
+// assembly {\
+//     _tmp_result_offset := add(\
+//         add(\
+//             _tmp_offset,\
+//             mul(\
+//                 0x20,\
+//                 shr(\
+//                     $(LENGTH_RESTORING_SHIFT),\
+//                     calldataload(add(blob.offset, _tmp_offset))\
+//                 )\
+//             )\
+//         ),\
+//         $(LENGTH_OCTETS)\
+//     )\
+// }\
+// _result_offset = _tmp_result_offset;
+
+// #def get_i_uint256_from_vector_tmp(_blob, _offset, _i, _result) uint256 _tmp_result;\
+// uint256 _tmp_offset = _offset;\
+// uint256 _tmp_i = _i;\
+// assembly {\
+//     _tmp_result := calldataload(\
+//         add(_blob.offset, add(add(_tmp_offset, $(LENGTH_OCTETS)), mul(_tmp_i, 0x20)))\
+//     )\
+// }\
+// _result = _tmp_result;
+
+//================================================================================================================
 // Bounds checking macros
 //================================================================================================================
 

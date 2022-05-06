@@ -255,11 +255,9 @@ library fri_verifier {
         uint256 j,
         types.fri_params_type memory fri_params
     ) internal view returns (uint256 result) {
-        result = basic_marshalling.get_i_uint256_from_vector(
-            blob,
-            local_vars.round_proof_y_offset,
-            j
-        );
+        {
+            uint256 _tmp_result;uint256 _tmp_offset = local_vars.round_proof_y_offset;uint256 _tmp_i = j;assembly {_tmp_result := calldataload(add(blob.offset, add(add(_tmp_offset, 8), mul(_tmp_i, 0x20))))}result = _tmp_result;
+        }
         if (i == 0) {
             uint256 U_evaluated_neg;
             uint256 V_evaluated_inv;

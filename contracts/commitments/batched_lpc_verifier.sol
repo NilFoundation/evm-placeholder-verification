@@ -264,10 +264,6 @@ library batched_lpc_verifier {
     ) internal view returns (bool result) {
         result = false;
 
-        // require(
-        //     fri_params.leaf_size == get_z_n_be(blob, offset),
-        //     "Z array size is not equal to leaf_size!"
-        // );
         fri_params.leaf_size = get_z_n_be(blob, offset);
         require(
             fri_params.leaf_size == evaluation_points.length,
@@ -367,15 +363,7 @@ library batched_lpc_verifier {
     ) internal view returns (bool result) {
         result = false;
 
-        // require(
-        //     fri_params.leaf_size == get_z_n_be(blob, offset),
-        //     "Z array size is not equal to leaf_size!"
-        // );
         fri_params.leaf_size = get_z_n_be(blob, offset);
-        // require(
-        //     fri_params.leaf_size == evaluation_points.length,
-        //     "Array of evaluation points size is not equal to leaf_size!"
-        // );
         require(
             fri_params.lambda == get_fri_proof_n_be(blob, offset),
             "Fri proofs number is not equal to lambda!"

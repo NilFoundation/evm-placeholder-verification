@@ -26,6 +26,7 @@ import "../basic_marshalling.sol";
 
 library batched_fri_verifier {
     struct local_vars_type {
+        // 0x0
         uint256 colinear_value;
         // 0x20
         uint256 T_root_offset;
@@ -37,28 +38,33 @@ library batched_fri_verifier {
         uint256 x_next;
         // 0xa0
         uint256 alpha;
-        // 0xc0
-        uint256[] y;
         // round proof verification variables
-        // 0xe0
+        // 0xc0
         bytes verified_data;
-        // 0x100
+        // 0xc1
         uint256 round_proof_offset;
-        // 0x120
+        // 0xe1
         uint256 round_proof_y_offset;
-        // 0x140
+        // 0x101
         uint256 round_proof_p_offset;
-        // 0x160
+        // 0x121
         uint256 y_polynom_index_j;
-        // 0x180
+        // 0x141
         bool status;
     }
 
-    uint256 constant VERIFIED_DATA_OFFSET = 0xe0;
-    uint256 constant ROUND_PROOF_OFFSET_OFFSET = 0x100;
-    uint256 constant ROUND_PROOF_Y_OFFSET_OFFSET = 0x120;
-    uint256 constant ROUND_PROOF_P_OFFSET_OFFSET = 0x140;
-    uint256 constant Y_POLYNOM_INDEX_J_OFFSET = 0x160;
+    uint256 constant COLINEAR_VALUE_OFFSET = 0x0;
+    uint256 constant T_ROOT_OFFSET_OFFSET = 0x20;
+    uint256 constant FINAL_POLY_OFFSET_OFFSET = 0x40;
+    uint256 constant X_OFFSET = 0x60;
+    uint256 constant X_NEXT_OFFSET = 0x80;
+    uint256 constant ALPHA_OFFSET = 0xa0;
+    uint256 constant VERIFIED_DATA_OFFSET = 0xc0;
+    uint256 constant ROUND_PROOF_OFFSET_OFFSET = 0xc1;
+    uint256 constant ROUND_PROOF_Y_OFFSET_OFFSET = 0xe1;
+    uint256 constant ROUND_PROOF_P_OFFSET_OFFSET = 0x101;
+    uint256 constant Y_POLYNOM_INDEX_J_OFFSET = 0x121;
+    uint256 constant STATUS_OFFSET = 0x141;
 
     uint256 constant m = 2;
 
@@ -341,7 +347,7 @@ library batched_fri_verifier {
         local_vars_type memory local_vars,
         uint256 i,
         uint256 j,
-        uint256 polynom_index,
+        // uint256 polynom_index,
         types.fri_params_type memory fri_params
     ) internal view returns (uint256 result) {
         result = basic_marshalling.get_i_uint256_from_vector(
@@ -356,13 +362,13 @@ library batched_fri_verifier {
                 U_evaluated_neg =
                     fri_params.modulus -
                     polynomial.evaluate(
-                        fri_params.batched_U[polynom_index],
+                        fri_params.batched_U[local_vars.y_polynom_index_j],
                         local_vars.x,
                         fri_params.modulus
                     );
                 V_evaluated_inv = field.inverse_static(
                     polynomial.evaluate(
-                        fri_params.batched_V[polynom_index],
+                        fri_params.batched_V[local_vars.y_polynom_index_j],
                         local_vars.x,
                         fri_params.modulus
                     ),
@@ -372,13 +378,13 @@ library batched_fri_verifier {
                 U_evaluated_neg =
                     fri_params.modulus -
                     polynomial.evaluate(
-                        fri_params.batched_U[polynom_index],
+                        fri_params.batched_U[local_vars.y_polynom_index_j],
                         fri_params.modulus - local_vars.x,
                         fri_params.modulus
                     );
                 V_evaluated_inv = field.inverse_static(
                     polynomial.evaluate(
-                        fri_params.batched_V[polynom_index],
+                        fri_params.batched_V[local_vars.y_polynom_index_j],
                         fri_params.modulus - local_vars.x,
                         fri_params.modulus
                     ),
@@ -400,7 +406,7 @@ library batched_fri_verifier {
         local_vars_type memory local_vars,
         uint256 i,
         uint256 j,
-        uint256 polynom_index,
+        // uint256 polynom_index,
         types.fri_params_type memory fri_params
     ) internal view returns (uint256 result) {
         result = basic_marshalling.get_i_uint256_from_vector(
@@ -415,7 +421,7 @@ library batched_fri_verifier {
                 U_evaluated_neg =
                     fri_params.modulus -
                     polynomial.evaluate(
-                        fri_params.batched_U[polynom_index],
+                        fri_params.batched_U[local_vars.y_polynom_index_j],
                         local_vars.x,
                         fri_params.modulus
                     );
@@ -431,7 +437,7 @@ library batched_fri_verifier {
                 U_evaluated_neg =
                     fri_params.modulus -
                     polynomial.evaluate(
-                        fri_params.batched_U[polynom_index],
+                        fri_params.batched_U[local_vars.y_polynom_index_j],
                         fri_params.modulus - local_vars.x,
                         fri_params.modulus
                     );
@@ -553,9 +559,16 @@ library batched_fri_verifier {
             fri_params.r == get_round_proofs_n_be(blob, offset),
             "Round proofs number is not equal to params.r!"
         );
+        require(
+            fri_params.leaf_size == fri_params.batched_U.length,
+            "Leaf size is not equal to U length!"
+        );
+        require(
+            fri_params.leaf_size == fri_params.batched_V.length,
+            "Leaf size is not equal to U length!"
+        );
 
         local_vars_type memory local_vars;
-        local_vars.y = new uint256[](2);
         local_vars.x = field.expmod_static(
             fri_params.D_omegas[0],
             transcript.get_integral_challenge_be(tr_state, 8),
@@ -593,30 +606,20 @@ library batched_fri_verifier {
                 local_vars.round_proof_offset
             );
             for (
-                uint256 polynom_index = 0;
-                polynom_index < fri_params.leaf_size;
-                polynom_index++
+                local_vars.y_polynom_index_j = 0;
+                local_vars.y_polynom_index_j < fri_params.leaf_size;
+                local_vars.y_polynom_index_j++
             ) {
-                for (uint256 j = 0; j < m; j++) {
-                    local_vars.y[j] = eval_y_from_blob(
-                        blob,
-                        local_vars,
-                        i,
-                        j,
-                        polynom_index,
-                        fri_params
-                    );
-                }
                 local_vars.colinear_value = basic_marshalling
                     .get_i_uint256_from_vector(
                         blob,
                         local_vars.round_proof_offset,
-                        polynom_index
+                        local_vars.y_polynom_index_j
                     );
                 store_i_chunk_in_verified_data(
                     local_vars,
                     local_vars.colinear_value,
-                    polynom_index
+                    local_vars.y_polynom_index_j
                 );
                 if (
                     polynomial.interpolate_evaluate_by_2_points_neg_x(
@@ -625,8 +628,8 @@ library batched_fri_verifier {
                             field.double(local_vars.x, fri_params.modulus),
                             fri_params.modulus
                         ),
-                        local_vars.y[0],
-                        local_vars.y[1],
+                        eval_y_from_blob(blob, local_vars, i, 0, fri_params),
+                        eval_y_from_blob(blob, local_vars, i, 1, fri_params),
                         local_vars.alpha,
                         fri_params.modulus
                     ) != local_vars.colinear_value
@@ -735,9 +738,12 @@ library batched_fri_verifier {
             fri_params.r == get_round_proofs_n_be(blob, offset),
             "Round proofs number is not equal to params.r!"
         );
+        require(
+            fri_params.leaf_size == fri_params.batched_U.length,
+            "Leaf size is not equal to U length!"
+        );
 
         local_vars_type memory local_vars;
-        local_vars.y = new uint256[](2);
         local_vars.x = field.expmod_static(
             fri_params.D_omegas[0],
             transcript.get_integral_challenge_be(tr_state, 8),
@@ -775,30 +781,20 @@ library batched_fri_verifier {
                 local_vars.round_proof_offset
             );
             for (
-                uint256 polynom_index = 0;
-                polynom_index < fri_params.leaf_size;
-                polynom_index++
+                local_vars.y_polynom_index_j = 0;
+                local_vars.y_polynom_index_j < fri_params.leaf_size;
+                local_vars.y_polynom_index_j++
             ) {
-                for (uint256 j = 0; j < m; j++) {
-                    local_vars.y[j] = eval_y_from_blob_single_V(
-                        blob,
-                        local_vars,
-                        i,
-                        j,
-                        polynom_index,
-                        fri_params
-                    );
-                }
                 local_vars.colinear_value = basic_marshalling
                     .get_i_uint256_from_vector(
                         blob,
                         local_vars.round_proof_offset,
-                        polynom_index
+                        local_vars.y_polynom_index_j
                     );
                 store_i_chunk_in_verified_data(
                     local_vars,
                     local_vars.colinear_value,
-                    polynom_index
+                    local_vars.y_polynom_index_j
                 );
                 if (
                     polynomial.interpolate_evaluate_by_2_points_neg_x(
@@ -807,8 +803,20 @@ library batched_fri_verifier {
                             field.double(local_vars.x, fri_params.modulus),
                             fri_params.modulus
                         ),
-                        local_vars.y[0],
-                        local_vars.y[1],
+                        eval_y_from_blob_single_V(
+                            blob,
+                            local_vars,
+                            i,
+                            0,
+                            fri_params
+                        ),
+                        eval_y_from_blob_single_V(
+                            blob,
+                            local_vars,
+                            i,
+                            1,
+                            fri_params
+                        ),
                         local_vars.alpha,
                         fri_params.modulus
                     ) != local_vars.colinear_value
