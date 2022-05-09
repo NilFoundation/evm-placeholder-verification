@@ -17,7 +17,7 @@ text = text.split("\n")
 
 function drawTable () {
     return asTable.configure({delimiter})(
-        names.forEach(drawTableRow)
+        names.map(drawTableRow)
     )
 }
 
