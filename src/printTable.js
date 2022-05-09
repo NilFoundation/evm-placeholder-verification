@@ -12,6 +12,8 @@ const names = [
     "Unified Addition"
 ]
 
+const delimiter = ' | ';
+
 var text = fs.readFileSync(file).toString().trim();
 text = text.split("\n")
 
