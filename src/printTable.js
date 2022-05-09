@@ -18,7 +18,7 @@ var text = fs.readFileSync(file).toString().trim();
 text = text.split("\n")
 
 function drawTable () {
-    return asTable.configure({delimiter: ' | '})(
+    return asTable.configure({delimiter})(
         names.forEach(drawTableRow)
     )
 }
