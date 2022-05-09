@@ -17,17 +17,25 @@ text = text.split("\n")
 
 function drawTable () {
     return asTable.configure({delimiter})(
-        names.map(drawTableRow)
+        names.reduce(drawTableRow, [])
     )
 }
 
-function drawTableRow(name, index) {
-    return {
-        Name: name,
-        Time: text[index].split(" ")[1],
+function drawTableRow(prev, current, index) {
+    const rowText = text[index];
+
+    if (!rowText) {
+        return prev;
+    }
+
+    prev.push({
+        Name: current,
+        Time: rowText.split(" ")[1],
         Status: 'Done',
         Verification_Gas: '-'
-    }
+    })
+
+    return prev;
 }
 
 console.log(drawTable())
