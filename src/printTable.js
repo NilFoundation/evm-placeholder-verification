@@ -3,12 +3,10 @@ const fs = require("fs");
 const file = 'time.log';
 
 const names = [
-    "Get Data",
-    "Proof Generation Public",
-    "Proof Generation Private",
-    "Unified Addition",
-    "Endo Scalar Mul",
-    "Scalar Mul",
+    "Endo Scalar",
+    "Variable Base Scalar Mul",
+    "Field Operations",
+    "Multi Scalar Multiplication",
     "Unified Addition"
 ]
 
@@ -27,8 +25,8 @@ function drawTableRow(name, index) {
     return {
         Name: name,
         Time: text[index].split(" ")[1],
-        Status: index === 3 ? text[3].split(" ")[2] : 'Done',
-        Verification_Gas: index === 3 ? text[3].split(" ")[3] : '-'
+        Status: 'Done',
+        Verification_Gas: '-'
     }
 }
 
