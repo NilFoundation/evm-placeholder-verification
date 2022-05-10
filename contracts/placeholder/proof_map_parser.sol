@@ -131,5 +131,7 @@ library placeholder_proof_map_parser {
         fri_params.batched_fri_verified_data = new bytes(
             batched_fri_verified_data_max_size
         );
+        fri_params.lpc_z = new uint256[](2);
+        fri_params.lpc_z[1] = 1;
     }
 }

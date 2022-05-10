@@ -156,6 +156,7 @@ library types {
         uint256[][] batched_V;
 
         bytes batched_fri_verified_data;
+        uint256[] lpc_z;
     }
 
     struct placeholder_proof_map {

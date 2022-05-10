@@ -24,7 +24,7 @@ import "../basic_marshalling.sol";
 
 library batched_lpc_verifier {
     struct local_vars_type {
-        uint256[][] z;
+        uint256 offset;
         bool status;
     }
 
@@ -224,6 +224,15 @@ library batched_lpc_verifier {
         }
     }
 
+    function skip_to_z(bytes calldata blob, uint256 offset)
+        internal
+        pure
+        returns (uint256 result_offset)
+    {
+        // T_root
+        result_offset = basic_marshalling.skip_octet_vector_32_be(blob, offset);
+    }
+
     function get_z_i_j_from_proof_be_check(
         bytes calldata blob,
         uint256 offset,
@@ -276,45 +285,28 @@ library batched_lpc_verifier {
 
         local_vars_type memory local_vars;
         fri_params.batched_U = new uint256[][](fri_params.leaf_size);
-        local_vars.z = new uint256[][](fri_params.leaf_size);
-        for (
-            uint256 polynom_index = 0;
-            polynom_index < fri_params.leaf_size;
-            polynom_index++
-        ) {
-            local_vars.z[polynom_index] = new uint256[](
-                evaluation_points[polynom_index].length
-            );
-            for (
-                uint256 point_index = 0;
-                point_index < evaluation_points[polynom_index].length;
-                point_index++
-            ) {
-                local_vars.z[polynom_index][
-                    point_index
-                ] = get_z_i_j_from_proof_be(
-                    blob,
-                    offset,
-                    polynom_index,
-                    point_index
-                );
-            }
-        }
+        local_vars.offset = basic_marshalling.skip_length(
+            blob,
+            skip_to_z(blob, offset)
+        );
         for (
             uint256 polynom_index = 0;
             polynom_index < fri_params.leaf_size;
             polynom_index++
         ) {
             fri_params.batched_U[polynom_index] = polynomial.interpolate(
+                blob,
                 evaluation_points[polynom_index],
-                local_vars.z[polynom_index],
+                local_vars.offset,
                 fri_params.modulus
+            );
+            local_vars.offset = basic_marshalling.skip_vector_of_uint256_be(
+                blob,
+                local_vars.offset
             );
         }
 
         fri_params.batched_V = new uint256[][](fri_params.leaf_size);
-        local_vars.z[0] = new uint256[](2);
-        local_vars.z[0][1] = 1;
         for (
             uint256 polynom_index = 0;
             polynom_index < fri_params.leaf_size;
@@ -327,12 +319,12 @@ library batched_lpc_verifier {
                 point_index < evaluation_points[polynom_index].length;
                 point_index++
             ) {
-                local_vars.z[0][0] =
+                fri_params.lpc_z[0] =
                     fri_params.modulus -
                     evaluation_points[polynom_index][point_index];
                 fri_params.batched_V[polynom_index] = polynomial.mul_poly(
                     fri_params.batched_V[polynom_index],
-                    local_vars.z[0],
+                    fri_params.lpc_z,
                     fri_params.modulus
                 );
             }
@@ -371,51 +363,34 @@ library batched_lpc_verifier {
 
         local_vars_type memory local_vars;
         fri_params.batched_U = new uint256[][](fri_params.leaf_size);
-        local_vars.z = new uint256[][](fri_params.leaf_size);
-        for (
-            uint256 polynom_index = 0;
-            polynom_index < fri_params.leaf_size;
-            polynom_index++
-        ) {
-            local_vars.z[polynom_index] = new uint256[](
-                evaluation_points.length
-            );
-            for (
-                uint256 point_index = 0;
-                point_index < evaluation_points.length;
-                point_index++
-            ) {
-                local_vars.z[polynom_index][
-                    point_index
-                ] = get_z_i_j_from_proof_be(
-                    blob,
-                    offset,
-                    polynom_index,
-                    point_index
-                );
-            }
-        }
+        local_vars.offset = basic_marshalling.skip_length(
+            blob,
+            skip_to_z(blob, offset)
+        );
         for (
             uint256 polynom_index = 0;
             polynom_index < fri_params.leaf_size;
             polynom_index++
         ) {
             fri_params.batched_U[polynom_index] = polynomial.interpolate(
+                blob,
                 evaluation_points,
-                local_vars.z[polynom_index],
+                local_vars.offset,
                 fri_params.modulus
+            );
+            local_vars.offset = basic_marshalling.skip_vector_of_uint256_be(
+                blob,
+                local_vars.offset
             );
         }
 
         fri_params.V = new uint256[](1);
         fri_params.V[0] = 1;
-        uint256[] memory a_poly = new uint256[](2);
-        a_poly[1] = 1;
         for (uint256 j = 0; j < evaluation_points.length; j++) {
-            a_poly[0] = fri_params.modulus - evaluation_points[j];
+            fri_params.lpc_z[0] = fri_params.modulus - evaluation_points[j];
             fri_params.V = polynomial.mul_poly(
                 fri_params.V,
-                a_poly,
+                fri_params.lpc_z,
                 fri_params.modulus
             );
         }
