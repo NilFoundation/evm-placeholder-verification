@@ -268,7 +268,7 @@ library types {
         // 0x60
         uint256 gate_eval;
         // 0x80
-        uint256[][] witness_evaluations;
+        uint256[] witness_evaluations_offsets;
         // 0xa0
         uint256[] selector_evaluations;
         // 0xc0
@@ -279,7 +279,6 @@ library types {
         uint256 gates_evaluation;
         // 0x120
         uint256 theta_acc;
-        uint256[] witness_evaluations_offsets;
         uint256 selector_evaluations_offset;
         uint256 offset;
     }

@@ -32,15 +32,14 @@ library unified_addition_component_gen {
     uint256 constant THETA_OFFSET = 0x20;
     uint256 constant CONSTRAINT_EVAL_OFFSET = 0x40;
     uint256 constant GATE_EVAL_OFFSET = 0x60;
-    uint256 constant WITNESS_EVALUATIONS_OFFSET = 0x140;
+    uint256 constant WITNESS_EVALUATIONS_OFFSETS_OFFSET = 0x80;
     uint256 constant SELECTOR_EVALUATIONS_OFFSET = 0xa0;
     uint256 constant EVAL_PROOF_WITNESS_OFFSET_OFFSET = 0xc0;
     uint256 constant EVAL_PROOF_SELECTOR_OFFSET_OFFSET = 0xe0;
     uint256 constant GATES_EVALUATION_OFFSET = 0x100;
     uint256 constant THETA_ACC_OFFSET = 0x120;
-    uint256 constant WITNESS_EVALUATIONS_OFFSETS_OFFSET = 0x140;
-    uint256 constant SELECTOR_EVALUATIONS_OFFSET_OFFSET = 0x160;
-    uint256 constant OFFSET_OFFSET = 0x180;
+    uint256 constant SELECTOR_EVALUATIONS_OFFSET_OFFSET = 0x140;
+    uint256 constant OFFSET_OFFSET = 0x160;
 
     // TODO: columns_rotations could be hard-coded
     function evaluate_gates_be(
@@ -108,14 +107,20 @@ library unified_addition_component_gen {
                                 0,
                                 0,
                                 mload(
-                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                    add(
+                                        gate_params,
+                                        WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                    )
                                 )
                             ),
                             get_W_i_by_rotation_idx(
                                 7,
                                 0,
                                 mload(
-                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                    add(
+                                        gate_params,
+                                        WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                    )
                                 )
                             ),
                             modulus
@@ -133,12 +138,22 @@ library unified_addition_component_gen {
                         get_W_i_by_rotation_idx(
                             2,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         get_W_i_by_rotation_idx(
                             7,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         modulus
                     ),
@@ -174,14 +189,20 @@ library unified_addition_component_gen {
                                 0,
                                 0,
                                 mload(
-                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                    add(
+                                        gate_params,
+                                        WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                    )
                                 )
                             ),
                             get_W_i_by_rotation_idx(
                                 10,
                                 0,
                                 mload(
-                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                    add(
+                                        gate_params,
+                                        WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                    )
                                 )
                             ),
                             modulus
@@ -199,12 +220,22 @@ library unified_addition_component_gen {
                         get_W_i_by_rotation_idx(
                             2,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         get_W_i_by_rotation_idx(
                             10,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         modulus
                     ),
@@ -226,7 +257,9 @@ library unified_addition_component_gen {
                     get_W_i_by_rotation_idx(
                         7,
                         0,
-                        mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                        mload(
+                            add(gate_params, WITNESS_EVALUATIONS_OFFSETS_OFFSET)
+                        )
                     ),
                     modulus
                 )
@@ -260,7 +293,10 @@ library unified_addition_component_gen {
                                 8,
                                 0,
                                 mload(
-                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                    add(
+                                        gate_params,
+                                        WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                    )
                                 )
                             ),
                             mulmod(
@@ -270,7 +306,7 @@ library unified_addition_component_gen {
                                     mload(
                                         add(
                                             gate_params,
-                                            WITNESS_EVALUATIONS_OFFSET
+                                            WITNESS_EVALUATIONS_OFFSETS_OFFSET
                                         )
                                     )
                                 ),
@@ -280,7 +316,7 @@ library unified_addition_component_gen {
                                     mload(
                                         add(
                                             gate_params,
-                                            WITNESS_EVALUATIONS_OFFSET
+                                            WITNESS_EVALUATIONS_OFFSETS_OFFSET
                                         )
                                     )
                                 ),
@@ -304,7 +340,10 @@ library unified_addition_component_gen {
                                 0,
                                 0,
                                 mload(
-                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                    add(
+                                        gate_params,
+                                        WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                    )
                                 )
                             ),
                             mulmod(
@@ -314,7 +353,7 @@ library unified_addition_component_gen {
                                     mload(
                                         add(
                                             gate_params,
-                                            WITNESS_EVALUATIONS_OFFSET
+                                            WITNESS_EVALUATIONS_OFFSETS_OFFSET
                                         )
                                     )
                                 ),
@@ -324,7 +363,7 @@ library unified_addition_component_gen {
                                     mload(
                                         add(
                                             gate_params,
-                                            WITNESS_EVALUATIONS_OFFSET
+                                            WITNESS_EVALUATIONS_OFFSETS_OFFSET
                                         )
                                     )
                                 ),
@@ -348,14 +387,20 @@ library unified_addition_component_gen {
                                 0,
                                 0,
                                 mload(
-                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                    add(
+                                        gate_params,
+                                        WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                    )
                                 )
                             ),
                             get_W_i_by_rotation_idx(
                                 8,
                                 0,
                                 mload(
-                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                    add(
+                                        gate_params,
+                                        WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                    )
                                 )
                             ),
                             modulus
@@ -373,12 +418,22 @@ library unified_addition_component_gen {
                         get_W_i_by_rotation_idx(
                             2,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         get_W_i_by_rotation_idx(
                             8,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         modulus
                     ),
@@ -392,7 +447,9 @@ library unified_addition_component_gen {
                     get_W_i_by_rotation_idx(
                         1,
                         0,
-                        mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                        mload(
+                            add(gate_params, WITNESS_EVALUATIONS_OFFSETS_OFFSET)
+                        )
                     ),
                     modulus
                 )
@@ -406,7 +463,12 @@ library unified_addition_component_gen {
                         get_W_i_by_rotation_idx(
                             3,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         modulus
                     ),
@@ -421,21 +483,32 @@ library unified_addition_component_gen {
                         get_W_i_by_rotation_idx(
                             7,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         mulmod(
                             get_W_i_by_rotation_idx(
                                 0,
                                 0,
                                 mload(
-                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                    add(
+                                        gate_params,
+                                        WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                    )
                                 )
                             ),
                             get_W_i_by_rotation_idx(
                                 8,
                                 0,
                                 mload(
-                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                    add(
+                                        gate_params,
+                                        WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                    )
                                 )
                             ),
                             modulus
@@ -456,7 +529,10 @@ library unified_addition_component_gen {
                                 7,
                                 0,
                                 mload(
-                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                    add(
+                                        gate_params,
+                                        WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                    )
                                 )
                             ),
                             mulmod(
@@ -466,7 +542,7 @@ library unified_addition_component_gen {
                                     mload(
                                         add(
                                             gate_params,
-                                            WITNESS_EVALUATIONS_OFFSET
+                                            WITNESS_EVALUATIONS_OFFSETS_OFFSET
                                         )
                                     )
                                 ),
@@ -476,7 +552,7 @@ library unified_addition_component_gen {
                                     mload(
                                         add(
                                             gate_params,
-                                            WITNESS_EVALUATIONS_OFFSET
+                                            WITNESS_EVALUATIONS_OFFSETS_OFFSET
                                         )
                                     )
                                 ),
@@ -500,14 +576,20 @@ library unified_addition_component_gen {
                                 7,
                                 0,
                                 mload(
-                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                    add(
+                                        gate_params,
+                                        WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                    )
                                 )
                             ),
                             get_W_i_by_rotation_idx(
                                 1,
                                 0,
                                 mload(
-                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                    add(
+                                        gate_params,
+                                        WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                    )
                                 )
                             ),
                             modulus
@@ -525,12 +607,22 @@ library unified_addition_component_gen {
                         get_W_i_by_rotation_idx(
                             7,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         get_W_i_by_rotation_idx(
                             3,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         modulus
                     ),
@@ -563,12 +655,22 @@ library unified_addition_component_gen {
                         get_W_i_by_rotation_idx(
                             8,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         get_W_i_by_rotation_idx(
                             8,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         modulus
                     ),
@@ -584,7 +686,12 @@ library unified_addition_component_gen {
                         get_W_i_by_rotation_idx(
                             2,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         modulus
                     ),
@@ -600,7 +707,12 @@ library unified_addition_component_gen {
                         get_W_i_by_rotation_idx(
                             0,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         modulus
                     ),
@@ -616,7 +728,12 @@ library unified_addition_component_gen {
                         get_W_i_by_rotation_idx(
                             4,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         modulus
                     ),
@@ -649,12 +766,22 @@ library unified_addition_component_gen {
                         get_W_i_by_rotation_idx(
                             4,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         get_W_i_by_rotation_idx(
                             8,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         modulus
                     ),
@@ -672,14 +799,20 @@ library unified_addition_component_gen {
                                 0,
                                 0,
                                 mload(
-                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                    add(
+                                        gate_params,
+                                        WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                    )
                                 )
                             ),
                             get_W_i_by_rotation_idx(
                                 8,
                                 0,
                                 mload(
-                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                    add(
+                                        gate_params,
+                                        WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                    )
                                 )
                             ),
                             modulus
@@ -696,7 +829,9 @@ library unified_addition_component_gen {
                     get_W_i_by_rotation_idx(
                         1,
                         0,
-                        mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                        mload(
+                            add(gate_params, WITNESS_EVALUATIONS_OFFSETS_OFFSET)
+                        )
                     ),
                     modulus
                 )
@@ -708,7 +843,9 @@ library unified_addition_component_gen {
                     get_W_i_by_rotation_idx(
                         5,
                         0,
-                        mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                        mload(
+                            add(gate_params, WITNESS_EVALUATIONS_OFFSETS_OFFSET)
+                        )
                     ),
                     modulus
                 )
@@ -739,12 +876,22 @@ library unified_addition_component_gen {
                         get_W_i_by_rotation_idx(
                             1,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         get_W_i_by_rotation_idx(
                             6,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         modulus
                     ),
@@ -762,14 +909,20 @@ library unified_addition_component_gen {
                                 1,
                                 0,
                                 mload(
-                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                    add(
+                                        gate_params,
+                                        WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                    )
                                 )
                             ),
                             get_W_i_by_rotation_idx(
                                 7,
                                 0,
                                 mload(
-                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                    add(
+                                        gate_params,
+                                        WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                    )
                                 )
                             ),
                             modulus
@@ -790,14 +943,20 @@ library unified_addition_component_gen {
                                 3,
                                 0,
                                 mload(
-                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                    add(
+                                        gate_params,
+                                        WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                    )
                                 )
                             ),
                             get_W_i_by_rotation_idx(
                                 6,
                                 0,
                                 mload(
-                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                    add(
+                                        gate_params,
+                                        WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                    )
                                 )
                             ),
                             modulus
@@ -815,12 +974,22 @@ library unified_addition_component_gen {
                         get_W_i_by_rotation_idx(
                             3,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         get_W_i_by_rotation_idx(
                             7,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         modulus
                     ),
@@ -856,14 +1025,20 @@ library unified_addition_component_gen {
                                 1,
                                 0,
                                 mload(
-                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                    add(
+                                        gate_params,
+                                        WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                    )
                                 )
                             ),
                             get_W_i_by_rotation_idx(
                                 9,
                                 0,
                                 mload(
-                                    add(gate_params, WITNESS_EVALUATIONS_OFFSET)
+                                    add(
+                                        gate_params,
+                                        WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                    )
                                 )
                             ),
                             modulus
@@ -881,12 +1056,22 @@ library unified_addition_component_gen {
                         get_W_i_by_rotation_idx(
                             3,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         get_W_i_by_rotation_idx(
                             9,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         modulus
                     ),
@@ -902,7 +1087,12 @@ library unified_addition_component_gen {
                         get_W_i_by_rotation_idx(
                             6,
                             0,
-                            mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))
+                            mload(
+                                add(
+                                    gate_params,
+                                    WITNESS_EVALUATIONS_OFFSETS_OFFSET
+                                )
+                            )
                         ),
                         modulus
                     ),
