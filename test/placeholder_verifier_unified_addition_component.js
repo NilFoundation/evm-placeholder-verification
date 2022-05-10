@@ -19,7 +19,7 @@ contract("Placeholder verifier unified addition component", accounts => {
         init_params.push(2);
         init_params.push(8);
         init_params.push(new BN('199455130043951077247265858823823987229570523056509026484192158816218200659', 10));
-        init_params.push(416);
+        init_params.push(13);
 
         var D_omegas = [];
         D_omegas.push(new BN('199455130043951077247265858823823987229570523056509026484192158816218200659', 10));
@@ -64,7 +64,7 @@ contract("Placeholder verifier unified addition component", accounts => {
         init_params.push(5);
         init_params.push(8);
         init_params.push(new BN('199455130043951077247265858823823987229570523056509026484192158816218200659', 10));
-        init_params.push(416);
+        init_params.push(13);
 
         var D_omegas = [];
         D_omegas.push(new BN('199455130043951077247265858823823987229570523056509026484192158816218200659', 10));

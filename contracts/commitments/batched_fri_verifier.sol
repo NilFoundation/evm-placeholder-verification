@@ -575,11 +575,11 @@ library batched_fri_verifier {
             "Round proofs number is not equal to params.r!"
         );
         require(
-            fri_params.leaf_size == fri_params.batched_U.length,
+            fri_params.leaf_size <= fri_params.batched_U.length,
             "Leaf size is not equal to U length!"
         );
         require(
-            fri_params.leaf_size == fri_params.batched_V.length,
+            fri_params.leaf_size <= fri_params.batched_V.length,
             "Leaf size is not equal to U length!"
         );
 
@@ -749,7 +749,7 @@ library batched_fri_verifier {
             "Round proofs number is not equal to params.r!"
         );
         require(
-            fri_params.leaf_size == fri_params.batched_U.length,
+            fri_params.leaf_size <= fri_params.batched_U.length,
             "Leaf size is not equal to U length!"
         );
 

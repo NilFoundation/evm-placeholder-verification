@@ -261,50 +261,6 @@ library polynomial {
         }
     }
 
-    function interpolate_by_2_points(
-        bytes calldata blob,
-        uint256[] memory x,
-        uint256 fx_offset,
-        uint256 modulus
-    ) internal view returns (uint256[] memory result) {
-        require(x.length == 2, "x length is not equal to 2");
-        require(
-            basic_marshalling.get_length(blob, fx_offset) == 2,
-            "fx length is not equal to 2"
-        );
-        uint256 x2_minus_x1_inv = field.inverse_static(
-            (x[1] + (modulus - x[0])) % modulus,
-            modulus
-        );
-        result = new uint256[](2);
-        assembly {
-            let y2_minus_y1 := addmod(
-                calldataload(
-                    add(blob.offset, add(add(fx_offset, LENGTH_OCTETS), 0x20))
-                ),
-                sub(
-                    modulus,
-                    calldataload(
-                        add(blob.offset, add(fx_offset, LENGTH_OCTETS))
-                    )
-                ),
-                modulus
-            )
-            let a := mulmod(y2_minus_y1, x2_minus_x1_inv, modulus)
-            let a_mul_x1_neg := sub(
-                modulus,
-                mulmod(a, mload(add(x, 0x20)), modulus)
-            )
-            let b := addmod(
-                calldataload(add(blob.offset, add(fx_offset, LENGTH_OCTETS))),
-                a_mul_x1_neg,
-                modulus
-            )
-            mstore(add(result, 0x20), b)
-            mstore(add(result, 0x40), a)
-        }
-    }
-
     function interpolate_evaluate(
         uint256[] memory x,
         uint256[] memory fx,
@@ -359,11 +315,55 @@ library polynomial {
             uint256[] memory result = new uint256[](1);
             result[0] = fx[0];
             return result;
-        }
-        if (x.length == 2) {
+        } else if (x.length == 2) {
             return interpolate_by_2_points(x, fx, modulus);
+        } else {
+            require(false, "unsupported number of points for interpolation");
         }
-        require(false, "unsupported number of points for interpolation");
+    }
+
+    function interpolate_by_2_points(
+        bytes calldata blob,
+        uint256[] memory x,
+        uint256 fx_offset,
+        uint256 modulus
+    ) internal view returns (uint256[] memory result) {
+        require(x.length == 2, "x length is not equal to 2");
+        require(
+            basic_marshalling.get_length(blob, fx_offset) == 2,
+            "fx length is not equal to 2"
+        );
+        uint256 x2_minus_x1_inv = field.inverse_static(
+            (x[1] + (modulus - x[0])) % modulus,
+            modulus
+        );
+        result = new uint256[](2);
+        assembly {
+            let y2_minus_y1 := addmod(
+                calldataload(
+                    add(blob.offset, add(add(fx_offset, LENGTH_OCTETS), 0x20))
+                ),
+                sub(
+                    modulus,
+                    calldataload(
+                        add(blob.offset, add(fx_offset, LENGTH_OCTETS))
+                    )
+                ),
+                modulus
+            )
+            let a := mulmod(y2_minus_y1, x2_minus_x1_inv, modulus)
+            let a_mul_x1_neg := sub(
+                modulus,
+                mulmod(a, mload(add(x, 0x20)), modulus)
+            )
+            let b := addmod(
+                calldataload(add(blob.offset, add(fx_offset, LENGTH_OCTETS))),
+                a_mul_x1_neg,
+                modulus
+            )
+            mstore(add(result, 0x20), b)
+            mstore(add(result, 0x40), a)
+        }
     }
 
     function interpolate(
@@ -382,10 +382,10 @@ library polynomial {
                 0
             );
             return result;
-        }
-        if (x.length == 2) {
+        } else if (x.length == 2) {
             return interpolate_by_2_points(blob, x, fx_offset, modulus);
+        } else {
+            require(false, "unsupported number of points for interpolation");
         }
-        require(false, "unsupported number of points for interpolation");
     }
 }

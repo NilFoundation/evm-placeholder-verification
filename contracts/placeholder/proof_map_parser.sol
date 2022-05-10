@@ -126,11 +126,11 @@ library placeholder_proof_map_parser {
 
     function init(
         types.fri_params_type memory fri_params,
-        uint256 batched_fri_verified_data_max_size
+        uint256 max_leaf_size
     ) internal pure {
-        fri_params.batched_fri_verified_data = new bytes(
-            batched_fri_verified_data_max_size
-        );
+        fri_params.batched_fri_verified_data = new bytes(0x20 * max_leaf_size);
+        fri_params.batched_U = new uint256[][](max_leaf_size);
+        fri_params.batched_V = new uint256[][](max_leaf_size);
         fri_params.lpc_z = new uint256[](2);
         fri_params.lpc_z[1] = 1;
     }

@@ -284,7 +284,6 @@ library batched_lpc_verifier {
         );
 
         local_vars_type memory local_vars;
-        fri_params.batched_U = new uint256[][](fri_params.leaf_size);
         local_vars.offset = basic_marshalling.skip_length(
             blob,
             skip_to_z(blob, offset)
@@ -306,7 +305,6 @@ library batched_lpc_verifier {
             );
         }
 
-        fri_params.batched_V = new uint256[][](fri_params.leaf_size);
         for (
             uint256 polynom_index = 0;
             polynom_index < fri_params.leaf_size;
@@ -362,7 +360,6 @@ library batched_lpc_verifier {
         );
 
         local_vars_type memory local_vars;
-        fri_params.batched_U = new uint256[][](fri_params.leaf_size);
         local_vars.offset = basic_marshalling.skip_length(
             blob,
             skip_to_z(blob, offset)
