@@ -24,37 +24,6 @@ import "../../cryptography/transcript.sol";
 import "../../placeholder/proof_map_parser.sol";
 
 contract TestFriVerifier {
-    // bool m_result;
-    // uint256 m_proof_size;
-    // types.fri_params_type m_params;
-
-    // function set_params(
-    //     uint256 modulus,
-    //     uint256 r,
-    //     uint256 max_degree
-    // ) public {
-    //     m_params.modulus = modulus;
-    //     m_params.r = r;
-    //     m_params.max_degree = max_degree;
-    // }
-
-    // function set_q(uint256[] calldata q) public {
-    //     m_params.q = q;
-    // }
-
-    // function set_D_omegas(uint256[] calldata D_omegas) public {
-    //     m_params.D_omegas = D_omegas;
-    // }
-
-    // function set_U(uint256[] calldata U) public {
-    //     m_params.U = U;
-    // }
-
-    // function set_V(uint256[] calldata V) public {
-    //     m_params.V = V;
-    // }
-
-    // TODO: optimize - do not copy params from storage to memory
     function verify(
         bytes calldata raw_proof,
         bytes calldata init_transcript_blob,

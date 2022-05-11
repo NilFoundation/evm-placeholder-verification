@@ -21,6 +21,7 @@ import "../../types.sol";
 import "../lpc_verifier.sol";
 import "../batched_lpc_verifier.sol";
 import "../../cryptography/transcript.sol";
+import "../../placeholder/proof_map_parser.sol";
 
 contract TestLpcVerifier {
     bool m_result;
@@ -106,6 +107,7 @@ contract TestLpcVerifier {
         for (uint256 i = 0; i < fri_params.q.length; i++) {
             fri_params.q[i] = init_params[idx++];
         }
+        placeholder_proof_map_parser.init(fri_params, fri_params.leaf_size);
         require(
             raw_proof.length ==
                 batched_lpc_verifier.skip_proof_be(raw_proof, 0),
