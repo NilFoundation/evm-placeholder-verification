@@ -18,7 +18,7 @@ def init_test1():
 
     params['init_params'] = []
     params['init_params'].append(
-        28948022309329048855892746252171976963363056481941560715954676764349967630337)
+        28948022309329048855892746252171976963363056481941560715954676764349967630333)
     params['init_params'].append(2)
     params['init_params'].append(7)
     params['init_params'].append(2)
@@ -86,14 +86,27 @@ if __name__ == '__main__':
         solc_version="0.8.12",
         optimize=True,
         optimize_runs=200)
-    compiled_interface = find_compiled_contract(compiled, contract_name)
+    compiled_id, compiled_interface = find_compiled_contract(compiled, contract_name)
+    compiled_lib_id, component_lib = find_compiled_contract(compiled, 'unified_addition_component_gen')
+
     bytecode = compiled_interface['bin']
     abi = compiled_interface['abi']
+
+    component_lib_bytecode = component_lib['bin']
+    component_lib_abi = component_lib['abi']
+    contract_lib = w3.eth.contract(abi=component_lib_abi, bytecode=component_lib_bytecode)
+    deploy_lib_tx_hash = contract_lib.constructor().transact()
+    deploy_lib_tx_receipt = w3.eth.wait_for_transaction_receipt(deploy_lib_tx_hash)
+    bytecode = solcx.link_code(
+        bytecode,
+        {compiled_lib_id: deploy_lib_tx_receipt.contractAddress},
+        solc_version="0.8.12")
     print('Bytecode size:', len(bytecode) // 2)
 
     contract = w3.eth.contract(abi=abi, bytecode=bytecode)
     deploy_tx_hash = contract.constructor().transact()
     deploy_tx_receipt = w3.eth.wait_for_transaction_receipt(deploy_tx_hash)
+    print("Deployment:", deploy_tx_receipt.gasUsed)
     contract_inst = w3.eth.contract(
         address=deploy_tx_receipt.contractAddress, abi=abi)
     params = init_test2()

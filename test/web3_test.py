@@ -1,13 +1,15 @@
 def find_compiled_contract(compiled, contract_name):
+    compiled_id = None
     compiled_interface = False
     for key, value in compiled.items():
         if key.endswith(contract_name):
+            compiled_id = key
             compiled_interface = value
             break
     else:
         print(f'{contract_name} not found!')
         exit(1)
-    return compiled_interface
+    return compiled_id, compiled_interface
 
 def write_tx_calldata(w3, tx_receipt, ofname = 'tx_calldata.txt'):
     with open(ofname, 'w') as f:

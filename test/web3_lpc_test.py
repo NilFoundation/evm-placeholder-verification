@@ -48,10 +48,11 @@ def init_test1():
 if __name__ == '__main__':
     compiled = solcx.compile_files(
         [f'{contracts_dir}/commitments/test/public_api_lpc_verification.sol'],
-        output_values=['abi', 'bin'], solc_version="0.8.12",
+        output_values=['abi', 'bin'],
+        solc_version="0.8.12",
         optimize=False,
         optimize_runs=None)
-    compiled_interface = find_compiled_contract(compiled, contract_name)
+    compiled_id, compiled_interface = find_compiled_contract(compiled, contract_name)
     bytecode = compiled_interface['bin']
     abi = compiled_interface['abi']
     print('Bytecode size:', len(bytecode) // 2)
