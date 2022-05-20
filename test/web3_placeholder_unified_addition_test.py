@@ -1,15 +1,8 @@
-from web3 import Web3
-from web3.middleware import geth_poa_middleware
-import solcx
-import pathlib
-from web3_test_defs import contracts_dir
-from web3_test import find_compiled_contract, print_tx_info
+from web3_test import do_placeholder_verification_test_via_transact
 
-w3 = Web3(Web3.HTTPProvider('http://127.0.0.1:8545'))
-w3.middleware_onion.inject(geth_poa_middleware, layer=0)
-w3.eth.default_account = w3.eth.accounts[0]
-
-contract_name = 'TestPlaceholderVerifierUnifiedAddition'
+test_contract_name = 'TestPlaceholderVerifierUnifiedAddition'
+test_contract_path = 'placeholder/test/public_api_placeholder_unified_addition_component.sol'
+linked_libs_names = []
 
 def init_test1():
     params = dict()
@@ -80,42 +73,8 @@ def init_test2():
     return params
 
 if __name__ == '__main__':
-    compiled = solcx.compile_files(
-        [f'{contracts_dir}/placeholder/test/public_api_placeholder_unified_addition_component.sol'],
-        output_values=['abi', 'bin'],
-        solc_version="0.8.12",
-        optimize=True,
-        optimize_runs=200)
-    compiled_id, compiled_interface = find_compiled_contract(compiled, contract_name)
-    compiled_lib_id, component_lib = find_compiled_contract(compiled, 'unified_addition_component_gen')
+    do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_libs_names, init_test1)
+    do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_libs_names, init_test2)
 
-    bytecode = compiled_interface['bin']
-    abi = compiled_interface['abi']
-
-    component_lib_bytecode = component_lib['bin']
-    component_lib_abi = component_lib['abi']
-    contract_lib = w3.eth.contract(abi=component_lib_abi, bytecode=component_lib_bytecode)
-    deploy_lib_tx_hash = contract_lib.constructor().transact()
-    deploy_lib_tx_receipt = w3.eth.wait_for_transaction_receipt(deploy_lib_tx_hash)
-    bytecode = solcx.link_code(
-        bytecode,
-        {compiled_lib_id: deploy_lib_tx_receipt.contractAddress},
-        solc_version="0.8.12")
-    print('Bytecode size:', len(bytecode) // 2)
-
-    contract = w3.eth.contract(abi=abi, bytecode=bytecode)
-    deploy_tx_hash = contract.constructor().transact()
-    deploy_tx_receipt = w3.eth.wait_for_transaction_receipt(deploy_tx_hash)
-    print("Deployment:", deploy_tx_receipt.gasUsed)
-    contract_inst = w3.eth.contract(
-        address=deploy_tx_receipt.contractAddress, abi=abi)
-    params = init_test2()
-    run_inst = contract_inst.functions.verify(
-        params['proof'], params['init_params'], params['columns_rotations'])
-    run_tx_hash = contract_inst.functions.verify(
-        params['proof'], params['init_params'], params['columns_rotations']).transact()
-    run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
-
-    print_tx_info(w3, run_tx_receipt, params['_test_name'])
 
 
