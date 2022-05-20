@@ -26,7 +26,38 @@ import "../commitments/batched_lpc_verifier.sol";
 library permutation_argument {
     uint256 constant ARGUMENT_SIZE = 3;
 
+    uint256 constant WITNESS_COMMITMENT_OFFSET_OFFSET = 0x0;
+    uint256 constant V_PERM_COMMITMENT_OFFSET_OFFSET = 0x20;
+    uint256 constant INPUT_PERM_COMMITMENT_OFFSET_OFFSET = 0x40;
+    uint256 constant VALUE_PERM_COMMITMENT_OFFSET_OFFSET = 0x60;
+    uint256 constant V_L_PERM_COMMITMENT_OFFSET_OFFSET = 0x80;
+    uint256 constant T_COMMITMENTS_OFFSET_OFFSET = 0xa0;
+    uint256 constant EVAL_PROOF_OFFSET_OFFSET = 0xc0;
+    uint256 constant EVAL_PROOF_LAGRANGE_0_OFFSET_OFFSET = 0xe0;
+    uint256 constant EVAL_PROOF_WITNESS_OFFSET_OFFSET = 0x100;
+    uint256 constant EVAL_PROOF_PERMUTATION_OFFSET_OFFSET = 0x120;
+    uint256 constant EVAL_PROOF_QUOTIENT_OFFSET_OFFSET = 0x140;
+    uint256 constant EVAL_PROOF_LOOKUPS_OFFSET_OFFSET = 0x160;
+    uint256 constant EVAL_PROOF_ID_PERMUTATION_OFFSET_OFFSET = 0x180;
+    uint256 constant EVAL_PROOF_SIGMA_PERMUTATION_OFFSET_OFFSET = 0x1a0;
+    uint256 constant EVAL_PROOF_PUBLIC_INPUT_OFFSET_OFFSET = 0x1c0;
+    uint256 constant EVAL_PROOF_CONSTANT_OFFSET_OFFSET = 0x1e0;
+    uint256 constant EVAL_PROOF_SELECTOR_OFFSET_OFFSET = 0x200;
+    uint256 constant EVAL_PROOF_SPECIAL_SELECTORS_OFFSET_OFFSET = 0x220;
+
+    uint256 constant LEN_OFFSET = 0x0;
+    uint256 constant OFFSET_OFFSET = 0x20;
+    uint256 constant ZERO_INDEX_OFFSET = 0x40;
+    uint256 constant PERMUTATION_ARGUMENT_OFFSET = 0x60;
+    uint256 constant GATE_ARGUMENT_OFFSET = 0x80;
+    uint256 constant ALPHAS_OFFSET = 0xa0;
     uint256 constant CHALLENGE_OFFSET = 0xc0;
+    uint256 constant E_OFFSET = 0xe0;
+    uint256 constant EVALUATION_POINTS_OFFSET = 0x100;
+    uint256 constant F_OFFSET = 0x120;
+    uint256 constant F_CONSOLIDATED_OFFSET = 0x140;
+    uint256 constant T_CONSOLIDATED_OFFSET = 0x160;
+    uint256 constant Z_AT_CHALLENGE_OFFSET = 0x180;
     uint256 constant BETA_OFFSET = 0x1a0;
     uint256 constant GAMMA_OFFSET = 0x1c0;
     uint256 constant G_OFFSET = 0x1e0;
@@ -37,6 +68,13 @@ library permutation_argument {
     uint256 constant Q_LAST_EVAL_OFFSET = 0x280;
     uint256 constant S_ID_I_OFFSET = 0x2a0;
     uint256 constant S_SIGMA_I_OFFSET = 0x2c0;
+    uint256 constant WITNESS_EVALUATION_POINTS_OFFSET = 0x2e0;
+    uint256 constant TMP1_OFFSET = 0x300;
+    uint256 constant TMP2_OFFSET = 0x320;
+    uint256 constant TMP3_OFFSET = 0x340;
+    uint256 constant IDX1_OFFSET = 0x360;
+    uint256 constant IDX2_OFFSET = 0x380;
+    uint256 constant STATUS_OFFSET = 0x3a0;
 
     function eval_permutations_at_challenge(
         types.fri_params_type memory fri_params,
@@ -255,12 +293,20 @@ library permutation_argument {
             let modulus := mload(fri_params)
 
             // F[0]
-            switch mload(add(local_vars, CHALLENGE_OFFSET))
-            case 1 {
-                mstore(
-                    add(F, 0x20),
-                    // preprocessed_data.common_data.lagrange_0.evaluate(challenge) *
-                    //  (one - perm_polynomial_value)
+            mstore(
+                add(F, 0x20),
+                mulmod(
+                    calldataload(
+                        add(
+                            blob.offset,
+                            mload(
+                                add(
+                                    proof_map,
+                                    EVAL_PROOF_LAGRANGE_0_OFFSET_OFFSET
+                                )
+                            )
+                        )
+                    ),
                     addmod(
                         1,
                         // one - perm_polynomial_value
@@ -269,12 +315,10 @@ library permutation_argument {
                             mload(add(local_vars, PERM_POLYNOMIAL_VALUE_OFFSET))
                         ),
                         modulus
-                    )
+                    ),
+                    modulus
                 )
-            }
-            default {
-                mstore(add(F, 0x20), 0)
-            }
+            )
 
             // F[1]
             mstore(

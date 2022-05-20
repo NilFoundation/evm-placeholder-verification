@@ -72,8 +72,14 @@ library placeholder_proof_map_parser {
                 proof_map.T_commitments_offset
             );
         // skip challenge
-        proof_map.eval_proof_witness_offset = basic_marshalling
+        proof_map.eval_proof_lagrange_0_offset = basic_marshalling
             .skip_uint256_be_check(blob, proof_map.eval_proof_offset);
+        // skip lagrange_0
+        proof_map.eval_proof_witness_offset = basic_marshalling
+            .skip_uint256_be_check(
+                blob,
+                proof_map.eval_proof_lagrange_0_offset
+            );
         // skip witness
         proof_map.eval_proof_permutation_offset = batched_lpc_verifier
             .skip_proof_be_check(blob, proof_map.eval_proof_witness_offset);

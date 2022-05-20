@@ -305,7 +305,6 @@ library placeholder_verifier_variable_base_scalar_mul_component {
             local_vars.F[i] = 0;
         }
         local_vars.F[8] = local_vars.gate_argument;
-        require(false, logging.uint2decstr(local_vars.F[0]));
 
         local_vars.F_consolidated = 0;
         for (uint256 i = 0; i < f_parts; i++) {

@@ -39,7 +39,7 @@ contract TestPlaceholderVerifierUnifiedAddition {
         // 3) lambda
         // 4) rows_amount
         // 5) omega
-        // 6) batched_fri_verified_data_max_size
+        // 6) max_leaf_size
         // 7) D_omegas_size
         //  [..., D_omegas_i, ...]
         // 8 + D_omegas_size) q_size

@@ -32,16 +32,36 @@ library placeholder_verifier_unified_addition_component {
 
     uint256 constant OMEGA_OFFSET = 0x20;
 
+    uint256 constant LEN_OFFSET = 0x0;
+    uint256 constant OFFSET_OFFSET = 0x20;
     uint256 constant ZERO_INDEX_OFFSET = 0x40;
-    uint256 constant E_OFFSET = 0xe0;
+    uint256 constant PERMUTATION_ARGUMENT_OFFSET = 0x60;
+    uint256 constant GATE_ARGUMENT_OFFSET = 0x80;
     uint256 constant ALPHAS_OFFSET = 0xa0;
     uint256 constant CHALLENGE_OFFSET = 0xc0;
+    uint256 constant E_OFFSET = 0xe0;
     uint256 constant EVALUATION_POINTS_OFFSET = 0x100;
     uint256 constant F_OFFSET = 0x120;
     uint256 constant F_CONSOLIDATED_OFFSET = 0x140;
     uint256 constant T_CONSOLIDATED_OFFSET = 0x160;
     uint256 constant Z_AT_CHALLENGE_OFFSET = 0x180;
+    uint256 constant BETA_OFFSET = 0x1a0;
+    uint256 constant GAMMA_OFFSET = 0x1c0;
+    uint256 constant G_OFFSET = 0x1e0;
+    uint256 constant H_OFFSET = 0x200;
+    uint256 constant PERM_POLYNOMIAL_VALUE_OFFSET = 0x220;
+    uint256 constant PERM_POLYNOMIAL_SHIFTED_VALUE_OFFSET = 0x240;
+    uint256 constant Q_BLIND_EVAL_OFFSET = 0x260;
+    uint256 constant Q_LAST_EVAL_OFFSET = 0x280;
+    uint256 constant S_ID_I_OFFSET = 0x2a0;
+    uint256 constant S_SIGMA_I_OFFSET = 0x2c0;
     uint256 constant WITNESS_EVALUATION_POINTS_OFFSET = 0x2e0;
+    uint256 constant TMP1_OFFSET = 0x300;
+    uint256 constant TMP2_OFFSET = 0x320;
+    uint256 constant TMP3_OFFSET = 0x340;
+    uint256 constant IDX1_OFFSET = 0x360;
+    uint256 constant IDX2_OFFSET = 0x380;
+    uint256 constant STATUS_OFFSET = 0x3a0;
 
     function verify_proof_be(
         bytes calldata blob,

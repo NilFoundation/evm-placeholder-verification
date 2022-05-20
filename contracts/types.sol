@@ -161,6 +161,7 @@ library types {
     }
 
     struct placeholder_proof_map {
+        // 0x0
         uint256 witness_commitment_offset;
         // 0x20
         uint256 v_perm_commitment_offset;
@@ -175,24 +176,26 @@ library types {
         // 0xc0
         uint256 eval_proof_offset;
         // 0xe0
-        uint256 eval_proof_witness_offset;
+        uint256 eval_proof_lagrange_0_offset;
         // 0x100
-        uint256 eval_proof_permutation_offset;
+        uint256 eval_proof_witness_offset;
         // 0x120
-        uint256 eval_proof_quotient_offset;
+        uint256 eval_proof_permutation_offset;
         // 0x140
-        uint256 eval_proof_lookups_offset;
+        uint256 eval_proof_quotient_offset;
         // 0x160
-        uint256 eval_proof_id_permutation_offset;
+        uint256 eval_proof_lookups_offset;
         // 0x180
-        uint256 eval_proof_sigma_permutation_offset;
+        uint256 eval_proof_id_permutation_offset;
         // 0x1a0
-        uint256 eval_proof_public_input_offset;
+        uint256 eval_proof_sigma_permutation_offset;
         // 0x1c0
-        uint256 eval_proof_constant_offset;
+        uint256 eval_proof_public_input_offset;
         // 0x1e0
-        uint256 eval_proof_selector_offset;
+        uint256 eval_proof_constant_offset;
         // 0x200
+        uint256 eval_proof_selector_offset;
+        // 0x220
         uint256 eval_proof_special_selectors_offset;
     }
 
@@ -204,6 +207,7 @@ library types {
     }
 
     struct placeholder_local_variables {
+        // 0x0
         uint256 len;
         // 0x20
         uint256 offset;
@@ -251,15 +255,22 @@ library types {
         uint256 S_sigma_i;
         // 0x2e0
         uint256[][] witness_evaluation_points;
+        // 0x300
         uint256 tmp1;
+        // 0x320
         uint256 tmp2;
+        // 0x340
         uint256 tmp3;
+        // 0x360
         uint256 idx1;
+        // 0x380
         uint256 idx2;
+        // 0x3a0
         bool status;
     }
 
     struct gate_argument_local_vars {
+        // 0x0
         uint256 modulus;
         // 0x20
         uint256 theta;
@@ -279,7 +290,11 @@ library types {
         uint256 gates_evaluation;
         // 0x120
         uint256 theta_acc;
+        // 0x140
         uint256 selector_evaluations_offset;
+        // 0x160
         uint256 offset;
+        // 0x180
+        uint256[][] witness_evaluations;
     }
 }
