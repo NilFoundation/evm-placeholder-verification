@@ -7,8 +7,9 @@ const names = [
     "Non-native field element multiplication",
     "Non-native field element subtraction",
     "Non-native field element range check",
-    "Unified addition",
-    "Variable base scalar mul"
+    "Non-native complete edition",
+    "Non-native var base mul per bit",
+    "Non-native fixed base mul"
 ]
 
 const delimiter = ' | ';
