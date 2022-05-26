@@ -3,13 +3,8 @@ const fs = require("fs");
 const file = 'time.log';
 
 const names = [
-"Non-native field element addition",
-    "Non-native field element multiplication",
-    "Non-native field element subtraction",
-    "Non-native field element range check",
-    "Non-native complete addition",
-    "Non-native variable-base per-bit multiplication",
-    "Non-native fixed-base multiplication"
+    'blueprint_hashes_plonk_decomposition_test', 'blueprint_non_native_plonk_non_native_range_test', 'blueprint_non_native_plonk_var_base_mul_per_bit_test',
+    'blueprint_non_native_plonk_field_mul_test', 'blueprint_non_native_plonk_complete_addition_test', 'blueprint_non_native_plonk_field_sub_test'
 ]
 
 const delimiter = ' | ';
