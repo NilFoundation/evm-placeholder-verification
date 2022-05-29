@@ -88,7 +88,7 @@ function drawTableRow({Name, Test, SolanaProof}) {
         SolanaProof,
         Time: Test.split(" ")[1],
         Status: 'Done',
-        Verification_Gas: '-',
+        Verification_Gas: noData,
     };
 };
 
