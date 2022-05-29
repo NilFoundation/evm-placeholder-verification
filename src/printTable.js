@@ -11,7 +11,8 @@ const tests = {
     'blueprint_non_native_plonk_var_base_mul_per_bit_test': text[2],
     'blueprint_non_native_plonk_field_mul_test': text[3],
     'blueprint_non_native_plonk_complete_addition_test': text[4],
-    'blueprint_non_native_plonk_field_sub_test': text[5]
+    'blueprint_non_native_plonk_field_sub_test': text[5],
+    'blueprint_non_native_plonk_field_add_test': text[6]
 };
 
 const delimiter = ' | ';
@@ -59,7 +60,7 @@ const tableRows = [
     { Name: emptyLine },
     { Name: 'Each non-native component contains:' },
     { Name: `${tab}non_native_multiplication component`, Test: tests.blueprint_non_native_plonk_field_mul_test },
-    { Name: `${tab}non_native_addition_component`, Test: tests.blueprint_non_native_plonk_complete_addition_test },
+    { Name: `${tab}non_native_addition_component`, Test: tests.blueprint_non_native_plonk_field_add_test },
     { Name: `${tab}non_native_subtraction_component`, Test: tests.blueprint_non_native_plonk_field_sub_test },
     { Name: `${tab}non_native_range_conponent`, Test: tests.blueprint_non_native_plonk_non_native_range_test },
 ];
