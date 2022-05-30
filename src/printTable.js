@@ -12,7 +12,8 @@ const tests = {
     'blueprint_non_native_plonk_field_mul_test': text[3],
     'blueprint_non_native_plonk_complete_addition_test': text[4],
     'blueprint_non_native_plonk_field_sub_test': text[5],
-    'blueprint_non_native_plonk_field_add_test': text[6]
+    'blueprint_non_native_plonk_field_add_test': text[6],
+    'blueprint_non_native_plonk_fixed_base_mul_test': text[7]
 };
 
 const delimiter = ' | ';
@@ -47,7 +48,7 @@ const tableRows = [
     { Name: `${tab}${tab}sha_512_component`, Test: null },
     { Name: `${tab}${tab}${tab}decomposition_component `, Test: tests.blueprint_hashes_plonk_decomposition_test },
     { Name: `${tab}${tab}${tab}sha_512_process_component`, Test: null },
-    { Name: `${tab}${tab}non_native_fixed_base_multiplication_component`, Test: null },
+    { Name: `${tab}${tab}non_native_fixed_base_multiplication_component`, Test: tests.blueprint_non_native_plonk_fixed_base_mul_test },
     { Name: `${tab}${tab}non_native_complete_addition_component `, Test: tests.blueprint_non_native_plonk_complete_addition_test },
     { Name: `${tab}${tab}reduction_component`, Test: null },
     { Name: `${tab}${tab}non_native_variable_base_multiplication_component`, Test: null },

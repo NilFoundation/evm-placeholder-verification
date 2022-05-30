@@ -6,4 +6,5 @@ export LD_LIBRARY_PATH=/usr/local/lib/
 
 # shellcheck disable=SC2164
 cd /home/app/build/benchmark/
-./run.sh /.secret
+#./run.sh /.secret $ONLY_FAST_TESTS
+./run.sh $ONLY_FAST_TESTS
