@@ -1,19 +1,44 @@
 const asTable = require('as-table');
 const fs = require("fs");
-const file = 'time.log';
 
-let text = fs.readFileSync(file).toString().trim();
-text = text.split("\n");
+file = 'time_execution.log';
+let time_execution = fs.readFileSync(file).toString().trim();
+time_execution = time_execution.split("\n");
+
+file = 'preprocessor.log';
+let preprocessor = fs.readFileSync(file).toString().trim();
+preprocessor = preprocessor.split("\n");
+
+file = 'private.log';
+let private = fs.readFileSync(file).toString().trim();
+private = private.split("\n");
+
+file = 'permutation.log';
+let permutation = fs.readFileSync(file).toString().trim();
+permutation = permutation.split("\n");
+
+file = 'gate.log';
+let gate = fs.readFileSync(file).toString().trim();
+gate = gate.split("\n");
+
+file = 'quotient.log';
+let quotient = fs.readFileSync(file).toString().trim();
+quotient = quotient.split("\n");
+
+file = 'polynomial.log';
+let polynomial = fs.readFileSync(file).toString().trim();
+polynomial = polynomial.split("\n");
 
 const tests = {
-    'blueprint_hashes_plonk_decomposition_test': text[0],
-    'blueprint_non_native_plonk_non_native_range_test': text[1],
-    'blueprint_non_native_plonk_var_base_mul_per_bit_test': text[2],
-    'blueprint_non_native_plonk_field_mul_test': text[3],
-    'blueprint_non_native_plonk_complete_addition_test': text[4],
-    'blueprint_non_native_plonk_field_sub_test': text[5],
-    'blueprint_non_native_plonk_field_add_test': text[6],
-    'blueprint_non_native_plonk_fixed_base_mul_test': text[7]
+    'blueprint_hashes_plonk_decomposition_test': {time_execution: time_execution[0], preprocessor: preprocessor[0], private: private[0], permutation: permutation[0], gate: gate[0], quotient: quotient[0], polynomial: polynomial[0]},
+    'blueprint_non_native_plonk_non_native_range_test': {time_execution: time_execution[1], preprocessor: preprocessor[1], private: private[1], permutation: permutation[1], gate: gate[1], quotient: quotient[1], polynomial: polynomial[1]},
+    'blueprint_non_native_plonk_var_base_mul_per_bit_test': {time_execution: time_execution[2], preprocessor: preprocessor[2], private: private[2], permutation: permutation[2], gate: gate[2], quotient: quotient[2], polynomial: polynomial[2]},
+    'blueprint_non_native_plonk_field_mul_test': {time_execution: time_execution[3], preprocessor: preprocessor[3], private: private[3], permutation: permutation[3], gate: gate[3], quotient: quotient[3], polynomial: polynomial[3]},
+    'blueprint_non_native_plonk_complete_addition_test': {time_execution: time_execution[4], preprocessor: preprocessor[4], private: private[4], permutation: permutation[4], gate: gate[4], quotient: quotient[4], polynomial: polynomial[3]},
+    'blueprint_non_native_plonk_field_sub_test': {time_execution: time_execution[5], preprocessor: preprocessor[5], private: private[5], permutation: permutation[5], gate: gate[5], quotient: quotient[5], polynomial: polynomial[5]},
+    'blueprint_non_native_plonk_field_add_test': {time_execution: time_execution[6], preprocessor: preprocessor[6], private: private[6], permutation: permutation[6], gate: gate[6], quotient: quotient[6], polynomial: polynomial[6]},
+    'blueprint_non_native_plonk_non_native_demo_test': {time_execution: time_execution[7], preprocessor: preprocessor[7], private: private[7], permutation: permutation[7], gate: gate[7], quotient: quotient[7], polynomial: polynomial[7]},
+    'blueprint_non_native_plonk_fixed_base_mul_test': {time_execution: time_execution[8], preprocessor: preprocessor[8], private: private[8], permutation: permutation[8], gate: gate[8], quotient: quotient[8], polynomial: polynomial[8]},
 };
 
 const delimiter = ' | ';
@@ -43,7 +68,7 @@ const tableRows = [
     { Name: `${tab}${tab}sha_256_process_component`, Test: null },
     { Name: emptyLine },
     { Name: 'for $j$ from $0$ to $M$:' },
-    { Name: `${tab}Ed25519_component for $H_{B_{n_2 + 32}}$`, Test: null, SolanaProof: 'Signatures' },
+    { Name: `${tab}Ed25519_component for $H_{B_{n_2 + 32}}$`, Test: tests.blueprint_non_native_plonk_non_native_demo_test, SolanaProof: 'Signatures' },
     { Name: `${tab}${tab}non_native_range_component`, Test: tests.blueprint_non_native_plonk_non_native_range_test },
     { Name: `${tab}${tab}sha_512_component`, Test: null },
     { Name: `${tab}${tab}${tab}decomposition_component `, Test: tests.blueprint_hashes_plonk_decomposition_test },
@@ -80,6 +105,12 @@ function drawTableRow({Name, Test, SolanaProof}) {
             Name,
             SolanaProof,
             Time: noData,
+            Preprocessor: noData,
+            Private_preprocessor: noData,
+            Permutation_argument: noData,
+            Gate_argument: noData,
+            Quotient_argument: noData,
+            Polynomial_commitment_evaluation: noData,
             Status: noData,
             Verification_Gas: noData
         }
@@ -88,7 +119,13 @@ function drawTableRow({Name, Test, SolanaProof}) {
     return {
         Name,
         SolanaProof,
-        Time: Test.split(" ")[1],
+        Time: Test.time_execution,
+        Preprocessor: Test.preprocessor,
+        Private_preprocessor: Test.private,
+        Permutation_argument: Test.permutation,
+        Gate_argument: Test.gate,
+        Quotient_argument: Test.quotient,
+        Polynomial_commitment_evaluation: Test.polynomial,
         Status: 'Done',
         Verification_Gas: noData,
     };
