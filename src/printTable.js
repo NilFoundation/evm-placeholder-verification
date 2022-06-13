@@ -39,6 +39,7 @@ const tests = {
     'blueprint_non_native_plonk_field_add_test': {time_execution: time_execution[6], preprocessor: preprocessor[6], private: private[6], permutation: permutation[6], gate: gate[6], quotient: quotient[6], polynomial: polynomial[6]},
     'blueprint_non_native_plonk_non_native_demo_test': {time_execution: time_execution[7], preprocessor: preprocessor[7], private: private[7], permutation: permutation[7], gate: gate[7], quotient: quotient[7], polynomial: polynomial[7]},
     'blueprint_non_native_plonk_fixed_base_mul_test': {time_execution: time_execution[8], preprocessor: preprocessor[8], private: private[8], permutation: permutation[8], gate: gate[8], quotient: quotient[8], polynomial: polynomial[8]},
+    'blueprint_hashes_plonk_sha256_test': {time_execution: time_execution[9], preprocessor: preprocessor[9], private: private[9], permutation: permutation[9], gate: gate[9], quotient: quotient[9], polynomial: polynomial[9]}
 };
 
 const delimiter = ' | ';
@@ -63,16 +64,17 @@ const tableRows = [
     { Name: 'Solana component for $M$ validators', Test: null },
     { Name: emptyLine },
     { Name: 'for $i$ from $n_1 + 1$ to $n_2 + 32$' },
-    { Name: `${tab}H_{B_i} = sha_256_component`, Test: null, SolanaProof: 'Bank hash' },
-    { Name: `${tab}${tab}decomposition_component`, Test: tests.blueprint_hashes_plonk_decomposition_test },
-    { Name: `${tab}${tab}sha_256_process_component`, Test: null },
+    { Name: `${tab}H_{B_i} = sha2_component`, Test: tests.blueprint_hashes_plonk_sha256_test, SolanaProof: 'Bank hash' },
+    // { Name: `${tab}${tab}decomposition_component`, Test: tests.blueprint_hashes_plonk_decomposition_test },
+    // { Name: `${tab}${tab}sha2_process_component`, Test: tests.blueprint_hashes_plonk_sha256_test },
     { Name: emptyLine },
     { Name: 'for $j$ from $0$ to $M$:' },
     { Name: `${tab}Ed25519_component for $H_{B_{n_2 + 32}}$`, Test: tests.blueprint_non_native_plonk_non_native_demo_test, SolanaProof: 'Signatures' },
+    { Name: `${tab}${tab}sha2_component`, Test: tests.blueprint_hashes_plonk_sha256_test },
     { Name: `${tab}${tab}non_native_range_component`, Test: tests.blueprint_non_native_plonk_non_native_range_test },
-    { Name: `${tab}${tab}sha_512_component`, Test: null },
-    { Name: `${tab}${tab}${tab}decomposition_component `, Test: tests.blueprint_hashes_plonk_decomposition_test },
-    { Name: `${tab}${tab}${tab}sha_512_process_component`, Test: null },
+    // { Name: `${tab}${tab}sha_512_component`, Test: null },
+    // { Name: `${tab}${tab}${tab}decomposition_component `, Test: tests.blueprint_hashes_plonk_decomposition_test },
+    // { Name: `${tab}${tab}${tab}sha_512_process_component`, Test: null },
     { Name: `${tab}${tab}non_native_fixed_base_multiplication_component`, Test: tests.blueprint_non_native_plonk_fixed_base_mul_test },
     { Name: `${tab}${tab}non_native_complete_addition_component `, Test: tests.blueprint_non_native_plonk_complete_addition_test },
     { Name: `${tab}${tab}reduction_component`, Test: null },
@@ -80,15 +82,15 @@ const tableRows = [
     { Name: `${tab}${tab}${tab}non_native_variable_base_multiplication_per_bit_component`, Test: tests.blueprint_non_native_plonk_var_base_mul_per_bit_test },
     { Name: emptyLine },
     { Name: `${tab}Merkle_tree_component for the set $\{H_{B_{n_1}}, ..., H_{B_{n_2}}\}$`, Test: null, SolanaProof: 'State proof sequence maintenance' },
-    { Name: `${tab}${tab}sha_256_component`, Test: null },
-    { Name: `${tab}${tab}${tab}decomposition_component `, Test: tests.blueprint_hashes_plonk_decomposition_test },
-    { Name: `${tab}${tab}${tab}sha_256_process_component  `, Test: null },
+    { Name: `${tab}${tab}sha2_component`, Test: tests.blueprint_hashes_plonk_sha256_test },
+    // { Name: `${tab}${tab}${tab}decomposition_component `, Test: tests.blueprint_hashes_plonk_decomposition_test },
+    // { Name: `${tab}${tab}${tab}sha_256_process_component  `, Test: null },
     { Name: emptyLine },
-    { Name: 'Each non-native component contains:' },
-    { Name: `${tab}non_native_multiplication component`, Test: tests.blueprint_non_native_plonk_field_mul_test },
-    { Name: `${tab}non_native_addition_component`, Test: tests.blueprint_non_native_plonk_field_add_test },
-    { Name: `${tab}non_native_subtraction_component`, Test: tests.blueprint_non_native_plonk_field_sub_test },
-    { Name: `${tab}non_native_range_conponent`, Test: tests.blueprint_non_native_plonk_non_native_range_test },
+    // { Name: 'Each non-native component contains:' },
+    // { Name: `${tab}non_native_multiplication component`, Test: tests.blueprint_non_native_plonk_field_mul_test },
+    // { Name: `${tab}non_native_addition_component`, Test: tests.blueprint_non_native_plonk_field_add_test },
+    // { Name: `${tab}non_native_subtraction_component`, Test: tests.blueprint_non_native_plonk_field_sub_test },
+    // { Name: `${tab}non_native_range_conponent`, Test: tests.blueprint_non_native_plonk_non_native_range_test },
 ];
 
 function drawTable () {
@@ -112,7 +114,7 @@ function drawTableRow({Name, Test, SolanaProof}) {
             Quotient_argument: noData,
             Polynomial_commitment_evaluation: noData,
             Status: noData,
-            Verification_Gas: noData
+            // Verification_Gas: noData
         }
     }
 
@@ -127,7 +129,7 @@ function drawTableRow({Name, Test, SolanaProof}) {
         Quotient_argument: Test.quotient,
         Polynomial_commitment_evaluation: Test.polynomial,
         Status: 'Done',
-        Verification_Gas: noData,
+        // Verification_Gas: noData,
     };
 };
 
