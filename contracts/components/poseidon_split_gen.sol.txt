@@ -20,13 +20,20 @@ pragma solidity >=0.8.4;
 import "../types.sol";
 import "../basic_marshalling.sol";
 import "../commitments/lpc_verifier.sol";
-// TODO: import all gate argument evaluation modules
-// import "./component_name/component_name_gate0.sol";
-// import "./component_name/component_name_gate1.sol";
-// ...
+import "./poseidon/poseidon_gate0.sol";
+import "./poseidon/poseidon_gate1.sol";
+import "./poseidon/poseidon_gate2.sol";
+import "./poseidon/poseidon_gate3.sol";
+import "./poseidon/poseidon_gate4.sol";
+import "./poseidon/poseidon_gate5.sol";
+import "./poseidon/poseidon_gate6.sol";
+import "./poseidon/poseidon_gate7.sol";
+import "./poseidon/poseidon_gate8.sol";
+import "./poseidon/poseidon_gate9.sol";
+import "./poseidon/poseidon_gate10.sol";
 
-// TODO: name main component module
-library component_name_split {
+// TODO: name component
+library poseidon_split_gen {
     // TODO: specify constants
     uint256 constant WITNESSES_N = 15;
     uint256 constant WITNESSES_TOTAL_N = 0;
@@ -71,10 +78,28 @@ library component_name_split {
         }
 
         gate_params.theta_acc = 1;
-        // TODO: evaluate gate argument on each gate of the circuit
-        // (gate_params.gates_evaluation, gate_params.theta_acc) = component_name_gate0.evaluate_gate_be(gate_params, columns_rotations);
-        // (gate_params.gates_evaluation, gate_params.theta_acc) = component_name_gate1.evaluate_gate_be(gate_params, columns_rotations);
-        // ...
+        (gate_params.gates_evaluation, gate_params.theta_acc) = poseidon_gate0
+            .evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = poseidon_gate1
+            .evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = poseidon_gate2
+            .evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = poseidon_gate3
+            .evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = poseidon_gate4
+            .evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = poseidon_gate5
+            .evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = poseidon_gate6
+            .evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = poseidon_gate7
+            .evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = poseidon_gate8
+            .evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = poseidon_gate9
+            .evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = poseidon_gate10
+            .evaluate_gate_be(gate_params, columns_rotations);
 
         gates_evaluation = gate_params.gates_evaluation;
     }

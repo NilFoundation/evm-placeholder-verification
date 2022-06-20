@@ -19,18 +19,15 @@ pragma solidity >=0.8.4;
 
 import "../types.sol";
 import "../basic_marshalling.sol";
-import "../commitments/lpc_verifier.sol";
-// TODO: import all gate argument evaluation modules
-// import "./component_name/component_name_gate0.sol";
-// import "./component_name/component_name_gate1.sol";
-// ...
+import "../commitments/batched_lpc_verifier.sol";
+import "./variable_base_scalar_mul/gate0.sol";
+import "./variable_base_scalar_mul/gate1.sol";
 
-// TODO: name main component module
-library component_name_split {
+// TODO: name component
+library variable_base_scalar_mul_split_gen {
     // TODO: specify constants
     uint256 constant WITNESSES_N = 15;
-    uint256 constant WITNESSES_TOTAL_N = 0;
-    uint256 constant GATES_N = 11;
+    uint256 constant GATES_N = 2;
 
     // TODO: columns_rotations could be hard-coded
     function evaluate_gates_be(
@@ -41,40 +38,45 @@ library component_name_split {
         // TODO: check witnesses number in proof
 
         gate_params.witness_evaluations = new uint256[][](WITNESSES_N);
-        gate_params.offset =
-            gate_params.eval_proof_witness_offset +
-            basic_marshalling.LENGTH_OCTETS;
         for (uint256 i = 0; i < WITNESSES_N; i++) {
             gate_params.witness_evaluations[i] = new uint256[](
                 columns_rotations[i].length
             );
             for (uint256 j = 0; j < columns_rotations[i].length; j++) {
-                gate_params.witness_evaluations[i][j] = lpc_verifier
-                    .get_z_i_from_proof_be(blob, gate_params.offset, j);
+                gate_params.witness_evaluations[i][j] = batched_lpc_verifier
+                    .get_z_i_j_from_proof_be(
+                        blob,
+                        gate_params.eval_proof_witness_offset,
+                        i,
+                        j
+                    );
             }
-            gate_params.offset = lpc_verifier.skip_proof_be(
-                blob,
-                gate_params.offset
-            );
         }
         gate_params.selector_evaluations = new uint256[](GATES_N);
-        gate_params.offset =
-            gate_params.eval_proof_selector_offset +
-            basic_marshalling.LENGTH_OCTETS;
         for (uint256 i = 0; i < GATES_N; i++) {
-            gate_params.selector_evaluations[i] = lpc_verifier
-                .get_z_i_from_proof_be(blob, gate_params.offset, 0);
-            gate_params.offset = lpc_verifier.skip_proof_be(
-                blob,
-                gate_params.offset
-            );
+            gate_params.selector_evaluations[i] = batched_lpc_verifier
+                .get_z_i_j_from_proof_be(
+                    blob,
+                    gate_params.eval_proof_selector_offset,
+                    i,
+                    0
+                );
         }
 
         gate_params.theta_acc = 1;
-        // TODO: evaluate gate argument on each gate of the circuit
-        // (gate_params.gates_evaluation, gate_params.theta_acc) = component_name_gate0.evaluate_gate_be(gate_params, columns_rotations);
-        // (gate_params.gates_evaluation, gate_params.theta_acc) = component_name_gate1.evaluate_gate_be(gate_params, columns_rotations);
-        // ...
+        (
+            gate_params.gates_evaluation,
+            gate_params.theta_acc
+        ) = variable_base_scalar_mul_gate0.evaluate_gate_be(
+            gate_params
+        );
+        (
+            gate_params.gates_evaluation,
+            gate_params.theta_acc
+        ) = variable_base_scalar_mul_gate1.evaluate_gate_be(
+            gate_params
+        );
+        // require(false, logging.uint2decstr(gate_params.gates_evaluation));
 
         gates_evaluation = gate_params.gates_evaluation;
     }

@@ -140,147 +140,63 @@ library types {
         bytes32 current_challenge;
     }
 
-    struct path_element {
-        uint256 position;
-        bytes32 hash;
-    }
-
-    struct merkle_proof {
-        uint256 li;
-        bytes32 root;
-        path_element[] path;
-    }
-
     struct fri_params_type {
         uint256 modulus;
         uint256 r;
         uint256 max_degree;
+        uint256 lambda;
+        uint256 leaf_size;
 
         uint256[] D_omegas;
         uint256[] q;
 
         uint256[] U;
         uint256[] V;
-    }
+        uint256[][] batched_U;
+        uint256[][] batched_V;
 
-    struct fri_round_proof_type {
-        uint256 colinear_value;
-        bytes32 T_root;
-        uint256[] y;
-        merkle_proof colinear_path;
-        merkle_proof[] p;
-    }
-
-    struct fri_proof_type {
-        uint256[] final_polynomial;
-        fri_round_proof_type[] round_proofs;
-    }
-
-    struct lpc_params_type {
-        uint256 modulus;
-        // 0x20
-        uint256 lambda;
-        // 0x40
-        uint256 r;
-        // 0x60
-        uint256 m;
-        // 0x80
-        fri_params_type fri_params;
-    }
-
-    struct lpc_proof_type {
-        bytes32 T_root;
-        uint256[] z;
-        fri_proof_type[] fri_proof;
-    }
-
-    struct gate_eval_params {
-        uint256 modulus;
-        // 0x20
-        uint256 theta_acc;
-        // 0x40
-        uint256 theta;
-        // 0x60
-        uint256[] selector_evaluations_ptrs;
-        // 0x80
-        uint256 constraint_eval;
-        // 0xa0
-        uint256 gate_evaluation;
-        // 0xc0
-        bytes mds;
-        // 0xe0
-        bytes round_constants;
-    }
-    
-    struct permutation_argument_eval_params {
-        uint256 modulus;
-        // 0x20
-        uint256 challenge;
-        // 0x40
-        uint256[] column_polynomials_values;
-        // 0x60
-        uint256[] id_permutation_ptrs;
-        // 0x80
-        uint256[] sigma_permutation_ptrs;
-        // 0xa0
-        uint256 perm_polynomial_value;
-        // 0xc0
-        uint256 perm_polynomial_shifted_value;
-        // 0xe0
-        uint256 beta;
-        // 0x100
-        uint256 gamma;
-        // 0x120
-        uint256 q_blind_eval;
-        // 0x140
-        uint256 q_last_eval;
+        bytes batched_fri_verified_data;
+        uint256[] lpc_z;
+        uint256 batched_U_len;
     }
 
     struct placeholder_proof_map {
-        uint256 witness_commitments_offset;
-        uint256 T_commitments_offset;
-        uint256 eval_proof_offset;
-        uint256 eval_proof_witness_offset;
-        uint256 eval_proof_permutation_offset;
-        uint256 eval_proof_quotient_offset;
-        uint256 eval_proof_id_permutation_offset;
-        uint256 eval_proof_sigma_permutation_offset;
-        uint256 eval_proof_public_input_offset;
-        uint256 eval_proof_constant_offset;
-        uint256 eval_proof_selector_offset;
-        uint256 eval_proof_special_selectors_offset;
-    }
-
-    struct placeholder_proof_map_calldata {
-        uint256 v_perm_commitment_offset;
+        // 0x0
+        uint256 witness_commitment_offset;
         // 0x20
-        uint256 witness_commitments_offset;
+        uint256 v_perm_commitment_offset;
         // 0x40
-        uint256 T_commitments_offset;
+        uint256 input_perm_commitment_offset;
         // 0x60
-        uint256 eval_proof_offset;
+        uint256 value_perm_commitment_offset;
         // 0x80
-        uint256 eval_proof_witness_offset;
+        uint256 v_l_perm_commitment_offset;
         // 0xa0
-        uint256 eval_proof_permutation_offset;
+        uint256 T_commitments_offset;
         // 0xc0
-        uint256 eval_proof_quotient_offset;
+        uint256 eval_proof_offset;
         // 0xe0
-        uint256 eval_proof_id_permutation_offset;
+        uint256 eval_proof_lagrange_0_offset;
         // 0x100
-        uint256 eval_proof_sigma_permutation_offset;
+        uint256 eval_proof_witness_offset;
         // 0x120
-        uint256 eval_proof_public_input_offset;
+        uint256 eval_proof_permutation_offset;
         // 0x140
-        uint256 eval_proof_constant_offset;
+        uint256 eval_proof_quotient_offset;
         // 0x160
-        uint256 eval_proof_selector_offset;
+        uint256 eval_proof_lookups_offset;
         // 0x180
+        uint256 eval_proof_id_permutation_offset;
+        // 0x1a0
+        uint256 eval_proof_sigma_permutation_offset;
+        // 0x1c0
+        uint256 eval_proof_public_input_offset;
+        // 0x1e0
+        uint256 eval_proof_constant_offset;
+        // 0x200
+        uint256 eval_proof_selector_offset;
+        // 0x220
         uint256 eval_proof_special_selectors_offset;
-    }
-
-    struct placeholder_column_rotations {
-        int256[] rotations;
     }
 
     struct placeholder_common_data {
@@ -291,37 +207,7 @@ library types {
     }
 
     struct placeholder_local_variables {
-        uint256 len;
-        // 0x20
-        uint256 offset;
-        // 0x40
-        uint256 zero_index;
-        // 0x60
-        uint256[] permutation_argument;
-        // 0x80
-        uint256 gate_argument;
-        // 0xa0
-        uint256[] alphas;
-        // 0xc0
-        uint256 challenge;
-        // 0xe0
-        uint256 e;
-        // 0x100
-        uint256[] evaluation_points;
-        // 0x120
-        uint256[] F;
-        // 0x140
-        uint256 F_consolidated;
-        // 0x160
-        uint256 T_consolidated;
-        // 0x180
-        uint256 Z_at_challenge;
-        // 0x1a0
-        uint256 tmp1;
-        bool status;
-    }
-
-    struct placeholder_local_variables_calldata {
+        // 0x0
         uint256 len;
         // 0x20
         uint256 offset;
@@ -367,15 +253,24 @@ library types {
         uint256 S_id_i;
         // 0x2c0
         uint256 S_sigma_i;
+        // 0x2e0
+        uint256[][] witness_evaluation_points;
+        // 0x300
         uint256 tmp1;
+        // 0x320
         uint256 tmp2;
+        // 0x340
         uint256 tmp3;
+        // 0x360
         uint256 idx1;
+        // 0x380
         uint256 idx2;
+        // 0x3a0
         bool status;
     }
 
     struct gate_argument_local_vars {
+        // 0x0
         uint256 modulus;
         // 0x20
         uint256 theta;
@@ -384,7 +279,7 @@ library types {
         // 0x60
         uint256 gate_eval;
         // 0x80
-        uint256[][] witness_evaluations;
+        uint256[] witness_evaluations_offsets;
         // 0xa0
         uint256[] selector_evaluations;
         // 0xc0
@@ -395,6 +290,11 @@ library types {
         uint256 gates_evaluation;
         // 0x120
         uint256 theta_acc;
+        // 0x140
+        uint256 selector_evaluations_offset;
+        // 0x160
         uint256 offset;
+        // 0x180
+        uint256[][] witness_evaluations;
     }
 }

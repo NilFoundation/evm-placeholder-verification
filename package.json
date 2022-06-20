@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "dependencies": {
     "@truffle/hdwallet-provider": "^2.0.1",
+    "as-table": "1.0.55",
     "bip39": "^3.0.4",
     "eth-gas-reporter": "^0.2.24",
     "ethereumjs-wallet": "^1.0.2",
-    "web3": "^1.7.0",
-    "as-table": "1.0.55"
+    "web3": "^1.7.0"
   },
   "directories": {
     "src": "src",
@@ -24,5 +24,9 @@
     "url": "https://github.com/nilfoundation/evm-mina-verification/issues"
   },
   "homepage": "https://github.com/nilfoundation/evm-mina-verification#readme",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "json5": "^2.2.1",
+    "solpp": "^0.11.5"
+  }
 }
