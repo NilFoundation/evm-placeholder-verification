@@ -4,9 +4,26 @@ WORKDIR /home
 
 # Disable Prompt During Packages Installation
 RUN export DEBIAN_FRONTEND=noninteractive
-RUN apt-get -qq update
 
-RUN apt install -y cmake
+RUN apt-get update \
+  && apt-get install -y ssh \
+      build-essential \
+      gcc \
+      g++ \
+      gdb \
+      clang \
+      make \
+      cmake \
+      autoconf \
+      automake \
+      locales-all \
+      dos2unix \
+      rsync \
+      tar \
+  && apt-get clean
+
+RUN apt install -y pkg-config libc-ares-dev libfmt-dev liblz4-dev gnutls-dev libprotobuf-dev libyaml-cpp-dev libhwloc-dev libsctp-dev ragel
+RUN apt install -y libaio-dev libnuma-dev libpciaccess-dev libcrypto++-dev libxen-dev libxml2-dev xfslibs-dev systemtap-sdt-dev
 
 RUN apt install -y build-essential
 
