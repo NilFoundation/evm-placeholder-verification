@@ -20,7 +20,7 @@ pragma solidity >=0.8.4;
 import "../types.sol";
 import "../containers/merkle_verifier.sol";
 import "../cryptography/transcript.sol";
-import "../algebra/field.sol";
+//import "../algebra/field.sol";
 import "../algebra/polynomial.sol";
 import "../basic_marshalling.sol";
 
@@ -98,8 +98,9 @@ library batched_fri_verifier {
         // round_proofs
         uint256 value_len;
         (value_len, result_offset) = basic_marshalling.get_skip_length(blob, result_offset);
-        for (uint256 i = 0; i < value_len; i++) {
+        for (uint256 i = 0; i < value_len;) {
             result_offset = skip_round_proof_be(blob, result_offset);
+            unchecked{ i++; }
         }
     }
 
@@ -197,8 +198,9 @@ library batched_fri_verifier {
         // p
         uint256 value_len;
         (value_len, result_offset) = basic_marshalling.get_skip_length_check(blob, result_offset);
-        for (uint256 i = 0; i < value_len; i++) {
+        for (uint256 i = 0; i < value_len;) {
             result_offset = merkle_verifier.skip_merkle_proof_be_check(blob, result_offset);
+            unchecked{ i++; }
         }
     }
 
@@ -209,8 +211,9 @@ library batched_fri_verifier {
         // round_proofs
         uint256 value_len;
         (value_len, result_offset) = basic_marshalling.get_skip_length_check(blob, result_offset);
-        for (uint256 i = 0; i < value_len; i++) {
+        for (uint256 i = 0; i < value_len;) {
             result_offset = skip_round_proof_be_check(blob, result_offset);
+            unchecked{ i++; }
         }
     }
 
@@ -370,7 +373,7 @@ library batched_fri_verifier {
             round_proof_offset
         );
 
-        for (uint256 j = 0; j < m; j++) {
+        for (uint256 j = 0; j < m;) {
             local_vars.y_j_offset = basic_marshalling.skip_length(
                 blob,
                 local_vars.round_proof_y_offset
@@ -416,6 +419,7 @@ library batched_fri_verifier {
                     blob,
                     local_vars.round_proof_y_offset
                 );
+            unchecked{ j++; }
         }
         result = true;
     }
@@ -452,7 +456,7 @@ library batched_fri_verifier {
             offset
         );
 
-        for (uint256 i = 0; i < fri_params.r; i++) {
+        for (uint256 i = 0; i < fri_params.r;) {
             local_vars.alpha = transcript.get_field_challenge(
                 tr_state,
                 fri_params.modulus
@@ -541,6 +545,7 @@ library batched_fri_verifier {
             }
 
             local_vars.x = local_vars.x_next;
+            unchecked{ i++; }
         }
 
         require(
@@ -548,21 +553,9 @@ library batched_fri_verifier {
             "Final poly array size is not equal to params.leaf_size!"
         );
         local_vars.final_poly_offset = offset + basic_marshalling.LENGTH_OCTETS;
-        for (
-            uint256 polynom_index = 0;
-            polynom_index < fri_params.leaf_size;
-            polynom_index++
-        ) {
-            if (
-                basic_marshalling.get_length(
-                    blob,
-                    local_vars.final_poly_offset
-                ) -
-                    1 >
-                uint256(2) **
-                    (field.log2(fri_params.max_degree + 1) - fri_params.r) -
-                    1
-            ) {
+        for (uint256 polynom_index = 0; polynom_index < fri_params.leaf_size;) {
+            if (basic_marshalling.get_length(blob, local_vars.final_poly_offset) - 1 >
+                uint256(2) ** (field.log2(fri_params.max_degree + 1) - fri_params.r) - 1) {
                 return false;
             }
 
@@ -589,6 +582,7 @@ library batched_fri_verifier {
             }
             local_vars.final_poly_offset = basic_marshalling
                 .skip_vector_of_uint256_be(blob, local_vars.final_poly_offset);
+            unchecked{ polynom_index++; }
         }
 
         result = true;
@@ -622,7 +616,7 @@ library batched_fri_verifier {
             offset
         );
 
-        for (uint256 i = 0; i < fri_params.r; i++) {
+        for (uint256 i = 0; i < fri_params.r;) {
             local_vars.alpha = transcript.get_field_challenge(
                 tr_state,
                 fri_params.modulus
@@ -723,6 +717,7 @@ library batched_fri_verifier {
             }
 
             local_vars.x = local_vars.x_next;
+            unchecked{ i++; }
         }
 
         require(
@@ -730,11 +725,7 @@ library batched_fri_verifier {
             "Final poly array size is not equal to params.leaf_size!"
         );
         local_vars.final_poly_offset = offset + basic_marshalling.LENGTH_OCTETS;
-        for (
-            uint256 polynom_index = 0;
-            polynom_index < fri_params.leaf_size;
-            polynom_index++
-        ) {
+        for (uint256 polynom_index = 0; polynom_index < fri_params.leaf_size;) {
             if (
                 basic_marshalling.get_length(
                     blob,
@@ -771,6 +762,7 @@ library batched_fri_verifier {
             }
             local_vars.final_poly_offset = basic_marshalling
                 .skip_vector_of_uint256_be(blob, local_vars.final_poly_offset);
+            unchecked{ polynom_index++; }
         }
 
         result = true;

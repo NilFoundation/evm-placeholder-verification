@@ -151,8 +151,9 @@ library batched_lpc_verifier {
         // fri_proof
         uint256 value_len;
         (value_len, result_offset) = basic_marshalling.get_skip_length_check(blob, result_offset);
-        for (uint256 i = 0; i < value_len; i++) {
+        for (uint256 i = 0; i < value_len;) {
             result_offset = batched_fri_verifier.skip_proof_be_check(blob, result_offset);
+        unchecked{ i++; }
         }
     }
 
@@ -160,8 +161,9 @@ library batched_lpc_verifier {
     internal pure returns (uint256 result_offset) {
         uint256 value_len;
         (value_len, result_offset) = basic_marshalling.get_skip_length_check(blob, offset);
-        for (uint256 i = 0; i < value_len; i++) {
+        for (uint256 i = 0; i < value_len;) {
             result_offset = skip_proof_be_check(blob, result_offset);
+            unchecked{ i++; }
         }
     }
 
@@ -170,8 +172,9 @@ library batched_lpc_verifier {
         uint256 value_len;
         (value_len, result_offset) = basic_marshalling.get_skip_length_check(blob, offset);
         require(n <= value_len);
-        for (uint256 i = 0; i < n; i++) {
+        for (uint256 i = 0; i < n;) {
             result_offset = skip_proof_be_check(blob, result_offset);
+            unchecked{ i++; }
         }
     }
 
@@ -215,7 +218,7 @@ library batched_lpc_verifier {
 
         local_vars_type memory local_vars;
         local_vars.offset = basic_marshalling.skip_length(blob, skip_to_z(blob, offset));
-        for (uint256 polynom_index = 0; polynom_index < fri_params.leaf_size; polynom_index++) {
+        for (uint256 polynom_index = 0; polynom_index < fri_params.leaf_size;) {
             fri_params.batched_U[polynom_index] = polynomial.interpolate(
                 blob,
                 evaluation_points[polynom_index],
@@ -223,23 +226,26 @@ library batched_lpc_verifier {
                 fri_params.modulus
             );
             local_vars.offset = basic_marshalling.skip_vector_of_uint256_be(blob, local_vars.offset);
+            unchecked{ polynom_index++; }
         }
 
-        for (uint256 polynom_index = 0; polynom_index < fri_params.leaf_size; polynom_index++) {
+        for (uint256 polynom_index = 0; polynom_index < fri_params.leaf_size;) {
             fri_params.batched_V[polynom_index] = new uint256[](1);
             fri_params.batched_V[polynom_index][0] = 1;
-            for (uint256 point_index = 0; point_index < evaluation_points[polynom_index].length; point_index++) {
+            for (uint256 point_index = 0; point_index < evaluation_points[polynom_index].length;) {
                 fri_params.lpc_z[0] = fri_params.modulus - evaluation_points[polynom_index][point_index];
                 fri_params.batched_V[polynom_index] = polynomial.mul_poly(
                     fri_params.batched_V[polynom_index],
                     fri_params.lpc_z,
                     fri_params.modulus
                 );
+                unchecked{ point_index++; }
             }
+            unchecked{ polynom_index++; }
         }
 
         offset = skip_to_first_fri_proof_be(blob, offset);
-        for (uint256 round_id = 0; round_id < fri_params.lambda; round_id++) {
+        for (uint256 round_id = 0; round_id < fri_params.lambda;) {
             local_vars.status = batched_fri_verifier.parse_verify_proof_be(
                 blob,
                 offset,
@@ -250,6 +256,7 @@ library batched_lpc_verifier {
                 return false;
             }
             offset = batched_fri_verifier.skip_proof_be(blob, offset);
+            unchecked{ round_id++; }
         }
         result = true;
     }
@@ -265,10 +272,11 @@ library batched_lpc_verifier {
 
         local_vars_type memory local_vars;
         local_vars.offset = basic_marshalling.skip_length(blob, skip_to_z(blob, offset));
-        for (uint256 polynom_index = 0; polynom_index < fri_params.leaf_size; polynom_index++) {
+        for (uint256 polynom_index = 0; polynom_index < fri_params.leaf_size;) {
             fri_params.batched_U[polynom_index] = polynomial.interpolate(
                 blob,evaluation_points,local_vars.offset,fri_params.modulus);
             local_vars.offset = basic_marshalling.skip_vector_of_uint256_be(blob, local_vars.offset);
+            unchecked{ polynom_index++; }
         }
 
         fri_params.V = new uint256[](1);
@@ -279,19 +287,13 @@ library batched_lpc_verifier {
         }
 
         offset = skip_to_first_fri_proof_be(blob, offset);
-        for (uint256 round_id = 0; round_id < fri_params.lambda; round_id++) {
-//            uint256 pos;
-//            assembly {
-//                pos := mload(0x40)
-//            }
+        for (uint256 round_id = 0; round_id < fri_params.lambda; ) {
             local_vars.status = batched_fri_verifier.parse_verify_proof_single_V_be(blob, offset, tr_state, fri_params);
             if (!local_vars.status) {
                 return false;
             }
             offset = batched_fri_verifier.skip_proof_be(blob, offset);
-//            assembly {
-//                mstore(0x40, pos)
-//            }
+            unchecked{ round_id++; }
         }
         result = true;
     }

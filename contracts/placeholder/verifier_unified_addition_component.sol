@@ -75,10 +75,7 @@ library placeholder_verifier_unified_addition_component {
         transcript.update_transcript_b32_by_offset_calldata(
             tr_state,
             blob,
-            basic_marshalling.skip_length(
-                blob,
-                proof_map.witness_commitment_offset
-            )
+            basic_marshalling.skip_length(blob, proof_map.witness_commitment_offset)
         );
 
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
@@ -95,18 +92,11 @@ library placeholder_verifier_unified_addition_component {
         // 7. gate argument
         types.gate_argument_local_vars memory gate_params;
         gate_params.modulus = fri_params.modulus;
-        gate_params.theta = transcript.get_field_challenge(
-            tr_state,
-            fri_params.modulus
-        );
+        gate_params.theta = transcript.get_field_challenge(tr_state, fri_params.modulus);
         gate_params.eval_proof_witness_offset = proof_map.eval_proof_witness_offset;
         gate_params.eval_proof_selector_offset = proof_map.eval_proof_selector_offset;
         local_vars.gate_argument = unified_addition_component_gen
-            .evaluate_gates_be(
-                blob,
-                gate_params,
-                common_data.columns_rotations
-            );
+            .evaluate_gates_be(blob, gate_params, common_data.columns_rotations);
 
         // 8. alphas computations
         local_vars.alphas = new uint256[](f_parts);
@@ -124,9 +114,7 @@ library placeholder_verifier_unified_addition_component {
         local_vars.witness_evaluation_points = new uint256[][](fri_params.leaf_size);
 
         for (uint256 i = 0; i < fri_params.leaf_size;) {
-            local_vars.witness_evaluation_points[i] = new uint256[](
-                common_data.columns_rotations[i].length
-            );
+            local_vars.witness_evaluation_points[i] = new uint256[](common_data.columns_rotations[i].length);
             for (uint256 j = 0; j < common_data.columns_rotations[i].length;) {
                 local_vars.e = uint256(common_data.columns_rotations[i][j] + int256(fri_params.modulus)) % fri_params.modulus;
                 local_vars.e = field.expmod_static(common_data.omega, local_vars.e, fri_params.modulus);
@@ -418,7 +406,6 @@ library placeholder_verifier_unified_addition_component {
             )
         }
         if (local_vars.F_consolidated != local_vars.Z_at_challenge) {
-            require(false, "here11");
             return false;
         }
 
