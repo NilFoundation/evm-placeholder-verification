@@ -50,7 +50,6 @@ library unified_addition_component_gen {
         // TODO: check witnesses number in proof
 
         gate_params.offset = basic_marshalling.skip_length(
-            blob,
             batched_lpc_verifier.skip_to_z(
                 blob,
                 gate_params.eval_proof_witness_offset

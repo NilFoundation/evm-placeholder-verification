@@ -75,7 +75,7 @@ library placeholder_verifier_unified_addition_component {
         transcript.update_transcript_b32_by_offset_calldata(
             tr_state,
             blob,
-            basic_marshalling.skip_length(blob, proof_map.witness_commitment_offset)
+            basic_marshalling.skip_length(proof_map.witness_commitment_offset)
         );
 
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
@@ -103,7 +103,7 @@ library placeholder_verifier_unified_addition_component {
         transcript.get_field_challenges(tr_state, local_vars.alphas, fri_params.modulus);
 
         // 9. Evaluation proof check
-        transcript.update_transcript_b32_by_offset_calldata(tr_state, blob, basic_marshalling.skip_length(blob, proof_map.T_commitments_offset));
+        transcript.update_transcript_b32_by_offset_calldata(tr_state, blob, basic_marshalling.skip_length(proof_map.T_commitments_offset));
         local_vars.challenge = transcript.get_field_challenge(tr_state, fri_params.modulus);
         if (local_vars.challenge != basic_marshalling.get_uint256_be(blob, proof_map.eval_proof_offset)) {
             return false;

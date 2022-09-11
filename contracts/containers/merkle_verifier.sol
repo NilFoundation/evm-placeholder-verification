@@ -53,10 +53,7 @@ library merkle_verifier {
     uint256 constant LENGTH_RESTORING_SHIFT = 0xc0;
 
     function skip_merkle_proof_be(bytes calldata blob, uint256 offset)
-        internal
-        pure
-        returns (uint256 result_offset)
-    {
+    internal pure returns (uint256 result_offset) {
         result_offset = offset + LAYERS_OFFSET;
         assembly {
             result_offset := add(
@@ -75,10 +72,7 @@ library merkle_verifier {
     }
 
     function skip_merkle_proof_be_check(bytes calldata blob, uint256 offset)
-        internal
-        pure
-        returns (uint256 result_offset)
-    {
+    internal pure returns (uint256 result_offset) {
         result_offset = offset + LAYERS_OFFSET;
         require(result_offset < blob.length);
         assembly {
@@ -98,11 +92,8 @@ library merkle_verifier {
         require(result_offset <= blob.length, "skip_merkle_proof_be");
     }
 
-    function parse_verify_merkle_proof_not_pre_hash_be(
-        bytes calldata blob,
-        uint256 offset,
-        bytes32 verified_data
-    ) internal pure returns (bool result) {
+    function parse_verify_merkle_proof_not_pre_hash_be(bytes calldata blob, uint256 offset, bytes32 verified_data)
+    internal pure returns (bool result) {
         assembly {
             let depth := shr(
                 LENGTH_RESTORING_SHIFT,
@@ -235,51 +226,27 @@ library merkle_verifier {
         result = (verified_data == root);
     }
 
-    function parse_verify_merkle_proof_be(
-        bytes calldata blob,
-        uint256 offset,
-        bytes32 verified_data
-    ) internal pure returns (bool result) {
+    function parse_verify_merkle_proof_be(bytes calldata blob, uint256 offset, bytes32 verified_data)
+    internal pure returns (bool result) {
         assembly {
             mstore(0, verified_data)
             verified_data := keccak256(0, 0x20)
         }
-        result = parse_verify_merkle_proof_not_pre_hash_be(
-            blob,
-            offset,
-            verified_data
-        );
+        result = parse_verify_merkle_proof_not_pre_hash_be(blob, offset, verified_data);
     }
 
-    function parse_verify_merkle_proof_bytes_be(
-        bytes calldata blob,
-        uint256 offset,
-        bytes memory verified_data
-    ) internal pure returns (bool result) {
-        result = parse_verify_merkle_proof_not_pre_hash_be(
-            blob,
-            offset,
-            keccak256(verified_data)
-        );
+    function parse_verify_merkle_proof_bytes_be(bytes calldata blob, uint256 offset, bytes memory verified_data)
+    internal pure returns (bool result) {
+        result = parse_verify_merkle_proof_not_pre_hash_be(blob, offset, keccak256(verified_data));
     }
 
-    function parse_verify_merkle_proof_bytes_be(
-        bytes calldata blob,
-        uint256 offset,
-        bytes memory verified_data_bytes,
-        uint256 verified_data_bytes_len
-    ) internal pure returns (bool result) {
+    function parse_verify_merkle_proof_bytes_be(bytes calldata blob, uint256 offset, bytes memory verified_data_bytes,
+                                                uint256 verified_data_bytes_len)
+    internal pure returns (bool result) {
         bytes32 verified_data;
         assembly {
-            verified_data := keccak256(
-                add(verified_data_bytes, 0x20),
-                verified_data_bytes_len
-            )
+            verified_data := keccak256(add(verified_data_bytes, 0x20), verified_data_bytes_len)
         }
-        result = parse_verify_merkle_proof_not_pre_hash_be(
-            blob,
-            offset,
-            verified_data
-        );
+        result = parse_verify_merkle_proof_not_pre_hash_be(blob, offset, verified_data);
     }
 }

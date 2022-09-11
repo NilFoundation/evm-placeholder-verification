@@ -28,10 +28,10 @@ pragma solidity >=0.8.4;
 //     )\
 // }
 
-// #def skip_length(_blob, _offset, _result_offset) _result_offset = _offset + $(LENGTH_OCTETS);
+// #def skip_length(_offset, _result_offset) _result_offset = _offset + $(LENGTH_OCTETS);
 
 // #def get_skip_length(_blob, _offset, _var, _result_offset) $(get_length(_blob, _offset, _var))\
-// $(skip_length(_blob, _offset, _result_offset))
+// $(skip_length(_offset, _result_offset))
 
 // #def mstore_length(_blob, _offset, _var_memory, var_offset) assembly {\
 //     mstore(\
@@ -84,7 +84,7 @@ pragma solidity >=0.8.4;
 // _var = _tmp_var;
 
 // #def get_skip_length_tmp(_blob, _offset, _var, _result_offset) $(get_length_tmp(_blob, _offset, _var))\
-// $(skip_length(_blob, _offset, _result_offset))
+// $(skip_length(_offset, _result_offset))
 
 // #def skip_vector_of_uint256_tmp_be(_blob, _offset, _result_offset) uint256 _tmp_result_offset;\
 // uint256 _tmp_offset = _offset;\
@@ -131,7 +131,7 @@ pragma solidity >=0.8.4;
 // require(_result_offset <= _blob.length);
 
 // #def get_skip_length_check(_blob, _offset, _var, _result_offset) $(get_length_check(_blob, _offset, _var))\
-// $(skip_length(_blob, _offset, _result_offset))
+// $(skip_length(_offset, _result_offset))
 
 // #def skip_uint256_be_check(_blob, _offset, _result_offset) _result_offset = _offset + 32;\
 // require(_result_offset <= _blob.length);
@@ -236,11 +236,8 @@ library basic_marshalling {
         }
     }
 
-    function skip_length(bytes calldata blob, uint256 offset)
-        internal
-        pure
-        returns (uint256 result_offset)
-    {
+    function skip_length(uint256 offset)
+    internal pure returns (uint256 result_offset) {
         result_offset = offset + LENGTH_OCTETS;
     }
 
@@ -314,7 +311,7 @@ library basic_marshalling {
         uint256 i,
         uint256 j
     ) internal pure returns (uint256 result) {
-        offset = skip_length(blob, offset);
+        offset = skip_length(offset);
         if (i > 0) {
             for (uint256 _i = 0; _i < i; _i++) {
                 offset = skip_vector_of_uint256_be(blob, offset);
@@ -329,7 +326,7 @@ library basic_marshalling {
         uint256 i,
         uint256 j
     ) internal pure returns (uint256 result_ptr) {
-        offset = skip_length(blob, offset);
+        offset = skip_length(offset);
         if (i > 0) {
             for (uint256 _i = 0; _i < i; _i++) {
                 offset = skip_vector_of_uint256_be(blob, offset);

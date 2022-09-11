@@ -56,7 +56,6 @@ library placeholder_verifier_non_native_field_add_component {
             tr_state,
             blob,
             basic_marshalling.skip_length(
-                blob,
                 proof_map.witness_commitment_offset
             )
         );
@@ -102,7 +101,7 @@ library placeholder_verifier_non_native_field_add_component {
         transcript.update_transcript_b32_by_offset_calldata(
             tr_state,
             blob,
-            basic_marshalling.skip_length(blob, proof_map.T_commitments_offset)
+            basic_marshalling.skip_length(proof_map.T_commitments_offset)
         );
         local_vars.challenge = transcript.get_field_challenge(
             tr_state,

@@ -97,7 +97,7 @@ library lpc_verifier {
             result_offset
         );
         // fri_proof
-        result_offset = basic_marshalling.skip_length(blob, result_offset);
+        result_offset = basic_marshalling.skip_length(result_offset);
     }
 
     function get_z_n_be(bytes calldata blob, uint256 offset)

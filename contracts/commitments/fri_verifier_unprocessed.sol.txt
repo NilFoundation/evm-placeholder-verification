@@ -143,7 +143,7 @@ library fri_verifier {
             result_offset
         );
         // p
-        $(skip_length(blob, result_offset, result_offset))
+        $(skip_length(result_offset, result_offset))
     }
 
     function skip_to_round_proof_T_root_be(bytes calldata blob, uint256 offset)
@@ -154,7 +154,7 @@ library fri_verifier {
         // colinear_value
         $(skip_uint256_be(blob, offset, result_offset))
         // T_root
-        $(skip_length(blob, result_offset, result_offset))
+        $(skip_length(result_offset, result_offset))
     }
 
     function skip_to_round_proof_colinear_path_be(
@@ -203,7 +203,7 @@ library fri_verifier {
         // final_polynomial
         $(skip_vector_of_uint256_be(blob, offset, result_offset))
         // round_proofs
-        $(skip_length(blob, result_offset, result_offset))
+        $(skip_length(result_offset, result_offset))
     }
 
     function skip_round_proof_be_check(bytes calldata blob, uint256 offset)

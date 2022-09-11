@@ -84,7 +84,7 @@ library batched_lpc_verifier {
             result_offset
         );
         // fri_proof
-        result_offset = basic_marshalling.skip_length(blob, result_offset);
+        result_offset = basic_marshalling.skip_length(result_offset);
     }
 
     function get_z_i_j_from_proof_be(
@@ -217,7 +217,7 @@ library batched_lpc_verifier {
         );
 
         local_vars_type memory local_vars;
-        local_vars.offset = basic_marshalling.skip_length(blob, skip_to_z(blob, offset));
+        local_vars.offset = basic_marshalling.skip_length(skip_to_z(blob, offset));
         for (uint256 polynom_index = 0; polynom_index < fri_params.leaf_size;) {
             fri_params.batched_U[polynom_index] = polynomial.interpolate(
                 blob,
@@ -271,7 +271,7 @@ library batched_lpc_verifier {
         require(fri_params.lambda == get_fri_proof_n_be(blob, offset), "Fri proofs number is not equal to lambda!");
 
         local_vars_type memory local_vars;
-        local_vars.offset = basic_marshalling.skip_length(blob, skip_to_z(blob, offset));
+        local_vars.offset = basic_marshalling.skip_length(skip_to_z(blob, offset));
         for (uint256 polynom_index = 0; polynom_index < fri_params.leaf_size;) {
             fri_params.batched_U[polynom_index] = polynomial.interpolate(
                 blob,evaluation_points,local_vars.offset,fri_params.modulus);

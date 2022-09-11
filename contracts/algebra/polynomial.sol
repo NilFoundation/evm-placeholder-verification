@@ -38,14 +38,11 @@ library polynomial {
       a direct pointer.
       The function requires that n is divisible by 8.
     */
-    function evaluate(
-        uint256[] memory coeffs,
-        uint256 point,
-        uint256 modulus
-    ) internal pure returns (uint256) {
+    function evaluate(uint256[] memory coeffs, uint256 point, uint256 modulus)
+    internal pure returns (uint256) {
         uint256 result = 0;
         uint256 x_pow = 1;
-        for (uint256 i = 0; i < coeffs.length; i++) {
+        for (uint256 i = 0; i < coeffs.length;) {
             assembly {
                 result := addmod(
                     result,
@@ -58,20 +55,16 @@ library polynomial {
                 )
                 x_pow := mulmod(x_pow, point, modulus)
             }
+            unchecked{ i++; }
         }
         return result;
     }
 
-    function evaluate_by_ptr(
-        bytes calldata blob,
-        uint256 offset,
-        uint256 len,
-        uint256 point,
-        uint256 modulus
-    ) internal pure returns (uint256) {
+    function evaluate_by_ptr(bytes calldata blob, uint256 offset, uint256 len, uint256 point, uint256 modulus)
+    internal pure returns (uint256) {
         uint256 result = 0;
         uint256 x_pow = 1;
-        for (uint256 i = 0; i < len; i++) {
+        for (uint256 i = 0; i < len;) {
             assembly {
                 result := addmod(
                     result,
@@ -86,15 +79,13 @@ library polynomial {
                 )
                 x_pow := mulmod(x_pow, point, modulus)
             }
+            unchecked{ i++; }
         }
         return result;
     }
 
-    function add_poly(
-        uint256[] memory a,
-        uint256[] memory b,
-        uint256 modulus
-    ) internal pure returns (uint256[] memory result) {
+    function add_poly(uint256[] memory a, uint256[] memory b, uint256 modulus)
+    internal pure returns (uint256[] memory result) {
         // [0] = minLen
         // [1] = maxLen
         // [3] = longArr
@@ -143,19 +134,16 @@ library polynomial {
         }
     }
 
-    function mul_poly(
-        uint256[] memory a,
-        uint256[] memory b,
-        uint256 modulus
-    ) internal pure returns (uint256[] memory result) {
+    function mul_poly(uint256[] memory a, uint256[] memory b, uint256 modulus)
+    internal pure returns (uint256[] memory result) {
         if (b.length > a.length) {
             uint256[] memory tmp = a;
             a = b;
             b = tmp;
         }
-        for (uint256 i = 0; i < b.length; i++) {
+        for (uint256 i = 0; i < b.length;) {
             uint256[] memory currentValues = new uint256[](a.length + i);
-            for (uint256 j = 0; j < a.length; j++) {
+            for (uint256 j = 0; j < a.length;) {
                 // currentValues[j + i] = a[j] * b[i];
                 assembly {
                     mstore(
@@ -167,8 +155,10 @@ library polynomial {
                         )
                     )
                 }
+                unchecked{ j++; }
             }
             result = add_poly(result, currentValues, modulus);
+            unchecked{ i++; }
         }
     }
 
@@ -179,10 +169,10 @@ library polynomial {
     ) internal pure returns (uint256[] memory result) {
         require(xs.length == fxs.length);
         uint256 len = fxs.length;
-        for (uint256 i = 0; i < len; i++) {
+        for (uint256 i = 0; i < len;) {
             uint256[] memory thisPoly = new uint256[](1);
             thisPoly[0] = 1;
-            for (uint256 j = 0; j < len; j++) {
+            for (uint256 j = 0; j < len;) {
                 if (i == j) {
                     continue;
                 }
@@ -191,6 +181,7 @@ library polynomial {
                 thisTerm[0] = field.fdiv(modulus - xs[j], denominator, modulus);
                 thisTerm[1] = field.fdiv(uint256(1), denominator, modulus);
                 thisPoly = mul_poly(thisPoly, thisTerm, modulus);
+                unchecked{ j++; }
             }
             if (fxs.length + 1 >= i) {
                 uint256[] memory multiple = new uint256[](1);
@@ -198,6 +189,7 @@ library polynomial {
                 thisPoly = mul_poly(thisPoly, multiple, modulus);
             }
             result = add_poly(result, thisPoly, modulus);
+            unchecked{ i++; }
         }
     }
 
@@ -226,18 +218,11 @@ library polynomial {
         }
     }
 
-    function interpolate_evaluate_by_2_points(
-        uint256[] memory x,
-        uint256[] memory fx,
-        uint256 eval_point,
-        uint256 modulus
-    ) internal view returns (uint256 result) {
+    function interpolate_evaluate_by_2_points(uint256[] memory x, uint256[] memory fx, uint256 eval_point, uint256 modulus)
+    internal view returns (uint256 result) {
         require(x.length == 2, "x length is not equal to 2");
         require(fx.length == 2, "fx length is not equal to 2");
-        uint256 x2_minus_x1_inv = field.inverse_static(
-            (x[1] + (modulus - x[0])) % modulus,
-            modulus
-        );
+        uint256 x2_minus_x1_inv = field.inverse_static((x[1] + (modulus - x[0])) % modulus, modulus);
         assembly {
             let y2_minus_y1 := addmod(
                 mload(add(fx, 0x40)),
@@ -261,12 +246,8 @@ library polynomial {
         }
     }
 
-    function interpolate_evaluate(
-        uint256[] memory x,
-        uint256[] memory fx,
-        uint256 eval_point,
-        uint256 modulus
-    ) internal view returns (uint256) {
+    function interpolate_evaluate(uint256[] memory x, uint256[] memory fx, uint256 eval_point, uint256 modulus)
+    internal view returns (uint256) {
         if (x.length == 1 && fx.length == 1) {
             return fx[0];
         }
@@ -277,11 +258,8 @@ library polynomial {
         return 0;
     }
 
-    function interpolate_by_2_points(
-        uint256[] memory x,
-        uint256[] memory fx,
-        uint256 modulus
-    ) internal view returns (uint256[] memory result) {
+    function interpolate_by_2_points(uint256[] memory x, uint256[] memory fx, uint256 modulus)
+    internal view returns (uint256[] memory result) {
         require(x.length == 2, "x length is not equal to 2");
         require(fx.length == 2, "fx length is not equal to 2");
         uint256 x2_minus_x1_inv = field.inverse_static(
@@ -306,11 +284,8 @@ library polynomial {
         }
     }
 
-    function interpolate(
-        uint256[] memory x,
-        uint256[] memory fx,
-        uint256 modulus
-    ) internal view returns (uint256[] memory) {
+    function interpolate(uint256[] memory x, uint256[] memory fx, uint256 modulus)
+    internal view returns (uint256[] memory) {
         if (x.length == 1 && fx.length == 1) {
             uint256[] memory result = new uint256[](1);
             result[0] = fx[0];
@@ -322,21 +297,11 @@ library polynomial {
         }
     }
 
-    function interpolate_by_2_points(
-        bytes calldata blob,
-        uint256[] memory x,
-        uint256 fx_offset,
-        uint256 modulus
-    ) internal view returns (uint256[] memory result) {
+    function interpolate_by_2_points(bytes calldata blob, uint256[] memory x, uint256 fx_offset, uint256 modulus)
+    internal view returns (uint256[] memory result) {
         require(x.length == 2, "x length is not equal to 2");
-        require(
-            basic_marshalling.get_length(blob, fx_offset) == 2,
-            "fx length is not equal to 2"
-        );
-        uint256 x2_minus_x1_inv = field.inverse_static(
-            (x[1] + (modulus - x[0])) % modulus,
-            modulus
-        );
+        require(basic_marshalling.get_length(blob, fx_offset) == 2, "fx length is not equal to 2");
+        uint256 x2_minus_x1_inv = field.inverse_static((x[1] + (modulus - x[0])) % modulus, modulus);
         result = new uint256[](2);
         assembly {
             let y2_minus_y1 := addmod(
@@ -366,21 +331,13 @@ library polynomial {
         }
     }
 
-    function interpolate(
-        bytes calldata blob,
-        uint256[] memory x,
-        uint256 fx_offset,
-        uint256 modulus
-    ) internal view returns (uint256[] memory) {
+    function interpolate(bytes calldata blob, uint256[] memory x, uint256 fx_offset, uint256 modulus)
+    internal view returns (uint256[] memory) {
         if (
             x.length == 1 && basic_marshalling.get_length(blob, fx_offset) == 1
         ) {
             uint256[] memory result = new uint256[](1);
-            result[0] = basic_marshalling.get_i_uint256_from_vector(
-                blob,
-                fx_offset,
-                0
-            );
+            result[0] = basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 0);
             return result;
         } else if (x.length == 2) {
             return interpolate_by_2_points(blob, x, fx_offset, modulus);
