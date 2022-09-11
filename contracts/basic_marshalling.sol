@@ -166,28 +166,20 @@ library basic_marshalling {
     //================================================================================================================
     // TODO: general case
     function skip_octet_vector_32_be(bytes calldata blob, uint256 offset)
-        internal
-        pure
-        returns (uint256 result_offset)
-    {
+    internal pure returns (uint256 result_offset) {
         result_offset = offset + LENGTH_OCTETS + 32;
     }
 
     function get_octet_vector_32_be(bytes calldata blob, uint256 offset)
-        internal
-        pure
-        returns (bytes32 result)
-    {
+    internal pure returns (bytes32 result) {
         assembly {
             result := mload(add(add(blob.offset, offset), LENGTH_OCTETS))
         }
     }
 
     // TODO: general case
-    function skip_vector_of_octet_vectors_32_be(
-        bytes calldata blob,
-        uint256 offset
-    ) internal pure returns (uint256 result_offset) {
+    function skip_vector_of_octet_vectors_32_be(bytes calldata blob, uint256 offset)
+    internal pure returns (uint256 result_offset) {
         result_offset = offset + LENGTH_OCTETS;
         assembly {
             result_offset := add(
@@ -204,18 +196,12 @@ library basic_marshalling {
     }
 
     function skip_uint256_be(bytes calldata blob, uint256 offset)
-        internal
-        pure
-        returns (uint256 result_offset)
-    {
+    internal pure returns (uint256 result_offset) {
         result_offset = offset + 32;
     }
 
     function skip_vector_of_uint256_be(bytes calldata blob, uint256 offset)
-        internal
-        pure
-        returns (uint256 result_offset)
-    {
+    internal pure returns (uint256 result_offset) {
         assembly {
             result_offset := add(
                 add(

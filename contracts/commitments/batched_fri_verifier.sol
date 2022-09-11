@@ -74,291 +74,150 @@ library batched_fri_verifier {
     uint256 constant m = 2;
 
     function skip_round_proof_be(bytes calldata blob, uint256 offset)
-        internal
-        pure
-        returns (uint256 result_offset)
-    {
+    internal pure returns (uint256 result_offset) {
         // colinear_value
-        result_offset = basic_marshalling.skip_vector_of_uint256_be(
-            blob,
-            offset
-        );
+        result_offset = basic_marshalling.skip_vector_of_uint256_be(blob, offset);
         // T_root
-        result_offset = basic_marshalling.skip_octet_vector_32_be(
-            blob,
-            result_offset
-        );
+        result_offset = basic_marshalling.skip_octet_vector_32_be(blob, result_offset);
         // y
-        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(
-            blob,
-            result_offset
-        );
+        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, result_offset);
         // colinear_path
-        result_offset = merkle_verifier.skip_merkle_proof_be(
-            blob,
-            result_offset
-        );
+        result_offset = merkle_verifier.skip_merkle_proof_be(blob, result_offset);
         // p
         uint256 value_len;
-        (value_len, result_offset) = basic_marshalling.get_skip_length(
-            blob,
-            result_offset
-        );
+        (value_len, result_offset) = basic_marshalling.get_skip_length(blob, result_offset);
         for (uint256 i = 0; i < value_len; i++) {
-            result_offset = merkle_verifier.skip_merkle_proof_be(
-                blob,
-                result_offset
-            );
+            result_offset = merkle_verifier.skip_merkle_proof_be(blob, result_offset);
         }
     }
 
     function skip_proof_be(bytes calldata blob, uint256 offset)
-        internal
-        pure
-        returns (uint256 result_offset)
-    {
+    internal pure returns (uint256 result_offset) {
         // final_polynomial
-        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(
-            blob,
-            offset
-        );
+        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, offset);
         // round_proofs
         uint256 value_len;
-        (value_len, result_offset) = basic_marshalling.get_skip_length(
-            blob,
-            result_offset
-        );
+        (value_len, result_offset) = basic_marshalling.get_skip_length(blob, result_offset);
         for (uint256 i = 0; i < value_len; i++) {
             result_offset = skip_round_proof_be(blob, result_offset);
         }
     }
 
     function get_round_proofs_n_be(bytes calldata blob, uint256 offset)
-        internal
-        pure
-        returns (uint256 n)
-    {
+    internal pure returns (uint256 n){
         // final_polynomial
-        offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(
-            blob,
-            offset
-        );
+        offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, offset);
         // round_proofs
         n = basic_marshalling.get_length(blob, offset);
     }
 
     function get_round_proof_y_n_be(bytes calldata blob, uint256 offset)
-        internal
-        pure
-        returns (uint256 n)
-    {
+    internal pure returns (uint256 n) {
         // colinear_value
-        uint256 result_offset = basic_marshalling.skip_vector_of_uint256_be(
-            blob,
-            offset
-        );
+        uint256 result_offset = basic_marshalling.skip_vector_of_uint256_be(blob, offset);
         // T_root
-        result_offset = basic_marshalling.skip_octet_vector_32_be(
-            blob,
-            result_offset
-        );
+        result_offset = basic_marshalling.skip_octet_vector_32_be(blob, result_offset);
         // y
         n = basic_marshalling.get_length(blob, result_offset);
     }
 
     function get_round_proof_p_n_be(bytes calldata blob, uint256 offset)
-        internal
-        pure
-        returns (uint256 n)
-    {
+    internal pure returns (uint256 n) {
         // colinear_value
-        uint256 result_offset = basic_marshalling.skip_vector_of_uint256_be(
-            blob,
-            offset
-        );
+        uint256 result_offset = basic_marshalling.skip_vector_of_uint256_be(blob, offset);
         // T_root
-        result_offset = basic_marshalling.skip_octet_vector_32_be(
-            blob,
-            result_offset
-        );
+        result_offset = basic_marshalling.skip_octet_vector_32_be(blob, result_offset);
         // y
-        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(
-            blob,
-            result_offset
-        );
+        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, result_offset);
         // colinear_path
-        result_offset = merkle_verifier.skip_merkle_proof_be(
-            blob,
-            result_offset
-        );
+        result_offset = merkle_verifier.skip_merkle_proof_be(blob, result_offset);
         // p
         n = basic_marshalling.get_length(blob, result_offset);
     }
 
     function skip_to_round_proof_T_root_be(bytes calldata blob, uint256 offset)
-        internal
-        pure
-        returns (uint256 result_offset)
-    {
+    internal pure returns (uint256 result_offset) {
         // colinear_value
-        result_offset = basic_marshalling.skip_vector_of_uint256_be(
-            blob,
-            offset
-        );
+        result_offset = basic_marshalling.skip_vector_of_uint256_be(blob, offset);
         // T_root
         result_offset = basic_marshalling.skip_length(blob, result_offset);
     }
 
     function skip_to_first_round_proof_be(bytes calldata blob, uint256 offset)
-        internal
-        pure
-        returns (uint256 result_offset)
-    {
+    internal pure returns (uint256 result_offset) {
         // final_polynomial
-        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(
-            blob,
-            offset
-        );
+        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, offset);
         result_offset = basic_marshalling.skip_length(blob, result_offset);
     }
 
     function skip_to_first_round_proof_y_be(bytes calldata blob, uint256 offset)
-        internal
-        pure
-        returns (uint256 result_offset)
-    {
+    internal pure returns (uint256 result_offset) {
         // colinear_value
-        result_offset = basic_marshalling.skip_vector_of_uint256_be(
-            blob,
-            offset
-        );
+        result_offset = basic_marshalling.skip_vector_of_uint256_be(blob, offset);
         // T_root
-        result_offset = basic_marshalling.skip_octet_vector_32_be(
-            blob,
-            result_offset
-        );
+        result_offset = basic_marshalling.skip_octet_vector_32_be(blob, result_offset);
         // y
         result_offset = basic_marshalling.skip_length(blob, result_offset);
     }
 
     function skip_to_first_round_proof_p_be(bytes calldata blob, uint256 offset)
-        internal
-        pure
-        returns (uint256 result_offset)
-    {
+    internal pure returns (uint256 result_offset) {
         // colinear_value
-        result_offset = basic_marshalling.skip_vector_of_uint256_be(
-            blob,
-            offset
-        );
+        result_offset = basic_marshalling.skip_vector_of_uint256_be(blob, offset);
         // T_root
-        result_offset = basic_marshalling.skip_octet_vector_32_be(
-            blob,
-            result_offset
-        );
+        result_offset = basic_marshalling.skip_octet_vector_32_be(blob, result_offset);
         // y
-        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(
-            blob,
-            result_offset
-        );
+        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, result_offset);
         // colinear_path
-        result_offset = merkle_verifier.skip_merkle_proof_be(
-            blob,
-            result_offset
-        );
+        result_offset = merkle_verifier.skip_merkle_proof_be(blob, result_offset);
         // p
         result_offset = basic_marshalling.skip_length(blob, result_offset);
     }
 
-    function skip_to_round_proof_colinear_path_be(
-        bytes calldata blob,
-        uint256 offset
-    ) internal pure returns (uint256 result_offset) {
+    function skip_to_round_proof_colinear_path_be(bytes calldata blob, uint256 offset)
+    internal pure returns (uint256 result_offset) {
         // colinear_value
-        result_offset = basic_marshalling.skip_vector_of_uint256_be(
-            blob,
-            offset
-        );
+        result_offset = basic_marshalling.skip_vector_of_uint256_be(blob, offset);
         // T_root
-        result_offset = basic_marshalling.skip_octet_vector_32_be(
-            blob,
-            result_offset
-        );
+        result_offset = basic_marshalling.skip_octet_vector_32_be(blob, result_offset);
         // y
-        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(
-            blob,
-            result_offset
-        );
+        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, result_offset);
     }
 
     function skip_round_proof_be_check(bytes calldata blob, uint256 offset)
-        internal
-        pure
-        returns (uint256 result_offset)
-    {
+    internal pure returns (uint256 result_offset) {
         // colinear_value
-        result_offset = basic_marshalling.skip_vector_of_uint256_be_check(
-            blob,
-            offset
-        );
+        result_offset = basic_marshalling.skip_vector_of_uint256_be_check(blob, offset);
         // T_root
-        result_offset = basic_marshalling.skip_octet_vector_32_be_check(
-            blob,
-            result_offset
-        );
+        result_offset = basic_marshalling.skip_octet_vector_32_be_check(blob, result_offset);
         // y
-        result_offset = basic_marshalling
-            .skip_vector_of_vectors_of_uint256_be_check(blob, result_offset);
+        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be_check(blob, result_offset);
         // colinear_path
-        result_offset = merkle_verifier.skip_merkle_proof_be_check(
-            blob,
-            result_offset
-        );
+        result_offset = merkle_verifier.skip_merkle_proof_be_check(blob, result_offset);
         // p
         uint256 value_len;
-        (value_len, result_offset) = basic_marshalling.get_skip_length_check(
-            blob,
-            result_offset
-        );
+        (value_len, result_offset) = basic_marshalling.get_skip_length_check(blob, result_offset);
         for (uint256 i = 0; i < value_len; i++) {
-            result_offset = merkle_verifier.skip_merkle_proof_be_check(
-                blob,
-                result_offset
-            );
+            result_offset = merkle_verifier.skip_merkle_proof_be_check(blob, result_offset);
         }
     }
 
     function skip_proof_be_check(bytes calldata blob, uint256 offset)
-        internal
-        pure
-        returns (uint256 result_offset)
-    {
+    internal pure returns (uint256 result_offset) {
         // final_polynomial
-        result_offset = basic_marshalling
-            .skip_vector_of_vectors_of_uint256_be_check(blob, offset);
+        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be_check(blob, offset);
         // round_proofs
         uint256 value_len;
-        (value_len, result_offset) = basic_marshalling.get_skip_length_check(
-            blob,
-            result_offset
-        );
+        (value_len, result_offset) = basic_marshalling.get_skip_length_check(blob, result_offset);
         for (uint256 i = 0; i < value_len; i++) {
             result_offset = skip_round_proof_be_check(blob, result_offset);
         }
     }
 
-    function eval_y_from_blob(
-        bytes calldata blob,
-        local_vars_type memory local_vars,
-        uint256 i,
-        uint256 j,
-        types.fri_params_type memory fri_params
-    ) internal view returns (uint256 result) {
-        result = basic_marshalling.get_i_uint256_from_vector(
-            blob,
-            local_vars.y_j_offset,
-            local_vars.y_polynom_index_j
-        );
+    function eval_y_from_blob(bytes calldata blob, local_vars_type memory local_vars, uint256 i, uint256 j,
+                              types.fri_params_type memory fri_params)
+    internal view returns (uint256 result) {
+        result = basic_marshalling.get_i_uint256_from_vector(blob, local_vars.y_j_offset, local_vars.y_polynom_index_j);
         if (i == 0) {
             uint256 U_evaluated_neg;
             uint256 V_evaluated_inv;
@@ -367,8 +226,7 @@ library batched_fri_verifier {
                     fri_params.modulus -
                     polynomial.evaluate(
                         fri_params.batched_U[local_vars.y_polynom_index_j],
-                        local_vars.x,
-                        fri_params.modulus
+                        local_vars.x, fri_params.modulus
                     );
                 V_evaluated_inv = field.inverse_static(
                     polynomial.evaluate(
