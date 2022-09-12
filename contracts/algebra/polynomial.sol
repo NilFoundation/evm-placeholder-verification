@@ -20,6 +20,7 @@ pragma solidity >=0.8.4;
 
 import "./field.sol";
 import "../basic_marshalling.sol";
+import "../logging.sol";
 
 /**
  * @title Turbo Plonk polynomial evaluation
@@ -40,46 +41,28 @@ library polynomial {
     */
     function evaluate(uint256[] memory coeffs, uint256 point, uint256 modulus)
     internal pure returns (uint256) {
-        uint256 result = 0;
-        uint256 x_pow = 1;
-        for (uint256 i = 0; i < coeffs.length;) {
+        uint256 result;
+        for (uint256 i = coeffs.length; i > 0;) {
             assembly {
-                result := addmod(
-                    result,
-                    mulmod(
-                        x_pow,
-                        mload(add(add(coeffs, 0x20), mul(i, 0x20))),
-                        modulus
-                    ),
-                    modulus
-                )
-                x_pow := mulmod(x_pow, point, modulus)
+                result := addmod(mulmod(result, point, modulus),
+                                 mload(add(add(coeffs, 0x20), mul(sub(i, 0x01), 0x20))),
+                                 modulus)
             }
-            unchecked{ i++; }
+            unchecked{ i--; }
         }
         return result;
     }
 
     function evaluate_by_ptr(bytes calldata blob, uint256 offset, uint256 len, uint256 point, uint256 modulus)
     internal pure returns (uint256) {
-        uint256 result = 0;
-        uint256 x_pow = 1;
-        for (uint256 i = 0; i < len;) {
+        uint256 result;
+        for (uint256 i = len; i > 0;) {
             assembly {
-                result := addmod(
-                    result,
-                    mulmod(
-                        x_pow,
-                        calldataload(
-                            add(add(blob.offset, offset), mul(i, 0x20))
-                        ),
-                        modulus
-                    ),
-                    modulus
-                )
-                x_pow := mulmod(x_pow, point, modulus)
+                result := addmod(mulmod(result, point, modulus),
+                                 calldataload(add(add(blob.offset, offset), mul(sub(i, 0x01), 0x20))),
+                                 modulus)
             }
-            unchecked{ i++; }
+            unchecked{ i--; }
         }
         return result;
     }
