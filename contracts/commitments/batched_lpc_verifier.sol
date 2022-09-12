@@ -39,8 +39,9 @@ library batched_lpc_verifier {
         // fri_proof
         uint256 value_len;
         (value_len, result_offset) = basic_marshalling.get_skip_length(blob, result_offset);
-        for (uint256 i = 0; i < value_len; i++) {
+        for (uint256 i = 0; i < value_len;) {
             result_offset = batched_fri_verifier.skip_proof_be(blob, result_offset);
+            unchecked{ i++; }
         }
     }
 
@@ -51,8 +52,9 @@ library batched_lpc_verifier {
     {
         uint256 value_len;
         (value_len, result_offset) = basic_marshalling.get_skip_length(blob, offset);
-        for (uint256 i = 0; i < value_len; i++) {
+        for (uint256 i = 0; i < value_len;) {
             result_offset = skip_proof_be(blob, result_offset);
+            unchecked{ i++; }
         }
     }
 
@@ -207,14 +209,8 @@ library batched_lpc_verifier {
         result = false;
 
         fri_params.leaf_size = get_z_n_be(blob, offset);
-        require(
-            fri_params.leaf_size == evaluation_points.length,
-            "Array of evaluation points size is not equal to leaf_size!"
-        );
-        require(
-            fri_params.lambda == get_fri_proof_n_be(blob, offset),
-            "Fri proofs number is not equal to lambda!"
-        );
+        require(fri_params.leaf_size == evaluation_points.length, "Array of evaluation points size is not equal to leaf_size!");
+        require(fri_params.lambda == get_fri_proof_n_be(blob, offset), "Fri proofs number is not equal to lambda!");
 
         local_vars_type memory local_vars;
         local_vars.offset = basic_marshalling.skip_length(skip_to_z(blob, offset));

@@ -463,13 +463,8 @@ library batched_fri_verifier {
 
             if (i < fri_params.r - 1) {
                 // get round_proofs[i + 1].T_root
-                local_vars.T_root_offset = skip_to_round_proof_T_root_be(
-                    blob, skip_round_proof_be(blob, local_vars.round_proof_offset));
-                transcript.update_transcript_b32_by_offset_calldata(
-                    tr_state,
-                    blob,
-                    local_vars.T_root_offset
-                );
+                local_vars.T_root_offset = skip_to_round_proof_T_root_be(blob, skip_round_proof_be(blob, local_vars.round_proof_offset));
+                transcript.update_transcript_b32_by_offset_calldata(tr_state, blob, local_vars.T_root_offset);
                 local_vars.status = merkle_verifier
                     .parse_verify_merkle_proof_bytes_be(
                         blob,
@@ -487,10 +482,8 @@ library batched_fri_verifier {
             unchecked{ i++; }
         }
 
-        require(
-            fri_params.leaf_size == basic_marshalling.get_length(blob, offset),
-            "Final poly array size is not equal to params.leaf_size!"
-        );
+        require(fri_params.leaf_size == basic_marshalling.get_length(blob, offset),
+                "Final poly array size is not equal to params.leaf_size!");
         local_vars.final_poly_offset = offset + basic_marshalling.LENGTH_OCTETS;
         for (uint256 polynom_index = 0; polynom_index < fri_params.leaf_size;) {
             if (basic_marshalling.get_length(blob, local_vars.final_poly_offset) - 1 >
