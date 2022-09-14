@@ -23,6 +23,7 @@ import "../cryptography/transcript.sol";
 //import "../algebra/field.sol";
 import "../algebra/polynomial.sol";
 import "../basic_marshalling.sol";
+import "../logging.sol";
 
 library batched_fri_verifier {
     struct local_vars_type {
@@ -78,7 +79,7 @@ library batched_fri_verifier {
         // colinear_value
         result_offset = basic_marshalling.skip_vector_of_uint256_be(blob, offset);
         // T_root
-        result_offset = basic_marshalling.skip_octet_vector_32_be(blob, result_offset);
+        result_offset = basic_marshalling.skip_octet_vector_32_be(result_offset);
         // y
         result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, result_offset);
         // colinear_path
@@ -86,8 +87,9 @@ library batched_fri_verifier {
         // p
         uint256 value_len;
         (value_len, result_offset) = basic_marshalling.get_skip_length(blob, result_offset);
-        for (uint256 i = 0; i < value_len; i++) {
+        for (uint256 i = 0; i < value_len;) {
             result_offset = merkle_verifier.skip_merkle_proof_be(blob, result_offset);
+            unchecked{ i++; }
         }
     }
 
@@ -117,7 +119,7 @@ library batched_fri_verifier {
         // colinear_value
         uint256 result_offset = basic_marshalling.skip_vector_of_uint256_be(blob, offset);
         // T_root
-        result_offset = basic_marshalling.skip_octet_vector_32_be(blob, result_offset);
+        result_offset = basic_marshalling.skip_octet_vector_32_be(result_offset);
         // y
         n = basic_marshalling.get_length(blob, result_offset);
     }
@@ -127,7 +129,7 @@ library batched_fri_verifier {
         // colinear_value
         uint256 result_offset = basic_marshalling.skip_vector_of_uint256_be(blob, offset);
         // T_root
-        result_offset = basic_marshalling.skip_octet_vector_32_be(blob, result_offset);
+        result_offset = basic_marshalling.skip_octet_vector_32_be(result_offset);
         // y
         result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, result_offset);
         // colinear_path
@@ -156,7 +158,7 @@ library batched_fri_verifier {
         // colinear_value
         result_offset = basic_marshalling.skip_vector_of_uint256_be(blob, offset);
         // T_root
-        result_offset = basic_marshalling.skip_octet_vector_32_be(blob, result_offset);
+        result_offset = basic_marshalling.skip_octet_vector_32_be(result_offset);
         // y
         result_offset = basic_marshalling.skip_length(result_offset);
     }
@@ -166,7 +168,7 @@ library batched_fri_verifier {
         // colinear_value
         result_offset = basic_marshalling.skip_vector_of_uint256_be(blob, offset);
         // T_root
-        result_offset = basic_marshalling.skip_octet_vector_32_be(blob, result_offset);
+        result_offset = basic_marshalling.skip_octet_vector_32_be(result_offset);
         // y
         result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, result_offset);
         // colinear_path
@@ -180,7 +182,7 @@ library batched_fri_verifier {
         // colinear_value
         result_offset = basic_marshalling.skip_vector_of_uint256_be(blob, offset);
         // T_root
-        result_offset = basic_marshalling.skip_octet_vector_32_be(blob, result_offset);
+        result_offset = basic_marshalling.skip_octet_vector_32_be(result_offset);
         // y
         result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, result_offset);
     }
@@ -270,29 +272,19 @@ library batched_fri_verifier {
         );
     }
 
-    function eval_y_from_blob_single_V(
-        bytes calldata blob,
-        local_vars_type memory local_vars,
-        uint256 i,
-        uint256 j,
-        types.fri_params_type memory fri_params
-    ) internal view returns (uint256 result) {
-        result = basic_marshalling.get_i_uint256_from_vector(
-            blob,
-            local_vars.y_j_offset,
-            local_vars.y_polynom_index_j
-        );
+    function eval_y_from_blob_single_V(bytes calldata blob, local_vars_type memory local_vars, uint256 i, uint256 j,
+                                       types.fri_params_type memory fri_params)
+    internal view returns (uint256 result) {
+        result = basic_marshalling.get_i_uint256_from_vector(blob, local_vars.y_j_offset, local_vars.y_polynom_index_j);
         if (i == 0) {
             uint256 U_evaluated_neg;
             uint256 V_evaluated_inv;
             if (j == 0) {
-                U_evaluated_neg =
-                    fri_params.modulus -
+                U_evaluated_neg = fri_params.modulus -
                     polynomial.evaluate(
                         fri_params.batched_U[local_vars.y_polynom_index_j],
                         local_vars.x,
-                        fri_params.modulus
-                    );
+                        fri_params.modulus);
                 V_evaluated_inv = field.inverse_static(
                     polynomial.evaluate(
                         fri_params.V,
@@ -319,24 +311,14 @@ library batched_fri_verifier {
                 );
             }
             assembly {
-                result := mulmod(
-                    addmod(result, U_evaluated_neg, mload(fri_params)),
-                    V_evaluated_inv,
-                    mload(fri_params)
-                )
+                result := mulmod(addmod(result, U_evaluated_neg, mload(fri_params)), V_evaluated_inv, mload(fri_params))
             }
         }
-        local_vars.y_j_offset = basic_marshalling.skip_vector_of_uint256_be(
-            blob,
-            local_vars.y_j_offset
-        );
+        local_vars.y_j_offset = basic_marshalling.skip_vector_of_uint256_be(blob, local_vars.y_j_offset);
     }
 
-    function store_i_chunk_in_verified_data(
-        types.fri_params_type memory fri_params,
-        uint256 chunk,
-        uint256 i
-    ) internal pure {
+    function store_i_chunk_in_verified_data(types.fri_params_type memory fri_params, uint256 chunk, uint256 i)
+    internal pure {
         assembly {
             mstore(
                 add(
@@ -413,16 +395,10 @@ library batched_fri_verifier {
             transcript.get_integral_challenge_be(tr_state, 8),
             fri_params.modulus
         );
-        local_vars.round_proof_offset = skip_to_first_round_proof_be(
-            blob,
-            offset
-        );
+        local_vars.round_proof_offset = skip_to_first_round_proof_be(blob, offset);
 
         for (uint256 i = 0; i < fri_params.r;) {
-            local_vars.alpha = transcript.get_field_challenge(
-                tr_state,
-                fri_params.modulus
-            );
+            local_vars.alpha = transcript.get_field_challenge(tr_state, fri_params.modulus);
             local_vars.x_next = polynomial.evaluate(fri_params.q, local_vars.x, fri_params.modulus);
 
             local_vars.status = parse_verify_round_proof_be(blob, local_vars.round_proof_offset, fri_params, local_vars);
@@ -537,10 +513,10 @@ library batched_fri_verifier {
             }
 
             for (local_vars.y_polynom_index_j = 0; local_vars.y_polynom_index_j < fri_params.leaf_size;) {
-                local_vars.colinear_value = basic_marshalling
-                    .get_i_uint256_from_vector(blob, local_vars.round_proof_offset, local_vars.y_polynom_index_j);
+                local_vars.colinear_value = basic_marshalling.get_i_uint256_from_vector(blob, local_vars.round_proof_offset, local_vars.y_polynom_index_j);
                 store_i_chunk_in_verified_data(fri_params, local_vars.colinear_value, local_vars.y_polynom_index_j);
                 local_vars.y_j_offset = skip_to_first_round_proof_y_be(blob, local_vars.round_proof_offset);
+
                 if (polynomial.interpolate_evaluate_by_2_points_neg_x(
                         local_vars.x,
                         field.inverse_static(field.double(local_vars.x, fri_params.modulus), fri_params.modulus),
@@ -569,10 +545,7 @@ library batched_fri_verifier {
                 if (!local_vars.status) {
                     return false;
                 }
-                local_vars.round_proof_offset = skip_round_proof_be(
-                    blob,
-                    local_vars.round_proof_offset
-                );
+                local_vars.round_proof_offset = skip_round_proof_be(blob, local_vars.round_proof_offset);
             }
 
             local_vars.x = local_vars.x_next;

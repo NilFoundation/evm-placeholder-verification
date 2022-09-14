@@ -176,13 +176,8 @@ library polynomial {
         }
     }
 
-    function interpolate_evaluate_by_2_points_neg_x(
-        uint256 x,
-        uint256 dblXInv,
-        uint256 fX,
-        uint256 fMinusX,
-        uint256 evalPoint,
-        uint256 modulus
+    function interpolate_evaluate_by_2_points_neg_x(uint256 x, uint256 dblXInv, uint256 fX, uint256 fMinusX,
+                                                    uint256 evalPoint, uint256 modulus
     ) internal pure returns (uint256 result) {
         assembly {
             result := addmod(

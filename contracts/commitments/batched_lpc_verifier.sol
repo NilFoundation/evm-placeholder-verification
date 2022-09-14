@@ -33,7 +33,7 @@ library batched_lpc_verifier {
     function skip_proof_be(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 result_offset) {
         // T_root
-        result_offset = basic_marshalling.skip_octet_vector_32_be(blob, offset);
+        result_offset = basic_marshalling.skip_octet_vector_32_be(offset);
         // z
         result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, result_offset);
         // fri_proof
@@ -46,10 +46,7 @@ library batched_lpc_verifier {
     }
 
     function skip_vector_of_proofs_be(bytes calldata blob, uint256 offset)
-        internal
-        pure
-        returns (uint256 result_offset)
-    {
+    internal pure returns (uint256 result_offset){
         uint256 value_len;
         (value_len, result_offset) = basic_marshalling.get_skip_length(blob, offset);
         for (uint256 i = 0; i < value_len;) {
@@ -58,78 +55,46 @@ library batched_lpc_verifier {
         }
     }
 
-    function skip_n_proofs_in_vector_be(
-        bytes calldata blob,
-        uint256 offset,
-        uint256 n
-    ) internal pure returns (uint256 result_offset) {
+    function skip_n_proofs_in_vector_be(bytes calldata blob, uint256 offset, uint256 n)
+    internal pure returns (uint256 result_offset) {
         uint256 value_len;
-        (value_len, result_offset) = basic_marshalling.get_skip_length(
-            blob,
-            offset
-        );
-        for (uint256 i = 0; i < n; i++) {
+        (value_len, result_offset) = basic_marshalling.get_skip_length(blob, offset);
+        for (uint256 i = 0; i < n; ) {
             result_offset = skip_proof_be(blob, result_offset);
+            unchecked{ i++; }
         }
     }
 
     function skip_to_first_fri_proof_be(bytes calldata blob, uint256 offset)
-        internal
-        pure
-        returns (uint256 result_offset)
-    {
+    internal pure returns (uint256 result_offset) {
         // T_root
-        result_offset = basic_marshalling.skip_octet_vector_32_be(blob, offset);
+        result_offset = basic_marshalling.skip_octet_vector_32_be(offset);
         // z
-        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(
-            blob,
-            result_offset
-        );
+        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, result_offset);
         // fri_proof
         result_offset = basic_marshalling.skip_length(result_offset);
     }
 
-    function get_z_i_j_from_proof_be(
-        bytes calldata blob,
-        uint256 offset,
-        uint256 i,
-        uint256 j
-    ) internal pure returns (uint256 z_i_j) {
+    function get_z_i_j_from_proof_be(bytes calldata blob, uint256 offset, uint256 i, uint256 j)
+    internal pure returns (uint256 z_i_j) {
         // 0x28 (skip T_root)
         z_i_j = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(
             blob,
-            basic_marshalling.skip_octet_vector_32_be(blob, offset),
+            basic_marshalling.skip_octet_vector_32_be(offset),
             i,
-            j
-        );
+            j);
     }
 
-    function get_z_i_j_ptr_from_proof_be(
-        bytes calldata blob,
-        uint256 offset,
-        uint256 i,
-        uint256 j
-    ) internal pure returns (uint256 z_i_j_ptr) {
+    function get_z_i_j_ptr_from_proof_be(bytes calldata blob, uint256 offset, uint256 i, uint256 j)
+    internal pure returns (uint256 z_i_j_ptr) {
         // 0x28 (skip T_root)
-        z_i_j_ptr = basic_marshalling
-            .get_i_j_uint256_ptr_from_vector_of_vectors(
-                blob,
-                basic_marshalling.skip_octet_vector_32_be(blob, offset),
-                i,
-                j
-            );
+        z_i_j_ptr = basic_marshalling.get_i_j_uint256_ptr_from_vector_of_vectors(blob, basic_marshalling.skip_octet_vector_32_be(offset), i, j);
     }
 
     function get_z_n_be(bytes calldata blob, uint256 offset)
-        internal
-        pure
-        returns (uint256 n)
-    {
+    internal pure returns (uint256 n) {
         // T_root
-        uint256 result_offset = basic_marshalling.skip_octet_vector_32_be(
-            blob,
-            offset
-        );
+        uint256 result_offset = basic_marshalling.skip_octet_vector_32_be(offset);
         // z
         n = basic_marshalling.get_length(blob, result_offset);
     }
@@ -137,7 +102,7 @@ library batched_lpc_verifier {
     function get_fri_proof_n_be(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 n) {
         // T_root
-        uint256 result_offset = basic_marshalling.skip_octet_vector_32_be(blob, offset);
+        uint256 result_offset = basic_marshalling.skip_octet_vector_32_be(offset);
         // z
         result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, result_offset);
         // fri_proof
@@ -155,7 +120,7 @@ library batched_lpc_verifier {
         (value_len, result_offset) = basic_marshalling.get_skip_length_check(blob, result_offset);
         for (uint256 i = 0; i < value_len;) {
             result_offset = batched_fri_verifier.skip_proof_be_check(blob, result_offset);
-        unchecked{ i++; }
+            unchecked{ i++; }
         }
     }
 
@@ -183,7 +148,7 @@ library batched_lpc_verifier {
     function skip_to_z(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 result_offset) {
         // T_root
-        result_offset = basic_marshalling.skip_octet_vector_32_be(blob, offset);
+        result_offset = basic_marshalling.skip_octet_vector_32_be(offset);
     }
 
     function get_z_i_j_from_proof_be_check(bytes calldata blob, uint256 offset, uint256 i, uint256 j)
@@ -277,9 +242,10 @@ library batched_lpc_verifier {
 
         fri_params.V = new uint256[](1);
         fri_params.V[0] = 1;
-        for (uint256 j = 0; j < evaluation_points.length; j++) {
+        for (uint256 j = 0; j < evaluation_points.length;) {
             fri_params.lpc_z[0] = fri_params.modulus - evaluation_points[j];
             fri_params.V = polynomial.mul_poly(fri_params.V, fri_params.lpc_z, fri_params.modulus);
+            unchecked { j++; }
         }
 
         offset = skip_to_first_fri_proof_be(blob, offset);

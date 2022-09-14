@@ -64,9 +64,9 @@ library fri_verifier {
         returns (uint256 result_offset)
     {
         // colinear_value
-        $(skip_uint256_be(blob, offset, result_offset))
+        $(skip_uint256_be(offset, result_offset))
         // T_root
-        $(skip_octet_vector_32_be(blob, result_offset, result_offset))
+        $(skip_octet_vector_32_be(result_offset, result_offset))
         // y
         $(skip_vector_of_uint256_be(blob, result_offset, result_offset))
         // colinear_path
@@ -91,9 +91,9 @@ library fri_verifier {
         returns (uint256 n)
     {
         // colinear_value
-        $(skip_uint256_be(blob, offset, offset))
+        $(skip_uint256_be(offset, offset))
         // T_root
-        $(skip_octet_vector_32_be(blob, offset, offset))
+        $(skip_octet_vector_32_be(offset, offset))
         // y
         $(get_length(blob, offset, n))
     }
@@ -104,9 +104,9 @@ library fri_verifier {
         returns (uint256 n)
     {
         // colinear_value
-        $(skip_uint256_be(blob, offset, offset))
+        $(skip_uint256_be(offset, offset))
         // T_root
-        $(skip_octet_vector_32_be(blob, offset, offset))
+        $(skip_octet_vector_32_be(offset, offset))
         // y
         $(skip_vector_of_uint256_be(blob, offset, offset))
         // colinear_path
@@ -121,9 +121,9 @@ library fri_verifier {
         returns (uint256 result_offset)
     {
         // colinear_value
-        $(skip_uint256_be(blob, offset, result_offset))
+        $(skip_uint256_be(offset, result_offset))
         // T_root
-        $(skip_octet_vector_32_be(blob, result_offset, result_offset))
+        $(skip_octet_vector_32_be(result_offset, result_offset))
     }
 
     function skip_to_first_round_proof_p_be(bytes calldata blob, uint256 offset)
@@ -132,9 +132,9 @@ library fri_verifier {
         returns (uint256 result_offset)
     {
         // colinear_value
-        $(skip_uint256_be(blob, offset, result_offset))
+        $(skip_uint256_be(offset, result_offset))
         // T_root
-        $(skip_octet_vector_32_be(blob, result_offset, result_offset))
+        $(skip_octet_vector_32_be(result_offset, result_offset))
         // y
         $(skip_vector_of_uint256_be(blob, result_offset, result_offset))
         // colinear_path
@@ -152,7 +152,7 @@ library fri_verifier {
         returns (uint256 result_offset)
     {
         // colinear_value
-        $(skip_uint256_be(blob, offset, result_offset))
+        $(skip_uint256_be(offset, result_offset))
         // T_root
         $(skip_length(result_offset, result_offset))
     }
@@ -162,9 +162,9 @@ library fri_verifier {
         uint256 offset
     ) internal pure returns (uint256 result_offset) {
         // colinear_value
-        $(skip_uint256_be(blob, offset, result_offset))
+        $(skip_uint256_be(offset, result_offset))
         // T_root
-        $(skip_octet_vector_32_be(blob, result_offset, result_offset))
+        $(skip_octet_vector_32_be(result_offset, result_offset))
         // y
         $(skip_vector_of_uint256_be(blob, result_offset, result_offset))
     }
@@ -212,7 +212,7 @@ library fri_verifier {
         returns (uint256 result_offset)
     {
         // colinear_value
-        $(skip_uint256_be(blob, offset, result_offset))
+        $(skip_uint256_be(offset, result_offset))
         // T_root
         $(skip_octet_vector_32_be_check(blob, result_offset, result_offset))
         // y

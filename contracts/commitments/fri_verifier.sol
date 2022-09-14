@@ -77,11 +77,9 @@ library fri_verifier {
         // p
         uint256 value_len;
         assembly {value_len := shr(0xc0,calldataload(add(blob.offset, result_offset)))}result_offset = result_offset + 8;
-        for (uint256 i = 0; i < value_len; i++) {
-            result_offset = merkle_verifier.skip_merkle_proof_be(
-                blob,
-                result_offset
-            );
+        for (uint256 i = 0; i < value_len;) {
+            result_offset = merkle_verifier.skip_merkle_proof_be(blob, result_offset);
+            unchecked { i++; }
         }
     }
 
@@ -179,8 +177,9 @@ library fri_verifier {
         // round_proofs
         uint256 value_len;
         assembly {value_len := shr(0xc0,calldataload(add(blob.offset, result_offset)))}result_offset = result_offset + 8;
-        for (uint256 i = 0; i < value_len; i++) {
+        for (uint256 i = 0; i < value_len;) {
             result_offset = skip_round_proof_be(blob, result_offset);
+            unchecked { i++; }
         }
     }
 
@@ -225,11 +224,9 @@ library fri_verifier {
         // p
         uint256 value_len;
         require(result_offset + 8 <= blob.length);assembly {value_len := shr(0xc0,calldataload(add(blob.offset, result_offset)))}result_offset = result_offset + 8;
-        for (uint256 i = 0; i < value_len; i++) {
-            result_offset = merkle_verifier.skip_merkle_proof_be_check(
-                blob,
-                result_offset
-            );
+        for (uint256 i = 0; i < value_len;) {
+            result_offset = merkle_verifier.skip_merkle_proof_be_check(blob, result_offset);
+            unchecked { i++; }
         }
     }
 
@@ -243,8 +240,9 @@ library fri_verifier {
         // round_proofs
         uint256 value_len;
         require(result_offset + 8 <= blob.length);assembly {value_len := shr(0xc0,calldataload(add(blob.offset, result_offset)))}result_offset = result_offset + 8;
-        for (uint256 i = 0; i < value_len; i++) {
+        for (uint256 i = 0; i < value_len; ) {
             result_offset = skip_round_proof_be_check(blob, result_offset);
+            unchecked { i++; }
         }
     }
 

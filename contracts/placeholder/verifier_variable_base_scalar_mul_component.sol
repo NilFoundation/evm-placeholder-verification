@@ -53,11 +53,8 @@ library placeholder_verifier_variable_base_scalar_mul_component {
         types.placeholder_local_variables memory local_vars;
         // 3. append witness commitments to transcript
         transcript.update_transcript_b32_by_offset_calldata(
-            tr_state,
-            blob,
-            basic_marshalling.skip_length(
-                proof_map.witness_commitment_offset
-            )
+            tr_state, blob,
+            basic_marshalling.skip_length(proof_map.witness_commitment_offset)
         );
 
         // 4. prepare evaluaitons of the polynomials that are copy-constrained

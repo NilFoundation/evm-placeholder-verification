@@ -54,7 +54,7 @@ library merkle_verifier {
 
     function skip_merkle_proof_be(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 result_offset) {
-        result_offset = offset + LAYERS_OFFSET;
+        unchecked { result_offset = offset + LAYERS_OFFSET; }
         assembly {
             result_offset := add(
                 result_offset,
@@ -73,7 +73,7 @@ library merkle_verifier {
 
     function skip_merkle_proof_be_check(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 result_offset) {
-        result_offset = offset + LAYERS_OFFSET;
+        unchecked { result_offset = offset + LAYERS_OFFSET; }
         require(result_offset < blob.length);
         assembly {
             result_offset := add(
