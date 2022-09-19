@@ -135,15 +135,9 @@ library placeholder_verifier_unified_addition_component {
             }
             unchecked{i++;}
         }
-        local_vars.status = batched_lpc_verifier.parse_verify_proof_be(
-            blob,
-            proof_map.eval_proof_witness_offset,
-            local_vars.witness_evaluation_points,
-            tr_state,
-            fri_params
-        );
 
-        if (!local_vars.status) {
+        if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_witness_offset,
+                                                        local_vars.witness_evaluation_points, tr_state, fri_params)) {
             return false;
         }
 

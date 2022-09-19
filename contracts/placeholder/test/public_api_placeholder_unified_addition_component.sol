@@ -2,6 +2,7 @@
 //---------------------------------------------------------------------------//
 // Copyright (c) 2022 Mikhail Komarov <nemo@nil.foundation>
 // Copyright (c) 2022 Ilias Khairullin <ilias@nil.foundation>
+// Copyright (c) 2022 Aleksei Moskvin <alalmoskvin@nil.foundation>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +22,7 @@ import "../../types.sol";
 import "../../cryptography/transcript.sol";
 import "../proof_map_parser.sol";
 import "../verifier_unified_addition_component.sol";
+import "../../logging.sol";
 
 contract TestPlaceholderVerifierUnifiedAddition {
     struct test_local_vars {

@@ -2,6 +2,7 @@
 //---------------------------------------------------------------------------//
 // Copyright (c) 2021 Mikhail Komarov <nemo@nil.foundation>
 // Copyright (c) 2021 Ilias Khairullin <ilias@nil.foundation>
+// Copyright (c) 2022 Aleksei Moskvin <alalmoskvin@nil.foundation>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,14 +42,16 @@ library polynomial {
     */
     function evaluate(uint256[] memory coeffs, uint256 point, uint256 modulus)
     internal pure returns (uint256) {
-        uint256 result;
-        for (uint256 i = coeffs.length; i > 0;) {
-            assembly {
+        uint256 result = coeffs.length;
+        assembly {
+            let cur_coefs := add(coeffs, mul(result, 0x20))
+            result := 0
+            for { } gt(cur_coefs, coeffs) {} {
                 result := addmod(mulmod(result, point, modulus),
-                                 mload(add(add(coeffs, 0x20), mul(sub(i, 0x01), 0x20))),
+                                 mload(cur_coefs), // (i - 1) * 32
                                  modulus)
+                cur_coefs := sub(cur_coefs, 0x20)
             }
-            unchecked{ i--; }
         }
         return result;
     }
@@ -59,90 +62,87 @@ library polynomial {
         for (uint256 i = len; i > 0;) {
             assembly {
                 result := addmod(mulmod(result, point, modulus),
-                                 calldataload(add(add(blob.offset, offset), mul(sub(i, 0x01), 0x20))),
+                                 calldataload(add(add(blob.offset, offset), shl(0x05, sub(i, 0x01)))), // (i - 1) * 32
                                  modulus)
             }
             unchecked{ i--; }
         }
+//        assembly {
+//            let i := sub(add(blob.offset, add(offset, mul(len, 0x20))), 0x20)
+//            let coeff := sub(add(blob.offset, offset), 0x20)
+//            for { } gt(coefsPtr, coeff) {} {
+//                result := addmod(mulmod(result, point, modulus), calldataload(coefsPtr), modulus)
+//                coefsPtr := sub(coefsPtr, 0x20)
+//            }
+//        }
         return result;
     }
 
     function add_poly(uint256[] memory a, uint256[] memory b, uint256 modulus)
     internal pure returns (uint256[] memory result) {
-        // [0] = minLen
-        // [1] = maxLen
-        // [3] = longArr
-        uint256[] memory local_vars = new uint256[](3);
         if (a.length < b.length) {
+            result = new uint256[](b.length);
             assembly {
-                mstore(add(local_vars, 0x20), mload(a))
-                mstore(add(local_vars, 0x40), mload(b))
-                mstore(add(local_vars, 0x60), b)
+                let i := 0
+                for {} lt(i, mul(mload(a), 0x20)) {
+                    i := add(i, 0x20)
+                } {
+                    mstore(
+                    add(add(result, 0x20), i),
+                    addmod(mload(add(add(a, 0x20), i)), mload(add(add(b, 0x20), i)), modulus)
+                    )
+                }
+                for {} lt(i, mul(mload(b), 0x20)) {
+                    i := add(i, 0x20)
+                } {
+                    mstore(
+                    add(add(result, 0x20), i),
+                    mload(add(b, add(0x20, i)))
+                    )
+                }
             }
         } else {
+            result = new uint256[](a.length);
             assembly {
-                mstore(add(local_vars, 0x20), mload(b))
-                mstore(add(local_vars, 0x40), mload(a))
-                mstore(add(local_vars, 0x60), a)
-            }
-        }
-
-        result = new uint256[](local_vars[1]);
-
-        assembly {
-            for {
                 let i := 0
-            } lt(i, mul(mload(add(local_vars, 0x20)), 0x20)) {
-                i := add(i, 0x20)
-            } {
-                mstore(
+                for {} lt(i, mul(mload(b), 0x20)) {
+                    i := add(i, 0x20)
+                } {
+                    mstore(
                     add(add(result, 0x20), i),
-                    addmod(
-                        mload(add(add(a, 0x20), i)),
-                        mload(add(add(b, 0x20), i)),
-                        modulus
+                    addmod(mload(add(add(a, 0x20), i)), mload(add(add(b, 0x20), i)), modulus)
                     )
-                )
-            }
-            for {
-                let i := mul(mload(add(local_vars, 0x20)), 0x20)
-            } lt(i, mul(mload(add(local_vars, 0x40)), 0x20)) {
-                i := add(i, 0x20)
-            } {
-                mstore(
+                }
+                for {} lt(i, mul(mload(a), 0x20)) {
+                    i := add(i, 0x20)
+                } {
+                    mstore(
                     add(add(result, 0x20), i),
-                    mload(add(mload(add(local_vars, 0x60)), add(0x20, i)))
-                )
+                    mload(add(a, add(0x20, i)))
+                    )
+                }
             }
         }
     }
 
     function mul_poly(uint256[] memory a, uint256[] memory b, uint256 modulus)
     internal pure returns (uint256[] memory result) {
-        if (b.length > a.length) {
-            uint256[] memory tmp = a;
-            a = b;
-            b = tmp;
-        }
+        uint256[] memory result = new uint256[](a.length + b.length - 1);
         for (uint256 i = 0; i < b.length;) {
-            uint256[] memory currentValues = new uint256[](a.length + i);
             for (uint256 j = 0; j < a.length;) {
-                // currentValues[j + i] = a[j] * b[i];
                 assembly {
-                    mstore(
-                        add(add(currentValues, 0x20), mul(add(j, i), 0x20)),
-                        mulmod(
-                            mload(add(add(a, 0x20), mul(j, 0x20))),
-                            mload(add(add(b, 0x20), mul(i, 0x20))),
-                            modulus
-                        )
+                    mstore(add(add(result, 0x20), mul(add(j, i), 0x20)),
+                           addmod(mload(add(add(result, 0x20), mul(add(j, i), 0x20))),
+                                   mulmod(mload(add(add(a, 0x20), mul(j, 0x20))),
+                                          mload(add(add(b, 0x20), mul(i, 0x20))), modulus),
+                                   modulus)
                     )
                 }
                 unchecked{ j++; }
             }
-            result = add_poly(result, currentValues, modulus);
             unchecked{ i++; }
         }
+        return result;
     }
 
     function lagrange_interpolation(
@@ -172,7 +172,7 @@ library polynomial {
                 thisPoly = mul_poly(thisPoly, multiple, modulus);
             }
             result = add_poly(result, thisPoly, modulus);
-            unchecked{ i++; }
+            unchecked { i++; }
         }
     }
 
@@ -240,22 +240,12 @@ library polynomial {
     internal view returns (uint256[] memory result) {
         require(x.length == 2, "x length is not equal to 2");
         require(fx.length == 2, "fx length is not equal to 2");
-        uint256 x2_minus_x1_inv = field.inverse_static(
-            (x[1] + (modulus - x[0])) % modulus,
-            modulus
-        );
+        uint256 x2_minus_x1_inv = field.inverse_static((x[1] + (modulus - x[0])) % modulus, modulus);
         result = new uint256[](2);
         assembly {
-            let y2_minus_y1 := addmod(
-                mload(add(fx, 0x40)),
-                sub(modulus, mload(add(fx, 0x20))),
-                modulus
-            )
+            let y2_minus_y1 := addmod(mload(add(fx, 0x40)), sub(modulus, mload(add(fx, 0x20))), modulus)
             let a := mulmod(y2_minus_y1, x2_minus_x1_inv, modulus)
-            let a_mul_x1_neg := sub(
-                modulus,
-                mulmod(a, mload(add(x, 0x20)), modulus)
-            )
+            let a_mul_x1_neg := sub(modulus, mulmod(a, mload(add(x, 0x20)), modulus))
             let b := addmod(mload(add(fx, 0x20)), a_mul_x1_neg, modulus)
             mstore(add(result, 0x20), b)
             mstore(add(result, 0x40), a)
@@ -310,7 +300,7 @@ library polynomial {
     }
 
     function interpolate(bytes calldata blob, uint256[] memory x, uint256 fx_offset, uint256 modulus)
-    internal view returns (uint256[] memory) {
+    internal view returns (uint256[] memory ) {
         if (
             x.length == 1 && basic_marshalling.get_length(blob, fx_offset) == 1
         ) {

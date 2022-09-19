@@ -2,6 +2,7 @@
 //---------------------------------------------------------------------------//
 // Copyright (c) 2021 Mikhail Komarov <nemo@nil.foundation>
 // Copyright (c) 2021 Ilias Khairullin <ilias@nil.foundation>
+// Copyright (c) 2022 Aleksei Moskvin <alalmoskvin@nil.foundation>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,10 +24,6 @@ import "../algebra/polynomial.sol";
 import "../basic_marshalling.sol";
 
 library batched_lpc_verifier {
-    struct local_vars_type {
-        uint256 offset;
-        bool status;
-    }
 
     uint256 constant m = 2;
 
@@ -177,16 +174,16 @@ library batched_lpc_verifier {
         require(fri_params.leaf_size == evaluation_points.length, "Array of evaluation points size is not equal to leaf_size!");
         require(fri_params.lambda == get_fri_proof_n_be(blob, offset), "Fri proofs number is not equal to lambda!");
 
-        local_vars_type memory local_vars;
-        local_vars.offset = basic_marshalling.skip_length(skip_to_z(blob, offset));
+        uint256 local_vars;
+        local_vars = basic_marshalling.skip_length(skip_to_z(blob, offset));
         for (uint256 polynom_index = 0; polynom_index < fri_params.leaf_size;) {
             fri_params.batched_U[polynom_index] = polynomial.interpolate(
                 blob,
                 evaluation_points[polynom_index],
-                local_vars.offset,
+                    local_vars,
                 fri_params.modulus
             );
-            local_vars.offset = basic_marshalling.skip_vector_of_uint256_be(blob, local_vars.offset);
+            local_vars = basic_marshalling.skip_vector_of_uint256_be(blob, local_vars);
             unchecked{ polynom_index++; }
         }
 
@@ -207,13 +204,7 @@ library batched_lpc_verifier {
 
         offset = skip_to_first_fri_proof_be(blob, offset);
         for (uint256 round_id = 0; round_id < fri_params.lambda;) {
-            local_vars.status = batched_fri_verifier.parse_verify_proof_be(
-                blob,
-                offset,
-                tr_state,
-                fri_params
-            );
-            if (!local_vars.status) {
+            if (!batched_fri_verifier.parse_verify_proof_be(blob, offset, tr_state, fri_params)) {
                 return false;
             }
             offset = batched_fri_verifier.skip_proof_be(blob, offset);
@@ -231,12 +222,12 @@ library batched_lpc_verifier {
         fri_params.leaf_size = get_z_n_be(blob, offset);
         require(fri_params.lambda == get_fri_proof_n_be(blob, offset), "Fri proofs number is not equal to lambda!");
 
-        local_vars_type memory local_vars;
-        local_vars.offset = basic_marshalling.skip_length(skip_to_z(blob, offset));
+        uint256 local_vars;
+        local_vars = basic_marshalling.skip_length(skip_to_z(blob, offset));
         for (uint256 polynom_index = 0; polynom_index < fri_params.leaf_size;) {
             fri_params.batched_U[polynom_index] = polynomial.interpolate(
-                blob,evaluation_points,local_vars.offset,fri_params.modulus);
-            local_vars.offset = basic_marshalling.skip_vector_of_uint256_be(blob, local_vars.offset);
+                blob,evaluation_points,local_vars,fri_params.modulus);
+            local_vars = basic_marshalling.skip_vector_of_uint256_be(blob, local_vars);
             unchecked{ polynom_index++; }
         }
 
@@ -250,8 +241,7 @@ library batched_lpc_verifier {
 
         offset = skip_to_first_fri_proof_be(blob, offset);
         for (uint256 round_id = 0; round_id < fri_params.lambda; ) {
-            local_vars.status = batched_fri_verifier.parse_verify_proof_single_V_be(blob, offset, tr_state, fri_params);
-            if (!local_vars.status) {
+            if (!batched_fri_verifier.parse_verify_proof_single_V_be(blob, offset, tr_state, fri_params)) {
                 return false;
             }
             offset = batched_fri_verifier.skip_proof_be(blob, offset);

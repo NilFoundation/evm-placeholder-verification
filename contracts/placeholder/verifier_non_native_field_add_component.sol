@@ -55,9 +55,7 @@ library placeholder_verifier_non_native_field_add_component {
         transcript.update_transcript_b32_by_offset_calldata(
             tr_state,
             blob,
-            basic_marshalling.skip_length(
-                proof_map.witness_commitment_offset
-            )
+            basic_marshalling.skip_length(proof_map.witness_commitment_offset)
         );
 
         // 4. prepare evaluaitons of the polynomials that are copy-constrained

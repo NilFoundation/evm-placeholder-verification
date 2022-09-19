@@ -2,6 +2,7 @@
 //---------------------------------------------------------------------------//
 // Copyright (c) 2021 Mikhail Komarov <nemo@nil.foundation>
 // Copyright (c) 2021 Ilias Khairullin <ilias@nil.foundation>
+// Copyright (c) 2022 Aleksei Moskvin <alalmoskvin@nil.foundation>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -95,10 +96,7 @@ library merkle_verifier {
     function parse_verify_merkle_proof_not_pre_hash_be(bytes calldata blob, uint256 offset, bytes32 verified_data)
     internal pure returns (bool result) {
         assembly {
-            let depth := shr(
-                LENGTH_RESTORING_SHIFT,
-                calldataload(add(blob.offset, add(offset, DEPTH_OFFSET)))
-            )
+            let depth := shr(LENGTH_RESTORING_SHIFT, calldataload(add(blob.offset, add(offset, DEPTH_OFFSET))))
 
             // save leaf hash data to required position
             let pos := shr(

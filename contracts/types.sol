@@ -265,8 +265,6 @@ library types {
         uint256 idx1;
         // 0x380
         uint256 idx2;
-        // 0x3a0
-        bool status;
     }
 
     struct gate_argument_local_vars {
