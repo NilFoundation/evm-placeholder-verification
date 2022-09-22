@@ -42,10 +42,9 @@ library polynomial {
     */
     function evaluate(uint256[] memory coeffs, uint256 point, uint256 modulus)
     internal pure returns (uint256) {
-        uint256 result = coeffs.length;
+        uint256 result;
         assembly {
-            let cur_coefs := add(coeffs, mul(result, 0x20))
-            result := 0
+            let cur_coefs := add(coeffs, mul(mload(coeffs), 0x20))
             for { } gt(cur_coefs, coeffs) {} {
                 result := addmod(mulmod(result, point, modulus),
                                  mload(cur_coefs), // (i - 1) * 32
@@ -301,9 +300,7 @@ library polynomial {
 
     function interpolate(bytes calldata blob, uint256[] memory x, uint256 fx_offset, uint256 modulus)
     internal view returns (uint256[] memory ) {
-        if (
-            x.length == 1 && basic_marshalling.get_length(blob, fx_offset) == 1
-        ) {
+        if (x.length == 1 && basic_marshalling.get_length(blob, fx_offset) == 1) {
             uint256[] memory result = new uint256[](1);
             result[0] = basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 0);
             return result;
