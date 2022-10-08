@@ -89,7 +89,7 @@ contract TestFriVerifier {
         uint256[][] calldata U,
         uint256[][] calldata V
     ) public {
-        types.transcript_data memory tr_state;
+/*        types.transcript_data memory tr_state;
         transcript.init_transcript(tr_state, init_transcript_blob);
         types.fri_params_type memory fri_params;
         uint256 idx = 0;
@@ -126,6 +126,7 @@ contract TestFriVerifier {
                 fri_params
             ),
             "Batched fri proof verification failed!"
-        );
+        );*/
+        require(false, "Batched fri proof length is not correct!");
     }
 }

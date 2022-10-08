@@ -64,4 +64,20 @@ library logging {
         }
         return string(bstr);
     }
+
+    function memory_chunk256_to_hexstr(bytes memory blob, uint256 offset) internal pure returns (string memory){
+        uint256 logvar;
+        assembly {
+            logvar:=mload(add(blob, offset))
+        }
+        return logging.uint2hexstr(logvar);
+    }
+
+    function calldata_chunk256_to_hexstr(bytes calldata blob, uint256 offset) internal pure returns (string memory result){
+        uint256 logvar;
+        assembly {
+            logvar := calldataload(add(blob.offset, offset))
+        }
+        return logging.uint2hexstr(logvar);
+    }
 }

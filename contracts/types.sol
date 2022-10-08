@@ -141,23 +141,39 @@ library types {
     }
 
     struct fri_params_type {
+        //0x00
         uint256 modulus;
+        //0x20
         uint256 r;
+        //0x40
         uint256 max_degree;
+        //0x60
         uint256 lambda;
+        //0x80
         uint256 leaf_size;
 
+        //0xa0
         uint256[] D_omegas;
+        //0xc0
         uint256[] q;
 
+        //0xe0
         uint256[] U;
+        //0x100
         uint256[] V;
+        //0x120
         uint256[][] batched_U;
+        //0x140
         uint256[][] batched_V;
 
+        //0x160
         bytes batched_fri_verified_data;
         uint256[] lpc_z;
         uint256 batched_U_len;
+
+        uint256[] step_list;
+        uint256 const1_2;
+        uint256 i_fri_proof;    // It is useful for debugging
     }
 
     struct placeholder_proof_map {

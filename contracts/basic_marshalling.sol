@@ -17,6 +17,7 @@
 //---------------------------------------------------------------------------//
 pragma solidity >=0.8.4;
 
+import "./logging.sol";
 //================================================================================================================
 // Bounds non-checking macros
 //================================================================================================================
@@ -234,6 +235,40 @@ library basic_marshalling {
             result_offset = skip_vector_of_uint256_be(blob, result_offset);
             unchecked{ i++; }
         }
+    }
+
+    function skip_vector_of_vectors_of_vectors_of_uint256_be(bytes calldata blob, uint256 offset)
+    internal pure returns (uint256 result_offset) {
+        unchecked { result_offset = offset + LENGTH_OCTETS; }
+        uint256 n;
+        assembly {
+            n := shr(
+                LENGTH_RESTORING_SHIFT,
+                calldataload(add(blob.offset, offset))
+            )
+        }
+        for (uint256 i = 0; i < n;) {
+            result_offset = skip_vector_of_vectors_of_uint256_be(blob, result_offset);
+            unchecked{ i++; }
+        }
+    }
+    
+    function skip_vector_of_vectors_of_vectors_of_uint256_be_check(bytes calldata blob, uint256 offset)
+    internal pure returns (uint256 result_offset) {
+        unchecked { result_offset = offset + LENGTH_OCTETS; }
+        require(result_offset < blob.length);
+        uint256 n;
+        assembly {
+            n := shr(
+                LENGTH_RESTORING_SHIFT,
+                calldataload(add(blob.offset, offset))
+            )
+        }
+        for (uint256 i = 0; i < n;) {
+            result_offset = skip_vector_of_vectors_of_uint256_be_check(blob, result_offset);
+            unchecked{ i++; }
+        }
+        require(result_offset < blob.length);
     }
 
     function skip_length(uint256 offset)

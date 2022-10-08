@@ -33,6 +33,7 @@ library batched_lpc_verifier {
         result_offset = basic_marshalling.skip_octet_vector_32_be(offset);
         // z
         result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, result_offset);
+        
         // fri_proof
         uint256 value_len;
         (value_len, result_offset) = basic_marshalling.get_skip_length(blob, result_offset);
@@ -204,15 +205,18 @@ library batched_lpc_verifier {
 
         offset = skip_to_first_fri_proof_be(blob, offset);
         for (uint256 round_id = 0; round_id < fri_params.lambda;) {
+            fri_params.i_fri_proof = round_id;  // for debug only
             if (!batched_fri_verifier.parse_verify_proof_be(blob, offset, tr_state, fri_params)) {
+                require(false, "FRI-proof problem");
                 return false;
             }
+            //require(false, "First FRI-proof no problem");
             offset = batched_fri_verifier.skip_proof_be(blob, offset);
             unchecked{ round_id++; }
         }
         result = true;
     }
-
+/*
     function parse_verify_proof_be(
         bytes calldata blob, uint256 offset, uint256[] memory evaluation_points,
         types.transcript_data memory tr_state, types.fri_params_type memory fri_params
@@ -249,4 +253,5 @@ library batched_lpc_verifier {
         }
         result = true;
     }
+    */
 }

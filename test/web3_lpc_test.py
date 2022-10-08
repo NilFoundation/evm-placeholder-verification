@@ -44,6 +44,144 @@ def init_test1():
 
     return params
 
+def init_basic_test():
+    params = dict()
+    params['_test_name'] = "Lpc basic verification test (case 1)"
+    f = open('./test/data/lpc_basic_test.txt')
+    params["proof"] = f.read()
+    f.close()
+    params['init_transcript'] = '0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
+
+    params['init_params'] = []
+    params['init_params'].append(
+        52435875175126190479447740508185965837690552500527637822603658699938581184513)      #modulus
+    params['init_params'].append(3)                                                         #r
+    params['init_params'].append(15)                                                        #max_degree
+    params['init_params'].append(1)                                                         #leaf_size
+    params['init_params'].append(2)                                                         #lambda
+
+    D_omegas = []
+    f = open('./test/data/domain.txt')
+    lines = f.readlines()
+    for line in lines:
+        D_omegas.append(int(line))
+    f.close()
+
+    params['init_params'].append(len(D_omegas))
+    params['init_params'].extend(D_omegas)                                                  #Domain
+
+    q = []
+    q.append(0)
+    q.append(0)
+    q.append(1)
+    params['init_params'].append(len(q))
+    params['init_params'].extend(q)                                                         #q
+
+    step_list = [];
+    step_list.append(1);
+    step_list.append(1);
+    step_list.append(1);
+    params['init_params'].append(len(step_list))
+    params['init_params'].extend(step_list)                                                 #step_list
+
+    params['init_params'].append(26217937587563095239723870254092982918845276250263818911301829349969290592257) #const 1/2
+
+    params['evaluation_points'] = [[7, ], ]
+
+    return params
+
+def init_batched_test():
+    params = dict()
+    params['_test_name'] = "Lpc basic verification test (case 1)"
+    f = open('./test/data/lpc_batched_basic_test.txt')
+    params["proof"] = f.read()
+    f.close()
+    params['init_transcript'] = '0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
+
+    params['init_params'] = []
+    params['init_params'].append(
+        52435875175126190479447740508185965837690552500527637822603658699938581184513)      #modulus
+    params['init_params'].append(3)                                                         #r
+    params['init_params'].append(15)                                                        #max_degree
+    params['init_params'].append(2)                                                         #leaf_size
+    params['init_params'].append(2)                                                         #lambda
+
+    D_omegas = []
+    f = open('./test/data/domain.txt')
+    lines = f.readlines()
+    for line in lines:
+        D_omegas.append(int(line))
+    f.close()
+
+    params['init_params'].append(len(D_omegas))
+    params['init_params'].extend(D_omegas)                                                  #Domain
+
+    q = []
+    q.append(0)
+    q.append(0)
+    q.append(1)
+    params['init_params'].append(len(q))
+    params['init_params'].extend(q)                                                         #q
+
+    step_list = [];
+    step_list.append(1);
+    step_list.append(1);
+    step_list.append(1);
+    params['init_params'].append(len(step_list))
+    params['init_params'].extend(step_list)                                                 #step_list
+
+    params['init_params'].append(26217937587563095239723870254092982918845276250263818911301829349969290592257) #const 1/2
+
+    params['evaluation_points'] = [[7, ], [7, ] ]
+
+    return params
+
+def init_skipping_layers_test():
+    params = dict()
+    params['_test_name'] = "Batched lpc verification skipping layers test (case 1)"
+    f = open('./test/data/lpc_batched_basic_test.txt')
+    params["proof"] = f.read()
+    f.close()
+
+    params['init_transcript'] = '0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
+
+    params['init_params'] = []
+    params['init_params'].append(
+        52435875175126190479447740508185965837690552500527637822603658699938581184513)
+    params['init_params'].append(3)
+    params['init_params'].append(15)
+    params['init_params'].append(1)
+    params['init_params'].append(2)
+
+    D_omegas = []
+    f = open('./test/data/domain.txt')
+    lines = f.readlines()
+    for line in lines:
+        D_omegas.append(int(line))
+    f.close()
+    params['init_params'].append(len(D_omegas))
+    params['init_params'].extend(D_omegas)
+
+    q = []
+    q.append(0)
+    q.append(0)
+    q.append(1)
+    params['init_params'].append(len(q))
+    params['init_params'].extend(q)
+
+    step_list = [];
+    step_list.append(2);
+    step_list.append(1);
+    step_list.append(1);
+    step_list.append(1);
+    step_list.append(4);
+    step_list.append(1);
+    params['init_params'].append(len(step_list))
+    params['init_params'].extend(step_list)                                                 #step_list
+
+    params['evaluation_points'] = [[7, ] ]
+
+    return params
 
 if __name__ == '__main__':
     compiled = solcx.compile_files(
@@ -60,11 +198,10 @@ if __name__ == '__main__':
     contract = w3.eth.contract(abi=abi, bytecode=bytecode)
     deploy_tx_hash = contract.constructor().transact()
     deploy_tx_receipt = w3.eth.wait_for_transaction_receipt(deploy_tx_hash)
-    contract_inst = w3.eth.contract(
-        address=deploy_tx_receipt.contractAddress, abi=abi)
-    params = init_test1()
+    contract_inst = w3.eth.contract(address=deploy_tx_receipt.contractAddress, abi=abi)
+    params = init_batched_test()
     run_tx_hash = contract_inst.functions.batched_verify(
-        params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
+       params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
     run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
 
     print_tx_info(w3, run_tx_receipt, params['_test_name'])

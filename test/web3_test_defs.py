@@ -1,0 +1,1 @@
+contracts_dir = '/Users/zerg/Projects/solana/share/state-proof-verify/contracts'
