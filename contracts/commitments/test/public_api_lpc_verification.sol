@@ -117,6 +117,7 @@ contract TestLpcVerifier {
 
         require(sum == fri_params.r, "Sum of fri_params.step_list and fri_params.r are different");
         placeholder_proof_map_parser.init(fri_params, fri_params.leaf_size);
+        
         require(
             raw_proof.length ==
                 batched_lpc_verifier.skip_proof_be(raw_proof, 0),

@@ -175,6 +175,7 @@ library batched_lpc_verifier {
         require(fri_params.leaf_size == evaluation_points.length, "Array of evaluation points size is not equal to leaf_size!");
         require(fri_params.lambda == get_fri_proof_n_be(blob, offset), "Fri proofs number is not equal to lambda!");
 
+
         uint256 local_vars;
         local_vars = basic_marshalling.skip_length(skip_to_z(blob, offset));
         for (uint256 polynom_index = 0; polynom_index < fri_params.leaf_size;) {
