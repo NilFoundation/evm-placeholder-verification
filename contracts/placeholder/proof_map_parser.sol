@@ -18,6 +18,7 @@
 pragma solidity >=0.8.4;
 
 import "../types.sol";
+import "../logging.sol";
 import "../commitments/lpc_verifier.sol";
 import "../commitments/batched_lpc_verifier.sol";
 import "../basic_marshalling.sol";
@@ -46,14 +47,15 @@ library placeholder_proof_map_parser {
         proof_map.eval_proof_lagrange_0_offset = basic_marshalling.skip_uint256_be_check(blob, proof_map.eval_proof_offset);
         // skip lagrange_0
         proof_map.eval_proof_witness_offset = basic_marshalling.skip_uint256_be_check(blob, proof_map.eval_proof_lagrange_0_offset);
+
         // skip witness
         proof_map.eval_proof_permutation_offset = batched_lpc_verifier.skip_proof_be_check(blob, proof_map.eval_proof_witness_offset);
         // skip permutation
-        proof_map.eval_proof_quotient_offset = lpc_verifier.skip_proof_be_check(blob, proof_map.eval_proof_permutation_offset);
+        proof_map.eval_proof_quotient_offset = batched_lpc_verifier.skip_proof_be_check(blob, proof_map.eval_proof_permutation_offset);
         // skip quotient
         proof_map.eval_proof_lookups_offset = batched_lpc_verifier.skip_proof_be_check(blob, proof_map.eval_proof_quotient_offset);
         // skip lookups
-        proof_map.eval_proof_id_permutation_offset = lpc_verifier.skip_vector_of_proofs_be_check(blob, proof_map.eval_proof_lookups_offset);
+        proof_map.eval_proof_id_permutation_offset = batched_lpc_verifier.skip_vector_of_proofs_be_check(blob, proof_map.eval_proof_lookups_offset);
         // skip id_permutation
         proof_map.eval_proof_sigma_permutation_offset = batched_lpc_verifier.skip_proof_be_check(blob, proof_map.eval_proof_id_permutation_offset);
         // skip sigma_permutation

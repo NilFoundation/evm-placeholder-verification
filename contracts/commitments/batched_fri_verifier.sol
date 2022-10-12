@@ -563,14 +563,12 @@ library batched_fri_verifier {
     internal view returns (bool result) {
         // TODO: offsets in local vars should be better
         // But it needs assembly work
-        //uint256 modulus = fri_params.modulus;
-        //uint256 const1_2 = fri_params.const1_2;
 
         result = false;
         require(m == 2, "m has to be equal to 2!");
-//        require(fri_params.step_list.length - 1 == get_round_proofs_n_be(blob, offset), "Wrong round proofs number");
-//        require(fri_params.leaf_size <= fri_params.batched_U.length, "Leaf size is not equal to U length!");
-//        require(fri_params.leaf_size <= fri_params.batched_V.length, "Leaf size is not equal to V length!");
+        require(fri_params.step_list.length - 1 == get_round_proofs_n_be(blob, offset), "Wrong round proofs number");
+        require(fri_params.leaf_size <= fri_params.batched_U.length, "Leaf size is not equal to U length!");
+        require(fri_params.leaf_size <= fri_params.batched_V.length, "Leaf size is not equal to V length!");
 
         local_vars_type memory local_vars;
         init_local_vars(blob, offset, fri_params, local_vars);
@@ -586,10 +584,10 @@ library batched_fri_verifier {
 
         // Prepare values.
         // 1.Check values length.
-        /*require(
+        require(
             basic_marshalling.get_length(blob, local_vars.values_offset) == 
             fri_params.step_list.length, "Unsufficient polynomial values data in proofs"
-        );*/
+        );
 
         prepare_leaf_data_and_ys(blob, fri_params, local_vars);
         while ( local_vars.i_step < fri_params.step_list.length - 1 ) {
@@ -598,7 +596,7 @@ library batched_fri_verifier {
             if (!merkle_verifier.parse_verify_merkle_proof_bytes_be(
                 blob, local_vars.round_proof_offset, local_vars.b, local_vars.b.length)
             ) {
-//                require(false, "Merkle proof failed");
+                require(false, "Merkle proof failed");
                 return false;
             }
 
@@ -611,7 +609,6 @@ library batched_fri_verifier {
             //  fs1;
             //  fs2;
             //  res;
-//            require(false, "I am here");
         
             for( local_vars.i_round = 0; local_vars.i_round < local_vars.r_step - 1; local_vars.i_round++){
                 local_vars.alpha = transcript.get_field_challenge(tr_state, fri_params.modulus);
@@ -784,18 +781,17 @@ library batched_fri_verifier {
                 colinear_path_offset, 
                 local_vars.b, local_vars.b.length)
             ) {
+                require(false, "Round_proof.colinear_path verifier failes");
                 return false;
             }
-            //require(false, "First colinear check is well");
         }
-        //require(false, "All Merkle checks are well");
-
-//        require(fri_params.leaf_size == basic_marshalling.get_length(blob, local_vars.final_poly_offset),
-//            "Final poly array size is not equal to params.leaf_size!");
+/*        require(fri_params.leaf_size == basic_marshalling.get_length(blob, local_vars.final_poly_offset),
+            "Final poly array size is not equal to params.leaf_size!");
         local_vars.final_poly_offset = basic_marshalling.skip_length(local_vars.final_poly_offset);
         for (local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size; local_vars.p_ind++) {
              if (basic_marshalling.get_length(blob, local_vars.final_poly_offset) - 1 >
                 uint256(2) ** (field.log2(fri_params.max_degree + 1) - fri_params.r + 1) - 1) {
+                require(false, "Max degree problem");
                 return false;
             }
             if( polynomial.evaluate_by_ptr(
@@ -805,12 +801,12 @@ library batched_fri_verifier {
                 local_vars.x,
                 fri_params.modulus
             ) != local_vars.ys[local_vars.p_ind][0][0]){
-                //require(false, "Final polynomial check failed");
+                require(false, "Final polynomial check failed");
                 return false;
             }
             local_vars.final_poly_offset = basic_marshalling.skip_vector_of_uint256_be(blob, local_vars.final_poly_offset);
             unchecked{ local_vars.p_ind++; }
-        }
+        }*/
         return true;
     }
 }

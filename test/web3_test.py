@@ -56,6 +56,7 @@ def deploy_link_libs(w3, compiled, test_contract_bytecode, linked_libs_names):
 def do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_libs_names, init_test_params_func):
     w3 = init_connection()
 
+    print(f'{contracts_dir}/{test_contract_path}')
     compiled = solcx.compile_files(
         [f'{contracts_dir}/{test_contract_path}'],
         output_values=['abi', 'bin'],

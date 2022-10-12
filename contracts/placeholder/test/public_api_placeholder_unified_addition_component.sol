@@ -77,6 +77,12 @@ contract TestPlaceholderVerifierUnifiedAddition {
             unchecked{ i++; idx++;}
         }
 
+        vars.fri_params.step_list = new uint256[](init_params[idx++]);
+        for (uint256 i = 0; i < vars.fri_params.step_list.length;) {
+            vars.fri_params.step_list[i] = init_params[idx];
+            unchecked{ i++; idx++;}
+        }
+
         require(
             placeholder_verifier_unified_addition_component.verify_proof_be(
                 blob,

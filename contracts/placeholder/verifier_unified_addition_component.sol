@@ -110,7 +110,6 @@ library placeholder_verifier_unified_addition_component {
         // witnesses
         fri_params.leaf_size = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_witness_offset);
         local_vars.witness_evaluation_points = new uint256[][](fri_params.leaf_size);
-
         for (uint256 i = 0; i < fri_params.leaf_size;) {
             local_vars.witness_evaluation_points[i] = new uint256[](common_data.columns_rotations[i].length);
             for (uint256 j = 0; j < common_data.columns_rotations[i].length;) {
@@ -135,20 +134,23 @@ library placeholder_verifier_unified_addition_component {
             }
             unchecked{i++;}
         }
+        
 
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_witness_offset,
                                                         local_vars.witness_evaluation_points, tr_state, fri_params)) {
             return false;
         }
+        require(false, "Witness verification is right");
 
         // permutation
-        local_vars.evaluation_points = new uint256[](2);
-        local_vars.evaluation_points[0] = local_vars.challenge;
+        local_vars.evaluation_points = new uint256[][](1);
+        local_vars.evaluation_points[0] = new uint256[](2);
+        local_vars.evaluation_points[0][0] = local_vars.challenge;
         // local_vars.evaluation_points_permutation[1] = (local_vars.challenge * common_data.omega) % fri_params.modulus;
         assembly {
             mstore(
-                // local_vars.evaluation_points[1]
-                add(mload(add(local_vars, EVALUATION_POINTS_OFFSET)), 0x40),
+                // local_vars.evaluation_points[0][1]
+                add(mload(mload(add(local_vars, EVALUATION_POINTS_OFFSET))), 0x40),
                 // (local_vars.challenge * common_data.omega) % fri_params.modulus
                 mulmod(
                     // local_vars.challenge
@@ -161,14 +163,14 @@ library placeholder_verifier_unified_addition_component {
             )
         }
 
-        if (!lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_permutation_offset,
+        if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_permutation_offset,
                                                 local_vars.evaluation_points, tr_state, fri_params)) {
             return false;
         }
 
         // quotient
-        local_vars.evaluation_points = new uint256[](1);
-        local_vars.evaluation_points[0] = local_vars.challenge;
+        local_vars.evaluation_points = new uint256[][](1);
+        local_vars.evaluation_points[0][0] = local_vars.challenge;
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_quotient_offset,
                                                         local_vars.evaluation_points, tr_state, fri_params)) {
             return false;

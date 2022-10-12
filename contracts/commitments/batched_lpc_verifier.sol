@@ -116,8 +116,10 @@ library batched_lpc_verifier {
         // fri_proof
         uint256 value_len;
         (value_len, result_offset) = basic_marshalling.get_skip_length_check(blob, result_offset);
+
         for (uint256 i = 0; i < value_len;) {
-            result_offset = batched_fri_verifier.skip_proof_be_check(blob, result_offset);
+            // TODO realized FRI::skip_proof_be checked better
+            result_offset = batched_fri_verifier.skip_proof_be(blob, result_offset);
             unchecked{ i++; }
         }
     }
@@ -208,7 +210,7 @@ library batched_lpc_verifier {
         for (uint256 round_id = 0; round_id < fri_params.lambda;) {
             fri_params.i_fri_proof = round_id;  // for debug only
             if (!batched_fri_verifier.parse_verify_proof_be(blob, offset, tr_state, fri_params)) {
-                //require(false, "FRI-proof problem");
+                require(false, "FRI-proof problem");
                 return false;
             }
             offset = batched_fri_verifier.skip_proof_be(blob, offset);

@@ -244,7 +244,7 @@ library types {
         // 0xe0
         uint256 e;
         // 0x100
-        uint256[] evaluation_points;
+        uint256[][] evaluation_points;
         // 0x120
         uint256[] F;
         // 0x140
