@@ -89,7 +89,7 @@ contract TestLpcVerifier {
         //  [..., q_i, ...]
         uint256[] calldata init_params,
         uint256[][] calldata evaluation_points
-    ) public {
+    ) public view {
         types.transcript_data memory tr_state;
         transcript.init_transcript(tr_state, init_transcript_blob);
         types.fri_params_type memory fri_params;

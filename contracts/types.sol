@@ -168,10 +168,14 @@ library types {
 
         //0x160
         bytes batched_fri_verified_data;
+        //0x180
         uint256[] lpc_z;
+        //0x1a0
         uint256 batched_U_len;
 
+        //0x1c0
         uint256[] step_list;
+        //0x1e0
         uint256 const1_2;
         uint256 i_fri_proof;    // It is useful for debugging
     }
