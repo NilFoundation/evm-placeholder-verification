@@ -65,10 +65,11 @@ def init_test2():
     params['init_params'].append(199455130043951077247265858823823987229570523056509026484192158816218200659)
     params['init_params'].append(13)
     D_omegas = []
-    D_omegas.append(
-        199455130043951077247265858823823987229570523056509026484192158816218200659)
-    D_omegas.append(
-        24760239192664116622385963963284001971067308018068707868888628426778644166363)
+    f = open('./test/data/domain8_unified_addition.txt')
+    lines = f.readlines()
+    for line in lines:
+        D_omegas.append(int(line))
+    f.close()
     params['init_params'].append(len(D_omegas))
     params['init_params'].extend(D_omegas)
     q = []
@@ -94,6 +95,3 @@ def init_test2():
 if __name__ == '__main__':
     do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_libs_names, init_test1)
     do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_libs_names, init_test2)
-
-
-

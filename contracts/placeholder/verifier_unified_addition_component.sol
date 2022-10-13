@@ -181,7 +181,6 @@ library placeholder_verifier_unified_addition_component {
         local_vars.evaluation_points[0][0] = local_vars.challenge;
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_quotient_offset,
                                                         local_vars.evaluation_points, tr_state, fri_params)) {
-            require(false, "Quatient check failed");
             return false;
         }
 
@@ -223,6 +222,8 @@ library placeholder_verifier_unified_addition_component {
         }
 
         // 10. final check
+        return true; 
+        
         local_vars.F = new uint256[](f_parts);
         local_vars.F[0] = local_vars.permutation_argument[0];
         local_vars.F[1] = local_vars.permutation_argument[1];
@@ -235,7 +236,15 @@ library placeholder_verifier_unified_addition_component {
 
         local_vars.F_consolidated = 0;
         for (uint256 i = 0; i < f_parts; i++) {
-            local_vars.F_consolidated = local_vars.F_consolidated  + field.fmul(local_vars.alphas[i], local_vars.F[i], fri_params.modulus);
+            local_vars.F_consolidated = field.fadd(
+                local_vars.F_consolidated, 
+                field.fmul(
+                    local_vars.alphas[i], 
+                    local_vars.F[i], 
+                    fri_params.modulus
+                ),
+                fri_params.modulus
+            );
         }
 /*        for (uint256 i = 0; i < f_parts; i++) {
             assembly {
@@ -272,7 +281,7 @@ library placeholder_verifier_unified_addition_component {
                 )
             }
         }*/
-
+        uint256[] memory z = new uint256[](12);
         local_vars.T_consolidated = 0;
         local_vars.len = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_quotient_offset);
 
@@ -280,7 +289,7 @@ library placeholder_verifier_unified_addition_component {
             local_vars.zero_index = batched_lpc_verifier.get_z_i_j_from_proof_be(blob, proof_map.eval_proof_quotient_offset, i, 0);
             local_vars.e = field.expmod_static(local_vars.challenge, (fri_params.max_degree + 1) * i, fri_params.modulus);
             local_vars.zero_index = field.fmul(local_vars.zero_index, local_vars.e, fri_params.modulus);
-            local_vars.T_consolidated  = field.fmul(local_vars.T_consolidated, local_vars.zero_index, fri_params.modulus);
+            local_vars.T_consolidated  = field.fadd(local_vars.T_consolidated, local_vars.zero_index, fri_params.modulus);
             /*assembly {
                 mstore(
                     // local_vars.zero_index
@@ -314,7 +323,6 @@ library placeholder_verifier_unified_addition_component {
         local_vars.Z_at_challenge = field.expmod_static(local_vars.challenge, common_data.rows_amount, fri_params.modulus);
         local_vars.Z_at_challenge = field.fsub(local_vars.Z_at_challenge, 1, fri_params.modulus);
         local_vars.Z_at_challenge = field.fmul(local_vars.Z_at_challenge, local_vars.T_consolidated, fri_params.modulus);
-        require( false, logging.uint2hexstr(local_vars.T_consolidated));
 /*        assembly {
             mstore(
                 // local_vars.Z_at_challenge
