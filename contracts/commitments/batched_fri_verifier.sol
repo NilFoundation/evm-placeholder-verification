@@ -785,7 +785,7 @@ library batched_fri_verifier {
                 return false;
             }
         }
-/*        require(fri_params.leaf_size == basic_marshalling.get_length(blob, local_vars.final_poly_offset),
+        require(fri_params.leaf_size == basic_marshalling.get_length(blob, local_vars.final_poly_offset),
             "Final poly array size is not equal to params.leaf_size!");
         local_vars.final_poly_offset = basic_marshalling.skip_length(local_vars.final_poly_offset);
         for (local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size; local_vars.p_ind++) {
@@ -794,19 +794,19 @@ library batched_fri_verifier {
                 require(false, "Max degree problem");
                 return false;
             }
-            if( polynomial.evaluate_by_ptr(
+            uint256 eval = polynomial.evaluate_by_ptr(
                 blob,
                 local_vars.final_poly_offset + basic_marshalling.LENGTH_OCTETS,
                 basic_marshalling.get_length(blob, local_vars.final_poly_offset),
                 local_vars.x,
                 fri_params.modulus
-            ) != local_vars.ys[local_vars.p_ind][0][0]){
+            );
+            if( eval != local_vars.ys[local_vars.p_ind][0][0]){
                 require(false, "Final polynomial check failed");
                 return false;
             }
             local_vars.final_poly_offset = basic_marshalling.skip_vector_of_uint256_be(blob, local_vars.final_poly_offset);
-            unchecked{ local_vars.p_ind++; }
-        }*/
+        }
         return true;
     }
 }

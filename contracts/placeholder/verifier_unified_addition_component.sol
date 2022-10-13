@@ -140,7 +140,6 @@ library placeholder_verifier_unified_addition_component {
                                                         local_vars.witness_evaluation_points, tr_state, fri_params)) {
             return false;
         }
-        require(false, "Witness verification is right");
 
         // permutation
         local_vars.evaluation_points = new uint256[][](1);
