@@ -135,18 +135,25 @@ library placeholder_verifier_unified_addition_component {
             unchecked{i++;}
         }
         
-
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_witness_offset,
                                                         local_vars.witness_evaluation_points, tr_state, fri_params)) {
             return false;
         }
 
+        //require(false, logging.uint2hexstr(proof_map.eval_proof_permutation_offset));
         // permutation
         local_vars.evaluation_points = new uint256[][](1);
         local_vars.evaluation_points[0] = new uint256[](2);
         local_vars.evaluation_points[0][0] = local_vars.challenge;
         // local_vars.evaluation_points_permutation[1] = (local_vars.challenge * common_data.omega) % fri_params.modulus;
-        assembly {
+        uint256 challenge = local_vars.challenge;
+        uint256 omega = common_data.omega;
+        uint256 modulus = fri_params.modulus;
+        uint256 result;
+        assembly{
+            result := mulmod(challenge, omega, modulus)
+        }
+        /*assembly {
             mstore(
                 // local_vars.evaluation_points[0][1]
                 add(mload(mload(add(local_vars, EVALUATION_POINTS_OFFSET))), 0x40),
@@ -160,7 +167,8 @@ library placeholder_verifier_unified_addition_component {
                     mload(fri_params)
                 )
             )
-        }
+        }*/
+        local_vars.evaluation_points[0][1] = result;
 
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_permutation_offset,
                                                 local_vars.evaluation_points, tr_state, fri_params)) {
@@ -169,9 +177,11 @@ library placeholder_verifier_unified_addition_component {
 
         // quotient
         local_vars.evaluation_points = new uint256[][](1);
+        local_vars.evaluation_points[0] = new uint256[](1);
         local_vars.evaluation_points[0][0] = local_vars.challenge;
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_quotient_offset,
                                                         local_vars.evaluation_points, tr_state, fri_params)) {
+            require(false, "Quatient check failed");
             return false;
         }
 
