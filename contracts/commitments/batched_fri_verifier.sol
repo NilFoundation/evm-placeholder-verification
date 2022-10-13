@@ -794,14 +794,13 @@ library batched_fri_verifier {
                 require(false, "Max degree problem");
                 return false;
             }
-            uint256 eval = polynomial.evaluate_by_ptr(
+            if( polynomial.evaluate_by_ptr(
                 blob,
                 local_vars.final_poly_offset + basic_marshalling.LENGTH_OCTETS,
                 basic_marshalling.get_length(blob, local_vars.final_poly_offset),
                 local_vars.x,
                 fri_params.modulus
-            );
-            if( eval != local_vars.ys[local_vars.p_ind][0][0]){
+            ) != local_vars.ys[local_vars.p_ind][0][0]){
                 require(false, "Final polynomial check failed");
                 return false;
             }
