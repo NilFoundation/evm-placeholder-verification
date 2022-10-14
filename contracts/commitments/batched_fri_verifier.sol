@@ -381,7 +381,6 @@ library batched_fri_verifier {
         for (local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size;) {
 
             size = basic_marshalling.get_length(blob, local_vars.p_offset);
-            //require(size == (1 << local_vars.r_step), logging.uint2hexstr(local_vars.round_proof_values_offset));
             local_vars.ys[local_vars.p_ind] = new uint256[][](local_vars.correct_order_idx.length);
             require(size == (1 << local_vars.r_step), "Wrong round proof values size");
 
@@ -565,10 +564,10 @@ library batched_fri_verifier {
         // But it needs assembly work
 
         result = false;
-        require(m == 2, "m has to be equal to 2!");
-        require(fri_params.step_list.length - 1 == get_round_proofs_n_be(blob, offset), "Wrong round proofs number");
-        require(fri_params.leaf_size <= fri_params.batched_U.length, "Leaf size is not equal to U length!");
-        require(fri_params.leaf_size <= fri_params.batched_V.length, "Leaf size is not equal to V length!");
+        //require(m == 2, "m has to be equal to 2!");
+        //require(fri_params.step_list.length - 1 == get_round_proofs_n_be(blob, offset), "Wrong round proofs number");
+        //require(fri_params.leaf_size <= fri_params.batched_U.length, "Leaf size is not equal to U length!");
+        //require(fri_params.leaf_size <= fri_params.batched_V.length, "Leaf size is not equal to V length!");
 
         local_vars_type memory local_vars;
         init_local_vars(blob, offset, fri_params, local_vars);
@@ -584,10 +583,10 @@ library batched_fri_verifier {
 
         // Prepare values.
         // 1.Check values length.
-        require(
+        /*require(
             basic_marshalling.get_length(blob, local_vars.values_offset) == 
             fri_params.step_list.length, "Unsufficient polynomial values data in proofs"
-        );
+        );*/
 
         prepare_leaf_data_and_ys(blob, fri_params, local_vars);
         while ( local_vars.i_step < fri_params.step_list.length - 1 ) {
@@ -711,7 +710,6 @@ library batched_fri_verifier {
             step_local_vars(blob, offset, fri_params, local_vars);
             prepare_leaf_data_and_ys(blob, fri_params, local_vars);
 
-//            require(local_vars.i_step != 4, logging.uint2hexstr(local_vars.ys[0][7].length));
             uint256 res;
             uint256 c;
             for( local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size;){

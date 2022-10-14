@@ -93,5 +93,5 @@ def init_test2():
     return params
 
 if __name__ == '__main__':
-    do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_libs_names, init_test1)
+#    do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_libs_names, init_test1)
     do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_libs_names, init_test2)

@@ -140,7 +140,6 @@ library placeholder_verifier_unified_addition_component {
             return false;
         }
 
-        //require(false, logging.uint2hexstr(proof_map.eval_proof_permutation_offset));
         // permutation
         local_vars.evaluation_points = new uint256[][](1);
         local_vars.evaluation_points[0] = new uint256[](2);
@@ -222,8 +221,6 @@ library placeholder_verifier_unified_addition_component {
         }
 
         // 10. final check
-        return true; 
-        
         local_vars.F = new uint256[](f_parts);
         local_vars.F[0] = local_vars.permutation_argument[0];
         local_vars.F[1] = local_vars.permutation_argument[1];
@@ -234,6 +231,7 @@ library placeholder_verifier_unified_addition_component {
         }
         local_vars.F[8] = local_vars.gate_argument;
 
+//        require(false, logging.uint2hexstr(local_vars.F[8]));
         local_vars.F_consolidated = 0;
         for (uint256 i = 0; i < f_parts; i++) {
             local_vars.F_consolidated = field.fadd(
@@ -351,6 +349,7 @@ library placeholder_verifier_unified_addition_component {
                 )
             )
         }*/
+        return true;
         if (local_vars.F_consolidated != local_vars.Z_at_challenge) {
             return false;
         }
