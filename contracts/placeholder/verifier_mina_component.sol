@@ -22,13 +22,12 @@ import "../cryptography/transcript.sol";
 import "../commitments/lpc_verifier.sol";
 import "../commitments/batched_lpc_verifier.sol";
 import "./permutation_argument.sol";
-import "../components/unified_addition_gen.sol";
-//import "../components/unified_addition_gen_main.sol";
+//import "../components/unified_addition_gen_good.sol";
 import "../basic_marshalling.sol";
 import "../algebra/field.sol";
 import "../logging.sol";
 
-library placeholder_verifier_unified_addition_component {
+library placeholder_verifier_mina_component {
     uint256 constant f_parts = 9;
 
     uint256 constant OMEGA_OFFSET = 0x20;
@@ -71,6 +70,7 @@ library placeholder_verifier_unified_addition_component {
         types.fri_params_type memory fri_params,
         types.placeholder_common_data memory common_data
     ) internal view returns (bool result) {
+
         types.placeholder_local_variables memory local_vars;
         // 3. append witness commitments to transcript
         transcript.update_transcript_b32_by_offset_calldata(
@@ -79,22 +79,23 @@ library placeholder_verifier_unified_addition_component {
 
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
         // 5. permutation argument
-        local_vars.permutation_argument = permutation_argument.verify_eval_be(
-            blob,
-            tr_state,
-            proof_map,
-            fri_params,
-            common_data,
-            local_vars
-        );
-
+//        local_vars.permutation_argument = permutation_argument.verify_eval_be(
+//            blob,
+//            tr_state,
+//            proof_map,
+//            fri_params,
+//            common_data,
+//            local_vars
+//        );
         // 7. gate argument
         types.gate_argument_local_vars memory gate_params;
         gate_params.modulus = fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(tr_state, fri_params.modulus);
         gate_params.eval_proof_witness_offset = proof_map.eval_proof_witness_offset;
         gate_params.eval_proof_selector_offset = proof_map.eval_proof_selector_offset;
-        local_vars.gate_argument = unified_addition_component_gen.evaluate_gates_be(blob, gate_params, common_data.columns_rotations);
+
+//        local_vars.gate_argument = unified_addition_component_gen
+//                    .evaluate_gates_be(blob, gate_params, common_data.columns_rotations);
 
         // 8. alphas computations
         local_vars.alphas = new uint256[](f_parts);
@@ -103,10 +104,12 @@ library placeholder_verifier_unified_addition_component {
         // 9. Evaluation proof check
         transcript.update_transcript_b32_by_offset_calldata(tr_state, blob, basic_marshalling.skip_length(proof_map.T_commitments_offset));
         local_vars.challenge = transcript.get_field_challenge(tr_state, fri_params.modulus);
+        require(false, logging.uint2decstr(basic_marshalling.get_uint256_be(blob, proof_map.eval_proof_offset)));
+        require(false, logging.uint2decstr(local_vars.challenge));
         if (local_vars.challenge != basic_marshalling.get_uint256_be(blob, proof_map.eval_proof_offset)) {
             return false;
         }
-
+        return true;
         // witnesses
         fri_params.leaf_size = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_witness_offset);
         local_vars.witness_evaluation_points = new uint256[][](fri_params.leaf_size);
@@ -320,6 +323,7 @@ library placeholder_verifier_unified_addition_component {
 
         local_vars.Z_at_challenge = field.expmod_static(local_vars.challenge, common_data.rows_amount, fri_params.modulus);
         local_vars.Z_at_challenge = field.fsub(local_vars.Z_at_challenge, 1, fri_params.modulus);
+//        require(false, logging.uint2decstr(local_vars.F[8]));
         local_vars.Z_at_challenge = field.fmul(local_vars.Z_at_challenge, local_vars.T_consolidated, fri_params.modulus);
 /*        assembly {
             mstore(
@@ -349,7 +353,7 @@ library placeholder_verifier_unified_addition_component {
                 )
             )
         }*/
-
+//        return true;
         if (local_vars.F_consolidated != local_vars.Z_at_challenge) {
             return false;
         }
