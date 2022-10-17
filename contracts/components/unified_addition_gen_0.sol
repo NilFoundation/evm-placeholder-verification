@@ -23,7 +23,7 @@ import "../commitments/lpc_verifier.sol";
 import "../commitments/batched_lpc_verifier.sol";
 import "../logging.sol";
 
-library unified_addition_component_gen {
+library unified_addition_component_gen_0 {
     uint256 constant WITNESSES_N = 11;
     uint256 constant WITNESSES_TOTAL_N = 11;
     uint256 constant GATES_N = 1;
@@ -46,40 +46,13 @@ library unified_addition_component_gen {
         bytes calldata blob,
         types.gate_argument_local_vars memory gate_params,
         int256[][] memory columns_rotations
-    ) internal pure returns (uint256 gates_evaluation) {
+    ) external pure returns (uint256 gates_evaluation, uint256 theta_acc) {
         // TODO: check witnesses number in proof
 
-        gate_params.offset = basic_marshalling.skip_length(
-            batched_lpc_verifier.skip_to_z(
-                blob,
-                gate_params.eval_proof_witness_offset
-            )
-        );
-        gate_params.witness_evaluations_offsets = new uint256[](WITNESSES_N);
-        for (uint256 i = 0; i < WITNESSES_N; i++) {
-            gate_params.witness_evaluations_offsets[i] = basic_marshalling
-                .get_i_uint256_ptr_from_vector(blob, gate_params.offset, 0);
-            gate_params.offset = basic_marshalling.skip_vector_of_uint256_be(
-                blob,
-                gate_params.offset
-            );
-        }
-        gate_params.selector_evaluations = new uint256[](GATES_N);
-        for (uint256 i = 0; i < GATES_N; i++) {
-            gate_params.selector_evaluations[i] = batched_lpc_verifier
-                .get_z_i_j_from_proof_be(
-                    blob,
-                    gate_params.eval_proof_selector_offset,
-                    i,
-                    0
-                );
-        }
-
-        uint256 t = 0;
+        gates_evaluation = gate_params.gates_evaluation;
+        theta_acc = gate_params.theta_acc;
         assembly {
             let modulus := mload(gate_params)
-            let theta_acc := 1
-            mstore(add(gate_params, GATE_EVAL_OFFSET), 0)
 
             function get_W_i_by_rotation_idx(idx, rot_idx, ptr) -> result {
                 result := calldataload(
@@ -93,6 +66,7 @@ library unified_addition_component_gen {
             function get_selector_i(idx, ptr) -> result {
                 result := mload(add(add(ptr, 0x20), mul(0x20, idx)))
             }
+
             let x1 := add(gate_params, CONSTRAINT_EVAL_OFFSET)
             let x2 := add(gate_params, WITNESS_EVALUATIONS_OFFSET)
             let x3 := get_W_i_by_rotation_idx(0,0,mload(x2))
@@ -148,70 +122,11 @@ library unified_addition_component_gen {
             mstore(x1,addmod(mload(x1),mulmod(x3,mulmod(x4,mulmod(get_W_i_by_rotation_idx(1,0,mload(x2)),mulmod(get_W_i_by_rotation_idx(10,0,mload(x2)),get_W_i_by_rotation_idx(10,0,mload(x2)),modulus),modulus),modulus),modulus),modulus))
             mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(x3,mulmod(x4,mulmod(get_W_i_by_rotation_idx(1,0,mload(x2)),x3,modulus),modulus),modulus),modulus),modulus))
 
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(x3,mulmod(x4,mulmod(get_W_i_by_rotation_idx(1,0,mload(x2)),x4,modulus),modulus),modulus),modulus),modulus))
-            // Last working string
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(x3,mulmod(x4,mulmod(get_W_i_by_rotation_idx(1,0,mload(x2)),get_W_i_by_rotation_idx(4,0,mload(x2)),modulus),modulus),modulus),modulus),modulus))
-            mstore(add(gate_params, GATE_EVAL_OFFSET),addmod(mload(add(gate_params, GATE_EVAL_OFFSET)),mulmod(mload(x1),theta_acc,modulus),modulus))
-            theta_acc := mulmod(theta_acc,mload(add(gate_params, THETA_OFFSET)),modulus)
-            mstore(x1, 0)
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(x3,mulmod(x4,mulmod(get_W_i_by_rotation_idx(3,0,mload(x2)),mulmod(get_W_i_by_rotation_idx(4,0,mload(x2)),get_W_i_by_rotation_idx(10,0,mload(x2)),modulus),modulus),modulus),modulus),modulus),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(x3,mulmod(x4,mulmod(get_W_i_by_rotation_idx(3,0,mload(x2)),mulmod(x3,get_W_i_by_rotation_idx(10,0,mload(x2)),modulus),modulus),modulus),modulus),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(x3,mulmod(x4,mulmod(get_W_i_by_rotation_idx(3,0,mload(x2)),get_W_i_by_rotation_idx(1,0,mload(x2)),modulus),modulus),modulus),modulus),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(x3,mulmod(x4,mulmod(get_W_i_by_rotation_idx(3,0,mload(x2)),get_W_i_by_rotation_idx(5,0,mload(x2)),modulus),modulus),modulus),modulus),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(x3,mulmod(x4,mulmod(get_W_i_by_rotation_idx(1,0,mload(x2)),mulmod(get_W_i_by_rotation_idx(4,0,mload(x2)),get_W_i_by_rotation_idx(10,0,mload(x2)),modulus),modulus),modulus),modulus),modulus),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(x3,mulmod(x4,mulmod(get_W_i_by_rotation_idx(1,0,mload(x2)),mulmod(x3,get_W_i_by_rotation_idx(10,0,mload(x2)),modulus),modulus),modulus),modulus),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(x3,mulmod(x4,mulmod(get_W_i_by_rotation_idx(1,0,mload(x2)),get_W_i_by_rotation_idx(1,0,mload(x2)),modulus),modulus),modulus),modulus),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(x3,mulmod(x4,mulmod(get_W_i_by_rotation_idx(1,0,mload(x2)),get_W_i_by_rotation_idx(5,0,mload(x2)),modulus),modulus),modulus),modulus),modulus))
-            mstore(add(gate_params, GATE_EVAL_OFFSET),addmod(mload(add(gate_params, GATE_EVAL_OFFSET)),mulmod(mload(x1),theta_acc,modulus),modulus))
-            theta_acc := mulmod(theta_acc,mload(add(gate_params, THETA_OFFSET)),modulus)
-            mstore(x1, 0)
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,x4,modulus),modulus))
-            mstore(x1,addmod(mload(x1),get_W_i_by_rotation_idx(4,0,mload(x2)),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(x3,mulmod(get_W_i_by_rotation_idx(6,0,mload(x2)),x4,modulus),modulus),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(x3,mulmod(get_W_i_by_rotation_idx(6,0,mload(x2)),get_W_i_by_rotation_idx(4,0,mload(x2)),modulus),modulus),modulus),modulus))
-            mstore(add(gate_params, GATE_EVAL_OFFSET),addmod(mload(add(gate_params, GATE_EVAL_OFFSET)),mulmod(mload(x1),theta_acc,modulus),modulus))
-            theta_acc := mulmod(theta_acc,mload(add(gate_params, THETA_OFFSET)),modulus)
-            mstore(x1, 0)
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,get_W_i_by_rotation_idx(3,0,mload(x2)),modulus),modulus))
-            mstore(x1,addmod(mload(x1),get_W_i_by_rotation_idx(5,0,mload(x2)),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(x3,mulmod(get_W_i_by_rotation_idx(6,0,mload(x2)),get_W_i_by_rotation_idx(3,0,mload(x2)),modulus),modulus),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(x3,mulmod(get_W_i_by_rotation_idx(6,0,mload(x2)),get_W_i_by_rotation_idx(5,0,mload(x2)),modulus),modulus),modulus),modulus))
-            mstore(add(gate_params, GATE_EVAL_OFFSET),addmod(mload(add(gate_params, GATE_EVAL_OFFSET)),mulmod(mload(x1),theta_acc,modulus),modulus))
-            theta_acc := mulmod(theta_acc,mload(add(gate_params, THETA_OFFSET)),modulus)
-            mstore(x1, 0)
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,x3,modulus),modulus))
-            mstore(x1,addmod(mload(x1),get_W_i_by_rotation_idx(4,0,mload(x2)),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(x4,mulmod(get_W_i_by_rotation_idx(7,0,mload(x2)),x3,modulus),modulus),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(x4,mulmod(get_W_i_by_rotation_idx(7,0,mload(x2)),get_W_i_by_rotation_idx(4,0,mload(x2)),modulus),modulus),modulus),modulus))
-            mstore(add(gate_params, GATE_EVAL_OFFSET),addmod(mload(add(gate_params, GATE_EVAL_OFFSET)),mulmod(mload(x1),theta_acc,modulus),modulus))
-            theta_acc := mulmod(theta_acc,mload(add(gate_params, THETA_OFFSET)),modulus)
-            mstore(x1, 0)
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,get_W_i_by_rotation_idx(1,0,mload(x2)),modulus),modulus))
-            mstore(x1,addmod(mload(x1),get_W_i_by_rotation_idx(5,0,mload(x2)),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(x4,mulmod(get_W_i_by_rotation_idx(7,0,mload(x2)),get_W_i_by_rotation_idx(1,0,mload(x2)),modulus),modulus),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(x4,mulmod(get_W_i_by_rotation_idx(7,0,mload(x2)),get_W_i_by_rotation_idx(5,0,mload(x2)),modulus),modulus),modulus),modulus))
-            mstore(add(gate_params, GATE_EVAL_OFFSET),addmod(mload(add(gate_params, GATE_EVAL_OFFSET)),mulmod(mload(x1),theta_acc,modulus),modulus))
-            theta_acc := mulmod(theta_acc,mload(add(gate_params, THETA_OFFSET)),modulus)
-            mstore(x1, 0)
-            mstore(x1,addmod(mload(x1),get_W_i_by_rotation_idx(4,0,mload(x2)),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(x3,mulmod(get_W_i_by_rotation_idx(8,0,mload(x2)),get_W_i_by_rotation_idx(4,0,mload(x2)),modulus),modulus),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(x4,mulmod(get_W_i_by_rotation_idx(8,0,mload(x2)),get_W_i_by_rotation_idx(4,0,mload(x2)),modulus),modulus),modulus),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(get_W_i_by_rotation_idx(1,0,mload(x2)),mulmod(get_W_i_by_rotation_idx(9,0,mload(x2)),get_W_i_by_rotation_idx(4,0,mload(x2)),modulus),modulus),modulus),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(get_W_i_by_rotation_idx(3,0,mload(x2)),mulmod(get_W_i_by_rotation_idx(9,0,mload(x2)),get_W_i_by_rotation_idx(4,0,mload(x2)),modulus),modulus),modulus),modulus))
-            mstore(add(gate_params, GATE_EVAL_OFFSET),addmod(mload(add(gate_params, GATE_EVAL_OFFSET)),mulmod(mload(x1),theta_acc,modulus),modulus))
-            theta_acc := mulmod(theta_acc,mload(add(gate_params, THETA_OFFSET)),modulus)
-            mstore(x1, 0)
         //1st
-            mstore(x1,addmod(mload(x1),get_W_i_by_rotation_idx(5,0,mload(x2)),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(x3,mulmod(get_W_i_by_rotation_idx(8,0,mload(x2)),get_W_i_by_rotation_idx(5,0,mload(x2)),modulus),modulus),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(x4,mulmod(get_W_i_by_rotation_idx(8,0,mload(x2)),get_W_i_by_rotation_idx(5,0,mload(x2)),modulus),modulus),modulus),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(get_W_i_by_rotation_idx(1,0,mload(x2)),mulmod(get_W_i_by_rotation_idx(9,0,mload(x2)),get_W_i_by_rotation_idx(5,0,mload(x2)),modulus),modulus),modulus),modulus))
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(get_W_i_by_rotation_idx(3,0,mload(x2)),mulmod(get_W_i_by_rotation_idx(9,0,mload(x2)),get_W_i_by_rotation_idx(5,0,mload(x2)),modulus),modulus),modulus),modulus))
-            mstore(add(gate_params, GATE_EVAL_OFFSET),addmod(mload(add(gate_params, GATE_EVAL_OFFSET)),mulmod(mload(x1),theta_acc,modulus),modulus))
-            theta_acc := mulmod(theta_acc,mload(add(gate_params, THETA_OFFSET)),modulus)
-            mstore(add(gate_params, GATE_EVAL_OFFSET),mulmod(mload(add(gate_params, GATE_EVAL_OFFSET)),get_selector_i(0,mload(add(gate_params, SELECTOR_EVALUATIONS_OFFSET))),modulus))
+            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(x3,mulmod(x4,mulmod(get_W_i_by_rotation_idx(1,0,mload(x2)),x4,modulus),modulus),modulus),modulus),modulus))
 
-            gates_evaluation := mload(add(gate_params, GATE_EVAL_OFFSET))
+             gates_evaluation := mload(add(gate_params, GATE_EVAL_OFFSET))
+//            gates_evaluation := addmod(gates_evaluation,mload(add(gate_params, GATE_EVAL_OFFSET)),modulus)
         }
     }
 }

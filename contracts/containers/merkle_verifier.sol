@@ -19,6 +19,7 @@
 pragma solidity >=0.8.4;
 
 import "../types.sol";
+import "../logging.sol";
 
 library merkle_verifier {
     // Merkle proof has the following structure:
@@ -95,6 +96,8 @@ library merkle_verifier {
 
     function parse_verify_merkle_proof_not_pre_hash_be(bytes calldata blob, uint256 offset, bytes32 verified_data)
     internal pure returns (bool result) {
+//        uint256 x = 0;
+//        uint256 depth;
         assembly {
             let depth := shr(LENGTH_RESTORING_SHIFT, calldataload(add(blob.offset, add(offset, DEPTH_OFFSET))))
 
@@ -108,6 +111,8 @@ library merkle_verifier {
                     )
                 )
             )
+//            x := add(x, pos)
+//            x := mul(x, 10)
             switch pos
             case 0 {
                 mstore(0x20, verified_data)
@@ -144,6 +149,8 @@ library merkle_verifier {
                         )
                     )
                 )
+//                x := add(x, pos)
+//                x := mul(x, 10)
                 switch pos
                 case 0 {
                     mstore(
@@ -190,6 +197,8 @@ library merkle_verifier {
                     add(blob.offset, add(layer_offst, LAYER_POSITION_OFFSET))
                 )
             )
+//            x := add(x, pos)
+//            x := mul(x, 10)
             switch pos
             case 0 {
                 mstore(
@@ -221,6 +230,7 @@ library merkle_verifier {
         assembly {
             root := calldataload(add(blob.offset, add(offset, ROOT_OFFSET)))
         }
+//        require(false, logging.uint2decstr(depth));
         result = (verified_data == root);
     }
 

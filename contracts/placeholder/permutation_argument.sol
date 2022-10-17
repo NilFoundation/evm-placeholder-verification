@@ -156,6 +156,7 @@ library permutation_argument {
             tr_state,
             fri_params.modulus
         );
+
         transcript.update_transcript_b32_by_offset_calldata(
             tr_state,
             blob,
@@ -260,15 +261,16 @@ library permutation_argument {
             }
         }
 
-        local_vars.perm_polynomial_value = lpc_verifier.get_z_i_from_proof_be(
+        local_vars.perm_polynomial_value = batched_lpc_verifier.get_z_i_j_from_proof_be(
             blob,
             proof_map.eval_proof_permutation_offset,
+            0,
             0
         );
-        local_vars.perm_polynomial_shifted_value = lpc_verifier
-            .get_z_i_from_proof_be(
+        local_vars.perm_polynomial_shifted_value = batched_lpc_verifier.get_z_i_j_from_proof_be(
                 blob,
                 proof_map.eval_proof_permutation_offset,
+                0,
                 1
             );
         local_vars.q_last_eval = batched_lpc_verifier.get_z_i_j_from_proof_be(
@@ -284,6 +286,7 @@ library permutation_argument {
             0
         );
 
+        //require(false, logging.uint2hexstr(local_vars.perm_polynomial_shifted_value));
         F = new uint256[](ARGUMENT_SIZE);
         local_vars.challenge = basic_marshalling.get_uint256_be(
             blob,
