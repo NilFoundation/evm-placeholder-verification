@@ -79,14 +79,14 @@ library placeholder_verifier_mina_component {
 
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
         // 5. permutation argument
-//        local_vars.permutation_argument = permutation_argument.verify_eval_be(
-//            blob,
-//            tr_state,
-//            proof_map,
-//            fri_params,
-//            common_data,
-//            local_vars
-//        );
+        local_vars.permutation_argument = permutation_argument.verify_eval_be(
+            blob,
+            tr_state,
+            proof_map,
+            fri_params,
+            common_data,
+            local_vars
+        );
         // 7. gate argument
         types.gate_argument_local_vars memory gate_params;
         gate_params.modulus = fri_params.modulus;
@@ -104,12 +104,11 @@ library placeholder_verifier_mina_component {
         // 9. Evaluation proof check
         transcript.update_transcript_b32_by_offset_calldata(tr_state, blob, basic_marshalling.skip_length(proof_map.T_commitments_offset));
         local_vars.challenge = transcript.get_field_challenge(tr_state, fri_params.modulus);
-        require(false, logging.uint2decstr(basic_marshalling.get_uint256_be(blob, proof_map.eval_proof_offset)));
-        require(false, logging.uint2decstr(local_vars.challenge));
+
         if (local_vars.challenge != basic_marshalling.get_uint256_be(blob, proof_map.eval_proof_offset)) {
             return false;
         }
-        return true;
+//        require(false, logging.uint2decstr(local_vars.challenge));
         // witnesses
         fri_params.leaf_size = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_witness_offset);
         local_vars.witness_evaluation_points = new uint256[][](fri_params.leaf_size);
@@ -117,21 +116,33 @@ library placeholder_verifier_mina_component {
             local_vars.witness_evaluation_points[i] = new uint256[](common_data.columns_rotations[i].length);
             for (uint256 j = 0; j < common_data.columns_rotations[i].length;) {
                 local_vars.e = uint256(common_data.columns_rotations[i][j] + int256(fri_params.modulus)) % fri_params.modulus;
-                local_vars.e = field.expmod_static(common_data.omega, local_vars.e, fri_params.modulus);
-                assembly {
-                    mstore(
-                        add(local_vars, E_OFFSET),
-                        // challenge * omega^rotation_gates[j]
-                        mulmod(
-                            // challenge
-                            mload(add(local_vars, CHALLENGE_OFFSET)),
-                            // e = omega^rotation_gates[j]
-                            mload(add(local_vars, E_OFFSET)),
-                            // modulus
-                            mload(fri_params)
-                        )
-                    )
+                if (common_data.columns_rotations[i][j] < 0) {
+                    uint256 omega_inv = field.inverse_static(common_data.omega, fri_params.modulus);
+                    local_vars.e = uint256(-common_data.columns_rotations[i][j]);
+                    local_vars.e = field.expmod_static(omega_inv, local_vars.e, fri_params.modulus);
+                    local_vars.e = field.fmul(local_vars.e, local_vars.challenge, fri_params.modulus);
+                } else {
+                    local_vars.e = field.expmod_static(common_data.omega, local_vars.e, fri_params.modulus);
+                    local_vars.e = field.fmul(local_vars.e, local_vars.challenge, fri_params.modulus);
                 }
+//                if ( common_data.columns_rotations[i].length == 3 && j == 1) {
+//                    require(false, logging.uint2decstr(local_vars.e));
+//                }
+//                require(false, logging.uint2decstr(local_vars.e));
+//                assembly {
+//                    mstore(
+//                        add(local_vars, E_OFFSET),
+//                        // challenge * omega^rotation_gates[j]
+//                        mulmod(
+//                            // challenge
+//                            mload(add(local_vars, CHALLENGE_OFFSET)),
+//                            // e = omega^rotation_gates[j]
+//                            mload(add(local_vars, E_OFFSET)),
+//                            // modulus
+//                            mload(fri_params)
+//                        )
+//                    )
+//                }
                 local_vars.witness_evaluation_points[i][j] = local_vars.e;
                 unchecked{j++;}
             }
@@ -142,7 +153,7 @@ library placeholder_verifier_mina_component {
                                                         local_vars.witness_evaluation_points, tr_state, fri_params)) {
             return false;
         }
-
+        return true;
         // permutation
         local_vars.evaluation_points = new uint256[][](1);
         local_vars.evaluation_points[0] = new uint256[](2);
