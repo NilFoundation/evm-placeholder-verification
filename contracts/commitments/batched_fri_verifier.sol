@@ -489,7 +489,7 @@ library batched_fri_verifier {
         // 0xa0
         // local_vars. alpha;           // computed later
         // 0x320
-        local_vars.domain_size = 1 << fri_params.D_omegas.length; // domain size TODO change domain representation
+        local_vars.domain_size = (1 << fri_params.D_omegas.length) * 2; // domain size TODO change domain representation
         local_vars.omega = fri_params.D_omegas[0];           // domain generator
         local_vars.global_round_index = 0;                   // current FRI round
         local_vars.i_round = 0;                              // current round in step

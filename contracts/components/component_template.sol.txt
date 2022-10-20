@@ -77,7 +77,7 @@ library component_template {
             let theta_acc := 1
             mstore(add(gate_params, GATE_EVAL_OFFSET), 0)
 
-            function get_W_i_by_rotation_idx(idx, rot_idx, ptr) -> result {
+            function get_eval_i_by_rotation_idx(idx, rot_idx, ptr) -> result {
                 result := mload(
                     add(
                         add(mload(add(add(ptr, 0x20), mul(0x20, idx))), 0x20),

@@ -189,7 +189,9 @@ library batched_lpc_verifier {
         uint256 local_vars;
         local_vars = basic_marshalling.skip_length(skip_to_z(blob, offset));
         for (uint256 polynom_index = 0; polynom_index < fri_params.leaf_size;) {
-
+//            require(false, logging.uint2decstr(offset));
+//            require(false, logging.uint2decstr(basic_marshalling.get_i_uint256_from_vector(blob, local_vars, 0)));
+//            require(false, logging.uint2hexstr(local_vars));
             fri_params.batched_U[polynom_index] = polynomial.interpolate(
                 blob,
                 evaluation_points[polynom_index],
@@ -197,6 +199,8 @@ library batched_lpc_verifier {
                 fri_params.modulus
             );
             local_vars = basic_marshalling.skip_vector_of_uint256_be(blob, local_vars);
+
+//            require(false, logging.uint2hexstr(basic_marshalling.get_i_uint256_from_vector(blob, local_vars, 0)));
             unchecked{ polynom_index++; }
         }
 

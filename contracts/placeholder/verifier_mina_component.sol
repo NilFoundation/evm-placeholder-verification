@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0.
 //---------------------------------------------------------------------------//
 // Copyright (c) 2022 Mikhail Komarov <nemo@nil.foundation>
-// Copyright (c) 2022 Ilias Khairullin <ilias@nil.foundation>
+// Copyright (c) 2022 Aleksei Moskvin <alalmoskvin@nil.foundation>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import "../cryptography/transcript.sol";
 import "../commitments/lpc_verifier.sol";
 import "../commitments/batched_lpc_verifier.sol";
 import "./permutation_argument.sol";
-//import "../components/unified_addition_gen_good.sol";
+import "../components/mina_split_gen.sol";
 import "../basic_marshalling.sol";
 import "../algebra/field.sol";
 import "../logging.sol";
@@ -93,9 +93,9 @@ library placeholder_verifier_mina_component {
         gate_params.theta = transcript.get_field_challenge(tr_state, fri_params.modulus);
         gate_params.eval_proof_witness_offset = proof_map.eval_proof_witness_offset;
         gate_params.eval_proof_selector_offset = proof_map.eval_proof_selector_offset;
+        gate_params.eval_proof_constant_offset = proof_map.eval_proof_constant_offset;
 
-//        local_vars.gate_argument = unified_addition_component_gen
-//                    .evaluate_gates_be(blob, gate_params, common_data.columns_rotations);
+        local_vars.gate_argument = mina_split_gen.evaluate_gates_be(blob, gate_params, common_data.columns_rotations);
 
         // 8. alphas computations
         local_vars.alphas = new uint256[](f_parts);
@@ -108,23 +108,22 @@ library placeholder_verifier_mina_component {
         if (local_vars.challenge != basic_marshalling.get_uint256_be(blob, proof_map.eval_proof_offset)) {
             return false;
         }
-//        require(false, logging.uint2decstr(local_vars.challenge));
+
         // witnesses
         fri_params.leaf_size = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_witness_offset);
         local_vars.witness_evaluation_points = new uint256[][](fri_params.leaf_size);
         for (uint256 i = 0; i < fri_params.leaf_size;) {
             local_vars.witness_evaluation_points[i] = new uint256[](common_data.columns_rotations[i].length);
             for (uint256 j = 0; j < common_data.columns_rotations[i].length;) {
-                local_vars.e = uint256(common_data.columns_rotations[i][j] + int256(fri_params.modulus)) % fri_params.modulus;
+//                local_vars.e = uint256(common_data.columns_rotations[i][j] + int256(fri_params.modulus)) % fri_params.modulus;
+                local_vars.e = uint256(common_data.columns_rotations[i][j]);
                 if (common_data.columns_rotations[i][j] < 0) {
-                    uint256 omega_inv = field.inverse_static(common_data.omega, fri_params.modulus);
                     local_vars.e = uint256(-common_data.columns_rotations[i][j]);
-                    local_vars.e = field.expmod_static(omega_inv, local_vars.e, fri_params.modulus);
-                    local_vars.e = field.fmul(local_vars.e, local_vars.challenge, fri_params.modulus);
+                    local_vars.e = field.expmod_static(field.inverse_static(common_data.omega, fri_params.modulus), local_vars.e, fri_params.modulus);
                 } else {
                     local_vars.e = field.expmod_static(common_data.omega, local_vars.e, fri_params.modulus);
-                    local_vars.e = field.fmul(local_vars.e, local_vars.challenge, fri_params.modulus);
                 }
+                local_vars.e = field.fmul(local_vars.e, local_vars.challenge, fri_params.modulus);
 //                if ( common_data.columns_rotations[i].length == 3 && j == 1) {
 //                    require(false, logging.uint2decstr(local_vars.e));
 //                }
@@ -148,12 +147,12 @@ library placeholder_verifier_mina_component {
             }
             unchecked{i++;}
         }
-        
+
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_witness_offset,
                                                         local_vars.witness_evaluation_points, tr_state, fri_params)) {
             return false;
         }
-        return true;
+
         // permutation
         local_vars.evaluation_points = new uint256[][](1);
         local_vars.evaluation_points[0] = new uint256[](2);
@@ -245,14 +244,13 @@ library placeholder_verifier_mina_component {
         }
         local_vars.F[8] = local_vars.gate_argument;
 
-//        require(false, logging.uint2hexstr(local_vars.F[8]));
         local_vars.F_consolidated = 0;
         for (uint256 i = 0; i < f_parts; i++) {
             local_vars.F_consolidated = field.fadd(
-                local_vars.F_consolidated, 
+                local_vars.F_consolidated,
                 field.fmul(
-                    local_vars.alphas[i], 
-                    local_vars.F[i], 
+                    local_vars.alphas[i],
+                    local_vars.F[i],
                     fri_params.modulus
                 ),
                 fri_params.modulus
@@ -334,7 +332,6 @@ library placeholder_verifier_mina_component {
 
         local_vars.Z_at_challenge = field.expmod_static(local_vars.challenge, common_data.rows_amount, fri_params.modulus);
         local_vars.Z_at_challenge = field.fsub(local_vars.Z_at_challenge, 1, fri_params.modulus);
-//        require(false, logging.uint2decstr(local_vars.F[8]));
         local_vars.Z_at_challenge = field.fmul(local_vars.Z_at_challenge, local_vars.T_consolidated, fri_params.modulus);
 /*        assembly {
             mstore(
@@ -364,7 +361,6 @@ library placeholder_verifier_mina_component {
                 )
             )
         }*/
-//        return true;
         if (local_vars.F_consolidated != local_vars.Z_at_challenge) {
             return false;
         }

@@ -301,6 +301,15 @@ library basic_marshalling {
         }
     }
 
+    function get_i_j_uint256_from_vector_of_vectors_true(bytes calldata blob, uint256 offset, uint256 i, uint256 j)
+    internal pure returns (uint256 result) {
+        for (uint256 _i = 0; _i < i;) {
+            offset = skip_vector_of_uint256_be(blob, offset);
+        unchecked{ _i++; }
+        }
+        result = get_i_uint256_from_vector(blob, offset, j);
+    }
+
     function get_i_j_uint256_from_vector_of_vectors(bytes calldata blob, uint256 offset, uint256 i, uint256 j)
     internal pure returns (uint256 result) {
         offset = skip_length(offset);

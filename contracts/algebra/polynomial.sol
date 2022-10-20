@@ -308,44 +308,26 @@ library polynomial {
         } else if (x.length == 2) {
             return interpolate_by_2_points(blob, x, fx_offset, modulus);
         } else if (x.length == 3) {
-            uint256[] memory result = new uint256[](3);
-            uint256[] memory sub_x = new uint256[](6);
-            sub_x[0] = field.fsub(x[0], x[1],modulus);
-            sub_x[1] = field.fsub(x[0], x[2],modulus);
-            sub_x[2] = field.fsub(x[1], x[0],modulus);
-            sub_x[3] = field.fsub(x[1], x[2],modulus);
-            sub_x[4] = field.fsub(x[2], x[0],modulus);
-            sub_x[5] = field.fsub(x[2], x[1],modulus);
-            uint256[] memory div_one = new uint256[](3);
-            div_one[0] = field.fdiv(basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 0), sub_x[0], modulus);
-            div_one[1] = field.fdiv(basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 1), sub_x[2], modulus);
-            div_one[2] = field.fdiv(basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 2), sub_x[4], modulus);
-            uint256[] memory div_two = new uint256[](3);
-            div_two[0] = field.fdiv(div_one[0], sub_x[1], modulus);
-            div_two[1] = field.fdiv(div_one[1], sub_x[3], modulus);
-            div_two[2] = field.fdiv(div_one[2], sub_x[5], modulus);
-            result[2] = field.fadd(field.fadd(div_two[0], div_two[1], modulus), div_two[2], modulus);
+            uint256[] memory y_div = new uint256[](3);
+            y_div[0] = field.fdiv(basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 0), field.fmul(field.fsub(x[0], x[1],modulus), field.fsub(x[0], x[2],modulus), modulus), modulus);
+            y_div[1] = field.fdiv(basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 1), field.fmul(field.fsub(x[1], x[0],modulus), field.fsub(x[1], x[2],modulus), modulus), modulus);
+            y_div[2] = field.fdiv(basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 2), field.fmul(field.fsub(x[2], x[0],modulus), field.fsub(x[2], x[1],modulus), modulus), modulus);
 
             uint256[] memory mul_two = new uint256[](3);
-            mul_two[0] = field.fmul(div_two[0], field.fmul(x[1], x[2], modulus), modulus);
-            mul_two[1] = field.fmul(div_two[1], field.fmul(x[0], x[2], modulus), modulus);
-            mul_two[2] = field.fmul(div_two[2], field.fmul(x[0], x[1], modulus), modulus);
-            result[0] = field.fadd(field.fadd(mul_two[0], mul_two[1], modulus), mul_two[2], modulus);
-
-            uint256[] memory neg = new uint256[](3);
-            neg[0] = field.fsub(modulus, field.fadd(x[1], x[2], modulus), modulus);
-            neg[1] = field.fsub(modulus, field.fadd(x[0], x[2], modulus), modulus);
-            neg[2] = field.fsub(modulus, field.fadd(x[0], x[1], modulus), modulus);
+            mul_two[0] = field.fmul(y_div[0], field.fmul(x[1], x[2], modulus), modulus);
+            mul_two[1] = field.fmul(y_div[1], field.fmul(x[0], x[2], modulus), modulus);
+            mul_two[2] = field.fmul(y_div[2], field.fmul(x[0], x[1], modulus), modulus);
 
             uint256[] memory last = new uint256[](3);
-            last[0] = field.fmul(div_two[0], neg[0], modulus);
-            last[1] = field.fmul(div_two[1], neg[1], modulus);
-            last[2] = field.fmul(div_two[2], neg[2], modulus);
+            last[0] = field.fmul(y_div[0], modulus - field.fadd(x[1], x[2], modulus), modulus);
+            last[1] = field.fmul(y_div[1], modulus - field.fadd(x[0], x[2], modulus), modulus);
+            last[2] = field.fmul(y_div[2], modulus - field.fadd(x[0], x[1], modulus), modulus);
 
+            uint256[] memory result = new uint256[](3);
+            result[0] = field.fadd(field.fadd(mul_two[0], mul_two[1], modulus), mul_two[2], modulus);
             result[1] = field.fadd(field.fadd(last[0], last[1], modulus), last[2], modulus);
+            result[2] = field.fadd(field.fadd(y_div[0], y_div[1], modulus), y_div[2], modulus);
             return result;
-//        require(false, logging.uint2decstr(result[1]));
-//            require(false, logging.uint2decstr(result[0]));
         } else {
             require(false, "unsupported number of points for interpolation");
         }

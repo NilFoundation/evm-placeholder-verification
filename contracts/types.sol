@@ -314,5 +314,11 @@ library types {
         uint256 offset;
         // 0x180
         uint256[][] witness_evaluations;
+        // 0x1a0
+        uint256[][] constant_evaluations;
+        // 0x1c0
+        uint256[][] public_input_evaluations;
+        // 0x1e0
+        uint256 eval_proof_constant_offset;
     }
 }

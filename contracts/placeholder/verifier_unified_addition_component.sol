@@ -99,7 +99,6 @@ library placeholder_verifier_unified_addition_component {
         // 8. alphas computations
         local_vars.alphas = new uint256[](f_parts);
         transcript.get_field_challenges(tr_state, local_vars.alphas, fri_params.modulus);
-
         // 9. Evaluation proof check
         transcript.update_transcript_b32_by_offset_calldata(tr_state, blob, basic_marshalling.skip_length(proof_map.T_commitments_offset));
         local_vars.challenge = transcript.get_field_challenge(tr_state, fri_params.modulus);

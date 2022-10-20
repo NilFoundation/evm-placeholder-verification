@@ -2,6 +2,7 @@
 //---------------------------------------------------------------------------//
 // Copyright (c) 2022 Mikhail Komarov <nemo@nil.foundation>
 // Copyright (c) 2022 Ilias Khairullin <ilias@nil.foundation>
+// Copyright (c) 2022 Aleksei Moskvin <alalmoskvin@nil.foundation>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,22 +18,15 @@
 //---------------------------------------------------------------------------//
 pragma solidity >=0.8.4;
 
-import "../types.sol";
-import "../basic_marshalling.sol";
-import "../commitments/lpc_verifier.sol";
-import "../commitments/batched_lpc_verifier.sol";
-import "../logging.sol";
+import "../../types.sol";
 
-library unified_addition_component_gen_1 {
-    uint256 constant WITNESSES_N = 11;
-    uint256 constant WITNESSES_TOTAL_N = 11;
-    uint256 constant GATES_N = 1;
-
+// TODO: name component
+library mina_gate2 {
     uint256 constant MODULUS_OFFSET = 0x0;
     uint256 constant THETA_OFFSET = 0x20;
     uint256 constant CONSTRAINT_EVAL_OFFSET = 0x40;
     uint256 constant GATE_EVAL_OFFSET = 0x60;
-    uint256 constant WITNESS_EVALUATIONS_OFFSET = 0x80;
+    uint256 constant WITNESS_EVALUATIONS_OFFSET_OFFSET = 0x80;
     uint256 constant SELECTOR_EVALUATIONS_OFFSET = 0xa0;
     uint256 constant EVAL_PROOF_WITNESS_OFFSET_OFFSET = 0xc0;
     uint256 constant EVAL_PROOF_SELECTOR_OFFSET_OFFSET = 0xe0;
@@ -40,23 +34,25 @@ library unified_addition_component_gen_1 {
     uint256 constant THETA_ACC_OFFSET = 0x120;
     uint256 constant SELECTOR_EVALUATIONS_OFFSET_OFFSET = 0x140;
     uint256 constant OFFSET_OFFSET = 0x160;
+    uint256 constant WITNESS_EVALUATIONS_OFFSET = 0x180;
+    uint256 constant CONSTANT_EVALUATIONS_OFFSET = 0x1a0;
+    uint256 constant PUBLIC_INPUT_EVALUATIONS_OFFSET = 0x1c0;
 
     // TODO: columns_rotations could be hard-coded
-    function evaluate_gates_be(
-        bytes calldata blob,
+    function evaluate_gate_be(
         types.gate_argument_local_vars memory gate_params,
         int256[][] memory columns_rotations
     ) external pure returns (uint256 gates_evaluation, uint256 theta_acc) {
-        // TODO: check witnesses number in proof
         gates_evaluation = gate_params.gates_evaluation;
         theta_acc = gate_params.theta_acc;
         assembly {
             let modulus := mload(gate_params)
+            mstore(add(gate_params, GATE_EVAL_OFFSET), 0)
 
-            function get_W_i_by_rotation_idx(idx, rot_idx, ptr) -> result {
-                result := calldataload(
+            function get_eval_i_by_rotation_idx(idx, rot_idx, ptr) -> result {
+                result := mload(
                     add(
-                        mload(add(add(ptr, 0x20), mul(0x20, idx))),
+                        add(mload(add(add(ptr, 0x20), mul(0x20, idx))), 0x20),
                         mul(0x20, rot_idx)
                     )
                 )
@@ -65,18 +61,18 @@ library unified_addition_component_gen_1 {
             function get_selector_i(idx, ptr) -> result {
                 result := mload(add(add(ptr, 0x20), mul(0x20, idx)))
             }
-            let x1 := add(gate_params, CONSTRAINT_EVAL_OFFSET)
-            let x2 := add(gate_params, WITNESS_EVALUATIONS_OFFSET)
-            let x3 := get_W_i_by_rotation_idx(0,0,mload(x2))
-            let x4 := get_W_i_by_rotation_idx(2,0,mload(x2))
 
-            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(x3,mulmod(x4,mulmod(get_W_i_by_rotation_idx(1,0,mload(x2)),x4,modulus),modulus),modulus),modulus),modulus))
-//            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(x3,mulmod(x4,mulmod(get_W_i_by_rotation_idx(1,0,mload(x2)),get_W_i_by_rotation_idx(4,0,mload(x2)),modulus),modulus),modulus),modulus),modulus))
-//            mstore(add(gate_params, GATE_EVAL_OFFSET),addmod(mload(add(gate_params, GATE_EVAL_OFFSET)),mulmod(mload(x1),theta_acc,modulus),modulus))
+            // TODO: insert generated code for gate argument evaluation here
+            mstore(add(gate_params, GATE_EVAL_OFFSET), 0)
+            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET), 0)
+            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),get_eval_i_by_rotation_idx(1,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),modulus))
+            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),get_eval_i_by_rotation_idx(0,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),modulus))
+            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,get_eval_i_by_rotation_idx(2,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),modulus),modulus))
+            mstore(add(gate_params, GATE_EVAL_OFFSET),addmod(mload(add(gate_params, GATE_EVAL_OFFSET)),mulmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
+            theta_acc := mulmod(theta_acc,mload(add(gate_params, THETA_OFFSET)),modulus)
+            mstore(add(gate_params, GATE_EVAL_OFFSET),mulmod(mload(add(gate_params, GATE_EVAL_OFFSET)),get_selector_i(2,mload(add(gate_params, SELECTOR_EVALUATIONS_OFFSET))),modulus))
+            gates_evaluation := addmod(gates_evaluation,mload(add(gate_params, GATE_EVAL_OFFSET)),modulus)
 
-
-            gates_evaluation := mload(add(gate_params, GATE_EVAL_OFFSET))
         }
-        require(false, logging.uint2decstr(gates_evaluation));
     }
 }
