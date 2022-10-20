@@ -229,7 +229,6 @@ library placeholder_verifier_mina_component {
                                                         local_vars.evaluation_points, tr_state, fri_params)) {
             return false;
         }
-        return true;
 
         // 10. final check
         local_vars.F = new uint256[](f_parts);
