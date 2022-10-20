@@ -177,11 +177,16 @@ library types {
         uint256[] step_list;
         //0x1e0
         uint256 const1_2;       // !!! It's important. Set it please. Uninitialized 1/2 => colinear check error.
+        //0x200
         uint256 i_fri_proof;    // It is useful for debugging
+        //0x220
         uint256 max_step;       // variable for memory  initializing
+        //0x240
         uint256 max_batch;      // variable for memory  initializing
 
         // These are local variables for FRI. But it's useful to allocate memory once
+        //0x260
+        bytes        b;
         uint256[2][] s_indices;              // Indices of current coset S
         uint256[2][] s;                      // Coset S
         uint256[2][] correct_order_idx;      // Ordered indices to pack ys to check merkle proofs

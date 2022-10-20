@@ -30,7 +30,7 @@ library batched_fri_verifier {
     struct local_vars_type {
         // some internal variables used in assemblys
         // 0x0
-        bytes       b;
+        uint256       b_length;
         //0x20
         uint256     s1;                                      
         //0x40
@@ -67,7 +67,7 @@ library batched_fri_verifier {
 
         // Some internal variables
         uint256 p_ind;          // ??
-        uint256 y_ind;                   // ??
+        uint256 y_ind;                   // ?
         uint256 polynom_index;              // ??
         uint256 p_offset;
         uint256 y_offset;
@@ -80,6 +80,7 @@ library batched_fri_verifier {
         uint256 indices_size;
     }
 
+    uint256 constant FRI_PARAMS_BYTES_B_OFFSET = 0x260;
     uint256 constant BYTES_B_OFFSET = 0x0;
     uint256 constant S1_OFFSET = 0x20;                                      
     uint256 constant ALPHA_OFFSET = 0x40;                                   // alpha challenge
@@ -249,8 +250,8 @@ library batched_fri_verifier {
 
     // if x_index is index of x, then paired_index is index of -x
     function get_paired_index(uint256 x_index, uint256 domain_size)
-    internal view returns(uint256 result ){
-        result = (x_index + domain_size / 2) % domain_size;
+    internal pure returns(uint256 result ){
+        unchecked{ result = (x_index + (domain_size >> 1)) % domain_size; }
     }
 
     // calculate indices for coset S = {s\in D| s^(2^fri_step) == x_next}
@@ -259,10 +260,8 @@ library batched_fri_verifier {
         local_vars_type memory local_vars)
     internal view
     {
-        local_vars.indices_size = 1 << (local_vars.r_step - 1);
+        unchecked{ local_vars.indices_size = 1 << (local_vars.r_step - 1); }
         uint256 n2 = field.fmul(fri_params.D_omegas[fri_params.D_omegas.length - 1], fri_params.D_omegas[fri_params.D_omegas.length - 1], fri_params.modulus);
-        //uint256 n2 = field.expmod_static(local_vars.omega, local_vars.domain_size >> 1, fri_params.modulus);
-        //require(false, logging.uint2decstr(n2));
 
         fri_params.s_indices[0][0] = local_vars.x_index;
         fri_params.s[0][0] = field.expmod_static(local_vars.omega, fri_params.s_indices[0][0], fri_params.modulus);
@@ -270,7 +269,7 @@ library batched_fri_verifier {
         fri_params.s[0][1] = field.fmul(fri_params.s[0][0], n2, fri_params.modulus);
 
         if( local_vars.indices_size > 1){
-            uint256 base_index = local_vars.domain_size >> 2;
+            uint256 base_index = local_vars.domain_size >> 2; 
             uint256 prev_half_size = 1;
             uint256 i = 1;
             uint256 omega_ind = fri_params.D_omegas.length - 1;
@@ -283,20 +282,24 @@ library batched_fri_verifier {
                     unchecked{ i++; } // TODO: is it really here?
                     unchecked{ j++; }
                 }
-                base_index >>=1;
-                prev_half_size <<=1;
-                omega_ind--;
+                unchecked{
+                    base_index >>=1;
+                    prev_half_size <<=1;
+                    omega_ind--;
+                }
             }
         }
     }
 
     function get_folded_index(uint256 x_index, uint256 fri_step, uint256 domain_size) 
-    internal view returns(uint256 result){
+    internal pure returns(uint256 result){
         result = x_index;
         for (uint256 i = 0; i < fri_step;) {
-            domain_size >>= 1;
-            result %= domain_size;
-            unchecked{ i++; }
+            unchecked{
+                domain_size >>= 1;
+                result %= domain_size;
+                i++; 
+            }
         }
     }
 
@@ -319,8 +322,10 @@ library batched_fri_verifier {
                 unchecked{ i++; }
                 unchecked{ j++; }
             }
-            base_index >>= 1;
-            prev_half_size <<= 1;
+            unchecked{
+                base_index >>= 1;
+                prev_half_size <<= 1;
+            }
         }
 
         for ( i = 0; i < coset_size >> 1;) {
@@ -364,14 +369,19 @@ library batched_fri_verifier {
         calculate_correct_order_idx(fri_params, local_vars);
 
         local_vars.p_offset = basic_marshalling.skip_length(local_vars.round_proof_values_offset);
-        local_vars.b = new bytes(0x40 * fri_params.leaf_size * local_vars.indices_size); // do something with it!
+        unchecked{ local_vars.b_length = 0x40 * fri_params.leaf_size * local_vars.indices_size; }
         uint256 polynomial_vector_size = 0x8 + 0x40 * local_vars.indices_size;
+
+        uint256 y0;
+        uint256 y1;
+        uint256 first_offset;
+        uint256 second_offset;
 
         for (local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size;) {
 
             local_vars.y_size = basic_marshalling.get_length(blob, local_vars.p_offset);
             require(local_vars.y_size == (1 << local_vars.r_step), "Wrong round proof values size");
-            local_vars.y_size >>= 1;
+            unchecked{local_vars.y_size >>= 1;}
 
             for(uint256 ind = 0; ind < local_vars.indices_size;){
                 uint256 y_ind = fri_params.correct_order_idx[ind][0];
@@ -380,28 +390,28 @@ library batched_fri_verifier {
                 local_vars.y_offset = basic_marshalling.skip_length(local_vars.p_offset) 
                     + fri_params.correct_order_idx[ind][0] * 0x40;
 
-                uint256 y0 = basic_marshalling.get_uint256_be(blob, local_vars.y_offset);
-                uint256 y1 = basic_marshalling.get_uint256_be(blob, local_vars.y_offset + 0x20);
+                y0 = basic_marshalling.get_uint256_be(blob, local_vars.y_offset);
+                y1 = basic_marshalling.get_uint256_be(blob, local_vars.y_offset + 0x20);
                 fri_params.ys[local_vars.y][local_vars.p_ind][y_ind][0] = y0;
                 fri_params.ys[local_vars.y][local_vars.p_ind][y_ind][1] = y1;
 
                 // push y
-                uint256 first_offset = 0x20 + 0x40*ind+0x40*local_vars.p_ind*local_vars.indices_size;
-                uint256 second_offset = first_offset+ 0x20;
+                unchecked{ first_offset = 0x20 + 0x40*ind+0x40*local_vars.p_ind*local_vars.indices_size; }
+                unchecked{ second_offset = first_offset+ 0x20; }
                 if(fri_params.correct_order_idx[ind][1] == 0){
                     assembly{
-                        mstore(add(mload(add(local_vars, BYTES_B_OFFSET)),first_offset), y0)
-                        mstore(add(mload(add(local_vars, BYTES_B_OFFSET)),second_offset), y1)
+                        mstore(add(mload(add(fri_params, FRI_PARAMS_BYTES_B_OFFSET)),first_offset), y0)
+                        mstore(add(mload(add(fri_params, FRI_PARAMS_BYTES_B_OFFSET)),second_offset), y1)
                     }
                 } else {
                     assembly{
-                        mstore(add(mload(add(local_vars, BYTES_B_OFFSET)),first_offset), y1)
-                        mstore(add(mload(add(local_vars, BYTES_B_OFFSET)),second_offset), y0)
+                        mstore(add(mload(add(fri_params, FRI_PARAMS_BYTES_B_OFFSET)),first_offset), y1)
+                        mstore(add(mload(add(fri_params, FRI_PARAMS_BYTES_B_OFFSET)),second_offset), y0)
                     }
                 }
                 unchecked{ ind++; }
             }
-            local_vars.p_offset += polynomial_vector_size;
+            unchecked{local_vars.p_offset += polynomial_vector_size;}
             unchecked{ local_vars.p_ind++; }
         }
         evaluate_first_round_ys(fri_params, local_vars);
@@ -410,25 +420,24 @@ library batched_fri_verifier {
     // It's called from prepare_leafs_and_ys because it is a part of y-s preparation
     function evaluate_first_round_ys(types.fri_params_type memory fri_params, local_vars_type memory local_vars)
     internal view{
-        uint256 U_evaluated_neg;
-        uint256 V_evaluated_inv;
-        uint256 result;
-
-        if(local_vars.global_round_index == 0){
+        if(local_vars.global_round_index == 0){ 
             for(local_vars.p_ind = 0; local_vars.p_ind <  fri_params.leaf_size;){
-                for(uint256 i1 = 0; i1 < local_vars.y_size;){
-                    for(uint256 i2 = 0; i2 < 2;){
-                        result = y_to_y0_for_first_step(
-                            fri_params.s[i1][i2], 
-                            fri_params.ys[local_vars.y][local_vars.p_ind][i1][i2], 
-                            fri_params.batched_U[local_vars.p_ind], 
-                            fri_params.batched_V[local_vars.p_ind], 
-                            fri_params.modulus
-                        );
-                        fri_params.ys[local_vars.y][local_vars.p_ind][i1][i2] = result;
-                        unchecked{ i2++; }
-                    }
-                    unchecked{ i1++; }
+                for(local_vars.y_ind = 0; local_vars.y_ind < local_vars.y_size;){
+                    fri_params.ys[local_vars.y][local_vars.p_ind][local_vars.y_ind][0] = y_to_y0_for_first_step(
+                        fri_params.s[local_vars.y_ind][0], 
+                        fri_params.ys[local_vars.y][local_vars.p_ind][local_vars.y_ind][0], 
+                        fri_params.batched_U[local_vars.p_ind], 
+                        fri_params.batched_V[local_vars.p_ind], 
+                        fri_params.modulus
+                    );
+                    fri_params.ys[local_vars.y][local_vars.p_ind][local_vars.y_ind][1] = y_to_y0_for_first_step(
+                        fri_params.s[local_vars.y_ind][1], 
+                        fri_params.ys[local_vars.y][local_vars.p_ind][local_vars.y_ind][1], 
+                        fri_params.batched_U[local_vars.p_ind], 
+                        fri_params.batched_V[local_vars.p_ind], 
+                        fri_params.modulus
+                    );
+                    unchecked{ local_vars.y_ind++; }
                 }
                 unchecked{ local_vars.p_ind++; }
             }
@@ -449,7 +458,7 @@ library batched_fri_verifier {
     }
 
     function init_local_vars(bytes calldata blob, uint256 offset, types.fri_params_type memory  fri_params, local_vars_type memory local_vars)
-    internal view {
+    internal pure {
         // Fri proof fields
         local_vars.final_poly_offset = skip_to_final_poly(blob, offset);  // one for all rounds
         local_vars.values_offset = skip_to_values_be(blob, offset);  // one for all rounds
@@ -474,7 +483,7 @@ library batched_fri_verifier {
         // 0xa0
         // local_vars. alpha;           // computed later
         // 0x320
-        local_vars.domain_size = 1 << (fri_params.D_omegas.length + 1); // domain size TODO change domain representation
+        unchecked{ local_vars.domain_size = 1 << (fri_params.D_omegas.length + 1); } // domain size TODO change domain representation
         local_vars.omega = fri_params.D_omegas[0];           // domain generator
         local_vars.global_round_index = 0;                   // current FRI round
         local_vars.i_round = 0;                              // current round in step
@@ -494,31 +503,8 @@ library batched_fri_verifier {
         // offset item in fri_proof.values structure for current round proof
         local_vars.round_proof_values_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, local_vars.round_proof_values_offset);    
         //round_proof_colinear_value;  // It is the value. Not offset. Have to be computed
-        // 0x120
-        local_vars.i_step++;                                                 // current step
+        unchecked{local_vars.i_step++;}                                                 // current step
         local_vars.r_step = fri_params.step_list[local_vars.i_step];           // current step
-        //local_vars.domain_size >>= local_vars.r_step;
-        //local_vars.x_index %= local_vars.domain_size;
-
-        // Fri params for one round (in step)
-        // 0x60
-        // local_vars.x;                // have to be computed
-        // 0x80
-        // local_vars.x_next;           // computed later
-        // 0xa0
-        // local_vars. alpha;           // computed later
-
-        // TODO domain work
-        // 0x320
-        /*
-        local_vars.domain_size = fri_params.D_omegas.length; // domain size TODO change domain representation
-        // 0x340
-        local_vars.omega = fri_params.D_omegas[0];           // domain generator
-        // 0x200 
-        local_vars.global_round_index = 0;                   // current FRI round
-        // 0x240 
-        local_vars.i_round = 0;                              // current round in step
-        */
     }
 
     function sqr_mod(uint256 x, uint256 modulus)
@@ -530,13 +516,14 @@ library batched_fri_verifier {
 
     function round_local_vars(bytes calldata blob, uint256 offset, types.fri_params_type memory  fri_params, local_vars_type memory local_vars)
     internal view {
-        local_vars.domain_size >>=1;
-        local_vars.x_index %= local_vars.domain_size;
-        local_vars.x = sqr_mod(local_vars.x, fri_params.modulus);
-        local_vars.global_round_index++;
-        local_vars.y_size >>= 1;
+        unchecked{local_vars.domain_size >>=1;
+            local_vars.x_index %= local_vars.domain_size;
+            local_vars.global_round_index++;
+            local_vars.y_size >>= 1;
+        }
 
         local_vars.omega = sqr_mod(local_vars.omega, fri_params.modulus);
+        local_vars.x = sqr_mod(local_vars.x, fri_params.modulus);
     }
 
     function parse_verify_proof_be(
@@ -570,17 +557,17 @@ library batched_fri_verifier {
 
         // Prepare values.p
         // 1.Check values length.
-        /*require(
+        require(
             basic_marshalling.get_length(blob, local_vars.values_offset) == 
             fri_params.step_list.length, "Unsufficient polynomial values data in proofs"
-        );*/
+        );
 
         prepare_leaf_data_and_ys(blob, fri_params, local_vars);
         while ( local_vars.i_step < fri_params.step_list.length - 1 ) {
             // Check p. Data for it is prepared before cycle or at the end of it.
             // We don't calculate indices twice.
             if (!merkle_verifier.parse_verify_merkle_proof_bytes_be(
-                blob, local_vars.round_proof_offset, local_vars.b, local_vars.b.length)
+                blob, local_vars.round_proof_offset, fri_params.b, local_vars.b_length)
             ) {
                 require(false, "Merkle proof failed");
                 return false;
@@ -598,7 +585,7 @@ library batched_fri_verifier {
         
             for( local_vars.i_round = 0; local_vars.i_round < local_vars.r_step - 1;){
                 local_vars.alpha = transcript.get_field_challenge(tr_state, fri_params.modulus);
-                local_vars.y_next = (local_vars.y + 1)%3;
+                unchecked{ local_vars.y_next = (local_vars.y + 1)%3; }
                 for( local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size;){
                     for( local_vars.y_ind = 0; local_vars.y_ind < (local_vars.y_size >> 1);){
                         for ( uint256 ind = 0; ind < 2;){
@@ -690,9 +677,9 @@ library batched_fri_verifier {
             uint256 colinear_path_offset = local_vars.round_proof_colinear_path_offset;
 
             local_vars.s1 = local_vars.x;
-            local_vars.cc_one_round_step = (local_vars.r_step == 1);
+            unchecked{ local_vars.cc_one_round_step = (local_vars.r_step == 1); }
             local_vars.y_previous = local_vars.y;
-            local_vars.y = (local_vars.y + 1)%3;
+            unchecked{ local_vars.y = (local_vars.y + 1)%3; }
 
             round_local_vars(blob, offset, fri_params, local_vars);
             step_local_vars(blob, offset, fri_params, local_vars);
@@ -765,7 +752,7 @@ library batched_fri_verifier {
             if (!merkle_verifier.parse_verify_merkle_proof_bytes_be(
                 blob, 
                 colinear_path_offset, 
-                local_vars.b, local_vars.b.length)
+                fri_params.b, local_vars.b_length)
             ) {
                 require(false, "Round_proof.colinear_path verifier failes");
                 return false;

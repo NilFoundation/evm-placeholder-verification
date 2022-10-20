@@ -232,17 +232,15 @@ def init_test4():
     step_list = [3, 3, 3, 1, 1]
     params['init_params'].append(len(step_list))
     params['init_params'].extend(step_list)  # step_list
-
-    params['init_params'].append(30)  # max_batch
     return params
 
 
 if __name__ == '__main__':
-    do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_lib_name,
-                                                  linked_libs_names, init_test1)
-    do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_lib_name,
-                                                  linked_libs_names, init_test2)
-    do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_lib_name,
-                                                  linked_libs_names, init_test3)
+    #do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_lib_name,
+    #                                              linked_libs_names, init_test1)
+    #do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_lib_name,
+    #                                              linked_libs_names, init_test2)
+    #do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_lib_name,
+    #                                              linked_libs_names, init_test3)
     do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_lib_name,
                                                   linked_libs_names, init_test4)
