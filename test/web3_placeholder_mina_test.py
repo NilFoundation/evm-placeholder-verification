@@ -236,11 +236,11 @@ def init_test4():
 
 
 if __name__ == '__main__':
-    #do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_lib_name,
-    #                                              linked_libs_names, init_test1)
-    #do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_lib_name,
-    #                                              linked_libs_names, init_test2)
-    #do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_lib_name,
-    #                                              linked_libs_names, init_test3)
+    do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_lib_name,
+                                                  linked_libs_names, init_test1)
+    do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_lib_name,
+                                                  linked_libs_names, init_test2)
+    do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_lib_name,
+                                                  linked_libs_names, init_test3)
     do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_lib_name,
                                                   linked_libs_names, init_test4)
