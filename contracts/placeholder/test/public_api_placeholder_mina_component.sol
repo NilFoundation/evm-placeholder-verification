@@ -55,10 +55,14 @@ contract TestPlaceholderVerifierMina {
         transcript.init_transcript(vars.tr_state, hex"");
 
         uint256 idx = 0;
+        uint256 max_batch = 30;
+        uint256 max_coset = 8;
+
         vars.fri_params.modulus = init_params[idx++];
         vars.fri_params.r = init_params[idx++];
         vars.fri_params.max_degree = init_params[idx++];
         vars.fri_params.lambda = init_params[idx++];
+        vars.fri_params.const1_2 = field.inverse_static(2, vars.fri_params.modulus);
 
         vars.common_data.rows_amount = init_params[idx++];
         vars.common_data.omega = init_params[idx++];
@@ -77,10 +81,29 @@ contract TestPlaceholderVerifierMina {
             unchecked{ i++; idx++;}
         }
 
+        vars.fri_params.max_step = 0;
         vars.fri_params.step_list = new uint256[](init_params[idx++]);
         for (uint256 i = 0; i < vars.fri_params.step_list.length;) {
             vars.fri_params.step_list[i] = init_params[idx];
+            if(vars.fri_params.step_list[i] > vars.fri_params.max_step)
+                vars.fri_params.max_step = vars.fri_params.step_list[i];
             unchecked{ i++; idx++;}
+        }
+        max_batch = vars.fri_params.max_batch = init_params[idx++];                                                 // We need it to allocate memory correctly
+        max_coset = 1 << (vars.fri_params.max_step - 1);
+
+        vars.fri_params.s_indices = new uint256[2][](max_coset);
+        vars.fri_params.s = new uint256[2][](max_coset);
+        vars.fri_params.correct_order_idx = new uint256[2][](max_coset);
+
+        vars.fri_params.ys[0] = new uint256[2][][](max_batch);
+        vars.fri_params.ys[1] = new uint256[2][][](max_batch);
+        vars.fri_params.ys[2] = new uint256[2][][](max_batch);
+
+        for(uint256 i = 0; i < max_batch; i++){
+            vars.fri_params.ys[0][i] = new uint256[2][](max_coset);
+            vars.fri_params.ys[1][i] = new uint256[2][](max_coset);
+            vars.fri_params.ys[2][i] = new uint256[2][](max_coset);
         }
 
         require(

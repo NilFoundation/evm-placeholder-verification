@@ -11,7 +11,7 @@ linked_libs_names = [
 def init_test1():
     params = dict()
     params['_test_name'] = "Placeholder proof verification for mina"
-    f = open('./test/data/mina.txt')
+    f = open('./test/data/output_scalar')
     params["proof"] = f.read()
     f.close()
 
@@ -57,11 +57,12 @@ def init_test1():
     params['columns_rotations'][13] = [0, 1]
 
 
-    # step_list = [3, 3, 3, 1, 1]
-    step_list = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    step_list = [3, 3, 3, 1, 1]
+    #step_list = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     params['init_params'].append(len(step_list))
     params['init_params'].extend(step_list)                                                 #step_list
 
+    params['init_params'].append(30)                                                        #max_batch
     return params
 
 if __name__ == '__main__':

@@ -219,7 +219,7 @@ library batched_lpc_verifier {
         for (uint256 round_id = 0; round_id < fri_params.lambda;) {
             fri_params.i_fri_proof = round_id;  // for debug only
             if (!batched_fri_verifier.parse_verify_proof_be(blob, offset, tr_state, fri_params)) {
-                //require(false, "FRI-proof problem");
+                require(false, "FRI-proof problem");
                 return false;
             }
             offset = batched_fri_verifier.skip_proof_be(blob, offset);

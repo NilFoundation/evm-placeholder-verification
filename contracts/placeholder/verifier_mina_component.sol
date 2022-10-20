@@ -148,12 +148,11 @@ library placeholder_verifier_mina_component {
             }
             unchecked{i++;}
         }
-        
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_witness_offset,
                                                         local_vars.witness_evaluation_points, tr_state, fri_params)) {
             return false;
         }
-        return true;
+                
         // permutation
         local_vars.evaluation_points = new uint256[][](1);
         local_vars.evaluation_points[0] = new uint256[](2);
@@ -227,12 +226,12 @@ library placeholder_verifier_mina_component {
             return false;
         }
 
-
         // special_selectors
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_special_selectors_offset,
                                                         local_vars.evaluation_points, tr_state, fri_params)) {
             return false;
         }
+        return true;
 
         // 10. final check
         local_vars.F = new uint256[](f_parts);
