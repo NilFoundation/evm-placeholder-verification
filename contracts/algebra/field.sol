@@ -2,6 +2,7 @@
 //---------------------------------------------------------------------------//
 // Copyright (c) 2021 Mikhail Komarov <nemo@nil.foundation>
 // Copyright (c) 2021 Ilias Khairullin <ilias@nil.foundation>
+// Copyright (c) 2022 Aleksei Moskvin <alalmoskvin@nil.foundation>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,7 +25,8 @@ pragma solidity >=0.8.4;
 library field {
     // Perform a modular exponentiation. This method is ideal for small exponents (~64 bits or less), as
     // it is cheaper than using the pow precompile
-    function pow_small(uint256 base, uint256 exponent, uint256 modulus) internal pure returns (uint256 result) {
+    function pow_small(uint256 base, uint256 exponent, uint256 modulus)
+    internal pure returns (uint256 result) {
         result = 1;
         assembly {
             for { let count := 1 }
@@ -43,7 +45,8 @@ library field {
     /// @param a The number.
     /// @param p The mmodulus.
     /// @return x such that ax = 1 (mod p)
-    function invmod(uint256 a, uint256 p) internal pure returns (uint256) {
+    function invmod(uint256 a, uint256 p)
+    internal pure returns (uint256) {
         require(a != 0 && a != p && p != 0);
         if (a > p)
             a = a % p;
@@ -61,25 +64,29 @@ library field {
         return uint256(t1);
     }
 
-    function fadd(uint256 a, uint256 b, uint256 modulus) internal pure returns (uint256 result) {
+    function fadd(uint256 a, uint256 b, uint256 modulus)
+    internal pure returns (uint256 result) {
         assembly {
             result := addmod(a, b, modulus)
         }
     }
 
-    function fsub(uint256 a, uint256 b, uint256 modulus) internal pure returns (uint256 result) {
+    function fsub(uint256 a, uint256 b, uint256 modulus)
+    internal pure returns (uint256 result) {
         assembly {
             result := addmod(a, sub(modulus, b), modulus)
         }
     }
 
-    function fmul(uint256 a, uint256 b, uint256 modulus) internal pure returns (uint256 result) {
+    function fmul(uint256 a, uint256 b, uint256 modulus)
+    internal pure returns (uint256 result) {
         assembly {
             result := mulmod(a, b, modulus)
         }
     }
 
-    function fdiv(uint256 a, uint256 b, uint256 modulus) internal pure returns (uint256 result) {
+    function fdiv(uint256 a, uint256 b, uint256 modulus)
+    internal pure returns (uint256 result) {
         uint256 b_inv = invmod(b, modulus);
         assembly {
             result := mulmod(a, b_inv, modulus)
@@ -87,7 +94,8 @@ library field {
     }
 
     // See https://ethereum.stackexchange.com/questions/8086/logarithm-math-operation-in-solidity
-    function log2(uint256 x) internal pure returns (uint256 y){
+    function log2(uint256 x)
+    internal pure returns (uint256 y){
         assembly {
             let arg := x
             x := sub(x,1)
@@ -118,11 +126,8 @@ library field {
         }
     }
 
-    function expmod_static(
-        uint256 base,
-        uint256 exponent,
-        uint256 modulus
-    ) internal view returns (uint256 res) {
+    function expmod_static(uint256 base, uint256 exponent, uint256 modulus)
+    internal view returns (uint256 res) {
         assembly {
             let p := mload(0x40)
             mstore(p, 0x20) // Length of Base.
@@ -139,8 +144,23 @@ library field {
         }
     }
 
-    function inverse_static(uint256 val, uint256 modulus) internal view returns (uint256) {
-        return expmod_static(val, modulus - 2, modulus);
+    function inverse_static(uint256 val, uint256 modulus)
+    internal view returns (uint256 res) {
+//        return expmod_static(val, modulus - 2, modulus); // code below similar to this call
+        assembly {
+            let p := mload(0x40)
+            mstore(p, 0x20) // Length of Base.
+            mstore(add(p, 0x20), 0x20) // Length of Exponent.
+            mstore(add(p, 0x40), 0x20) // Length of Modulus.
+            mstore(add(p, 0x60), val) // Base.
+            mstore(add(p, 0x80), sub(modulus, 0x02)) // Exponent.
+            mstore(add(p, 0xa0), modulus) // Modulus.
+        // Call modexp precompile.
+            if iszero(staticcall(gas(), 0x05, p, 0xc0, p, 0x20)) {
+                revert(0, 0)
+            }
+            res := mload(p)
+        }
     }
 
     function double(uint256 val, uint256 modulus) internal pure returns (uint256 result) {

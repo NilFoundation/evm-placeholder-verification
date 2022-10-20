@@ -2,6 +2,7 @@
 //---------------------------------------------------------------------------//
 // Copyright (c) 2022 Mikhail Komarov <nemo@nil.foundation>
 // Copyright (c) 2022 Ilias Khairullin <ilias@nil.foundation>
+// Copyright (c) 2022 Aleksei Moskvin <alalmoskvin@nil.foundation>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +22,7 @@ import "../../types.sol";
 import "../../cryptography/transcript.sol";
 import "../proof_map_parser.sol";
 import "../verifier_unified_addition_component.sol";
+import "../../logging.sol";
 
 contract TestPlaceholderVerifierUnifiedAddition {
     struct test_local_vars {
@@ -48,12 +50,8 @@ contract TestPlaceholderVerifierUnifiedAddition {
         int256[][] calldata columns_rotations
     ) public {
         test_local_vars memory vars;
-        (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser
-            .parse_be(blob, 0);
-        require(
-            vars.proof_size == blob.length,
-            "Proof length was detected incorrectly!"
-        );
+        (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser.parse_be(blob, 0);
+        require(vars.proof_size == blob.length, "Proof length was detected incorrectly!");
         transcript.init_transcript(vars.tr_state, hex"");
 
         uint256 idx = 0;
@@ -69,12 +67,20 @@ contract TestPlaceholderVerifierUnifiedAddition {
         vars.common_data.columns_rotations = columns_rotations;
 
         vars.fri_params.D_omegas = new uint256[](init_params[idx++]);
-        for (uint256 i = 0; i < vars.fri_params.D_omegas.length; i++) {
-            vars.fri_params.D_omegas[i] = init_params[idx++];
+        for (uint256 i = 0; i < vars.fri_params.D_omegas.length;) {
+            vars.fri_params.D_omegas[i] = init_params[idx];
+            unchecked{ i++; idx++;}
         }
         vars.fri_params.q = new uint256[](init_params[idx++]);
-        for (uint256 i = 0; i < vars.fri_params.q.length; i++) {
-            vars.fri_params.q[i] = init_params[idx++];
+        for (uint256 i = 0; i < vars.fri_params.q.length;) {
+            vars.fri_params.q[i] = init_params[idx];
+            unchecked{ i++; idx++;}
+        }
+
+        vars.fri_params.step_list = new uint256[](init_params[idx++]);
+        for (uint256 i = 0; i < vars.fri_params.step_list.length;) {
+            vars.fri_params.step_list[i] = init_params[idx];
+            unchecked{ i++; idx++;}
         }
 
         require(

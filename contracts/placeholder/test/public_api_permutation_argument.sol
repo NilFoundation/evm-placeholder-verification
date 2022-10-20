@@ -60,7 +60,6 @@ contract TestPermutationArgument {
             vars.tr_state,
             blob,
             basic_marshalling.skip_length(
-                blob,
                 vars.proof_map.witness_commitment_offset
             )
         );

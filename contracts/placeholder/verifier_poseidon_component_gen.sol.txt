@@ -86,7 +86,7 @@ library placeholder_verifier_poseidon_gen {
                 local_vars.offset + basic_marshalling.LENGTH_OCTETS
             );
             local_vars.offset = basic_marshalling
-                .skip_octet_vector_32_be(blob, local_vars.offset);
+                .skip_octet_vector_32_be(local_vars.offset);
         }
 
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
@@ -136,8 +136,7 @@ library placeholder_verifier_poseidon_gen {
                 blob,
                 local_vars.offset + basic_marshalling.LENGTH_OCTETS
             );
-            local_vars.offset = basic_marshalling
-                .skip_octet_vector_32_be(blob, local_vars.offset);
+            local_vars.offset = basic_marshalling.skip_octet_vector_32_be(local_vars.offset);
         }
         local_vars.challenge = transcript.get_field_challenge(
             tr_state,

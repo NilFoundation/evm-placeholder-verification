@@ -89,7 +89,7 @@ contract TestLpcVerifier {
         //  [..., q_i, ...]
         uint256[] calldata init_params,
         uint256[][] calldata evaluation_points
-    ) public {
+    ) public view {
         types.transcript_data memory tr_state;
         transcript.init_transcript(tr_state, init_transcript_blob);
         types.fri_params_type memory fri_params;
@@ -107,7 +107,17 @@ contract TestLpcVerifier {
         for (uint256 i = 0; i < fri_params.q.length; i++) {
             fri_params.q[i] = init_params[idx++];
         }
+        fri_params.step_list = new uint256[](init_params[idx++]);
+        uint256 sum = 0;
+        for (uint256 i = 0; i < fri_params.step_list.length; i++) {
+            fri_params.step_list[i] = init_params[idx++];
+            sum += fri_params.step_list[i];
+        }
+        fri_params.const1_2 = init_params[idx++];
+
+        require(sum == fri_params.r, "Sum of fri_params.step_list and fri_params.r are different");
         placeholder_proof_map_parser.init(fri_params, fri_params.leaf_size);
+        
         require(
             raw_proof.length ==
                 batched_lpc_verifier.skip_proof_be(raw_proof, 0),

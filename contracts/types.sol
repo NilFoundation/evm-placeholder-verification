@@ -141,23 +141,56 @@ library types {
     }
 
     struct fri_params_type {
+        //0x00
         uint256 modulus;
+        //0x20
         uint256 r;
+        //0x40
         uint256 max_degree;
+        //0x60
         uint256 lambda;
+        //0x80
         uint256 leaf_size;
 
+        //0xa0
         uint256[] D_omegas;
+        //0xc0
         uint256[] q;
 
+        //0xe0
         uint256[] U;
+        //0x100
         uint256[] V;
+        //0x120
         uint256[][] batched_U;
+        //0x140
         uint256[][] batched_V;
 
+        //0x160
         bytes batched_fri_verified_data;
+        //0x180
         uint256[] lpc_z;
+        //0x1a0
         uint256 batched_U_len;
+
+        //0x1c0
+        uint256[] step_list;
+        //0x1e0
+        uint256 const1_2;       // !!! It's important. Set it please. Uninitialized 1/2 => colinear check error.
+        //0x200
+        uint256 i_fri_proof;    // It is useful for debugging
+        //0x220
+        uint256 max_step;       // variable for memory  initializing
+        //0x240
+        uint256 max_batch;      // variable for memory  initializing
+
+        // These are local variables for FRI. But it's useful to allocate memory once
+        //0x260
+        bytes        b;
+        uint256[2][] s_indices;              // Indices of current coset S
+        uint256[2][] s;                      // Coset S
+        uint256[2][] correct_order_idx;      // Ordered indices to pack ys to check merkle proofs
+        uint256[2][][][3] ys;                // ys -- previous, current, next
     }
 
     struct placeholder_proof_map {
@@ -224,7 +257,7 @@ library types {
         // 0xe0
         uint256 e;
         // 0x100
-        uint256[] evaluation_points;
+        uint256[][] evaluation_points;
         // 0x120
         uint256[] F;
         // 0x140
@@ -265,8 +298,6 @@ library types {
         uint256 idx1;
         // 0x380
         uint256 idx2;
-        // 0x3a0
-        bool status;
     }
 
     struct gate_argument_local_vars {
@@ -296,5 +327,11 @@ library types {
         uint256 offset;
         // 0x180
         uint256[][] witness_evaluations;
+        // 0x1a0
+        uint256[][] constant_evaluations;
+        // 0x1c0
+        uint256[][] public_input_evaluations;
+        // 0x1e0
+        uint256 eval_proof_constant_offset;
     }
 }

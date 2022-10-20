@@ -152,11 +152,11 @@ library bn254_crypto {
             let y := mload(add(point, 0x20))
 
             is_well_formed := and(
-            and(
-            and(lt(x, p), lt(y, p)),
-            not(or(iszero(x), iszero(y)))
-            ),
-            eq(mulmod(y, y, p), addmod(mulmod(x, mulmod(x, x, p), p), 3, p))
+                and(
+                and(lt(x, p), lt(y, p)),
+                not(or(iszero(x), iszero(y)))
+                ),
+                eq(mulmod(y, y, p), addmod(mulmod(x, mulmod(x, x, p), p), 3, p))
             )
         }
         require(is_well_formed, "Bn254: G1 point not on curve, or is malformed");
