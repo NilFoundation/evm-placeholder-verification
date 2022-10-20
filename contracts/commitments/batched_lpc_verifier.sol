@@ -176,11 +176,13 @@ library batched_lpc_verifier {
         if (fri_params.leaf_size != evaluation_points.length && evaluation_points.length == 1){
             uint256[] memory eval = evaluation_points[0];
             evaluation_points = new uint256[][](fri_params.leaf_size);
-            for(uint256 ind = 0; ind < fri_params.leaf_size; ind++ ){
+            for(uint256 ind = 0; ind < fri_params.leaf_size;){
                 evaluation_points[ind] = new uint256[](eval.length);
-                for (uint256 ind2 = 0; ind2 < eval.length; ind2++){
+                for (uint256 ind2 = 0; ind2 < eval.length;){
                     evaluation_points[ind][ind2] = eval[ind2];
+                    unchecked{ ind2++; }
                 }
+                unchecked{ ind++; }
             }
         }
         require(fri_params.leaf_size == evaluation_points.length, "Array of evaluation points size is not equal to leaf_size!");

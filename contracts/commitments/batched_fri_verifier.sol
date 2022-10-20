@@ -275,12 +275,13 @@ library batched_fri_verifier {
             uint256 i = 1;
             uint256 omega_ind = fri_params.D_omegas.length - 1;
             while( i < local_vars.indices_size ){
-                for( uint256 j = 0; j < prev_half_size; j++){
+                for( uint256 j = 0; j < prev_half_size;) {
                     fri_params.s_indices[i][0] = (base_index + fri_params.s_indices[j][0]) %local_vars.domain_size;
                     fri_params.s_indices[i][1] = get_paired_index(fri_params.s_indices[i][0], local_vars.domain_size);
                     fri_params.s[i][0] = field.fmul(fri_params.s[j][0], fri_params.D_omegas[omega_ind], fri_params.modulus);
                     fri_params.s[i][1] = field.fmul(fri_params.s[i][0], n2, fri_params.modulus);
-                    i++;
+                    unchecked{ i++; } // TODO: is it really here?
+                    unchecked{ j++; }
                 }
                 base_index >>=1;
                 prev_half_size <<=1;
@@ -292,9 +293,10 @@ library batched_fri_verifier {
     function get_folded_index(uint256 x_index, uint256 fri_step, uint256 domain_size) 
     internal view returns(uint256 result){
         result = x_index;
-        for (uint256 i = 0; i < fri_step; i++) {
+        for (uint256 i = 0; i < fri_step;) {
             domain_size >>= 1;
             result %= domain_size;
+            unchecked{ i++; }
         }
     }
 
@@ -311,20 +313,21 @@ library batched_fri_verifier {
         uint256 i = 1;
         uint256 j = 0;
         while (i < coset_size >> 1 ){
-            for (j = 0; j < prev_half_size; j++) {
+            for (j = 0; j < prev_half_size;) {
                 correctly_ordered_s_indices[i] =
                     (base_index + correctly_ordered_s_indices[j]) % local_vars.domain_size;
-                i++;
+                unchecked{ i++; }
+                unchecked{ j++; }
             }
             base_index >>= 1;
             prev_half_size <<= 1;
         }
 
-        for ( i = 0; i < coset_size >> 1; i++) {
+        for ( i = 0; i < coset_size >> 1;) {
             bool found = false;
             uint256 found_ind;
 
-            for(j = 0; j < local_vars.indices_size; j++){
+            for(j = 0; j < local_vars.indices_size;){
                 if(fri_params.s_indices[j][0] == correctly_ordered_s_indices[i] && fri_params.s_indices[j][1] == get_paired_index(correctly_ordered_s_indices[i], local_vars.domain_size)){
                     found = true;
                     found_ind = j;
@@ -337,9 +340,11 @@ library batched_fri_verifier {
                     fri_params.correct_order_idx[i][1] = 1; 
                     break;
                 }
+                unchecked{ j++; }
             }
             //require(found, "Invalid indices");
             fri_params.correct_order_idx[i][0] = found_ind;
+            unchecked{ i++; }
         }
     }
 
@@ -368,7 +373,7 @@ library batched_fri_verifier {
             require(local_vars.y_size == (1 << local_vars.r_step), "Wrong round proof values size");
             local_vars.y_size >>= 1;
 
-            for(uint256 ind = 0; ind < local_vars.indices_size; ind++ ){
+            for(uint256 ind = 0; ind < local_vars.indices_size;){
                 uint256 y_ind = fri_params.correct_order_idx[ind][0];
                 // Check leaf size
                 // Prepare y-s
@@ -394,6 +399,7 @@ library batched_fri_verifier {
                         mstore(add(mload(add(local_vars, BYTES_B_OFFSET)),second_offset), y0)
                     }
                 }
+                unchecked{ ind++; }
             }
             local_vars.p_offset += polynomial_vector_size;
             unchecked{ local_vars.p_ind++; }
@@ -409,9 +415,9 @@ library batched_fri_verifier {
         uint256 result;
 
         if(local_vars.global_round_index == 0){
-            for(local_vars.p_ind = 0; local_vars.p_ind <  fri_params.leaf_size; local_vars.p_ind++){
-                for(uint256 i1 = 0; i1 < local_vars.y_size; i1++){
-                    for(uint256 i2 = 0; i2 < 2; i2++){
+            for(local_vars.p_ind = 0; local_vars.p_ind <  fri_params.leaf_size;){
+                for(uint256 i1 = 0; i1 < local_vars.y_size;){
+                    for(uint256 i2 = 0; i2 < 2;){
                         result = y_to_y0_for_first_step(
                             fri_params.s[i1][i2], 
                             fri_params.ys[local_vars.y][local_vars.p_ind][i1][i2], 
@@ -420,8 +426,11 @@ library batched_fri_verifier {
                             fri_params.modulus
                         );
                         fri_params.ys[local_vars.y][local_vars.p_ind][i1][i2] = result;
+                        unchecked{ i2++; }
                     }
+                    unchecked{ i1++; }
                 }
+                unchecked{ local_vars.p_ind++; }
             }
         }
     }
@@ -587,12 +596,12 @@ library batched_fri_verifier {
             //  fs2;
             //  res;
         
-            for( local_vars.i_round = 0; local_vars.i_round < local_vars.r_step - 1; local_vars.i_round++){
+            for( local_vars.i_round = 0; local_vars.i_round < local_vars.r_step - 1;){
                 local_vars.alpha = transcript.get_field_challenge(tr_state, fri_params.modulus);
                 local_vars.y_next = (local_vars.y + 1)%3;
-                for( local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size; local_vars.p_ind++){
-                    for( local_vars.y_ind = 0; local_vars.y_ind < (local_vars.y_size >> 1); local_vars.y_ind++){
-                        for ( uint256 ind = 0; ind < 2; ind++){
+                for( local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size;){
+                    for( local_vars.y_ind = 0; local_vars.y_ind < (local_vars.y_size >> 1);){
+                        for ( uint256 ind = 0; ind < 2;){
                             uint256 newind = (local_vars.y_ind << 1) + ind;
                             uint256 res;
                             local_vars.s1 = fri_params.s[newind][0];
@@ -660,12 +669,16 @@ library batched_fri_verifier {
                                 }
                             }
                             fri_params.ys[local_vars.y_next][local_vars.p_ind][local_vars.y_ind][ind] = res;
+                            unchecked{ ind++; }
                         }
+                        unchecked{ local_vars.y_ind++; }
                     }
+                    unchecked{ local_vars.p_ind++; }
                 }
                 local_vars.y = local_vars.y_next;
                 round_local_vars(blob, offset, fri_params, local_vars);
                 calculate_s_indices(fri_params, local_vars);
+                unchecked{  local_vars.i_round++; }
             }
             local_vars.alpha = transcript.get_field_challenge(tr_state, fri_params.modulus);
             
@@ -687,7 +700,7 @@ library batched_fri_verifier {
 
             uint256 res;
             uint256 c;
-            for( local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size; local_vars.p_ind++){
+            for( local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size;){
                 c = fri_params.ys[local_vars.y][local_vars.p_ind][0][0];
                 // prepare vars for colinear check
                 local_vars.fs1 = fri_params.ys[local_vars.y_previous][local_vars.p_ind][0][0];
@@ -746,6 +759,7 @@ library batched_fri_verifier {
                     require(false, "Colinear check failes");
                     return false;
                 }
+                unchecked{ local_vars.p_ind++; }
             }
             
             if (!merkle_verifier.parse_verify_merkle_proof_bytes_be(
@@ -760,7 +774,7 @@ library batched_fri_verifier {
         require(fri_params.leaf_size == basic_marshalling.get_length(blob, local_vars.final_poly_offset),
             "Final poly array size is not equal to params.leaf_size!");
         local_vars.final_poly_offset = basic_marshalling.skip_length(local_vars.final_poly_offset);
-        for (local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size; local_vars.p_ind++) {
+        for (local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size;) {
              if (basic_marshalling.get_length(blob, local_vars.final_poly_offset) - 1 >
                 (uint256(2) ** (field.log2(fri_params.max_degree + 1) - fri_params.r + 1) - 1)) {
                 require(false, "Max degree problem");
@@ -777,6 +791,7 @@ library batched_fri_verifier {
                 return false;
             }
             local_vars.final_poly_offset = basic_marshalling.skip_vector_of_uint256_be(blob, local_vars.final_poly_offset);
+            unchecked{ local_vars.p_ind++; }
         }
         return true;
     }
