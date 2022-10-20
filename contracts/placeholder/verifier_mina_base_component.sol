@@ -115,7 +115,7 @@ library placeholder_verifier_mina_component {
         for (uint256 i = 0; i < fri_params.leaf_size;) {
             local_vars.witness_evaluation_points[i] = new uint256[](common_data.columns_rotations[i].length);
             for (uint256 j = 0; j < common_data.columns_rotations[i].length;) {
-//                local_vars.e = uint256(common_data.columns_rotations[i][j] + int256(fri_params.modulus)) % fri_params.modulus;
+                //                local_vars.e = uint256(common_data.columns_rotations[i][j] + int256(fri_params.modulus)) % fri_params.modulus;
                 local_vars.e = uint256(common_data.columns_rotations[i][j]);
                 if (common_data.columns_rotations[i][j] < 0) {
                     local_vars.e = uint256(-common_data.columns_rotations[i][j]);
@@ -124,31 +124,31 @@ library placeholder_verifier_mina_component {
                     local_vars.e = field.expmod_static(common_data.omega, local_vars.e, fri_params.modulus);
                 }
                 local_vars.e = field.fmul(local_vars.e, local_vars.challenge, fri_params.modulus);
-//                if ( common_data.columns_rotations[i].length == 3 && j == 1) {
-//                    require(false, logging.uint2decstr(local_vars.e));
-//                }
-//                require(false, logging.uint2decstr(local_vars.e));
-//                assembly {
-//                    mstore(
-//                        add(local_vars, E_OFFSET),
-//                        // challenge * omega^rotation_gates[j]
-//                        mulmod(
-//                            // challenge
-//                            mload(add(local_vars, CHALLENGE_OFFSET)),
-//                            // e = omega^rotation_gates[j]
-//                            mload(add(local_vars, E_OFFSET)),
-//                            // modulus
-//                            mload(fri_params)
-//                        )
-//                    )
-//                }
+                //                if ( common_data.columns_rotations[i].length == 3 && j == 1) {
+                //                    require(false, logging.uint2decstr(local_vars.e));
+                //                }
+                //                require(false, logging.uint2decstr(local_vars.e));
+                //                assembly {
+                //                    mstore(
+                //                        add(local_vars, E_OFFSET),
+                //                        // challenge * omega^rotation_gates[j]
+                //                        mulmod(
+                //                            // challenge
+                //                            mload(add(local_vars, CHALLENGE_OFFSET)),
+                //                            // e = omega^rotation_gates[j]
+                //                            mload(add(local_vars, E_OFFSET)),
+                //                            // modulus
+                //                            mload(fri_params)
+                //                        )
+                //                    )
+                //                }
                 local_vars.witness_evaluation_points[i][j] = local_vars.e;
-                unchecked{j++;}
+            unchecked{j++;}
             }
-            unchecked{i++;}
+        unchecked{i++;}
         }
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_witness_offset,
-                                                        local_vars.witness_evaluation_points, tr_state, fri_params)) {
+            local_vars.witness_evaluation_points, tr_state, fri_params)) {
             return false;
         }
         // permutation
@@ -181,7 +181,7 @@ library placeholder_verifier_mina_component {
         local_vars.evaluation_points[0][1] = result;
 
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_permutation_offset,
-                                                local_vars.evaluation_points, tr_state, fri_params)) {
+            local_vars.evaluation_points, tr_state, fri_params)) {
             return false;
         }
 
@@ -190,43 +190,43 @@ library placeholder_verifier_mina_component {
         local_vars.evaluation_points[0] = new uint256[](1);
         local_vars.evaluation_points[0][0] = local_vars.challenge;
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_quotient_offset,
-                                                        local_vars.evaluation_points, tr_state, fri_params)) {
+            local_vars.evaluation_points, tr_state, fri_params)) {
             return false;
         }
 
         // id
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_id_permutation_offset,
-                                                        local_vars.evaluation_points, tr_state, fri_params)) {
+            local_vars.evaluation_points, tr_state, fri_params)) {
             return false;
         }
 
         // sigma
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_sigma_permutation_offset,
-                                                        local_vars.evaluation_points, tr_state, fri_params)) {
+            local_vars.evaluation_points, tr_state, fri_params)) {
             return false;
         }
 
         // public_input
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_public_input_offset,
-                                                        local_vars.evaluation_points, tr_state, fri_params)) {
+            local_vars.evaluation_points, tr_state, fri_params)) {
             return false;
         }
 
         // constant
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_constant_offset,
-                                                        local_vars.evaluation_points, tr_state, fri_params)) {
+            local_vars.evaluation_points, tr_state, fri_params)) {
             return false;
         }
 
         // selector
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_selector_offset,
-                                                        local_vars.evaluation_points, tr_state, fri_params)) {
+            local_vars.evaluation_points, tr_state, fri_params)) {
             return false;
         }
 
         // special_selectors
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_special_selectors_offset,
-                                                        local_vars.evaluation_points, tr_state, fri_params)) {
+            local_vars.evaluation_points, tr_state, fri_params)) {
             return false;
         }
 
@@ -253,41 +253,41 @@ library placeholder_verifier_mina_component {
                 fri_params.modulus
             );
         }
-/*        for (uint256 i = 0; i < f_parts; i++) {
-            assembly {
-                mstore(
-                    // local_vars.F_consolidated
-                    add(local_vars, F_CONSOLIDATED_OFFSET),
-                    addmod(
-                        // F_consolidated
-                        mload(add(local_vars, F_CONSOLIDATED_OFFSET)),
-                        mulmod(
-                            // alphas[i]
-                            mload(
-                                add(
-                                    add(
-                                        mload(add(local_vars, ALPHAS_OFFSET)),
-                                        0x20
+        /*        for (uint256 i = 0; i < f_parts; i++) {
+                    assembly {
+                        mstore(
+                            // local_vars.F_consolidated
+                            add(local_vars, F_CONSOLIDATED_OFFSET),
+                            addmod(
+                                // F_consolidated
+                                mload(add(local_vars, F_CONSOLIDATED_OFFSET)),
+                                mulmod(
+                                    // alphas[i]
+                                    mload(
+                                        add(
+                                            add(
+                                                mload(add(local_vars, ALPHAS_OFFSET)),
+                                                0x20
+                                            ),
+                                            mul(0x20, i)
+                                        )
                                     ),
-                                    mul(0x20, i)
-                                )
-                            ),
-                            // F[i]
-                            mload(
-                                add(
-                                    add(mload(add(local_vars, F_OFFSET)), 0x20),
-                                    mul(0x20, i)
-                                )
-                            ),
-                            // modulus
-                            mload(fri_params)
-                        ),
-                        // modulus
-                        mload(fri_params)
-                    )
-                )
-            }
-        }*/
+                                    // F[i]
+                                    mload(
+                                        add(
+                                            add(mload(add(local_vars, F_OFFSET)), 0x20),
+                                            mul(0x20, i)
+                                        )
+                                    ),
+                                    // modulus
+                                    mload(fri_params)
+                                ),
+                                // modulus
+                                mload(fri_params)
+                            )
+                        )
+                    }
+                }*/
         uint256[] memory z = new uint256[](12);
         local_vars.T_consolidated = 0;
         local_vars.len = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_quotient_offset);
@@ -330,34 +330,34 @@ library placeholder_verifier_mina_component {
         local_vars.Z_at_challenge = field.expmod_static(local_vars.challenge, common_data.rows_amount, fri_params.modulus);
         local_vars.Z_at_challenge = field.fsub(local_vars.Z_at_challenge, 1, fri_params.modulus);
         local_vars.Z_at_challenge = field.fmul(local_vars.Z_at_challenge, local_vars.T_consolidated, fri_params.modulus);
-/*        assembly {
-            mstore(
-                // local_vars.Z_at_challenge
-                add(local_vars, Z_AT_CHALLENGE_OFFSET),
-                // local_vars.Z_at_challenge - 1
-                addmod(
-                    // Z_at_challenge
-                    mload(add(local_vars, Z_AT_CHALLENGE_OFFSET)),
-                    // -1
-                    sub(mload(fri_params), 1),
-                    // modulus
-                    mload(fri_params)
-                )
-            )
-            mstore(
-                // local_vars.Z_at_challenge
-                add(local_vars, Z_AT_CHALLENGE_OFFSET),
-                // Z_at_challenge * T_consolidated
-                mulmod(
-                    // Z_at_challenge
-                    mload(add(local_vars, Z_AT_CHALLENGE_OFFSET)),
-                    // T_consolidated
-                    mload(add(local_vars, T_CONSOLIDATED_OFFSET)),
-                    // modulus
-                    mload(fri_params)
-                )
-            )
-        }*/
+        /*        assembly {
+                    mstore(
+                        // local_vars.Z_at_challenge
+                        add(local_vars, Z_AT_CHALLENGE_OFFSET),
+                        // local_vars.Z_at_challenge - 1
+                        addmod(
+                            // Z_at_challenge
+                            mload(add(local_vars, Z_AT_CHALLENGE_OFFSET)),
+                            // -1
+                            sub(mload(fri_params), 1),
+                            // modulus
+                            mload(fri_params)
+                        )
+                    )
+                    mstore(
+                        // local_vars.Z_at_challenge
+                        add(local_vars, Z_AT_CHALLENGE_OFFSET),
+                        // Z_at_challenge * T_consolidated
+                        mulmod(
+                            // Z_at_challenge
+                            mload(add(local_vars, Z_AT_CHALLENGE_OFFSET)),
+                            // T_consolidated
+                            mload(add(local_vars, T_CONSOLIDATED_OFFSET)),
+                            // modulus
+                            mload(fri_params)
+                        )
+                    )
+                }*/
         if (local_vars.F_consolidated != local_vars.Z_at_challenge) {
             return false;
         }

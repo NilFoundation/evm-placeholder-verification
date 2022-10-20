@@ -41,9 +41,9 @@ import "./mina_base/mina_gate16.sol";
 import "./mina_base/mina_gate17.sol";
 import "./mina_base/mina_gate18.sol";
 import "./mina_base/mina_gate19.sol";
+import "./mina_base/mina_gate19_1.sol";
 import "./mina_base/mina_gate20.sol";
 import "./mina_base/mina_gate21.sol";
-import "./mina_base/mina_gate22.sol";
 
 // TODO: name component
 library mina_split_gen {
@@ -126,14 +126,16 @@ library mina_split_gen {
         .evaluate_gate_be(gate_params, columns_rotations);
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate18
         .evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate19
+        (gate_params.gate_eval, gate_params.theta_acc) = mina_gate19
+        .evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate19_1
         .evaluate_gate_be(gate_params, columns_rotations);
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate20
         .evaluate_gate_be(gate_params, columns_rotations);
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate21
         .evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate22
-        .evaluate_gate_be(gate_params, columns_rotations);
         gates_evaluation = gate_params.gates_evaluation;
+
+//        require(false, logging.uint2decstr(gate_params.gates_evaluation));
     }
 }
