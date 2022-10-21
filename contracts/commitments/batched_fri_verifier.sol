@@ -78,6 +78,8 @@ library batched_fri_verifier {
         // Variables for colinear check. Sorry! There are a so many of them.
         bool cc_one_round_step;
         uint256 indices_size;
+        uint256 ind;
+        uint256 newind;
     }
 
     uint256 constant FRI_PARAMS_BYTES_B_OFFSET = 0x260;
@@ -536,6 +538,8 @@ library batched_fri_verifier {
         // TODO: offsets in local vars should be better
         // But it needs assembly work
 
+        uint256 res;
+        uint256 c;
         result = false;
         //require(m == 2, "m has to be equal to 2!");
         //require(fri_params.step_list.length - 1 == get_round_proofs_n_be(blob, offset), "Wrong round proofs number");
@@ -573,7 +577,6 @@ library batched_fri_verifier {
                 return false;
             }
 
-
             //  Reduce ys. Local variables:
             //  c;
             //  modulus;
@@ -586,14 +589,13 @@ library batched_fri_verifier {
             for( local_vars.i_round = 0; local_vars.i_round < local_vars.r_step - 1;){
                 local_vars.alpha = transcript.get_field_challenge(tr_state, fri_params.modulus);
                 unchecked{ local_vars.y_next = (local_vars.y + 1)%3; }
-                for( local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size;){
-                    for( local_vars.y_ind = 0; local_vars.y_ind < (local_vars.y_size >> 1);){
-                        for ( uint256 ind = 0; ind < 2;){
-                            uint256 newind = (local_vars.y_ind << 1) + ind;
-                            uint256 res;
-                            local_vars.s1 = fri_params.s[newind][0];
-                            local_vars.fs1 = fri_params.ys[local_vars.y][local_vars.p_ind][newind][0];
-                            local_vars.fs2 = fri_params.ys[local_vars.y][local_vars.p_ind][newind][1];
+                for( local_vars.y_ind = 0; local_vars.y_ind < (local_vars.y_size >> 1);){
+                    for ( local_vars.ind = 0; local_vars.ind < 2;){
+                        unchecked{ local_vars.newind = (local_vars.y_ind << 1) + local_vars.ind; }
+                        local_vars.s1 = fri_params.s[local_vars.newind][0];
+                        for( local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size;){
+                            local_vars.fs1 = fri_params.ys[local_vars.y][local_vars.p_ind][local_vars.newind][0];
+                            local_vars.fs2 = fri_params.ys[local_vars.y][local_vars.p_ind][local_vars.newind][1];
                             if(local_vars.i_round == 0){
                                 assembly{
                                     res:= mulmod(
@@ -655,18 +657,19 @@ library batched_fri_verifier {
                                     )
                                 }
                             }
-                            fri_params.ys[local_vars.y_next][local_vars.p_ind][local_vars.y_ind][ind] = res;
-                            unchecked{ ind++; }
+                            fri_params.ys[local_vars.y_next][local_vars.p_ind][local_vars.y_ind][local_vars.ind] = res;
+                            unchecked{ local_vars.p_ind++; }
                         }
-                        unchecked{ local_vars.y_ind++; }
+                        unchecked{ local_vars.ind++; }
                     }
-                    unchecked{ local_vars.p_ind++; }
+                    unchecked{ local_vars.y_ind++; }
                 }
                 local_vars.y = local_vars.y_next;
                 round_local_vars(blob, offset, fri_params, local_vars);
                 calculate_s_indices(fri_params, local_vars);
                 unchecked{  local_vars.i_round++; }
             }
+
             local_vars.alpha = transcript.get_field_challenge(tr_state, fri_params.modulus);
             
             transcript.update_transcript_b32_by_offset_calldata(
@@ -685,8 +688,6 @@ library batched_fri_verifier {
             step_local_vars(blob, offset, fri_params, local_vars);
             prepare_leaf_data_and_ys(blob, fri_params, local_vars);
 
-            uint256 res;
-            uint256 c;
             for( local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size;){
                 c = fri_params.ys[local_vars.y][local_vars.p_ind][0][0];
                 // prepare vars for colinear check
@@ -763,7 +764,7 @@ library batched_fri_verifier {
         local_vars.final_poly_offset = basic_marshalling.skip_length(local_vars.final_poly_offset);
         for (local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size;) {
              if (basic_marshalling.get_length(blob, local_vars.final_poly_offset) - 1 >
-                (uint256(2) ** (field.log2(fri_params.max_degree + 1) - fri_params.r + 1) - 1)) {
+                (( 1 << (field.log2(fri_params.max_degree + 1) - fri_params.r + 1) ) - 1)) {
                 require(false, "Max degree problem");
                 return false;
             }
