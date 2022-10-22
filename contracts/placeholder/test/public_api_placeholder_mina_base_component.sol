@@ -24,7 +24,7 @@ import "../proof_map_parser.sol";
 import "../verifier_mina_base_component.sol";
 import "../../logging.sol";
 
-contract TestPlaceholderVerifierMina {
+contract TestPlaceholderVerifierMinaBase {
     struct test_local_vars {
         types.placeholder_proof_map proof_map;
         uint256 proof_size;
@@ -110,7 +110,7 @@ contract TestPlaceholderVerifierMina {
         vars.fri_params.b = new bytes(0x40 * vars.fri_params.max_batch * max_coset);
 
         require(
-            placeholder_verifier_mina_component.verify_proof_be(
+            placeholder_verifier_mina_base_component.verify_proof_be(
                 blob,
                 vars.tr_state,
                 vars.proof_map,

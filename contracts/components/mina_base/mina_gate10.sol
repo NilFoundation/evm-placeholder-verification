@@ -21,7 +21,7 @@ pragma solidity >=0.8.4;
 import "../../types.sol";
 
 // TODO: name component
-library mina_gate10 {
+library mina_base_gate10 {
     uint256 constant MODULUS_OFFSET = 0x0;
     uint256 constant THETA_OFFSET = 0x20;
     uint256 constant CONSTRAINT_EVAL_OFFSET = 0x40;

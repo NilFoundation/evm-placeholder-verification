@@ -21,8 +21,8 @@ pragma solidity >=0.8.4;
 import "../../types.sol";
 import "../../cryptography/transcript.sol";
 import "../proof_map_parser.sol";
-//import "../verifier_mina_component.sol";
-//import "../verifier_mina_base_component.sol";
+import "../verifier_mina_component.sol";
+import "../verifier_mina_base_component.sol";
 import "../../logging.sol";
 import "../verifier_unified_addition_component.sol";
 

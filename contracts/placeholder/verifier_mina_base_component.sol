@@ -27,7 +27,7 @@ import "../basic_marshalling.sol";
 import "../algebra/field.sol";
 import "../logging.sol";
 
-library placeholder_verifier_mina_component {
+library placeholder_verifier_mina_base_component {
     uint256 constant f_parts = 9;
 
     uint256 constant OMEGA_OFFSET = 0x20;
@@ -95,7 +95,7 @@ library placeholder_verifier_mina_component {
         gate_params.eval_proof_selector_offset = proof_map.eval_proof_selector_offset;
         gate_params.eval_proof_constant_offset = proof_map.eval_proof_constant_offset;
 
-        local_vars.gate_argument = mina_split_gen.evaluate_gates_be(blob, gate_params, common_data.columns_rotations);
+        local_vars.gate_argument = mina_base_split_gen.evaluate_gates_be(blob, gate_params, common_data.columns_rotations);
 
         // 8. alphas computations
         local_vars.alphas = new uint256[](f_parts);

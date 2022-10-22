@@ -23,7 +23,7 @@ import "../../logging.sol";
 import "../../basic_marshalling.sol";
 
 // TODO: name component
-library mina_gate0 {
+library mina_base_gate0 {
     uint256 constant MODULUS_OFFSET = 0x0;
     uint256 constant THETA_OFFSET = 0x20;
     uint256 constant CONSTRAINT_EVAL_OFFSET = 0x40;
