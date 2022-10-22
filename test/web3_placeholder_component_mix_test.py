@@ -3,9 +3,10 @@ from web3_test import do_placeholder_verification_test_via_transact, base_path
 test_contract_name = 'TestPlaceholderComponentMix'
 test_contract_path = 'placeholder/test/public_api_placeholder_component_mix.sol'
 
-#linked_gates_entry_unified_addition_lib_name = "unified_addition_component_gen"
-#linked_unified_addition_libs_names = []
+linked_gates_entry_unified_addition_lib_name = "unified_addition_component_gen"
+linked_unified_addition_libs_names = []
 
+"""
 linked_gates_entry_lib_name = 'mina_split_gen'
 linked_libs_names = [
     "mina_gate0",
@@ -32,7 +33,7 @@ linked_libs_names = [
     "mina_gate21",
     "mina_gate22"
 ]
-"""
+
 linked_gates_entry_lib_name = 'mina_base_split_gen'
 linked_libs_names = [
     "mina_base_gate0",
@@ -394,6 +395,6 @@ def init_test3():
     return params
 
 if __name__ == '__main__':
-#    do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_unified_addition_lib_name, linked_unified_addition_libs_names, init_test1)
-    do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_lib_name, linked_libs_names, init_test2)
-#    do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_mina_lib_name, linked_mina_libs_names, init_test2)
+    do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_unified_addition_lib_name, linked_unified_addition_libs_names, init_test1)
+#    do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_lib_name, linked_libs_names, init_test2)
+#    do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_mina_lib_name, linked_mina_libs_names, init_test3)
