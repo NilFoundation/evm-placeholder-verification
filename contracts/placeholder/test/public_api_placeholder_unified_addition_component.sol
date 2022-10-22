@@ -33,6 +33,29 @@ contract TestPlaceholderVerifierUnifiedAddition {
         types.placeholder_common_data common_data;
     }
 
+/*
+    function allocate_all(test_local_vars memory vars, uint256 max_step, uint256 max_batch) internal view{
+        uint256 max_coset = 1 << (vars.fri_params.max_step - 1);
+
+        vars.fri_params.s_indices = new uint256[2][](max_coset);
+        vars.fri_params.s = new uint256[2][](max_coset);
+        vars.fri_params.correct_order_idx = new uint256[2][](max_coset);
+
+        vars.fri_params.ys[0] = new uint256[2][][](max_batch);
+        vars.fri_params.ys[1] = new uint256[2][][](max_batch);
+        vars.fri_params.ys[2] = new uint256[2][][](max_batch);
+        require(false, logging.uint2decstr(max_batch));
+
+        for(uint256 i = 0; i < vars.fri_params.max_batch;){
+            vars.fri_params.ys[0][i] = new uint256[2][](max_coset);
+            vars.fri_params.ys[1][i] = new uint256[2][](max_coset);
+            vars.fri_params.ys[2][i] = new uint256[2][](max_coset);
+            unchecked{i++;}
+        }
+
+        vars.fri_params.b = new bytes(0x40 * vars.fri_params.max_batch * max_coset);
+    }
+*/
     function verify(
         bytes calldata blob,
         // 0) modulus
@@ -62,7 +85,8 @@ contract TestPlaceholderVerifierUnifiedAddition {
 
         vars.common_data.rows_amount = init_params[idx++];
         vars.common_data.omega = init_params[idx++];
-        placeholder_proof_map_parser.init(vars.fri_params, init_params[idx++]);
+        vars.fri_params.max_batch = init_params[idx++];
+        placeholder_proof_map_parser.init(vars.fri_params, vars.fri_params.max_batch);
 
         vars.common_data.columns_rotations = columns_rotations;
 
@@ -78,10 +102,32 @@ contract TestPlaceholderVerifierUnifiedAddition {
         }
 
         vars.fri_params.step_list = new uint256[](init_params[idx++]);
+        vars.fri_params.max_step = 0;
         for (uint256 i = 0; i < vars.fri_params.step_list.length;) {
             vars.fri_params.step_list[i] = init_params[idx];
+            if(vars.fri_params.step_list[i] > vars.fri_params.max_step)
+                vars.fri_params.max_step = vars.fri_params.step_list[i];
             unchecked{ i++; idx++;}
         }
+
+        uint256 max_coset = 1 << (vars.fri_params.max_step - 1);
+
+        vars.fri_params.s_indices = new uint256[2][](max_coset);
+        vars.fri_params.s = new uint256[2][](max_coset);
+        vars.fri_params.correct_order_idx = new uint256[2][](max_coset);
+
+        vars.fri_params.ys[0] = new uint256[2][][](vars.fri_params.max_batch);
+        vars.fri_params.ys[1] = new uint256[2][][](vars.fri_params.max_batch);
+        vars.fri_params.ys[2] = new uint256[2][][](vars.fri_params.max_batch);
+
+        for(uint256 i = 0; i < vars.fri_params.max_batch;){
+            vars.fri_params.ys[0][i] = new uint256[2][](max_coset);
+            vars.fri_params.ys[1][i] = new uint256[2][](max_coset);
+            vars.fri_params.ys[2][i] = new uint256[2][](max_coset);
+            unchecked{i++;}
+        }
+
+        vars.fri_params.b = new bytes(0x40 * vars.fri_params.max_batch * max_coset);
 
         require(
             placeholder_verifier_unified_addition_component.verify_proof_be(

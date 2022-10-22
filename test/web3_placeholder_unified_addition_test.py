@@ -21,7 +21,7 @@ def init_test1():
     params['init_params'].append(2)
     params['init_params'].append(8)
     params['init_params'].append(199455130043951077247265858823823987229570523056509026484192158816218200659)
-    params['init_params'].append(12)
+    params['init_params'].append(13)
     D_omegas = []
     f = open(base_path + '/test/data/domain8_unified_addition.txt')
     lines = f.readlines()
@@ -34,13 +34,14 @@ def init_test1():
     params['init_params'].append(len(q))
     params['init_params'].extend(q)
 
+    step_list = [1, 1]
+    params['init_params'].append(len(step_list))
+    params['init_params'].extend(step_list)  # step_list
+
     params['columns_rotations'] = []
     for i in range(14):
         params['columns_rotations'].append([0, ])
 
-    step_list = [1, 1]
-    params['init_params'].append(len(step_list))
-    params['init_params'].extend(step_list)  # step_list
 
     return params
 
@@ -76,12 +77,12 @@ def init_test2():
 
     params['columns_rotations'] = []
 
-    for i in range(14):
-        params['columns_rotations'].append([0, ])
-
     step_list = [1, 1]
     params['init_params'].append(len(step_list))
     params['init_params'].extend(step_list)  # step_list
+
+    for i in range(14):
+        params['columns_rotations'].append([0, ])
 
     return params
 
