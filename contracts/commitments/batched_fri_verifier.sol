@@ -30,17 +30,21 @@ library batched_fri_verifier {
     struct local_vars_type {
         // some internal variables used in assemblys
         // 0x0
-        uint256       b_length;
+        uint256     s1;                                     // It's extremely important, it's the first field.
         //0x20
-        uint256     s1;                                      
+        uint256     x;                                      
         //0x40
         uint256     alpha;                                   // alpha challenge
         //0x60
         uint256     fs1;
         //0x80 
         uint256     fs2;
-        //0x100     
+        //0xa0     
         uint256     c;                                      // colinear_value_offset
+        //0xc0     
+        uint256     c1;                                      // fs1 coefficient
+        //0xe0     
+        uint256     c2;                                      // fs2 coefficient
 
         // Fri proof fields
         uint256 final_poly_offset;                      // one for all rounds
@@ -55,10 +59,10 @@ library batched_fri_verifier {
         uint256 round_proof_colinear_value;              // It is the value. Not offset
         uint256 i_step;                                  // current step
         uint256 r_step;                                  // rounds in step                                     
+        uint256 b_length;                                // length of bytes for merkle verifier input
 
         // Fri params for one round (in step)
         uint256 x_index;
-        uint256 x;
         uint256 x_next;
         uint256 domain_size;                             // domain size
         uint256 omega;                                   // domain generator
@@ -75,25 +79,29 @@ library batched_fri_verifier {
         uint256 y_next;
         uint256 y_previous;
         uint256 y_size;
+        uint256 colinear_path_offset;
         // Variables for colinear check. Sorry! There are a so many of them.
         bool cc_one_round_step;
         uint256 indices_size;
         uint256 ind;
         uint256 newind;
+
+        uint256 n2;
     }
 
     uint256 constant FRI_PARAMS_BYTES_B_OFFSET = 0x260;
-    uint256 constant BYTES_B_OFFSET = 0x0;
-    uint256 constant S1_OFFSET = 0x20;                                      
+    uint256 constant S1_OFFSET = 0x00;                                      
+    uint256 constant X_OFFSET = 0x20;                                      
     uint256 constant ALPHA_OFFSET = 0x40;                                   // alpha challenge
     uint256 constant FS1_OFFSET = 0x60;
     uint256 constant FS2_OFFSET = 0x80;
-    uint256 constant C_OFFSET = 0x100;                                      // colinear_value_offset
+    uint256 constant C_OFFSET = 0xa0;                                      // colinear_value_offset
+    uint256 constant C1_OFFSET = 0xc0;                                      // colinear_value_offset
+    uint256 constant C2_OFFSET = 0xe0;                                      // colinear_value_offset
 
-    uint256 constant COLINEAR_VALUE_OFFSET = 0x0;
+/*    uint256 constant COLINEAR_VALUE_OFFSET = 0x0;
     uint256 constant T_ROOT_OFFSET_OFFSET = 0x20;
     uint256 constant FINAL_POLY_OFFSET_OFFSET = 0x40;
-    uint256 constant X_OFFSET = 0x60;
     uint256 constant X_NEXT_OFFSET = 0x80;
     uint256 constant ROUND_PROOF_OFFSET_OFFSET = 0xc0;
     uint256 constant ROUND_PROOF_Y_OFFSET_OFFSET = 0xe0;
@@ -102,7 +110,7 @@ library batched_fri_verifier {
     uint256 constant Y_J_OFFSET_OFFSET = 0x140;
     uint256 constant Y_J_SIZE_OFFSET = 0x160;
     uint256 constant STATUS_OFFSET = 0x180;
-    uint256 constant VALUES_OFFSET = 0x240;
+    uint256 constant VALUES_OFFSET = 0x240;*/
 
 //    uint256 constant BATCHED_FRI_VERIFIED_DATA_OFFSET = 0x160;
 //    uint256 constant VERIFIED_DATA_OFFSET = 0x300;
@@ -263,31 +271,33 @@ library batched_fri_verifier {
     internal view
     {
         unchecked{ local_vars.indices_size = 1 << (local_vars.r_step - 1); }
-        uint256 n2 = field.fmul(fri_params.D_omegas[fri_params.D_omegas.length - 1], fri_params.D_omegas[fri_params.D_omegas.length - 1], fri_params.modulus);
 
         fri_params.s_indices[0][0] = local_vars.x_index;
-        fri_params.s[0][0] = field.expmod_static(local_vars.omega, fri_params.s_indices[0][0], fri_params.modulus);
+        fri_params.s[0][0] = local_vars.x;
         fri_params.s_indices[0][1] = get_paired_index(local_vars.x_index, local_vars.domain_size);
-        fri_params.s[0][1] = field.fmul(fri_params.s[0][0], n2, fri_params.modulus);
+        fri_params.s[0][1] = field.fmul(fri_params.s[0][0], local_vars.n2, fri_params.modulus);
 
         if( local_vars.indices_size > 1){
             uint256 base_index = local_vars.domain_size >> 2; 
             uint256 prev_half_size = 1;
             uint256 i = 1;
-            uint256 omega_ind = fri_params.D_omegas.length - 1;
+            uint256 j;
+            local_vars.newind = fri_params.D_omegas.length - 1;
             while( i < local_vars.indices_size ){
-                for( uint256 j = 0; j < prev_half_size;) {
-                    fri_params.s_indices[i][0] = (base_index + fri_params.s_indices[j][0]) %local_vars.domain_size;
+                for( j = 0; j < prev_half_size;) {
+                    unchecked{
+                        fri_params.s_indices[i][0] = (base_index + fri_params.s_indices[j][0]) %local_vars.domain_size;
+                    }
                     fri_params.s_indices[i][1] = get_paired_index(fri_params.s_indices[i][0], local_vars.domain_size);
-                    fri_params.s[i][0] = field.fmul(fri_params.s[j][0], fri_params.D_omegas[omega_ind], fri_params.modulus);
-                    fri_params.s[i][1] = field.fmul(fri_params.s[i][0], n2, fri_params.modulus);
+                    fri_params.s[i][0] = field.fmul(fri_params.s[j][0], fri_params.D_omegas[local_vars.newind], fri_params.modulus);
+                    fri_params.s[i][1] = field.fmul(fri_params.s[i][0], local_vars.n2, fri_params.modulus);
                     unchecked{ i++; } // TODO: is it really here?
                     unchecked{ j++; }
                 }
                 unchecked{
                     base_index >>=1;
                     prev_half_size <<=1;
-                    omega_ind--;
+                    local_vars.newind--;
                 }
             }
         }
@@ -295,14 +305,7 @@ library batched_fri_verifier {
 
     function get_folded_index(uint256 x_index, uint256 fri_step, uint256 domain_size) 
     internal pure returns(uint256 result){
-        result = x_index;
-        for (uint256 i = 0; i < fri_step;) {
-            unchecked{
-                domain_size >>= 1;
-                result %= domain_size;
-                i++; 
-            }
-        }
+        result = x_index % (domain_size >> fri_step);
     }
 
     function calculate_correct_order_idx(types.fri_params_type memory fri_params, local_vars_type memory local_vars)
@@ -319,8 +322,10 @@ library batched_fri_verifier {
         uint256 j = 0;
         while (i < coset_size >> 1 ){
             for (j = 0; j < prev_half_size;) {
-                correctly_ordered_s_indices[i] =
-                    (base_index + correctly_ordered_s_indices[j]) % local_vars.domain_size;
+                unchecked{
+                    correctly_ordered_s_indices[i] =
+                        (base_index + correctly_ordered_s_indices[j]) % local_vars.domain_size;
+                }
                 unchecked{ i++; }
                 unchecked{ j++; }
             }
@@ -489,6 +494,8 @@ library batched_fri_verifier {
         local_vars.omega = fri_params.D_omegas[0];           // domain generator
         local_vars.global_round_index = 0;                   // current FRI round
         local_vars.i_round = 0;                              // current round in step
+
+        local_vars.n2 = field.fmul(fri_params.D_omegas[fri_params.D_omegas.length - 1], fri_params.D_omegas[fri_params.D_omegas.length - 1], fri_params.modulus);
     }
 
     function step_local_vars(bytes calldata blob, uint256 offset, types.fri_params_type memory  fri_params, local_vars_type memory local_vars)
@@ -593,69 +600,89 @@ library batched_fri_verifier {
                     for ( local_vars.ind = 0; local_vars.ind < 2;){
                         unchecked{ local_vars.newind = (local_vars.y_ind << 1) + local_vars.ind; }
                         local_vars.s1 = fri_params.s[local_vars.newind][0];
+
+                        // prepare coefficients for fs1 and fs2 they are equal for all polynomials
+                        if(local_vars.i_round == 0){
+                            assembly{
+                                mstore(
+                                    add(local_vars, C1_OFFSET),
+                                    mulmod(
+                                        mload(add(fri_params, CONSTANT_1_2_OFFSET)),
+                                        mulmod(
+                                            mload(local_vars),
+                                            addmod(
+                                                mload(local_vars),
+                                                mload(add(local_vars, ALPHA_OFFSET)),
+                                                mload(fri_params)
+                                            ),
+                                            mload(fri_params)
+                                        ),
+                                        mload(fri_params)
+                                    )
+                                )
+                                mstore(
+                                    add(local_vars, C2_OFFSET),
+                                    mulmod(
+                                        mload(add(fri_params, CONSTANT_1_2_OFFSET)),
+                                        mulmod(
+                                            mload(local_vars),
+                                            addmod(
+                                                mload(local_vars),
+                                                sub(mload(fri_params), mload(add(local_vars, ALPHA_OFFSET))),
+                                                mload(fri_params)
+                                            ),
+                                            mload(fri_params)
+                                        ),
+                                        mload(fri_params)
+                                    )
+                                )
+                            }
+                        } else {
+                            assembly{
+                                mstore(
+                                    add(local_vars, C1_OFFSET),
+                                    mulmod(
+                                        mload(add(fri_params, CONSTANT_1_2_OFFSET)),
+                                        addmod(
+                                            mload(local_vars),
+                                            mload(add(local_vars, ALPHA_OFFSET)),
+                                            mload(fri_params)
+                                        ),
+                                        mload(fri_params)
+                                    )
+                                )
+                                mstore(
+                                    add(local_vars, C2_OFFSET),
+                                    mulmod(
+                                        mload(add(fri_params, CONSTANT_1_2_OFFSET)),
+                                        addmod(
+                                            mload(add(local_vars, ALPHA_OFFSET)),
+                                            sub(mload(fri_params), mload(local_vars)),
+                                            mload(fri_params)
+                                        ),
+                                        mload(fri_params)
+                                    )
+                                )
+                            }
+                        }
+
                         for( local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size;){
                             local_vars.fs1 = fri_params.ys[local_vars.y][local_vars.p_ind][local_vars.newind][0];
                             local_vars.fs2 = fri_params.ys[local_vars.y][local_vars.p_ind][local_vars.newind][1];
-                            if(local_vars.i_round == 0){
-                                assembly{
-                                    res:= mulmod(
-                                        mload(add(local_vars,S1_OFFSET)),
-                                        mulmod(
-                                            mload(add(fri_params, CONSTANT_1_2_OFFSET)),
-                                            addmod(
-                                                mulmod(
-                                                    mload(add(local_vars,ALPHA_OFFSET)), 
-                                                    addmod(
-                                                        sub(mload(fri_params), mload(add(local_vars,FS2_OFFSET))), 
-                                                        mload(add(local_vars, FS1_OFFSET)), 
-                                                        mload(fri_params)
-                                                    ),
-                                                    mload(fri_params)
-                                                ),
-                                                mulmod(
-                                                    mload(add(local_vars, S1_OFFSET)), 
-                                                    addmod(
-                                                        mload(add(local_vars, FS1_OFFSET)),
-                                                        mload(add(local_vars, FS2_OFFSET)), 
-                                                        mload(fri_params)
-                                                    ), 
-                                                    mload(fri_params)
-                                                ),
-                                                mload(fri_params)
-                                            ),
-                                            mload(fri_params)
-                                        ),
+                            assembly {
+                                res := addmod(
+                                    mulmod(
+                                        mload(add(local_vars, C1_OFFSET)),
+                                        mload(add(local_vars, FS1_OFFSET)),
                                         mload(fri_params)
-                                    )
-                                }
-                            } else {
-                                assembly{
-                                    res :=  mulmod(
-                                        mload(add(fri_params, CONSTANT_1_2_OFFSET)),
-                                        addmod(
-                                            mulmod(
-                                                mload(add(local_vars, ALPHA_OFFSET)),
-                                                addmod(
-                                                    mload(add(local_vars, FS1_OFFSET)),
-                                                    mload(add(local_vars, FS2_OFFSET)),
-                                                    mload(fri_params)
-                                                ),
-                                                mload(fri_params)
-                                            ),
-                                            mulmod(
-                                                mload(add(local_vars, S1_OFFSET)),
-                                                addmod(
-                                                    mload(add(local_vars, FS1_OFFSET)),
-                                                    sub(mload(fri_params), mload(add(local_vars, FS2_OFFSET))),
-                                                    mload(fri_params)
-                                                ),
-                                                mload(fri_params)
-                                            ),
-                                            mload(fri_params)
-                                        ),
+                                    ),
+                                    mulmod(
+                                        mload(add(local_vars, C2_OFFSET)),
+                                        mload(add(local_vars, FS2_OFFSET)),
                                         mload(fri_params)
-                                    )
-                                }
+                                    ),
+                                    mload(fri_params)
+                                )
                             }
                             fri_params.ys[local_vars.y_next][local_vars.p_ind][local_vars.y_ind][local_vars.ind] = res;
                             unchecked{ local_vars.p_ind++; }
@@ -677,7 +704,7 @@ library batched_fri_verifier {
                 blob, 
                 local_vars.round_proof_colinear_path_T_root_offset
             );
-            uint256 colinear_path_offset = local_vars.round_proof_colinear_path_offset;
+            local_vars.colinear_path_offset = local_vars.round_proof_colinear_path_offset;
 
             local_vars.s1 = local_vars.x;
             unchecked{ local_vars.cc_one_round_step = (local_vars.r_step == 1); }
@@ -688,60 +715,74 @@ library batched_fri_verifier {
             step_local_vars(blob, offset, fri_params, local_vars);
             prepare_leaf_data_and_ys(blob, fri_params, local_vars);
 
+            if( local_vars.cc_one_round_step ){
+                assembly{
+                    mstore(
+                        add(local_vars, C1_OFFSET),
+                        mulmod(
+                            addmod(
+                                mload(add(local_vars, ALPHA_OFFSET)),
+                                mload(local_vars),
+                                mload(fri_params)
+                            ),
+                            mload(local_vars),
+                            mload(fri_params)
+                        )
+                    )
+                    mstore(
+                        add(local_vars, C2_OFFSET),
+                        mulmod(
+                            addmod(
+                                mload(local_vars),
+                                sub(mload(fri_params), mload(add(local_vars, ALPHA_OFFSET))),
+                                mload(fri_params)
+                            ),
+                            mload(local_vars),
+                            mload(fri_params)
+                        )
+                    )
+                }
+            } else {
+                assembly{
+                    mstore(
+                        add(local_vars, C1_OFFSET),
+                        addmod(
+                            mload(add(local_vars, ALPHA_OFFSET)),
+                            mload(local_vars),
+                            mload(fri_params)
+                        )
+                    )
+                    mstore(
+                        add(local_vars, C2_OFFSET),
+                        addmod(
+                            mload(add(local_vars, ALPHA_OFFSET)),
+                            sub( mload(fri_params), mload(local_vars)),
+                            mload(fri_params)
+                        )
+                    )
+                }
+            }
             for( local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size;){
                 c = fri_params.ys[local_vars.y][local_vars.p_ind][0][0];
                 // prepare vars for colinear check
                 local_vars.fs1 = fri_params.ys[local_vars.y_previous][local_vars.p_ind][0][0];
                 local_vars.fs2 = fri_params.ys[local_vars.y_previous][local_vars.p_ind][0][1];
-
-                if(local_vars.cc_one_round_step){
-                    assembly {
-                        c := mulmod(mload(add(local_vars, S1_OFFSET)), c, mload(fri_params))
-                        c := addmod(c, c, mload(fri_params))
-                        res:= addmod(
-                            mulmod(
-                                mload(add(local_vars,ALPHA_OFFSET)), 
-                                addmod(sub(mload(fri_params), mload(add(local_vars,FS2_OFFSET))), mload(add(local_vars,FS1_OFFSET)), mload(fri_params)), 
-                                mload(fri_params)
-                            ),
-                            mulmod(mload(add(local_vars, S1_OFFSET)), addmod(mload(add(local_vars,FS1_OFFSET)), mload(add(local_vars,FS2_OFFSET)), mload(fri_params)), mload(fri_params)), 
+                assembly{
+                    c := mulmod(mload(add(local_vars, X_OFFSET)), c, mload(fri_params))
+                    c := addmod(c, c, mload(fri_params))
+                    res := addmod(
+                        mulmod(
+                            mload(add(local_vars, C1_OFFSET)),
+                            mload(add(local_vars, FS1_OFFSET)),
                             mload(fri_params)
-                        )
-                    }
-                } else {
-                    assembly{
-                        c := mulmod(
-                            mload(add(local_vars, S1_OFFSET)), 
-                            mulmod(
-                                mload(add(local_vars, S1_OFFSET)), 
-                                c,
-                                mload(fri_params)
-                            ),
+                        ),
+                        mulmod(
+                            mload(add(local_vars, C2_OFFSET)),
+                            mload(add(local_vars, FS2_OFFSET)),
                             mload(fri_params)
-                        )              
-                        c:=addmod(c, c, mload(fri_params))
-                        res := addmod(
-                            mulmod(
-                                mload(add(local_vars, ALPHA_OFFSET)),
-                                addmod(
-                                    mload(add(local_vars, FS1_OFFSET)),
-                                    mload(add(local_vars, FS2_OFFSET)),
-                                    mload(fri_params)
-                                ),
-                                mload(fri_params)
-                            ),
-                            mulmod(
-                                mload(add(local_vars, S1_OFFSET)),
-                                addmod(
-                                    mload(add(local_vars, FS1_OFFSET)),
-                                    sub(mload(fri_params), mload(add(local_vars, FS2_OFFSET))),
-                                    mload(fri_params)
-                                ),
-                                mload(fri_params)
-                            ),
-                            mload(fri_params)
-                        )
-                    }
+                        ),
+                        mload(fri_params)
+                    )
                 }
                 if( c != res ){
                     require(false, "Colinear check failes");
@@ -752,7 +793,7 @@ library batched_fri_verifier {
             
             if (!merkle_verifier.parse_verify_merkle_proof_bytes_be(
                 blob, 
-                colinear_path_offset, 
+                local_vars.colinear_path_offset, 
                 fri_params.b, local_vars.b_length)
             ) {
                 require(false, "Round_proof.colinear_path verifier failes");
