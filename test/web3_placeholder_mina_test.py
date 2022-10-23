@@ -75,7 +75,6 @@ def init_test1():
     params['init_params'].append(len(step_list))
     params['init_params'].extend(step_list)  # step_list
 
-    params['init_params'].append(30)  # max_batch
     return params
 
 

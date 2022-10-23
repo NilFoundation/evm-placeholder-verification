@@ -1,32 +1,32 @@
 from web3_test import do_placeholder_verification_test_via_transact, base_path
 
-test_contract_name = 'TestPlaceholderVerifierMina'
+test_contract_name = 'TestPlaceholderVerifierMinaBase'
 test_contract_path = 'placeholder/test/public_api_placeholder_mina_base_component.sol'
-linked_gates_entry_lib_name = 'mina_split_gen'
+linked_gates_entry_lib_name = 'mina_base_split_gen'
 linked_libs_names = [
-    "mina_gate0",
-    "mina_gate1",
-    "mina_gate2",
-    "mina_gate3",
-    "mina_gate4",
-    "mina_gate5",
-    "mina_gate6",
-    "mina_gate7",
-    "mina_gate8",
-    "mina_gate9",
-    "mina_gate10",
-    "mina_gate11",
-    "mina_gate12",
-    "mina_gate13",
-    "mina_gate14",
-    "mina_gate15",
-    "mina_gate16",
-    "mina_gate17",
-    "mina_gate18",
-    "mina_gate19",
-    "mina_gate19_1",
-    "mina_gate20",
-    "mina_gate21"
+    "mina_base_gate0",
+    "mina_base_gate1",
+    "mina_base_gate2",
+    "mina_base_gate3",
+    "mina_base_gate4",
+    "mina_base_gate5",
+    "mina_base_gate6",
+    "mina_base_gate7",
+    "mina_base_gate8",
+    "mina_base_gate9",
+    "mina_base_gate10",
+    "mina_base_gate11",
+    "mina_base_gate12",
+    "mina_base_gate13",
+    "mina_base_gate14",
+    "mina_base_gate15",
+    "mina_base_gate16",
+    "mina_base_gate17",
+    "mina_base_gate18",
+    "mina_base_gate19",
+    "mina_base_gate19_1",
+    "mina_base_gate20",
+    "mina_base_gate21"
 ]
 
 
@@ -94,8 +94,6 @@ def init_test1():
     step_list = [1] * 13
     params['init_params'].append(len(step_list))
     params['init_params'].extend(step_list)  # step_list
-
-    params['init_params'].append(30)  # max_batch
     return params
 
 
