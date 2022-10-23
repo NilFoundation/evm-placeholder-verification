@@ -24,10 +24,8 @@ import "../proof_map_parser.sol";
 import "../verifier_mina_component.sol";
 import "../verifier_mina_base_component.sol";
 import "../../logging.sol";
-import "../verifier_unified_addition_component.sol";
 
-contract TestPlaceholderComponentMix {
-    uint256 constant UNIFIED_ADDITION_COMPONENT_ID = 0;
+contract TestPlaceholderMinaMix {
     uint256 constant MINA_COMPONENT_ID = 1;
     uint256 constant MINA_BASE_COMPONENT_ID = 2;
 
@@ -116,11 +114,13 @@ contract TestPlaceholderComponentMix {
         int256[][][] calldata columns_rotations
     ) public {
         test_local_vars memory vars;
-        vars.proofs_num = init_params[0].length;
         uint256 max_step = 0;
         uint256 max_batch = 0;
 
-        for( vars.ind = 0; vars.ind < vars.proofs_num; ){
+        require(blob.length == init_params[0][1], "Invalid input length");
+
+
+        for( vars.ind = 0; vars.ind < 2; ){
             init_vars(vars, init_params[vars.ind+1], columns_rotations[vars.ind]);
             if(vars.fri_params.max_step > max_step) max_step = vars.fri_params.max_step;
             if(vars.fri_params.max_batch > max_step) max_batch = vars.fri_params.max_batch;
@@ -130,52 +130,37 @@ contract TestPlaceholderComponentMix {
 
         // Map parser for each proof.
         vars.proof_offset = 0;
-        for( vars.ind = 0; vars.ind < vars.proofs_num; ){
-            (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser.parse_be(blob, vars.proof_offset);
-            require(vars.proof_size <= blob.length, "Proof length was detected incorrectly!");
-            init_vars(vars, init_params[vars.ind + 1], columns_rotations[vars.ind]);
-            transcript.init_transcript(vars.tr_state, hex"");
-            if( init_params[0][vars.ind] ==  UNIFIED_ADDITION_COMPONENT_ID ){
-                //require(false, "Call unified addition");
-                /*require(
-                    placeholder_verifier_unified_addition_component.verify_proof_be(
-                        blob,
-                        vars.tr_state,
-                        vars.proof_map,
-                        vars.fri_params,
-                        vars.common_data
-                    ),
-                    "Proof is not correct!"
-                );*/
-            } else if( init_params[0][vars.ind] ==  MINA_COMPONENT_ID ){
-                require(
-                    placeholder_verifier_mina_component.verify_proof_be(
-                        blob,
-                        vars.tr_state,
-                        vars.proof_map,
-                        vars.fri_params,
-                        vars.common_data
-                    ),
-                    "Proof is not correct!"
-                );
-            } else if(  init_params[0][vars.ind] ==  MINA_BASE_COMPONENT_ID ){
-                /*require(
-                    placeholder_verifier_mina_base_component.verify_proof_be(
-                        blob,
-                        vars.tr_state,
-                        vars.proof_map,
-                        vars.fri_params,
-                        vars.common_data
-                    ),
-                    "Proof is not correct!"
-                );*/
-            } else{
-                require(false, "Unknown component");
-            }
-            unchecked{
-                vars.ind++;
-                vars.proof_offset += vars.proof_size;
-            }
-        }
+        (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser.parse_be(blob, vars.proof_offset);
+        require(vars.proof_size <= blob.length, "Base proof length was detected incorrectly!");
+        require(vars.proof_size == init_params[0][0], "Invalid first proof length");
+        init_vars(vars, init_params[1], columns_rotations[0]);
+        transcript.init_transcript(vars.tr_state, hex"");
+        /*require(
+            placeholder_verifier_mina_base_component.verify_proof_be(
+                blob,
+                vars.tr_state,
+                vars.proof_map,
+                vars.fri_params,
+                vars.common_data
+            ),
+            "Base proof is not correct!"
+        );*/
+        
+        vars.proof_offset += vars.proof_size;
+
+        (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser.parse_be(blob, vars.proof_offset);
+        require(vars.proof_size <= blob.length, "Scalar proof length was detected incorrectly!");
+        init_vars(vars, init_params[2], columns_rotations[1]);
+        transcript.init_transcript(vars.tr_state, hex"");
+        require(
+            placeholder_verifier_mina_component.verify_proof_be(
+                blob,
+                vars.tr_state,
+                vars.proof_map,
+                vars.fri_params,
+                vars.common_data
+            ),
+            "Scalar proof is not correct!"
+        );
     }
 }
