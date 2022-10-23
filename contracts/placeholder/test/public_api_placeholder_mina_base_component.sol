@@ -107,6 +107,8 @@ contract TestPlaceholderVerifierMina {
             vars.fri_params.ys[2][i] = new uint256[2][](max_coset);
         }
 
+        vars.fri_params.b = new bytes(0x40 * vars.fri_params.max_batch * max_coset);
+
         require(
             placeholder_verifier_mina_component.verify_proof_be(
                 blob,
