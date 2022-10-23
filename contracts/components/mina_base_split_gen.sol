@@ -21,36 +21,34 @@ import "../types.sol";
 import "../basic_marshalling.sol";
 import "../commitments/lpc_verifier.sol";
 import "../commitments/batched_lpc_verifier.sol";
-import "./mina_base/mina_gate0.sol";
-import "./mina_base/mina_gate1.sol";
-import "./mina_base/mina_gate2.sol";
-import "./mina_base/mina_gate3.sol";
-import "./mina_base/mina_gate4.sol";
-import "./mina_base/mina_gate5.sol";
-import "./mina_base/mina_gate6.sol";
-import "./mina_base/mina_gate7.sol";
-import "./mina_base/mina_gate8.sol";
-import "./mina_base/mina_gate9.sol";
-import "./mina_base/mina_gate10.sol";
-import "./mina_base/mina_gate11.sol";
-import "./mina_base/mina_gate12.sol";
-import "./mina_base/mina_gate13.sol";
-import "./mina_base/mina_gate14.sol";
-import "./mina_base/mina_gate15.sol";
-import "./mina_base/mina_gate16.sol";
-import "./mina_base/mina_gate16_1.sol";
-import "./mina_base/mina_gate17.sol";
-import "./mina_base/mina_gate18.sol";
-import "./mina_base/mina_gate19.sol";
-import "./mina_base/mina_gate20.sol";
-import "./mina_base/mina_gate21.sol";
+import "./mina_base/mina_base_gate0.sol";
+import "./mina_base/mina_base_gate1.sol";
+import "./mina_base/mina_base_gate2.sol";
+import "./mina_base/mina_base_gate3.sol";
+import "./mina_base/mina_base_gate4.sol";
+import "./mina_base/mina_base_gate5.sol";
+import "./mina_base/mina_base_gate6.sol";
+import "./mina_base/mina_base_gate7.sol";
+import "./mina_base/mina_base_gate8.sol";
+import "./mina_base/mina_base_gate9.sol";
+import "./mina_base/mina_base_gate10.sol";
+import "./mina_base/mina_base_gate11.sol";
+import "./mina_base/mina_base_gate12.sol";
+import "./mina_base/mina_base_gate13.sol";
+import "./mina_base/mina_base_gate14.sol";
+import "./mina_base/mina_base_gate15.sol";
+import "./mina_base/mina_base_gate16.sol";
+import "./mina_base/mina_base_gate16_1.sol";
+import "./mina_base/mina_base_gate17.sol";
+import "./mina_base/mina_base_gate18.sol";
+import "./mina_base/mina_base_gate19.sol";
+import "./mina_base/mina_base_gate20.sol";
+import "./mina_base/mina_base_gate21.sol";
 
 // TODO: name component
-library mina_split_gen {
+library mina_base_split_gen {
     // TODO: specify constants
     uint256 constant WITNESSES_N = 15;
-    uint256 constant SELECTOR_N = 1;
-    uint256 constant PUBLIC_INPUT_N = 1;
     uint256 constant GATES_N = 23;
     uint256 constant CONSTANTS_N = 1;
 
@@ -59,7 +57,7 @@ library mina_split_gen {
         bytes calldata blob,
         types.gate_argument_local_vars memory gate_params,
         int256[][] memory columns_rotations
-    ) external pure returns (uint256 gates_evaluation) {
+    ) internal pure returns (uint256 gates_evaluation) {
         // TODO: check witnesses number in proof
 
         gate_params.witness_evaluations = new uint256[][](WITNESSES_N);
@@ -88,32 +86,30 @@ library mina_split_gen {
 
         gate_params.theta_acc = 1;
         gate_params.gates_evaluation = 0;
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate0.evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate1.evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate2 .evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate3.evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate4.evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate5.evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate6.evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate7.evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate8.evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate9.evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate10.evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate11.evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate12.evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate13.evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate14.evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate15.evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gate_eval, gate_params.theta_acc) = mina_gate16.evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate16_1.evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate17.evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate18.evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate19.evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate20.evaluate_gate_be(gate_params, columns_rotations);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_gate21.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate0.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate1.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate2 .evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate3.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate4.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate5.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate6.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate7.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate8.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate9.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate10.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate11.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate12.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate13.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate14.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate15.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gate_eval, gate_params.theta_acc) = mina_base_gate16.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate16_1.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate17.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate18.evaluate_gate_be(gate_params, columns_rotations);
+//        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate19.evaluate_gate_be(gate_params, columns_rotations);
+//        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate20.evaluate_gate_be(gate_params, columns_rotations);
+//        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate21.evaluate_gate_be(gate_params, columns_rotations);
 
         gates_evaluation = gate_params.gates_evaluation;
-
-//        require(false, logging.uint2decstr(gate_params.gates_evaluation));
     }
 }

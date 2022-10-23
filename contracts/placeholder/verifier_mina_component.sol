@@ -69,7 +69,7 @@ library placeholder_verifier_mina_component {
         types.placeholder_proof_map memory proof_map,
         types.fri_params_type memory fri_params,
         types.placeholder_common_data memory common_data
-    ) internal view returns (bool result) {
+    ) external view returns (bool result) {
 
         types.placeholder_local_variables memory local_vars;
         // 3. append witness commitments to transcript

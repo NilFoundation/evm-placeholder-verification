@@ -2,7 +2,7 @@ from web3_test import do_placeholder_verification_test_via_transact, base_path
 
 test_contract_name = 'TestPlaceholderVerifierMina'
 test_contract_path = 'placeholder/test/public_api_placeholder_mina_component.sol'
-linked_gates_entry_lib_name = 'mina_split_gen'
+linked_gates_entry_lib_name = 'placeholder_verifier_mina_component' # 'mina_split_gen'
 linked_libs_names = [
     "mina_gate0",
     "mina_gate1",
@@ -76,7 +76,6 @@ def init_test1():
     params['init_params'].append(len(step_list))
     params['init_params'].extend(step_list)  # step_list
 
-    params['init_params'].append(30)  # max_batch
     return params
 
 

@@ -27,7 +27,7 @@ import "../basic_marshalling.sol";
 import "../algebra/field.sol";
 import "../logging.sol";
 
-library placeholder_verifier_mina_component {
+library placeholder_verifier_mina_base_component {
     uint256 constant f_parts = 9;
 
     uint256 constant OMEGA_OFFSET = 0x20;
@@ -56,11 +56,6 @@ library placeholder_verifier_mina_component {
     uint256 constant S_ID_I_OFFSET = 0x2a0;
     uint256 constant S_SIGMA_I_OFFSET = 0x2c0;
     uint256 constant WITNESS_EVALUATION_POINTS_OFFSET = 0x2e0;
-    uint256 constant TMP1_OFFSET = 0x300;
-    uint256 constant TMP2_OFFSET = 0x320;
-    uint256 constant TMP3_OFFSET = 0x340;
-    uint256 constant IDX1_OFFSET = 0x360;
-    uint256 constant IDX2_OFFSET = 0x380;
     uint256 constant STATUS_OFFSET = 0x3a0;
 
     function verify_proof_be(
@@ -69,7 +64,7 @@ library placeholder_verifier_mina_component {
         types.placeholder_proof_map memory proof_map,
         types.fri_params_type memory fri_params,
         types.placeholder_common_data memory common_data
-    ) internal view returns (bool result) {
+    ) external view returns (bool result) {
 
         types.placeholder_local_variables memory local_vars;
         // 3. append witness commitments to transcript
@@ -95,7 +90,7 @@ library placeholder_verifier_mina_component {
         gate_params.eval_proof_selector_offset = proof_map.eval_proof_selector_offset;
         gate_params.eval_proof_constant_offset = proof_map.eval_proof_constant_offset;
 
-        local_vars.gate_argument = mina_split_gen.evaluate_gates_be(blob, gate_params, common_data.columns_rotations);
+        local_vars.gate_argument = mina_base_split_gen.evaluate_gates_be(blob, gate_params, common_data.columns_rotations);
 
         // 8. alphas computations
         local_vars.alphas = new uint256[](f_parts);
