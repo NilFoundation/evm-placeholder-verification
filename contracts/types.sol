@@ -142,7 +142,7 @@ library types {
 
     struct fri_params_type {
         //0x00
-        uint256 modulus;    // It's extremely important this is the first field!!!
+        uint256 modulus;
         //0x20
         uint256 r;
         //0x40

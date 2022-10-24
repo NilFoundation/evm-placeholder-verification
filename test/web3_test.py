@@ -4,7 +4,7 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 import os
 
-base_path = os.path.abspath(os.getcwd())
+base_path = os.path.abspath(os.getcwd()) + '/../'
 contracts_dir = base_path + '/contracts'
 
 
@@ -60,8 +60,7 @@ def deploy_link_libs(w3, compiled, test_contract_bytecode, linked_libs_names):
     return linked_bytecode
 
 
-def do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_lib_name,
-                                                  linked_gates_libs_names, init_test_params_func):
+def do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test_params_func):
     w3 = init_connection()
     solcx.install_solc('0.8.17')
     print(f'{contracts_dir}/{test_contract_path}')
@@ -72,27 +71,14 @@ def do_placeholder_verification_test_via_transact(test_contract_name, test_contr
         solc_version="0.8.17",
         optimize=True,
         optimize_runs=200)
-
-    compiled_gates_entry_lib_id, compiled_gates_entry_lib_interface = find_compiled_contract(
-        compiled, linked_gates_entry_lib_name)
-    gates_entry_lib_bytecode = compiled_gates_entry_lib_interface['bin']
-    gates_entry_lib_abi = compiled_gates_entry_lib_interface['abi']
-    gates_entry_lib_bytecode = deploy_link_libs(w3, compiled, gates_entry_lib_bytecode, linked_gates_libs_names)
-
-    gates_entry_contract_lib = w3.eth.contract(
-        abi=gates_entry_lib_abi, bytecode=gates_entry_lib_bytecode)
-    deploy_gates_entry_lib_tx_hash = gates_entry_contract_lib.constructor().transact()
-    deploy_gates_entry_lib_tx_receipt = w3.eth.wait_for_transaction_receipt(deploy_gates_entry_lib_tx_hash)
-
+    print(contracts_dir, test_contract_path)
+    print(contracts_dir)
+    exit(1)
     compiled_test_contract_id, compiled_test_contract_interface = find_compiled_contract(
         compiled, test_contract_name)
     bytecode = compiled_test_contract_interface['bin']
     abi = compiled_test_contract_interface['abi']
-
-    bytecode = solcx.link_code(
-        bytecode,
-        {compiled_gates_entry_lib_id: deploy_gates_entry_lib_tx_receipt.contractAddress},
-        solc_version="0.8.17")
+    bytecode = deploy_link_libs(w3, compiled, bytecode, linked_libs_names)
 
     test_contract = w3.eth.contract(abi=abi, bytecode=bytecode)
     deploy_tx_hash = test_contract.constructor().transact()
@@ -107,8 +93,14 @@ def do_placeholder_verification_test_via_transact(test_contract_name, test_contr
     run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
     print_tx_info(w3, run_tx_receipt, params['_test_name'])
 
-def do_placeholder_mix_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_libs_names,
-                                                  linked_gates_libs_names, init_test_params_func):
+
+def do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path,
+                                                      linked_gates_entry_libs_names,
+                                                      linked_gates_libs_names, init_test_params_func):
+    """
+    linked_gates_entry_libs_names - first external lib level
+    linked_gates_libs_names - second external lib level (external for 1st level)
+    """
     w3 = init_connection()
     solcx.install_solc('0.8.17')
     print(f'{contracts_dir}/{test_contract_path}')
@@ -121,6 +113,7 @@ def do_placeholder_mix_verification_test_via_transact(test_contract_name, test_c
         optimize_runs=200)
 
     linked_contracts = dict()
+
     for linked_gates_entry_lib_name in linked_gates_entry_libs_names:
         compiled_gates_entry_lib_id, compiled_gates_entry_lib_interface = find_compiled_contract(
             compiled, linked_gates_entry_lib_name)
@@ -128,8 +121,7 @@ def do_placeholder_mix_verification_test_via_transact(test_contract_name, test_c
         gates_entry_lib_abi = compiled_gates_entry_lib_interface['abi']
         gates_entry_lib_bytecode = deploy_link_libs(w3, compiled, gates_entry_lib_bytecode, linked_gates_libs_names)
 
-        gates_entry_contract_lib = w3.eth.contract(
-            abi=gates_entry_lib_abi, bytecode=gates_entry_lib_bytecode)
+        gates_entry_contract_lib = w3.eth.contract(abi=gates_entry_lib_abi, bytecode=gates_entry_lib_bytecode)
         deploy_gates_entry_lib_tx_hash = gates_entry_contract_lib.constructor().transact()
         deploy_gates_entry_lib_tx_receipt = w3.eth.wait_for_transaction_receipt(deploy_gates_entry_lib_tx_hash)
 
@@ -139,21 +131,18 @@ def do_placeholder_mix_verification_test_via_transact(test_contract_name, test_c
 
     bytecode = compiled_test_contract_interface['bin']
     abi = compiled_test_contract_interface['abi']
-    
-    bytecode = solcx.link_code(
-        bytecode,
-        linked_contracts,
-        solc_version="0.8.17")
+
+    bytecode = solcx.link_code(bytecode, linked_contracts, solc_version="0.8.17")
 
     test_contract = w3.eth.contract(abi=abi, bytecode=bytecode)
     deploy_tx_hash = test_contract.constructor().transact()
     deploy_tx_receipt = w3.eth.wait_for_transaction_receipt(deploy_tx_hash)
     print("Deployment:", deploy_tx_receipt.gasUsed)
-
-    test_contract_inst = w3.eth.contract(
-        address=deploy_tx_receipt.contractAddress, abi=abi)
+    print("contractAddress:", deploy_tx_receipt.contractAddress)
+    print("abi:", abi)
+    # test_contract_inst = w3.eth.contract(address=deploy_tx_receipt.contractAddress, abi=abi)
+    test_contract_inst = w3.eth.contract(address=deploy_tx_receipt.contractAddress, abi=abi)
     params = init_test_params_func()
-    run_tx_hash = test_contract_inst.functions.verify(
-        params['proof'], params['init_params'], params['columns_rotations']).transact()
+    run_tx_hash = test_contract_inst.functions.verify(params['proof'], params['init_params'], params['columns_rotations']).transact()
     run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
     print_tx_info(w3, run_tx_receipt, params['_test_name'])

@@ -1,9 +1,9 @@
-from web3_test import do_placeholder_verification_test_via_transact, base_path
+from web3_test import do_placeholder_verification_test_via_transact, base_path, do_placeholder_verification_test_via_transact_simple
 
 test_contract_name = 'TestPlaceholderVerifierUnifiedAddition'
 test_contract_path = 'placeholder/test/public_api_placeholder_unified_addition_component.sol'
-linked_gates_entry_lib_name = "unified_addition_component_gen"
-linked_libs_names = []
+# linked_gates_entry_lib_name = "unified_addition_component_gen"
+linked_libs_names = ["unified_addition_component_gen", "placeholder_verifier"]
 
 
 def init_test1():
@@ -88,5 +88,7 @@ def init_test2():
 
 
 if __name__ == '__main__':
-    do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_lib_name, linked_libs_names, init_test1)
+    do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test1)
+    do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test2)
+    # do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_lib_name, linked_libs_names, init_test1)
     # do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_lib_name, linked_libs_names, init_test2)

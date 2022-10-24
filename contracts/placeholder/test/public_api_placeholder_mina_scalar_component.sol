@@ -21,29 +21,30 @@ pragma solidity >=0.8.4;
 import "../../types.sol";
 import "../../cryptography/transcript.sol";
 import "../proof_map_parser.sol";
+import "../../components/mina_scalar_split_gen.sol";
 import "../placeholder_verifier.sol";
 import "../../logging.sol";
-import "../../components/unified_addition_gen.sol";
 import "../init_vars.sol";
 
-contract TestPlaceholderVerifierUnifiedAddition {
+contract TestPlaceholderVerifierMinaScalar {
+
     function verify(
         bytes calldata blob,
-    // 0) modulus
-    // 1) r
-    // 2) max_degree
-    // 3) lambda = 1
-    // 4) rows_amount
-    // 5) omega
-    // 6) max_leaf_size
-    // 7) D_omegas_size
-    //  [..., D_omegas_i, ...]
-    // 8 + D_omegas_size) q_size
-    //  [..., q_i, ...]
+        // 0) modulus
+        // 1) r
+        // 2) max_degree
+        // 3) lambda = 1
+        // 4) rows_amount
+        // 5) omega
+        // 6) max_leaf_size
+        // 7) D_omegas_size
+        //  [..., D_omegas_i, ...]
+        // 8 + D_omegas_size) q_size
+        //  [..., q_i, ...]
         uint256[] calldata init_params,
         int256[][] calldata columns_rotations
     ) public {
-        types.init_vars memory vars;
+        init_vars.vars_t memory vars;
         init_vars.init(blob, init_params, columns_rotations, vars);
 
         types.placeholder_local_variables memory local_vars;
@@ -53,8 +54,8 @@ contract TestPlaceholderVerifierUnifiedAddition {
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
         // 5. permutation argument
         local_vars.permutation_argument = permutation_argument.verify_eval_be(blob, vars.tr_state,
-            vars.proof_map, vars.fri_params,
-            vars.common_data, local_vars);
+                                                                              vars.proof_map, vars.fri_params,
+                                                                              vars.common_data, local_vars);
         // 7. gate argument specific for circuit
         types.gate_argument_local_vars memory gate_params;
         gate_params.modulus = vars.fri_params.modulus;
@@ -63,7 +64,7 @@ contract TestPlaceholderVerifierUnifiedAddition {
         gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_selector_offset;
         gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_constant_offset;
 
-        local_vars.gate_argument = unified_addition_component_gen.evaluate_gates_be(blob, gate_params, vars.common_data.columns_rotations);
+        local_vars.gate_argument = mina_split_gen.evaluate_gates_be(blob, gate_params, vars.common_data.columns_rotations);
 
         require(
             placeholder_verifier.verify_proof_be(

@@ -309,22 +309,23 @@ library polynomial {
             return interpolate_by_2_points(blob, x, fx_offset, modulus);
         } else if (x.length == 3) {
             uint256[] memory y_div = new uint256[](3);
-            y_div[0] = field.fdiv(basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 0), field.fmul(field.fsub(x[0], x[1],modulus), field.fsub(x[0], x[2],modulus), modulus), modulus);
-            y_div[1] = field.fdiv(basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 1), field.fmul(field.fsub(x[1], x[0],modulus), field.fsub(x[1], x[2],modulus), modulus), modulus);
-            y_div[2] = field.fdiv(basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 2), field.fmul(field.fsub(x[2], x[0],modulus), field.fsub(x[2], x[1],modulus), modulus), modulus);
+
+            uint256 y0 = field.fdiv(basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 0), field.fmul(field.fsub(x[0], x[1],modulus), field.fsub(x[0], x[2],modulus), modulus), modulus);
+            uint256 y1 = field.fdiv(basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 1), field.fmul(field.fsub(x[1], x[0],modulus), field.fsub(x[1], x[2],modulus), modulus), modulus);
+            uint256 y2 = field.fdiv(basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 2), field.fmul(field.fsub(x[2], x[0],modulus), field.fsub(x[2], x[1],modulus), modulus), modulus);
 
             uint256[] memory result = new uint256[](3);
             assembly {
-                let x1 := mulmod(mload(add(y_div, 0x20)), mulmod(mload(add(x, 0x40)), mload(add(x, 0x60)), modulus), modulus)
-                let x2 := mulmod(mload(add(y_div, 0x40)), mulmod(mload(add(x, 0x20)), mload(add(x, 0x60)), modulus), modulus)
-                let x3 := mulmod(mload(add(y_div, 0x60)), mulmod(mload(add(x, 0x20)), mload(add(x, 0x40)), modulus), modulus)
+                let x1 := mulmod(y0, mulmod(mload(add(x, 0x40)), mload(add(x, 0x60)), modulus), modulus)
+                let x2 := mulmod(y1, mulmod(mload(add(x, 0x20)), mload(add(x, 0x60)), modulus), modulus)
+                let x3 := mulmod(y2, mulmod(mload(add(x, 0x20)), mload(add(x, 0x40)), modulus), modulus)
                 mstore(add(result, 0x20), addmod(addmod(x1, x2, modulus), x3, modulus))
 
-                x1 := mulmod(mload(add(y_div, 0x20)), sub(modulus, addmod(mload(add(x, 0x40)), mload(add(x, 0x60)), modulus)), modulus)
-                x2 := mulmod(mload(add(y_div, 0x40)), sub(modulus, addmod(mload(add(x, 0x20)), mload(add(x, 0x60)), modulus)), modulus)
-                x3 := mulmod(mload(add(y_div, 0x60)), sub(modulus, addmod(mload(add(x, 0x20)), mload(add(x, 0x40)), modulus)), modulus)
+                x1 := mulmod(y0, sub(modulus, addmod(mload(add(x, 0x40)), mload(add(x, 0x60)), modulus)), modulus)
+                x2 := mulmod(y1, sub(modulus, addmod(mload(add(x, 0x20)), mload(add(x, 0x60)), modulus)), modulus)
+                x3 := mulmod(y2, sub(modulus, addmod(mload(add(x, 0x20)), mload(add(x, 0x40)), modulus)), modulus)
                 mstore(add(result, 0x40), addmod(addmod(x1, x2, modulus), x3, modulus))
-                mstore(add(result, 0x60), addmod(addmod(mload(add(y_div, 0x20)), mload(add(y_div, 0x40)), modulus), mload(add(y_div, 0x60)), modulus))
+                mstore(add(result, 0x60), addmod(addmod(y0, y1, modulus), y2, modulus))
             }
             return result;
         }
