@@ -21,17 +21,12 @@ pragma solidity >=0.8.4;
 import "../../types.sol";
 import "../../cryptography/transcript.sol";
 import "../proof_map_parser.sol";
-import "../verifier_mina_base_component.sol";
+import "../../components/mina_base_split_gen.sol";
+import "../placeholder_verifier.sol";
 import "../../logging.sol";
+import "../init_vars.sol";
 
 contract TestPlaceholderVerifierMinaBase {
-    struct test_local_vars {
-        types.placeholder_proof_map proof_map;
-        uint256 proof_size;
-        types.transcript_data tr_state;
-        types.fri_params_type fri_params;
-        types.placeholder_common_data common_data;
-    }
 
     function verify(
         bytes calldata blob,
@@ -49,73 +44,36 @@ contract TestPlaceholderVerifierMinaBase {
         uint256[] calldata init_params,
         int256[][] calldata columns_rotations
     ) public {
+        init_vars.vars_t memory vars;
+        init_vars.init(blob, init_params, columns_rotations, vars);
 
-        test_local_vars memory vars;
-        (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser.parse_be(blob, 0);
-        require(vars.proof_size == blob.length, "Proof length was detected incorrectly!");
-        transcript.init_transcript(vars.tr_state, hex"");
+        types.placeholder_local_variables memory local_vars;
+        // 3. append witness commitments to transcript
+        transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.witness_commitment_offset));
 
-        uint256 idx = 0;
-        uint256 max_coset = 8;
+        // 4. prepare evaluaitons of the polynomials that are copy-constrained
+        // 5. permutation argument
+        local_vars.permutation_argument = permutation_argument.verify_eval_be(blob, vars.tr_state,
+            vars.proof_map, vars.fri_params,
+            vars.common_data, local_vars);
+        // 7. gate argument specific for circuit
+        types.gate_argument_local_vars memory gate_params;
+        gate_params.modulus = vars.fri_params.modulus;
+        gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
+        gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_witness_offset;
+        gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_selector_offset;
+        gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_constant_offset;
 
-        vars.fri_params.modulus = init_params[idx++];
-        vars.fri_params.r = init_params[idx++];
-        vars.fri_params.max_degree = init_params[idx++];
-        vars.fri_params.lambda = init_params[idx++];
-        vars.fri_params.const1_2 = field.inverse_static(2, vars.fri_params.modulus);
-
-        vars.common_data.rows_amount = init_params[idx++];
-        vars.common_data.omega = init_params[idx++];
-        vars.fri_params.max_batch = init_params[idx++];
-        placeholder_proof_map_parser.init(vars.fri_params, vars.fri_params.max_batch);
-
-        vars.common_data.columns_rotations = columns_rotations;
-
-        vars.fri_params.D_omegas = new uint256[](init_params[idx++]);
-        for (uint256 i = 0; i < vars.fri_params.D_omegas.length;) {
-            vars.fri_params.D_omegas[i] = init_params[idx];
-        unchecked{ i++; idx++;}
-        }
-        vars.fri_params.q = new uint256[](init_params[idx++]);
-        for (uint256 i = 0; i < vars.fri_params.q.length;) {
-            vars.fri_params.q[i] = init_params[idx];
-        unchecked{ i++; idx++;}
-        }
-
-        vars.fri_params.max_step = 0;
-        vars.fri_params.step_list = new uint256[](init_params[idx++]);
-        for (uint256 i = 0; i < vars.fri_params.step_list.length;) {
-            vars.fri_params.step_list[i] = init_params[idx];
-            if(vars.fri_params.step_list[i] > vars.fri_params.max_step)
-                vars.fri_params.max_step = vars.fri_params.step_list[i];
-        unchecked{ i++; idx++;}
-        }
-        unchecked{ max_coset = 1 << (vars.fri_params.max_step - 1);}
-
-        vars.fri_params.s_indices = new uint256[2][](max_coset);
-        vars.fri_params.s = new uint256[2][](max_coset);
-        vars.fri_params.correct_order_idx = new uint256[2][](max_coset);
-
-        vars.fri_params.ys[0] = new uint256[2][][](vars.fri_params.max_batch);
-        vars.fri_params.ys[1] = new uint256[2][][](vars.fri_params.max_batch);
-        vars.fri_params.ys[2] = new uint256[2][][](vars.fri_params.max_batch);
-
-        for(uint256 i = 0; i < vars.fri_params.max_batch;){
-            vars.fri_params.ys[0][i] = new uint256[2][](max_coset);
-            vars.fri_params.ys[1][i] = new uint256[2][](max_coset);
-            vars.fri_params.ys[2][i] = new uint256[2][](max_coset);
-            unchecked{i++;}
-        }
-
-        vars.fri_params.b = new bytes(0x40 * vars.fri_params.max_batch * max_coset);
+        local_vars.gate_argument = mina_base_split_gen.evaluate_gates_be(blob, gate_params, vars.common_data.columns_rotations);
 
         require(
-            placeholder_verifier_mina_base_component.verify_proof_be(
+            placeholder_verifier.verify_proof_be(
                 blob,
                 vars.tr_state,
                 vars.proof_map,
                 vars.fri_params,
-                vars.common_data
+                vars.common_data,
+                local_vars
             ),
             "Proof is not correct!"
         );

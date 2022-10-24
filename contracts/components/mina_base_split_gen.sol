@@ -19,7 +19,6 @@ pragma solidity >=0.8.4;
 
 import "../types.sol";
 import "../basic_marshalling.sol";
-import "../commitments/lpc_verifier.sol";
 import "../commitments/batched_lpc_verifier.sol";
 import "./mina_base/mina_base_gate0.sol";
 import "./mina_base/mina_base_gate1.sol";
@@ -41,9 +40,6 @@ import "./mina_base/mina_base_gate16.sol";
 import "./mina_base/mina_base_gate16_1.sol";
 import "./mina_base/mina_base_gate17.sol";
 import "./mina_base/mina_base_gate18.sol";
-import "./mina_base/mina_base_gate19.sol";
-import "./mina_base/mina_base_gate20.sol";
-import "./mina_base/mina_base_gate21.sol";
 
 // TODO: name component
 library mina_base_split_gen {
@@ -106,6 +102,7 @@ library mina_base_split_gen {
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate16_1.evaluate_gate_be(gate_params, columns_rotations);
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate17.evaluate_gate_be(gate_params, columns_rotations);
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate18.evaluate_gate_be(gate_params, columns_rotations);
+//      This last contain gate18
 //        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate19.evaluate_gate_be(gate_params, columns_rotations);
 //        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate20.evaluate_gate_be(gate_params, columns_rotations);
 //        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate21.evaluate_gate_be(gate_params, columns_rotations);
