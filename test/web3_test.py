@@ -71,9 +71,6 @@ def do_placeholder_verification_test_via_transact_simple(test_contract_name, tes
         solc_version="0.8.17",
         optimize=True,
         optimize_runs=200)
-    print(contracts_dir, test_contract_path)
-    print(contracts_dir)
-    exit(1)
     compiled_test_contract_id, compiled_test_contract_interface = find_compiled_contract(
         compiled, test_contract_name)
     bytecode = compiled_test_contract_interface['bin']
