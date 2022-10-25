@@ -1,15 +1,17 @@
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 import solcx
+import os
 import pathlib
 from pathlib import Path
-from web3_test_defs import contracts_dir
 from web3_test import find_compiled_contract, print_tx_info
 
 w3 = Web3(Web3.HTTPProvider('http://127.0.0.1:8545'))
 w3.middleware_onion.inject(geth_poa_middleware, layer=0)
 w3.eth.default_account = w3.eth.accounts[0]
 
+base_path = os.path.abspath(os.getcwd())
+contracts_dir = base_path + '/contracts'
 contract_name = 'TestLpcVerifier'
 
 def init_basic_test():
