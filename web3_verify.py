@@ -19,7 +19,10 @@ def init_connection():
 if __name__ == '__main__':
     w3 = init_connection()
     params = dict()
-    f = open(base_path + '/proof.data')
+    proof_path = base_path + '/proof.data'
+    if len(sys.argv) > 1:
+        proof_path = sys.argv[1]
+    f = open(proof_path)
     params["proof"] = f.read()
     f.close()
 
