@@ -3,6 +3,7 @@ import solcx
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 import os
+import sys
 
 base_path = os.path.abspath(os.getcwd())
 contracts_dir = base_path + '/contracts'
@@ -114,6 +115,9 @@ if __name__ == '__main__':
     test_contract = w3.eth.contract(abi=abi, bytecode=bytecode)
     deploy_tx_hash = test_contract.constructor().transact()
     deploy_tx_receipt = w3.eth.wait_for_transaction_receipt(deploy_tx_hash)
-    print("Deployment:", deploy_tx_receipt.gasUsed)
+    print("Deployment cost:", deploy_tx_receipt.gasUsed)
     print("contractAddress:", deploy_tx_receipt.contractAddress)
     print("abi:", abi)
+    if (len(sys.argv) > 1):
+        with open(sys.argv[1], 'w') as f:
+            f.write(deploy_tx_receipt.contractAddress)
