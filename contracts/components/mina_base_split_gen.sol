@@ -45,8 +45,21 @@ import "./mina_base/mina_base_gate18.sol";
 library mina_base_split_gen {
     // TODO: specify constants
     uint256 constant WITNESSES_N = 15;
+    uint256 constant SELECTOR_N = 1;
+    uint256 constant PUBLIC_INPUT_N = 1;
     uint256 constant GATES_N = 23;
     uint256 constant CONSTANTS_N = 1;
+
+
+    uint256 constant PERMUTATION_COLUMNS = 7;
+    uint256 constant WITNESS_COLUMNS = 15;
+    uint256 constant PUBLIC_INPUT_COLUMNS = 1;
+    uint256 constant CONSTANT_COLUMNS = 1;
+    uint256 constant SELECTOR_COLUMNS = 30;
+    uint256 constant LOOKUP_TABLE_SIZE = 0;
+
+    uint256 constant ID_PERMUTATION_COLUMNS = 17; // WITNESS_COLUMNS +  PUBLIC_INPUT_COLUMNS + CONSTANT_COLUMNTS
+    uint256 constant PERMUTATION_PERMUTATION_COLUMNS = 17; // WITNESS_COLUMNS +  PUBLIC_INPUT_COLUMNS + CONSTANT_COLUMNS
 
     // TODO: columns_rotations could be hard-coded
     function evaluate_gates_be(
@@ -68,7 +81,12 @@ library mina_base_split_gen {
         gate_params.selector_evaluations = new uint256[](GATES_N);
         gate_params.offset = batched_lpc_verifier.skip_to_z(blob,  gate_params.eval_proof_selector_offset);
         for (uint256 i = 0; i < GATES_N; i++) {
-            gate_params.selector_evaluations[i] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(blob, gate_params.offset, i, 0);
+            gate_params.selector_evaluations[i] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(
+                blob, 
+                gate_params.offset, 
+                i + ID_PERMUTATION_COLUMNS + PERMUTATION_PERMUTATION_COLUMNS + CONSTANT_COLUMNS, 
+                0
+            );
         }
 
         gate_params.constant_evaluations = new uint256[][](CONSTANTS_N);
@@ -76,7 +94,12 @@ library mina_base_split_gen {
         for (uint256 i = 0; i < CONSTANTS_N; i++) {
             gate_params.constant_evaluations[i] = new uint256[](columns_rotations[i].length);
             for (uint256 j = 0; j < columns_rotations[i].length; j++) {
-                gate_params.constant_evaluations[i][j] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(blob, gate_params.offset, i, j);
+                gate_params.constant_evaluations[i][j] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(
+                    blob, 
+                    gate_params.offset, 
+                    i + ID_PERMUTATION_COLUMNS + PERMUTATION_PERMUTATION_COLUMNS, 
+                    j
+                );
             }
         }
 

@@ -58,6 +58,16 @@ library placeholder_verifier {
     uint256 constant WITNESS_EVALUATION_POINTS_OFFSET = 0x2e0;
     uint256 constant STATUS_OFFSET = 0x3a0;
 
+    uint256 constant PERMUTATION_COLUMNS = 7;
+    uint256 constant WITNESS_COLUMNS = 15;
+    uint256 constant PUBLIC_INPUT_COLUMNS = 1;
+    uint256 constant CONSTANT_COLUMNS = 1;
+    uint256 constant SELECTOR_COLUMNS = 30;
+    uint256 constant LOOKUP_TABLE_SIZE = 0;
+
+    uint256 constant ID_PERMUTATION_COLUMNS = 17; // WITNESS_COLUMNS +  PUBLIC_INPUT_COLUMNS + CONSTANT_COLUMNTS
+    uint256 constant PERMUTATION_PERMUTATION_COLUMNS = 17; // WITNESS_COLUMNS +  PUBLIC_INPUT_COLUMNS + CONSTANT_COLUMNS
+
     function verify_proof_be(
         bytes calldata blob,
         types.transcript_data memory tr_state,
@@ -77,12 +87,13 @@ library placeholder_verifier {
         if (local_vars.challenge != basic_marshalling.get_uint256_be(blob, proof_map.eval_proof_offset)) {
             return false;
         }
-
-        // witnesses
-        fri_params.leaf_size = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_witness_offset);
-        local_vars.witness_evaluation_points = new uint256[][](fri_params.leaf_size);
-        for (uint256 i = 0; i < fri_params.leaf_size;) {
-            local_vars.witness_evaluation_points[i] = new uint256[](common_data.columns_rotations[i].length);
+        
+        // variable values
+        fri_params.leaf_size = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_variable_values_offset);
+        require( fri_params.leaf_size == WITNESS_COLUMNS + PUBLIC_INPUT_COLUMNS, "Something wrong with the size");
+        local_vars.variable_values_evaluation_points = new uint256[][](fri_params.leaf_size);
+        for (uint256 i = 0; i < WITNESS_COLUMNS;) {
+            local_vars.variable_values_evaluation_points[i] = new uint256[](common_data.columns_rotations[i].length);
             for (uint256 j = 0; j < common_data.columns_rotations[i].length;) {
                 local_vars.e = uint256(common_data.columns_rotations[i][j]);
                 if (common_data.columns_rotations[i][j] < 0) {
@@ -111,13 +122,20 @@ library placeholder_verifier {
                 //                        )
                 //                    )
                 //                }
-                local_vars.witness_evaluation_points[i][j] = local_vars.e;
+                local_vars.variable_values_evaluation_points[i][j] = local_vars.e;
             unchecked{j++;}
             }
         unchecked{i++;}
         }
-        if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_witness_offset,
-            local_vars.witness_evaluation_points, tr_state, fri_params)) {
+        for (uint256 i = WITNESS_COLUMNS; i < WITNESS_COLUMNS + PUBLIC_INPUT_COLUMNS;) {
+            local_vars.variable_values_evaluation_points[i] = new uint256[](1);
+            local_vars.variable_values_evaluation_points[i][0] = local_vars.challenge;
+            unchecked{i++;}
+        }
+
+        if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_variable_values_offset,
+            local_vars.variable_values_evaluation_points, tr_state, fri_params)) {
+            require(false, "Wrong variable values LPC proof");
             return false;
         }
         // permutation
@@ -144,6 +162,7 @@ library placeholder_verifier {
 
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_permutation_offset,
             local_vars.evaluation_points, tr_state, fri_params)) {
+            require(false, "Wrong permutation LPC proof");
             return false;
         }
 
@@ -153,42 +172,13 @@ library placeholder_verifier {
         local_vars.evaluation_points[0][0] = local_vars.challenge;
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_quotient_offset,
             local_vars.evaluation_points, tr_state, fri_params)) {
+            require(false, "Wrong quotient LPC proof");
             return false;
         }
 
-        // id
-        if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_id_permutation_offset,
+        if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_fixed_values_offset,
             local_vars.evaluation_points, tr_state, fri_params)) {
-            return false;
-        }
-
-        // sigma
-        if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_sigma_permutation_offset,
-            local_vars.evaluation_points, tr_state, fri_params)) {
-            return false;
-        }
-
-        // public_input
-        if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_public_input_offset,
-            local_vars.evaluation_points, tr_state, fri_params)) {
-            return false;
-        }
-
-        // constant
-        if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_constant_offset,
-            local_vars.evaluation_points, tr_state, fri_params)) {
-            return false;
-        }
-
-        // selector
-        if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_selector_offset,
-            local_vars.evaluation_points, tr_state, fri_params)) {
-            return false;
-        }
-
-        // special_selectors
-        if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_special_selectors_offset,
-            local_vars.evaluation_points, tr_state, fri_params)) {
+            require(false, "Wrong fixed values LPC proof");
             return false;
         }
 
@@ -221,7 +211,6 @@ library placeholder_verifier {
             }
             unchecked{ i++; }
         }
-        uint256[] memory z = new uint256[](12);
         local_vars.T_consolidated = 0;
         local_vars.len = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_quotient_offset);
 
@@ -257,9 +246,9 @@ library placeholder_verifier {
                         mload(fri_params)
                     )
                 )
-            }*/
+            }
+            */
         }
-
         local_vars.Z_at_challenge = field.expmod_static(local_vars.challenge, common_data.rows_amount, fri_params.modulus);
         local_vars.Z_at_challenge = field.fsub(local_vars.Z_at_challenge, 1, fri_params.modulus);
         local_vars.Z_at_challenge = field.fmul(local_vars.Z_at_challenge, local_vars.T_consolidated, fri_params.modulus);
@@ -294,7 +283,7 @@ library placeholder_verifier {
         if (local_vars.F_consolidated != local_vars.Z_at_challenge) {
             return false;
         }
-
+ 
         return true;
     }
 }
