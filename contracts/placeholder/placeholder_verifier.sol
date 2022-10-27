@@ -211,7 +211,6 @@ library placeholder_verifier {
             }
             unchecked{ i++; }
         }
-        uint256[] memory z = new uint256[](12);
         local_vars.T_consolidated = 0;
         local_vars.len = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_quotient_offset);
 
