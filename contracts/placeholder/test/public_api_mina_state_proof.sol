@@ -131,13 +131,14 @@ contract TestMinaStateProof {
         (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser.parse_be(blob, vars.proof_offset);
 
         require(vars.proof_size <= blob.length, "Base proof length was detected incorrectly!");
+        require(vars.proof_size == init_params[0][0], logging.uint2decstr(vars.proof_size));
         require(vars.proof_size == init_params[0][0], "Invalid first proof length");
         init_vars(vars, init_params[1], columns_rotations[0]);
         transcript.init_transcript(vars.tr_state, hex"");
 
         types.placeholder_local_variables memory local_vars;
-        // 3. append witness commitments to transcript
-        transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.witness_commitment_offset));
+        // 3. append variable commitments to transcript
+        transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
 
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
         // 5. permutation argument
@@ -148,9 +149,9 @@ contract TestMinaStateProof {
         types.gate_argument_local_vars memory gate_params;
         gate_params.modulus = vars.fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
-        gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_witness_offset;
-        gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_selector_offset;
-        gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_constant_offset;
+        gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_variable_values_offset;
+        gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
+        gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
         local_vars.gate_argument = mina_base_split_gen.evaluate_gates_be(blob, gate_params, vars.common_data.columns_rotations);
 
@@ -163,13 +164,13 @@ contract TestMinaStateProof {
         vars.proof_offset += vars.proof_size;
 
         (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser.parse_be(blob, vars.proof_offset);
-        require(vars.proof_size <= blob.length, "Scalar proof length was detected incorrectly!");
+        require(vars.proof_size <= blob.length, "Scalar proof length is incorrect!");
         init_vars(vars, init_params[2], columns_rotations[1]);
         transcript.init_transcript(vars.tr_state, hex"");
 
         types.placeholder_local_variables memory local_vars_scalar;
-        // 3. append witness commitments to transcript
-        transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.witness_commitment_offset));
+        // 3. append variable_values commitments to transcript
+        transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
 
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
         // 5. permutation argument
@@ -179,9 +180,9 @@ contract TestMinaStateProof {
         // 7. gate argument specific for circuit
         gate_params.modulus = vars.fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
-        gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_witness_offset;
-        gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_selector_offset;
-        gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_constant_offset;
+        gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_variable_values_offset;
+        gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
+        gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
         local_vars_scalar.gate_argument = mina_split_gen.evaluate_gates_be(blob, gate_params, vars.common_data.columns_rotations);
 

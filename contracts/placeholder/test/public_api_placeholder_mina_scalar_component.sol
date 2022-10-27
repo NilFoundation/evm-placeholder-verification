@@ -27,7 +27,6 @@ import "../../logging.sol";
 import "../init_vars.sol";
 
 contract TestPlaceholderVerifierMinaScalar {
-
     function verify(
         bytes calldata blob,
         // 0) modulus
@@ -43,13 +42,13 @@ contract TestPlaceholderVerifierMinaScalar {
         //  [..., q_i, ...]
         uint256[] calldata init_params,
         int256[][] calldata columns_rotations
-    ) public {
+    ) public view{
         init_vars.vars_t memory vars;
         init_vars.init(blob, init_params, columns_rotations, vars);
 
         types.placeholder_local_variables memory local_vars;
-        // 3. append witness commitments to transcript
-        transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.witness_commitment_offset));
+        // 3. append variable values commitments to transcript
+        transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
 
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
         // 5. permutation argument
@@ -60,9 +59,9 @@ contract TestPlaceholderVerifierMinaScalar {
         types.gate_argument_local_vars memory gate_params;
         gate_params.modulus = vars.fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
-        gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_witness_offset;
-        gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_selector_offset;
-        gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_constant_offset;
+        gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_variable_values_offset;
+        gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
+        gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
         local_vars.gate_argument = mina_split_gen.evaluate_gates_be(blob, gate_params, vars.common_data.columns_rotations);
 
