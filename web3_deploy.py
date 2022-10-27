@@ -5,7 +5,7 @@ from web3.middleware import geth_poa_middleware
 import os
 import sys
 
-base_path = os.path.abspath(os.getcwd())
+base_path = os.path.dirname(os.path.realpath(__file__))
 contracts_dir = base_path + '/contracts'
 
 

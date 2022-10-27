@@ -6,7 +6,7 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 import os
 
-base_path = os.path.abspath(os.getcwd())
+base_path = os.path.dirname(os.path.realpath(__file__))
 
 
 def init_connection():
