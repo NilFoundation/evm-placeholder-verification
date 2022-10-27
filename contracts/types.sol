@@ -232,6 +232,35 @@ library types {
         uint256 eval_proof_special_selectors_offset;
     }
 
+    struct placeholder_updated_proof_map {
+        // 0x0
+        uint256 variable_values_commitment_offset;
+        // 0x20
+        uint256 v_perm_commitment_offset;
+        // 0x40
+        uint256 input_perm_commitment_offset;
+        // 0x60
+        uint256 value_perm_commitment_offset;
+        // 0x80
+        uint256 v_l_perm_commitment_offset;
+        // 0xa0
+        uint256 T_commitments_offset;
+        // 0xc0
+        uint256 eval_proof_offset;
+        // 0xe0
+        uint256 eval_proof_lagrange_0_offset;
+        // 0x100
+        uint256 eval_proof_fixed_values_offset;
+        // 0x120
+        uint256 eval_proof_variable_values_offset;
+        // 0x140
+        uint256 eval_proof_permutation_offset;
+        // 0x160
+        uint256 eval_proof_quotient_offset;
+        // 0x180
+        uint256 eval_proof_lookups_offset;
+    }
+
     struct placeholder_common_data {
         uint256 rows_amount;
         // 0x20
@@ -300,7 +329,103 @@ library types {
         uint256 idx2;
     }
 
+    struct placeholder_local_variables_updated{
+        // 0x0
+        uint256 len;
+        // 0x20
+        uint256 offset;
+        // 0x40
+        uint256 zero_index;
+        // 0x60
+        uint256[] permutation_argument;
+        // 0x80
+        uint256 gate_argument;
+        // 0xa0
+        uint256[] alphas;
+        // 0xc0
+        uint256 challenge;
+        // 0xe0
+        uint256 e;
+        // 0x100
+        uint256[][] evaluation_points;
+        // 0x120
+        uint256[] F;
+        // 0x140
+        uint256 F_consolidated;
+        // 0x160
+        uint256 T_consolidated;
+        // 0x180
+        uint256 Z_at_challenge;
+        // 0x1a0
+        uint256 beta;
+        // 0x1c0
+        uint256 gamma;
+        // 0x1e0
+        uint256 g;
+        // 0x200
+        uint256 h;
+        // 0x220
+        uint256 perm_polynomial_value;
+        // 0x240
+        uint256 perm_polynomial_shifted_value;
+        // 0x260
+        uint256 q_blind_eval;
+        // 0x280
+        uint256 q_last_eval;
+        // 0x2a0
+        uint256 S_id_i;
+        // 0x2c0
+        uint256 S_sigma_i;
+        // 0x2e0
+        uint256[][] variable_values_evaluation_points;
+        // 0x300
+        uint256 tmp1;
+        // 0x320
+        uint256 tmp2;
+        // 0x340
+        uint256 tmp3;
+        // 0x360
+        uint256 idx1;
+        // 0x380
+        uint256 idx2;
+    }
+
     struct gate_argument_local_vars {
+        // 0x0
+        uint256 modulus;
+        // 0x20
+        uint256 theta;
+        // 0x40
+        uint256 constraint_eval;
+        // 0x60
+        uint256 gate_eval;
+        // 0x80
+        uint256[] witness_evaluations_offsets;
+        // 0xa0
+        uint256[] selector_evaluations;
+        // 0xc0
+        uint256 eval_proof_witness_offset;
+        // 0xe0
+        uint256 eval_proof_selector_offset;
+        // 0x100
+        uint256 gates_evaluation;
+        // 0x120
+        uint256 theta_acc;
+        // 0x140
+        uint256 selector_evaluations_offset;
+        // 0x160
+        uint256 offset;
+        // 0x180
+        uint256[][] witness_evaluations;
+        // 0x1a0
+        uint256[][] constant_evaluations;
+        // 0x1c0
+        uint256[][] public_input_evaluations;
+        // 0x1e0
+        uint256 eval_proof_constant_offset;
+    }
+
+        struct gate_argument_local_vars_updated{
         // 0x0
         uint256 modulus;
         // 0x20

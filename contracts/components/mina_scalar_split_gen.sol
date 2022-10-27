@@ -113,4 +113,88 @@ library mina_split_gen {
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate22.evaluate_gate_be(gate_params, columns_rotations);
         gates_evaluation = gate_params.gates_evaluation;
     }
+
+    uint256 constant PERMUTATION_COLUMNS = 7;
+    uint256 constant WITNESS_COLUMNS = 15;
+    uint256 constant PUBLIC_INPUT_COLUMNS = 1;
+    uint256 constant CONSTANT_COLUMNS = 1;
+    uint256 constant SELECTOR_COLUMNS = 30;
+    uint256 constant LOOKUP_TABLE_SIZE = 0;
+
+    uint256 constant ID_PERMUTATION_COLUMNS = 17; // WITNESS_COLUMNS +  PUBLIC_INPUT_COLUMNS + CONSTANT_COLUMNTS
+    uint256 constant PERMUTATION_PERMUTATION_COLUMNS = 17; // WITNESS_COLUMNS +  PUBLIC_INPUT_COLUMNS + CONSTANT_COLUMNS
+
+    // TODO: columns_rotations could be hard-coded
+    function evaluate_gates_be_updated(
+        bytes calldata blob,
+        types.gate_argument_local_vars memory gate_params,
+        int256[][] memory columns_rotations
+    ) internal pure returns (uint256 gates_evaluation) {
+        // TODO: check witnesses number in proof
+
+        gate_params.witness_evaluations = new uint256[][](WITNESSES_N);
+        gate_params.offset = batched_lpc_verifier.skip_to_z(blob,  gate_params.eval_proof_witness_offset);
+        for (uint256 i = 0; i < WITNESSES_N; i++) {
+            gate_params.witness_evaluations[i] = new uint256[](columns_rotations[i].length);
+            for (uint256 j = 0; j < columns_rotations[i].length; j++) {
+                gate_params.witness_evaluations[i][j] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(blob, gate_params.offset, i, j);
+            }
+        }
+
+        gate_params.selector_evaluations = new uint256[](GATES_N);
+        gate_params.offset = batched_lpc_verifier.skip_to_z(blob,  gate_params.eval_proof_selector_offset);
+        for (uint256 i = 0; i < GATES_N; i++) {
+            gate_params.selector_evaluations[i] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(
+                blob, 
+                gate_params.offset, 
+                i + ID_PERMUTATION_COLUMNS + PERMUTATION_PERMUTATION_COLUMNS + CONSTANT_COLUMNS, 
+                0
+            );
+        }
+
+        gate_params.constant_evaluations = new uint256[][](CONSTANTS_N);
+        gate_params.offset = batched_lpc_verifier.skip_to_z(blob,  gate_params.eval_proof_constant_offset);
+        for (uint256 i = 0; i < CONSTANTS_N; i++) {
+            gate_params.constant_evaluations[i] = new uint256[](columns_rotations[i].length);
+            for (uint256 j = 0; j < columns_rotations[i].length; j++) {
+                gate_params.constant_evaluations[i][j] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(
+                    blob, 
+                    gate_params.offset, 
+                    i + ID_PERMUTATION_COLUMNS + PERMUTATION_PERMUTATION_COLUMNS, 
+                    j
+                );
+            }
+        }
+
+        gate_params.theta_acc = 1;
+        gate_params.gates_evaluation = 0;
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate0.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate1.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate2.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate3.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate4.evaluate_gate_be(gate_params, columns_rotations);
+//       This contain gate4
+//        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate5
+//            .evaluate_gate_be(gate_params, columns_rotations);
+//        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate6
+//            .evaluate_gate_be(gate_params, columns_rotations);
+//        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate7
+//            .evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate8.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate9.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate10.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate11.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate12.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate13.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate14.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate15.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate16.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate17.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate18.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate19.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate20.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate21.evaluate_gate_be(gate_params, columns_rotations);
+        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate22.evaluate_gate_be(gate_params, columns_rotations);
+        gates_evaluation = gate_params.gates_evaluation;
+    }
 }
