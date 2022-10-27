@@ -36,7 +36,6 @@ def deploy_link_libs(w3, compiled, contract_bytecode, linked_libs_names):
         compiled_lib_id, component_lib = find_compiled_contract(compiled, lib_name)
         component_lib_bytecode = component_lib['bin']
         component_lib_abi = component_lib['abi']
-        print(f'Lib {lib_name} bytecode size:', len(component_lib_bytecode) // 2)
         contract_lib = w3.eth.contract(
             abi=component_lib_abi, bytecode=component_lib_bytecode)
         deploy_lib_tx_hash = contract_lib.constructor().transact()
@@ -45,7 +44,6 @@ def deploy_link_libs(w3, compiled, contract_bytecode, linked_libs_names):
             linked_bytecode,
             {compiled_lib_id: deploy_lib_tx_receipt.contractAddress},
             solc_version="0.8.17")
-    print('Bytecode size:', len(linked_bytecode) // 2)
     return linked_bytecode
 
 

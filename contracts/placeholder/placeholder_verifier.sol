@@ -89,9 +89,7 @@ library placeholder_verifier {
         }
         
         // variable values
-        fri_params.leaf_size = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_variable_values_offset);
-        require( fri_params.leaf_size == WITNESS_COLUMNS + PUBLIC_INPUT_COLUMNS, "Something wrong with the size");
-        local_vars.variable_values_evaluation_points = new uint256[][](fri_params.leaf_size);
+        local_vars.variable_values_evaluation_points = new uint256[][](WITNESS_COLUMNS + PUBLIC_INPUT_COLUMNS);
         for (uint256 i = 0; i < WITNESS_COLUMNS;) {
             local_vars.variable_values_evaluation_points[i] = new uint256[](common_data.columns_rotations[i].length);
             for (uint256 j = 0; j < common_data.columns_rotations[i].length;) {

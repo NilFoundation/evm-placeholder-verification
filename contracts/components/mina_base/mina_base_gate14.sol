@@ -62,12 +62,14 @@ library mina_base_gate14 {
             }
 
             // TODO: insert generated code for gate argument evaluation here
+            let x1 := add(gate_params, CONSTRAINT_EVAL_OFFSET)
+            let x2 := add(gate_params, WITNESS_EVALUATIONS_OFFSET)
             mstore(add(gate_params, GATE_EVAL_OFFSET), 0)
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET), 0)
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x10000000000000000,get_eval_i_by_rotation_idx(1,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),modulus),modulus))
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x1,get_eval_i_by_rotation_idx(0,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),modulus),modulus))
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,get_eval_i_by_rotation_idx(2,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),modulus),modulus))
-            mstore(add(gate_params, GATE_EVAL_OFFSET),addmod(mload(add(gate_params, GATE_EVAL_OFFSET)),mulmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
+            mstore(x1, 0)
+            mstore(x1,addmod(mload(x1),mulmod(0x10000000000000000,get_eval_i_by_rotation_idx(1,0, mload(x2)),modulus),modulus))
+            mstore(x1,addmod(mload(x1),get_eval_i_by_rotation_idx(0,0, mload(x2)),modulus))
+            mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,get_eval_i_by_rotation_idx(2,0, mload(x2)),modulus),modulus))
+            mstore(add(gate_params, GATE_EVAL_OFFSET),addmod(mload(add(gate_params, GATE_EVAL_OFFSET)),mulmod(mload(x1),theta_acc,modulus),modulus))
             theta_acc := mulmod(theta_acc,mload(add(gate_params, THETA_OFFSET)),modulus)
             mstore(add(gate_params, GATE_EVAL_OFFSET),mulmod(mload(add(gate_params, GATE_EVAL_OFFSET)),get_selector_i(14,mload(add(gate_params, SELECTOR_EVALUATIONS_OFFSET))),modulus))
             gates_evaluation := addmod(gates_evaluation,mload(add(gate_params, GATE_EVAL_OFFSET)),modulus)
