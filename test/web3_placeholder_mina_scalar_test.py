@@ -31,7 +31,7 @@ linked_libs_names = [
 def init_test1():
     params = dict()
     params['_test_name'] = "Placeholder proof verification for mina"
-    f = open(base_path + '/test/data/generated_eval1_step1_scalar_updated.data')
+    f = open(base_path + '/test/data/generated_eval1_step1_scalar.data')
     params["proof"] = f.read()
     f.close()
 
@@ -79,7 +79,7 @@ def init_test1():
 def init_test2():
     params = dict()
     params['_test_name'] = "Placeholder proof verification for mina"
-    f = open(base_path + '/test/data/generated_eval15_step1_scalar_updated.data')
+    f = open(base_path + '/test/data/generated_eval15_step1_scalar.data')
     params["proof"] = f.read()
     f.close()
 
