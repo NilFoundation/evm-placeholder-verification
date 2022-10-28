@@ -30,6 +30,13 @@ import "../components/mina_base_split_gen.sol";
 import "../components/mina_scalar_split_gen.sol";
 
 contract MinaStateProof {
+    event gas_usage_emit(uint256 gas_usage);
+
+    struct gas_usage_t {
+        uint256 start;
+        uint256 end;
+    }
+
     struct test_local_vars {
         uint256 proofs_num;
         uint256 ind;
@@ -59,12 +66,12 @@ contract MinaStateProof {
         vars.fri_params.D_omegas = new uint256[](init_params[idx++]);
         for (uint256 i = 0; i < vars.fri_params.D_omegas.length;) {
             vars.fri_params.D_omegas[i] = init_params[idx];
-            unchecked{ i++; idx++;}
+        unchecked{ i++; idx++;}
         }
         vars.fri_params.q = new uint256[](init_params[idx++]);
         for (uint256 i = 0; i < vars.fri_params.q.length;) {
             vars.fri_params.q[i] = init_params[idx];
-            unchecked{ i++; idx++;}
+        unchecked{ i++; idx++;}
         }
 
         vars.fri_params.step_list = new uint256[](init_params[idx++]);
@@ -73,7 +80,7 @@ contract MinaStateProof {
             vars.fri_params.step_list[i] = init_params[idx];
             if(vars.fri_params.step_list[i] > vars.fri_params.max_step)
                 vars.fri_params.max_step = vars.fri_params.step_list[i];
-            unchecked{ i++; idx++;}
+        unchecked{ i++; idx++;}
         }
     }
 
@@ -92,7 +99,7 @@ contract MinaStateProof {
             vars.fri_params.ys[0][i] = new uint256[2][](max_coset);
             vars.fri_params.ys[1][i] = new uint256[2][](max_coset);
             vars.fri_params.ys[2][i] = new uint256[2][](max_coset);
-            unchecked{i++;}
+        unchecked{i++;}
         }
 
         vars.fri_params.b = new bytes(0x40 * vars.fri_params.max_batch * max_coset);
@@ -100,20 +107,11 @@ contract MinaStateProof {
 
     function verify(
         bytes calldata blob,
-        // 0) modulus
-        // 1) r
-        // 2) max_degree
-        // 3) lambda
-        // 4) rows_amount
-        // 5) omega
-        // 6) max_leaf_size
-        // 7) D_omegas_size
-        //  [..., D_omegas_i, ...]
-        // 8 + D_omegas_size) q_size
-        //  [..., q_i, ...]
         uint256[][] calldata init_params,
         int256[][][] calldata columns_rotations
     ) public {
+        gas_usage_t memory gas_usage;
+        gas_usage.start = gasleft();
         test_local_vars memory vars;
         uint256 max_step;
         uint256 max_batch;
@@ -124,7 +122,7 @@ contract MinaStateProof {
             init_vars(vars, init_params[vars.ind+1], columns_rotations[vars.ind]);
             if(vars.fri_params.max_step > max_step) max_step = vars.fri_params.max_step;
             if(vars.fri_params.max_batch > max_step) max_batch = vars.fri_params.max_batch;
-            unchecked{ vars.ind++; }
+        unchecked{ vars.ind++; }
         }
         allocate_all(vars, vars.fri_params.max_step, vars.fri_params.max_batch);
 
@@ -132,14 +130,14 @@ contract MinaStateProof {
         vars.proof_offset = 0;
         (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser.parse_be(blob, vars.proof_offset);
 
-        require(vars.proof_size <= blob.length, "Base proof length was detected incorrectly!");
-        require(vars.proof_size == init_params[0][0], "Invalid first proof length");
+        require(vars.proof_size <= blob.length, "Proof length is incorrect!");
+        require(vars.proof_size == init_params[0][0], "Proof length is incorrect!");
         init_vars(vars, init_params[1], columns_rotations[0]);
         transcript.init_transcript(vars.tr_state, hex"");
 
         types.placeholder_local_variables memory local_vars;
-        // 3. append witness commitments to transcript
-        transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.witness_commitment_offset));
+        // 3. append variable commitments to transcript
+        transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
 
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
         // 5. permutation argument
@@ -150,28 +148,27 @@ contract MinaStateProof {
         types.gate_argument_local_vars memory gate_params;
         gate_params.modulus = vars.fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
-        gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_witness_offset;
-        gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_selector_offset;
-        gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_constant_offset;
+        gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_variable_values_offset;
+        gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
+        gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
         local_vars.gate_argument = mina_base_split_gen.evaluate_gates_be(blob, gate_params, vars.common_data.columns_rotations);
-
         require(
             placeholder_verifier.verify_proof_be(blob, vars.tr_state,  vars.proof_map, vars.fri_params,
-                                                 vars.common_data, local_vars),
-            "Base proof is not correct!"
+            vars.common_data, local_vars),
+            "Proof is not correct!"
         );
-        
+
         vars.proof_offset += vars.proof_size;
 
         (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser.parse_be(blob, vars.proof_offset);
-        require(vars.proof_size <= blob.length, "Scalar proof length was detected incorrectly!");
+        require(vars.proof_size <= blob.length, "Proof length is incorrect!");
         init_vars(vars, init_params[2], columns_rotations[1]);
         transcript.init_transcript(vars.tr_state, hex"");
 
         types.placeholder_local_variables memory local_vars_scalar;
-        // 3. append witness commitments to transcript
-        transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.witness_commitment_offset));
+        // 3. append variable_values commitments to transcript
+        transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
 
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
         // 5. permutation argument
@@ -181,16 +178,18 @@ contract MinaStateProof {
         // 7. gate argument specific for circuit
         gate_params.modulus = vars.fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
-        gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_witness_offset;
-        gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_selector_offset;
-        gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_constant_offset;
+        gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_variable_values_offset;
+        gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
+        gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
         local_vars_scalar.gate_argument = mina_split_gen.evaluate_gates_be(blob, gate_params, vars.common_data.columns_rotations);
 
         require(
             placeholder_verifier.verify_proof_be(blob, vars.tr_state,  vars.proof_map, vars.fri_params,
-                                                 vars.common_data, local_vars_scalar),
-            "Scalar proof is not correct!"
+            vars.common_data, local_vars_scalar),
+            "Proof is not correct!"
         );
+        gas_usage.end = gasleft();
+        emit gas_usage_emit(gas_usage.start - gas_usage.end);
     }
 }
