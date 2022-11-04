@@ -187,10 +187,12 @@ library types {
         // These are local variables for FRI. But it's useful to allocate memory once
         //0x260
         bytes        b;
-        uint256[2][] s_indices;              // Indices of current coset S
-        uint256[2][] s;                      // Coset S
-        uint256[2][] correct_order_idx;      // Ordered indices to pack ys to check merkle proofs
-        uint256[2][][][3] ys;                // ys -- previous, current, next
+        //0x280
+        uint256[]    coeffs;                  // coeffs -- ancestor of ys
+        uint256[]    s_indices;
+        uint256[]    s;                    // Coset indices
+        uint256[]    tmp_arr;
+        uint256[]    correct_order_idx;       // Ordered indices to pack ys to check merkle proofs
     }
 
     struct placeholder_proof_map {

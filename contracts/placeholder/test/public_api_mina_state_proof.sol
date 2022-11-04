@@ -78,20 +78,12 @@ contract TestMinaStateProof {
     function allocate_all(test_local_vars memory vars, uint256 max_step, uint256 max_batch) internal view{
         uint256 max_coset = 1 << (vars.fri_params.max_step - 1);
 
-        vars.fri_params.s_indices = new uint256[2][](max_coset);
-        vars.fri_params.s = new uint256[2][](max_coset);
-        vars.fri_params.correct_order_idx = new uint256[2][](max_coset);
+        vars.fri_params.s_indices = new uint256[](max_coset);
+        vars.fri_params.s = new uint256[](max_coset);
 
-        vars.fri_params.ys[0] = new uint256[2][][](max_batch);
-        vars.fri_params.ys[1] = new uint256[2][][](max_batch);
-        vars.fri_params.ys[2] = new uint256[2][][](max_batch);
-
-        for(uint256 i = 0; i < vars.fri_params.max_batch;){
-            vars.fri_params.ys[0][i] = new uint256[2][](max_coset);
-            vars.fri_params.ys[1][i] = new uint256[2][](max_coset);
-            vars.fri_params.ys[2][i] = new uint256[2][](max_coset);
-            unchecked{i++;}
-        }
+        vars.fri_params.correct_order_idx = new uint256[](max_coset);
+        vars.fri_params.tmp_arr = new uint256[](max_coset << 1);
+        vars.fri_params.coeffs = new uint256[](max_coset << 1);
 
         vars.fri_params.b = new bytes(0x40 * vars.fri_params.max_batch * max_coset);
     }

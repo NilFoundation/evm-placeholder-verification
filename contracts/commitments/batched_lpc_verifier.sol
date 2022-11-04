@@ -198,12 +198,12 @@ library batched_lpc_verifier {
         require(fri_params.leaf_size == evaluation_points.length, "Array of evaluation points size is not equal to leaf_size!");
         require(fri_params.lambda == get_fri_proof_n_be(blob, offset), "Fri proofs number is not equal to lambda!");
 
-        uint256 local_vars;
+        uint256 z_offset;
         uint256 polynom_index;
         uint256 point_index;
         uint256 round_id;
 
-        local_vars = basic_marshalling.skip_length(skip_to_z(blob, offset));
+        z_offset = basic_marshalling.skip_length(skip_to_z(blob, offset));
         for (polynom_index = 0; polynom_index < fri_params.leaf_size;) {
 //            require(false, logging.uint2decstr(offset));
 //            require(false, logging.uint2decstr(basic_marshalling.get_i_uint256_from_vector(blob, local_vars, 0)));
@@ -211,10 +211,10 @@ library batched_lpc_verifier {
             fri_params.batched_U[polynom_index] = polynomial.interpolate(
                 blob,
                 evaluation_points[polynom_index],
-                local_vars,
+                z_offset,
                 fri_params.modulus
             );
-            local_vars = basic_marshalling.skip_vector_of_uint256_be(blob, local_vars);
+            z_offset = basic_marshalling.skip_vector_of_uint256_be(blob, z_offset);
 
 //            require(false, logging.uint2hexstr(basic_marshalling.get_i_uint256_from_vector(blob, local_vars, 0)));
             unchecked{ polynom_index++; }

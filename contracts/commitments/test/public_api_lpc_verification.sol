@@ -28,21 +28,11 @@ contract TestLpcVerifier {
     function allocate_all(types.fri_params_type memory fri_params, uint256 max_step, uint256 max_batch) internal view{
         uint256 max_coset = 1 << (fri_params.max_step - 1);
 
-        fri_params.s_indices = new uint256[2][](max_coset);
-        fri_params.s = new uint256[2][](max_coset);
-        fri_params.correct_order_idx = new uint256[2][](max_coset);
-
-        fri_params.ys[0] = new uint256[2][][](max_batch);
-        fri_params.ys[1] = new uint256[2][][](max_batch);
-        fri_params.ys[2] = new uint256[2][][](max_batch);
-
-        for(uint256 i = 0; i < fri_params.max_batch;){
-            fri_params.ys[0][i] = new uint256[2][](max_coset);
-            fri_params.ys[1][i] = new uint256[2][](max_coset);
-            fri_params.ys[2][i] = new uint256[2][](max_coset);
-            unchecked{i++;}
-        }
-
+        fri_params.s_indices = new uint256[](max_coset);
+        fri_params.s = new uint256[](max_coset);
+        fri_params.correct_order_idx = new uint256[](max_coset);
+        fri_params.tmp_arr = new uint256[](max_coset << 1);
+        fri_params.coeffs = new uint256[](max_coset << 2);
         fri_params.b = new bytes(0x40 * max_batch * max_coset);
     }
 

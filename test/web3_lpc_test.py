@@ -169,7 +169,6 @@ def init_skipping_layers_test():
 
 
 if __name__ == '__main__':
-    raise ValueError('Can be outdated paths')
     compiled = solcx.compile_files(
         [f'{contracts_dir}/commitments/test/public_api_lpc_verification.sol'],
         output_values=['abi', 'bin'],
@@ -185,17 +184,20 @@ if __name__ == '__main__':
     deploy_tx_hash = contract.constructor().transact()
     deploy_tx_receipt = w3.eth.wait_for_transaction_receipt(deploy_tx_hash)
     contract_inst = w3.eth.contract(address=deploy_tx_receipt.contractAddress, abi=abi)
+
     print("Skipping layers test")
     params = init_skipping_layers_test()
     run_tx_hash = contract_inst.functions.batched_verify(
         params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
     run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
+    print_tx_info(w3, run_tx_receipt, params['_test_name'])
 
     print("Basic test")
     params = init_basic_test()
     run_tx_hash = contract_inst.functions.batched_verify(
         params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
     run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
+    print_tx_info(w3, run_tx_receipt, params['_test_name'])
 
     print("Batched test")
     params = init_batched_test()
