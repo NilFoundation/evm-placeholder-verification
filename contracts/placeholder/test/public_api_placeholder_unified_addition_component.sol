@@ -43,28 +43,28 @@ contract TestPlaceholderVerifierUnifiedAddition {
         uint256[] calldata init_params,
         int256[][] calldata columns_rotations
     ) public {
-        types.init_vars memory vars;
+        init_vars.vars_t memory vars;
         init_vars.init(blob, init_params, columns_rotations, vars);
 
         types.placeholder_local_variables memory local_vars;
+
         // 3. append witness commitments to transcript
-        transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.witness_commitment_offset));
+        transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
 
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
         // 5. permutation argument
         local_vars.permutation_argument = permutation_argument.verify_eval_be(blob, vars.tr_state,
             vars.proof_map, vars.fri_params,
-            vars.common_data, local_vars);
+            vars.common_data, local_vars, vars.arithmetization_params);
         // 7. gate argument specific for circuit
         types.gate_argument_local_vars memory gate_params;
         gate_params.modulus = vars.fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
-        gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_witness_offset;
-        gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_selector_offset;
-        gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_constant_offset;
+        gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_variable_values_offset;
+        gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
+        gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
-        local_vars.gate_argument = unified_addition_component_gen.evaluate_gates_be(blob, gate_params, vars.common_data.columns_rotations);
-
+        local_vars.gate_argument = unified_addition_component_gen.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
         require(
             placeholder_verifier.verify_proof_be(
                 blob,
@@ -72,7 +72,8 @@ contract TestPlaceholderVerifierUnifiedAddition {
                 vars.proof_map,
                 vars.fri_params,
                 vars.common_data,
-                local_vars
+                local_vars,
+                vars.arithmetization_params
             ),
             "Proof is not correct!"
         );

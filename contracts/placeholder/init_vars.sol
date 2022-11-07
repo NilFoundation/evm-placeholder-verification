@@ -30,6 +30,7 @@ library init_vars {
         types.transcript_data tr_state;
         types.fri_params_type fri_params;
         types.placeholder_common_data common_data;
+        types.arithmetization_params arithmetization_params;
     }
 
     function init(bytes calldata blob, uint256[] calldata init_params,
@@ -74,6 +75,18 @@ library init_vars {
                 vars.fri_params.max_step = vars.fri_params.step_list[i];
             unchecked{ i++; idx++;}
         }
+
+        unchecked{
+            idx++; // arithmetization_params length;
+            vars.arithmetization_params.witness_columns = init_params[idx++];
+            vars.arithmetization_params.public_input_columns = init_params[idx++];
+            vars.arithmetization_params.constant_columns = init_params[idx++];
+            vars.arithmetization_params.selector_columns = init_params[idx++];
+            vars.arithmetization_params.permutation_columns = vars.arithmetization_params.witness_columns 
+                + vars.arithmetization_params.public_input_columns 
+                + vars.arithmetization_params.constant_columns;
+        }
+
         unchecked{ max_coset = 1 << (vars.fri_params.max_step - 1);}
 
         vars.fri_params.s_indices = new uint256[](max_coset);

@@ -62,6 +62,14 @@ def init_test1():
     params['init_params'].append(len(q))
     params['init_params'].extend(q)
 
+    step_list = [1] * 11
+    params['init_params'].append(len(step_list))
+    params['init_params'].extend(step_list)  # step_list
+
+    arithmentization_params = [15, 1, 1, 30] # witness, public_input, constant, selector
+    params['init_params'].append((len(arithmentization_params)))
+    params['init_params'].extend(arithmentization_params)
+
     params['columns_rotations'] = []
     for i in range(47):
         params['columns_rotations'].append([0, ])
@@ -70,9 +78,6 @@ def init_test1():
     params['columns_rotations'][2] = [0, 1]
     params['columns_rotations'][5] = [0, -1]
     params['columns_rotations'][13] = [0, 1]
-    step_list = [1] * 11
-    params['init_params'].append(len(step_list))
-    params['init_params'].extend(step_list)  # step_list
 
     return params
 
@@ -100,20 +105,23 @@ def init_test2():
     params['init_params'].append(len(q))
     params['init_params'].extend(q)
 
-    params['columns_rotations'] = []
-    for i in range(47):
-        params['columns_rotations'].append([0, ])
-    params['columns_rotations'][0] = [0, 1, -1]
-    params['columns_rotations'][1] = [0, -1, 1]
-    params['columns_rotations'][2] = [0, 1]
-    params['columns_rotations'][5] = [0, -1]
-    params['columns_rotations'][13] = [0, 1]
-
-    # step_list = [3, 3, 3, 1, 1]
     step_list = [1] * 17
     params['init_params'].append(len(step_list))
     params['init_params'].extend(step_list)  # step_list
 
+    arithmentization_params = [15, 1, 1, 30] # witness, public_input, constant, selector
+    params['init_params'].append((len(arithmentization_params)))
+    params['init_params'].extend(arithmentization_params)
+
+    params['columns_rotations'] = []
+    for i in range(47):
+        params['columns_rotations'].append([0, ])
+    params['columns_rotations'][0] = [0, 1, -1]
+    params['columns_rotations'][1] = [0, -1, 1]
+    params['columns_rotations'][2] = [0, 1]
+    params['columns_rotations'][5] = [0, -1]
+    params['columns_rotations'][13] = [0, 1]
+
     return params
 
 def init_test3():
@@ -150,6 +158,14 @@ def init_test3():
     params['init_params'].append(len(q))
     params['init_params'].extend(q)
 
+    step_list = [3, 3, 3, 1, 1]
+    params['init_params'].append(len(step_list))
+    params['init_params'].extend(step_list)  # step_list
+
+    arithmentization_params = [15, 1, 1, 30] # witness, public_input, constant, selector
+    params['init_params'].append((len(arithmentization_params)))
+    params['init_params'].extend(arithmentization_params)
+
     params['columns_rotations'] = []
     for i in range(47):
         params['columns_rotations'].append([0, ])
@@ -158,9 +174,6 @@ def init_test3():
     params['columns_rotations'][2] = [0, 1]
     params['columns_rotations'][5] = [0, -1]
     params['columns_rotations'][13] = [0, 1]
-    step_list = [3, 3, 3, 1, 1]
-    params['init_params'].append(len(step_list))
-    params['init_params'].extend(step_list)  # step_list
     return params
 
 def init_test3():
@@ -197,6 +210,14 @@ def init_test3():
     params['init_params'].append(len(q))
     params['init_params'].extend(q)
 
+    step_list = [3, 3, 3, 1, 1]
+    params['init_params'].append(len(step_list))
+    params['init_params'].extend(step_list)  # step_list
+
+    arithmentization_params = [15, 1, 1, 30] # witness, public_input, constant, selector
+    params['init_params'].append((len(arithmentization_params)))
+    params['init_params'].extend(arithmentization_params)
+
     params['columns_rotations'] = []
     for i in range(47):
         params['columns_rotations'].append([0, ])
@@ -205,9 +226,6 @@ def init_test3():
     params['columns_rotations'][2] = [0, 1]
     params['columns_rotations'][5] = [0, -1]
     params['columns_rotations'][13] = [0, 1]
-    step_list = [3, 3, 3, 1, 1]
-    params['init_params'].append(len(step_list))
-    params['init_params'].extend(step_list)  # step_list
     return params
     
 def init_test4():
@@ -244,6 +262,14 @@ def init_test4():
     params['init_params'].append(len(q))
     params['init_params'].extend(q)
 
+    step_list = [1, 4, 4, 1, 1]
+    params['init_params'].append(len(step_list))
+    params['init_params'].extend(step_list)  # step_list
+
+    arithmentization_params = [15, 1, 1, 30] # witness, public_input, constant, selector
+    params['init_params'].append((len(arithmentization_params)))
+    params['init_params'].extend(arithmentization_params)
+
     params['columns_rotations'] = []
     for i in range(47):
         params['columns_rotations'].append([0, ])
@@ -252,9 +278,6 @@ def init_test4():
     params['columns_rotations'][2] = [0, 1]
     params['columns_rotations'][5] = [0, -1]
     params['columns_rotations'][13] = [0, 1]
-    step_list = [1, 4, 4, 1, 1]
-    params['init_params'].append(len(step_list))
-    params['init_params'].extend(step_list)  # step_list
     return params
     
 def init_test5():
@@ -291,6 +314,14 @@ def init_test5():
     params['init_params'].append(len(q))
     params['init_params'].extend(q)
 
+    step_list = [1, 3, 3, 1, 1, 1, 1]
+    params['init_params'].append(len(step_list))
+    params['init_params'].extend(step_list)  # step_list
+
+    arithmentization_params = [15, 1, 1, 30] # witness, public_input, constant, selector
+    params['init_params'].append((len(arithmentization_params)))
+    params['init_params'].extend(arithmentization_params)
+
     params['columns_rotations'] = []
     for i in range(47):
         params['columns_rotations'].append([0, ])
@@ -299,9 +330,6 @@ def init_test5():
     params['columns_rotations'][2] = [0, 1]
     params['columns_rotations'][5] = [0, -1]
     params['columns_rotations'][13] = [0, 1]
-    step_list = [1, 3, 3, 1, 1, 1, 1]
-    params['init_params'].append(len(step_list))
-    params['init_params'].extend(step_list)  # step_list
     return params
 
 def init_test6():
@@ -338,6 +366,14 @@ def init_test6():
     params['init_params'].append(len(q))
     params['init_params'].extend(q)
 
+    step_list = [1, 3, 3, 3, 1]
+    params['init_params'].append(len(step_list))
+    params['init_params'].extend(step_list)  # step_list
+
+    arithmentization_params = [15, 1, 1, 30] # witness, public_input, constant, selector
+    params['init_params'].append((len(arithmentization_params)))
+    params['init_params'].extend(arithmentization_params)
+
     params['columns_rotations'] = []
     for i in range(47):
         params['columns_rotations'].append([0, ])
@@ -346,9 +382,6 @@ def init_test6():
     params['columns_rotations'][2] = [0, 1]
     params['columns_rotations'][5] = [0, -1]
     params['columns_rotations'][13] = [0, 1]
-    step_list = [1, 3, 3, 3, 1]
-    params['init_params'].append(len(step_list))
-    params['init_params'].extend(step_list)  # step_list
     return params
     
 if __name__ == '__main__':

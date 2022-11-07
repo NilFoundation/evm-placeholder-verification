@@ -292,6 +292,17 @@ library types {
         uint256 idx2;
     }
 
+    struct arithmetization_params{
+        uint256 witness_columns;
+        uint256 public_input_columns;
+        uint256 constant_columns;
+        uint256 selector_columns;
+        uint256 lookup_table_size;
+
+        // computed from other params
+        uint256 permutation_columns;
+    }
+
     struct gate_argument_local_vars {
         // 0x0
         uint256 modulus;
@@ -305,9 +316,9 @@ library types {
         uint256[] witness_evaluations_offsets;
         // 0xa0
         uint256[] selector_evaluations;
-        // 0xc0
-        uint256 eval_proof_witness_offset;
         // 0xe0
+        uint256 eval_proof_witness_offset;
+        // 0xc0
         uint256 eval_proof_selector_offset;
         // 0x100
         uint256 gates_evaluation;

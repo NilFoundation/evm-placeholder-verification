@@ -102,6 +102,9 @@ def init_test1():
     step_list = [1] * 16
     params['init_params'][1].append(len(step_list))
     params['init_params'][1].extend(step_list)  # step_list
+    arithmetization_params = [15, 1, 1, 30] # witness, public_input, constant, selector
+    params['init_params'][1].append((len(arithmetization_params)))
+    params['init_params'][1].extend(arithmetization_params)
 
     # For proof 2
     params['init_params'][2] = []
@@ -121,6 +124,15 @@ def init_test1():
     params['init_params'][2].append(len(q))
     params['init_params'][2].extend(q)
 
+    step_list = [1] * 17
+    params['init_params'][2].append(len(step_list))
+    params['init_params'][2].extend(step_list)  # step_list
+
+    arithmetization_params = [15, 1, 1, 30] # witness, public_input, constant, selector
+    params['init_params'][2].append((len(arithmetization_params)))
+    params['init_params'][2].extend(arithmetization_params)
+
+
     for i in range(47):
         params['columns_rotations'][1].append([0, ])
     params['columns_rotations'][1][0] = [0, 1, -1]
@@ -128,9 +140,6 @@ def init_test1():
     params['columns_rotations'][1][2] = [0, 1]
     params['columns_rotations'][1][5] = [0, -1]
     params['columns_rotations'][1][13] = [0, 1]
-    step_list = [1] * 17
-    params['init_params'][2].append(len(step_list))
-    params['init_params'][2].extend(step_list)  # step_list
 
     return params
 

@@ -51,7 +51,7 @@ library mina_base_split_gen {
     uint256 constant CONSTANTS_N = 1;
 
 
-    uint256 constant PERMUTATION_COLUMNS = 7;
+/*    uint256 constant PERMUTATION_COLUMNS = 7;
     uint256 constant WITNESS_COLUMNS = 15;
     uint256 constant PUBLIC_INPUT_COLUMNS = 1;
     uint256 constant CONSTANT_COLUMNS = 1;
@@ -59,12 +59,13 @@ library mina_base_split_gen {
     uint256 constant LOOKUP_TABLE_SIZE = 0;
 
     uint256 constant ID_PERMUTATION_COLUMNS = 17; // WITNESS_COLUMNS +  PUBLIC_INPUT_COLUMNS + CONSTANT_COLUMNTS
-    uint256 constant PERMUTATION_PERMUTATION_COLUMNS = 17; // WITNESS_COLUMNS +  PUBLIC_INPUT_COLUMNS + CONSTANT_COLUMNS
+    uint256 constant PERMUTATION_PERMUTATION_COLUMNS = 17; // WITNESS_COLUMNS +  PUBLIC_INPUT_COLUMNS + CONSTANT_COLUMNS*/
 
     // TODO: columns_rotations could be hard-coded
     function evaluate_gates_be(
         bytes calldata blob,
         types.gate_argument_local_vars memory gate_params,
+        types.arithmetization_params memory ar_params,
         int256[][] memory columns_rotations
     ) internal pure returns (uint256 gates_evaluation) {
         // TODO: check witnesses number in proof
@@ -84,7 +85,7 @@ library mina_base_split_gen {
             gate_params.selector_evaluations[i] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(
                 blob, 
                 gate_params.offset, 
-                i + ID_PERMUTATION_COLUMNS + PERMUTATION_PERMUTATION_COLUMNS + CONSTANT_COLUMNS, 
+                i + ar_params.permutation_columns + ar_params.permutation_columns + ar_params.constant_columns, 
                 0
             );
         }
@@ -97,7 +98,7 @@ library mina_base_split_gen {
                 gate_params.constant_evaluations[i][j] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(
                     blob, 
                     gate_params.offset, 
-                    i + ID_PERMUTATION_COLUMNS + PERMUTATION_PERMUTATION_COLUMNS, 
+                    i + ar_params.permutation_columns + ar_params.permutation_columns, 
                     j
                 );
             }
