@@ -567,13 +567,10 @@ library batched_fri_verifier {
         );
 
         prepare_leaf_data(blob, fri_params, local_vars);
-        if( local_vars.global_round_index == 0){
-            // prepare values only for evaluation
-            for( local_vars.y_ind = 0; local_vars.y_ind < local_vars.indices_size; )
-            {
-                fri_params.tmp_arr[local_vars.y_ind] = fri_params.s[local_vars.y_ind];
-                unchecked{local_vars.y_ind++;}
-            }
+        for( local_vars.y_ind = 0; local_vars.y_ind < local_vars.indices_size; )
+        {
+            fri_params.tmp_arr[local_vars.y_ind] = fri_params.s[local_vars.y_ind];
+            unchecked{local_vars.y_ind++;}
         }
 
 
