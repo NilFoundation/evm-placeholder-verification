@@ -23,7 +23,7 @@ import "../basic_marshalling.sol";
 import "../commitments/batched_lpc_verifier.sol";
 import "../logging.sol";
 
-library unified_addition_component_gen {
+contract unified_addition_component_gen {
     uint256 constant WITNESSES_N = 11;
     uint256 constant WITNESSES_TOTAL_N = 11;
     uint256 constant GATES_N = 1;

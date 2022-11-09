@@ -1,12 +1,14 @@
-from web3_test import do_placeholder_verification_test_via_transact, base_path, do_placeholder_verification_test_via_transact_simple
+import sys
+from web3_test import do_placeholder_verification_test_via_transact, base_path, do_placeholder_verification_test_via_transact_with_external_gates
 
 test_contract_name = 'TestPlaceholderVerifierUnifiedAddition'
 test_contract_path = 'placeholder/test/public_api_placeholder_unified_addition_component.sol'
 # linked_gates_entry_lib_name = "unified_addition_component_gen"
-linked_libs_names = ["unified_addition_component_gen", "placeholder_verifier"]
+linked_libs_names = ["placeholder_verifier"]
 
 
 def init_test1():
+    print(sys.argv[1])
     params = dict()
     params['_test_name'] = "Placeholder proof verification for unified addition (case 1)"
     f = open(base_path + '/test/data/unified_addition_proof1.data')
@@ -42,10 +44,12 @@ def init_test1():
     params['init_params'].append((len(arithmentization_params)))
     params['init_params'].extend(arithmentization_params)
 
+    params['gate_argument_address'] = int(sys.argv[1], 16)
+
     params['columns_rotations'] = []
     for i in range(14):
         params['columns_rotations'].append([0, ])
-
+    
     return params
 
 
@@ -91,12 +95,16 @@ def init_test2():
     for i in range(14):
         params['columns_rotations'].append([0, ])
 
+    params['gate_argument_address'] = int(sys.argv[1], 16)
+
     return params
 
 
 if __name__ == '__main__':
+    #gate_argument_contract_name = "unified_addition_component_gen";
+    #gate_argument_contract_path = "";
     #raise ValueError('Outdates data files and maybe public api')
-    do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test1)
-    do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test2)
+    do_placeholder_verification_test_via_transact_with_external_gates(test_contract_name, test_contract_path, linked_libs_names, init_test1)
+    do_placeholder_verification_test_via_transact_with_external_gates(test_contract_name, test_contract_path, linked_libs_names, init_test2)
     # do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_lib_name, linked_libs_names, init_test1)
     # do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path, linked_gates_entry_lib_name, linked_libs_names, init_test2)

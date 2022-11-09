@@ -145,3 +145,38 @@ def do_placeholder_verification_test_via_transact(test_contract_name, test_contr
                                                       params['columns_rotations']).transact()
     run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
     print_tx_info(w3, run_tx_receipt, params['_test_name'])
+
+def do_placeholder_verification_test_via_transact_with_external_gates(
+    test_contract_name, 
+    test_contract_path, 
+    linked_libs_names,
+    init_test_params_func
+):
+    w3 = init_connection()
+    solcx.install_solc('0.8.17')
+    print(f'{contracts_dir}/{test_contract_path}')
+    compiled = solcx.compile_files(
+        [f'{contracts_dir}/{test_contract_path}'],
+        allow_paths=[f'{contracts_dir}/'],
+        output_values=['abi', 'bin'],
+        solc_version="0.8.17",
+        optimize=True,
+        optimize_runs=200)
+    compiled_test_contract_id, compiled_test_contract_interface = find_compiled_contract(
+        compiled, test_contract_name)
+    bytecode = compiled_test_contract_interface['bin']
+    abi = compiled_test_contract_interface['abi']
+    bytecode = deploy_link_libs(w3, compiled, bytecode, linked_libs_names)
+
+    test_contract = w3.eth.contract(abi=abi, bytecode=bytecode)
+    deploy_tx_hash = test_contract.constructor().transact()
+    deploy_tx_receipt = w3.eth.wait_for_transaction_receipt(deploy_tx_hash)
+    print("Deployment:", deploy_tx_receipt.gasUsed)
+
+    test_contract_inst = w3.eth.contract(
+        address=deploy_tx_receipt.contractAddress, abi=abi)
+    params = init_test_params_func()
+    run_tx_hash = test_contract_inst.functions.verify(
+        params['proof'], params['init_params'], params['columns_rotations'], params['gate_argument_address']).transact()
+    run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
+    print_tx_info(w3, run_tx_receipt, params['_test_name'])

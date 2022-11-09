@@ -41,7 +41,8 @@ contract TestPlaceholderVerifierUnifiedAddition {
     // 8 + D_omegas_size) q_size
     //  [..., q_i, ...]
         uint256[] calldata init_params,
-        int256[][] calldata columns_rotations
+        int256[][] calldata columns_rotations,
+        uint160    gate_argument_address
     ) public {
         init_vars.vars_t memory vars;
         init_vars.init(blob, init_params, columns_rotations, vars);
@@ -64,7 +65,8 @@ contract TestPlaceholderVerifierUnifiedAddition {
         gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
         gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
-        local_vars.gate_argument = unified_addition_component_gen.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
+        unified_addition_component_gen gate_argument_component = unified_addition_component_gen(address(gate_argument_address));
+        local_vars.gate_argument = gate_argument_component.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
         require(
             placeholder_verifier.verify_proof_be(
                 blob,
