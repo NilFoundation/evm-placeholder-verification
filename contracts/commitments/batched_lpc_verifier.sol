@@ -176,6 +176,7 @@ library batched_lpc_verifier {
         types.transcript_data memory tr_state, types.fri_params_type memory fri_params)
     internal view returns (bool result) {
         result = false;
+<<<<<<< HEAD
         uint256 ind;
         uint256 ind2;
         uint256[] memory eval;
@@ -208,6 +209,27 @@ library batched_lpc_verifier {
 //            require(false, logging.uint2decstr(offset));
 //            require(false, logging.uint2decstr(basic_marshalling.get_i_uint256_from_vector(blob, local_vars, 0)));
 //            require(false, logging.uint2hexstr(local_vars));
+=======
+
+//        if (fri_params.leaf_size != evaluation_points.length && evaluation_points.length == 1){
+//            uint256[] memory eval = evaluation_points[0];
+//            evaluation_points = new uint256[][](fri_params.leaf_size);
+//            for(uint256 ind = 0; ind < fri_params.leaf_size;){
+//                evaluation_points[ind] = new uint256[](eval.length);
+//                for (uint256 ind2 = 0; ind2 < eval.length;){
+//                    evaluation_points[ind][ind2] = eval[ind2];
+//                    unchecked{ ind2++; }
+//                }
+//                unchecked{ ind++; }
+//            }
+//        }
+//        require(fri_params.leaf_size == evaluation_points.length, "Array of evaluation points size is not equal to leaf_size!");
+//        require(fri_params.lambda == get_fri_proof_n_be(blob, offset), "Fri proofs number is not equal to lambda!");
+
+        uint256 local_vars;
+        local_vars = basic_marshalling.skip_length(skip_to_z(blob, offset));
+        for (uint256 polynom_index = 0; polynom_index < fri_params.leaf_size;) {
+>>>>>>> 72276d679ddb80fd915638e37c158ca382866fed
             fri_params.batched_U[polynom_index] = polynomial.interpolate(
                 blob,
                 evaluation_points[polynom_index],
@@ -216,7 +238,6 @@ library batched_lpc_verifier {
             );
             z_offset = basic_marshalling.skip_vector_of_uint256_be(blob, z_offset);
 
-//            require(false, logging.uint2hexstr(basic_marshalling.get_i_uint256_from_vector(blob, local_vars, 0)));
             unchecked{ polynom_index++; }
         }
 
