@@ -58,6 +58,14 @@ library placeholder_verifier {
     uint256 constant WITNESS_EVALUATION_POINTS_OFFSET = 0x2e0;
     uint256 constant STATUS_OFFSET = 0x3a0;
 
+    function test(
+        bytes calldata blob,
+        types.transcript_data memory tr_state,
+        types.placeholder_proof_map memory proof_map
+    ) external view returns (uint256){
+        return 1;
+    }
+
     function verify_proof_be(
         bytes calldata blob,
         types.transcript_data memory tr_state,
@@ -78,10 +86,9 @@ library placeholder_verifier {
         if (local_vars.challenge != basic_marshalling.get_uint256_be(blob, proof_map.eval_proof_offset)) {
             return false;
         }
-        
+
         // variable values
         fri_params.leaf_size = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_variable_values_offset);
-        require( fri_params.leaf_size == ar_params.witness_columns + ar_params.public_input_columns, "Something wrong with the size");
         local_vars.variable_values_evaluation_points = new uint256[][](fri_params.leaf_size);
         for (uint256 i = 0; i < ar_params.witness_columns;) {
             local_vars.variable_values_evaluation_points[i] = new uint256[](common_data.columns_rotations[i].length);

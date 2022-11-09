@@ -2,7 +2,7 @@ from web3_test import do_placeholder_verification_test_via_transact, do_placehol
 
 test_contract_name = 'TestPlaceholderVerifierMinaScalar'
 test_contract_path = 'placeholder/test/public_api_placeholder_mina_scalar_component.sol'
-linked_gates_entry_lib_name = 'placeholder_verifier'
+#linked_gates_entry_lib_name = 'placeholder_verifier'
 linked_libs_names = [
     "mina_scalar_gate0",
     "mina_scalar_gate1",

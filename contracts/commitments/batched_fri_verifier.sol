@@ -295,7 +295,7 @@ library batched_fri_verifier {
     internal  pure
     {
         // Check length parameters correctness
-        require(basic_marshalling.get_length(blob, local_vars.round_proof_values_offset) == fri_params.leaf_size, "Invalid polynomial number in proof.values");
+        require(basic_marshalling.get_length(blob, local_vars.round_proof_values_offset) == fri_params.leaf_size, "Invalid polynomials number in proof.values");
 
         // Calculate s_indices
         fri_params.s_indices[0] = local_vars.x_index;
@@ -463,7 +463,6 @@ library batched_fri_verifier {
         unchecked{local_vars.i_step++;}                                                 // current step
         local_vars.r_step = fri_params.step_list[local_vars.i_step];           // current step
         local_vars.p_offset = basic_marshalling.skip_length(local_vars.round_proof_values_offset);
-        require( basic_marshalling.get_length(blob, local_vars.p_offset) == (1 << local_vars.r_step),  logging.uint2decstr(local_vars.i_step));
         require( basic_marshalling.get_length(blob, local_vars.p_offset) == (1 << local_vars.r_step), "Step list param doesn't according to real values length" );
         unchecked{local_vars.indices_size = 1 << (local_vars.r_step - 1);}
         unchecked{local_vars.polynomial_vector_size = 0x8 + (local_vars.indices_size << 6);}

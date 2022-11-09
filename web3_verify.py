@@ -6,7 +6,7 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 import os
 
-base_path = os.path.abspath(os.getcwd())
+base_path = os.path.dirname(os.path.realpath(__file__))
 
 
 def init_connection():
@@ -115,3 +115,6 @@ if __name__ == '__main__':
     run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
     print(run_tx_receipt.transactionHash.hex())
     print("Gas used =", test_contract_inst.events.gas_usage_emit.getLogs()[0]['args']['gas_usage'])
+    if len(sys.argv) > 3 and sys.argv[3] == '1':
+        print("Gas used with extra technical costs: ", run_tx_receipt.gasUsed)
+

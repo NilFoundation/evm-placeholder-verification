@@ -38,6 +38,7 @@ contract MinaStateProof {
     }
 
     struct test_local_vars {
+        types.fri_params_type fri_params;
         uint256 proofs_num;
         uint256 ind;
 
@@ -45,7 +46,6 @@ contract MinaStateProof {
         uint256 proof_offset;
         uint256 proof_size;
         types.transcript_data tr_state;
-        types.fri_params_type fri_params;
         types.placeholder_common_data common_data;
         types.arithmetization_params arithmetization_params;
     }
@@ -67,12 +67,12 @@ contract MinaStateProof {
         vars.fri_params.D_omegas = new uint256[](init_params[idx++]);
         for (uint256 i = 0; i < vars.fri_params.D_omegas.length;) {
             vars.fri_params.D_omegas[i] = init_params[idx];
-        unchecked{ i++; idx++;}
+            unchecked{ i++; idx++;}
         }
         vars.fri_params.q = new uint256[](init_params[idx++]);
         for (uint256 i = 0; i < vars.fri_params.q.length;) {
             vars.fri_params.q[i] = init_params[idx];
-        unchecked{ i++; idx++;}
+            unchecked{ i++; idx++;}
         }
 
         vars.fri_params.step_list = new uint256[](init_params[idx++]);
@@ -81,7 +81,7 @@ contract MinaStateProof {
             vars.fri_params.step_list[i] = init_params[idx];
             if(vars.fri_params.step_list[i] > vars.fri_params.max_step)
                 vars.fri_params.max_step = vars.fri_params.step_list[i];
-        unchecked{ i++; idx++;}
+            unchecked{ i++; idx++;}
         }
 
         unchecked{
@@ -118,13 +118,13 @@ contract MinaStateProof {
         uint256 max_step;
         uint256 max_batch;
 
-        require(blob.length == init_params[0][1], "Invalid input length");
+        require(blob.length == init_params[0][1], "Proof is not correct!");
 
         for( vars.ind = 0; vars.ind < 2; ){
             init_vars(vars, init_params[vars.ind+1], columns_rotations[vars.ind]);
             if(vars.fri_params.max_step > max_step) max_step = vars.fri_params.max_step;
             if(vars.fri_params.max_batch > max_step) max_batch = vars.fri_params.max_batch;
-        unchecked{ vars.ind++; }
+            unchecked{ vars.ind++; }
         }
         allocate_all(vars, vars.fri_params.max_step, vars.fri_params.max_batch);
 
@@ -132,8 +132,8 @@ contract MinaStateProof {
         vars.proof_offset = 0;
         (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser.parse_be(blob, vars.proof_offset);
 
-        require(vars.proof_size <= blob.length, "Proof length is incorrect!");
-        require(vars.proof_size == init_params[0][0], "Proof length is incorrect!");
+        require(vars.proof_size <= blob.length, "Proof is not correct!");
+        require(vars.proof_size == init_params[0][0], "Proof is not correct!");
         init_vars(vars, init_params[1], columns_rotations[0]);
         transcript.init_transcript(vars.tr_state, hex"");
 
@@ -154,6 +154,7 @@ contract MinaStateProof {
         gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
         gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
+        
         local_vars.gate_argument = mina_base_split_gen.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
         require(
             placeholder_verifier.verify_proof_be(blob, vars.tr_state,  vars.proof_map, vars.fri_params,
@@ -164,7 +165,7 @@ contract MinaStateProof {
         vars.proof_offset += vars.proof_size;
 
         (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser.parse_be(blob, vars.proof_offset);
-        require(vars.proof_size <= blob.length, "Proof length is incorrect!");
+        require(vars.proof_size <= blob.length, "Proof is not correct!");
         init_vars(vars, init_params[2], columns_rotations[1]);
         transcript.init_transcript(vars.tr_state, hex"");
 

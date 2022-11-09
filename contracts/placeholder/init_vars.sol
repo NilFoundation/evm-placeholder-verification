@@ -25,10 +25,10 @@ import "../logging.sol";
 
 library init_vars {
     struct vars_t {
+        types.fri_params_type fri_params;
         types.placeholder_proof_map proof_map;
         uint256 proof_size;
         types.transcript_data tr_state;
-        types.fri_params_type fri_params;
         types.placeholder_common_data common_data;
         types.arithmetization_params arithmetization_params;
     }
@@ -37,7 +37,7 @@ library init_vars {
                        int256[][] calldata columns_rotations, vars_t memory vars) internal view {
 
         (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser.parse_be(blob, 0);
-        require(vars.proof_size == blob.length, "Proof length was detected incorrectly!");
+        require(vars.proof_size == blob.length, "Proof is not correct!");
         transcript.init_transcript(vars.tr_state, hex"");
 
         uint256 idx;
