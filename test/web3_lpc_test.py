@@ -204,5 +204,5 @@ if __name__ == '__main__':
     params = init_batched_test()
     run_tx_hash = contract_inst.functions.batched_verify(
         params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
-#    run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
-#    print_tx_info(w3, run_tx_receipt, params['_test_name'])
+    run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
+    print_tx_info(w3, run_tx_receipt, params['_test_name'])

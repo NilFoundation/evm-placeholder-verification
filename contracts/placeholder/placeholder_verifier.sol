@@ -58,14 +58,6 @@ library placeholder_verifier {
     uint256 constant WITNESS_EVALUATION_POINTS_OFFSET = 0x2e0;
     uint256 constant STATUS_OFFSET = 0x3a0;
 
-    function test(
-        bytes calldata blob,
-        types.transcript_data memory tr_state,
-        types.placeholder_proof_map memory proof_map
-    ) external view returns (uint256){
-        return 1;
-    }
-
     function verify_proof_be(
         bytes calldata blob,
         types.transcript_data memory tr_state,

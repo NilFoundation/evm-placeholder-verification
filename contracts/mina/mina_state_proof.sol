@@ -82,7 +82,6 @@ contract MinaStateProof {
             if(vars.fri_params.step_list[i] > vars.fri_params.max_step)
                 vars.fri_params.max_step = vars.fri_params.step_list[i];
             unchecked{ i++; idx++;}
-<<<<<<< HEAD
         }
 
         unchecked{
@@ -94,39 +93,18 @@ contract MinaStateProof {
             vars.arithmetization_params.permutation_columns = vars.arithmetization_params.witness_columns 
                 + vars.arithmetization_params.public_input_columns 
                 + vars.arithmetization_params.constant_columns;
-=======
->>>>>>> 72276d679ddb80fd915638e37c158ca382866fed
         }
     }
 
     function allocate_all(test_local_vars memory vars, uint256 max_step, uint256 max_batch) internal view{
         uint256 max_coset = 1 << (vars.fri_params.max_step - 1);
 
-<<<<<<< HEAD
         vars.fri_params.s_indices = new uint256[](max_coset);
         vars.fri_params.correct_order_idx = new uint256[](max_coset);
         vars.fri_params.tmp_arr = new uint256[](max_coset << 1);
         vars.fri_params.s = new uint256[](max_coset);
         vars.fri_params.coeffs = new uint256[](max_coset << 1);
         vars.fri_params.b = new bytes(vars.fri_params.max_batch << (vars.fri_params.max_step + 5));
-=======
-        vars.fri_params.s_indices = new uint256[2][](max_coset);
-        vars.fri_params.s = new uint256[2][](max_coset);
-        vars.fri_params.correct_order_idx = new uint256[2][](max_coset);
-
-        vars.fri_params.ys[0] = new uint256[2][][](max_batch);
-        vars.fri_params.ys[1] = new uint256[2][][](max_batch);
-        vars.fri_params.ys[2] = new uint256[2][][](max_batch);
-
-        for(uint256 i = 0; i < vars.fri_params.max_batch;){
-            vars.fri_params.ys[0][i] = new uint256[2][](max_coset);
-            vars.fri_params.ys[1][i] = new uint256[2][](max_coset);
-            vars.fri_params.ys[2][i] = new uint256[2][](max_coset);
-            unchecked{i++;}
-        }
-
-        vars.fri_params.b = new bytes(0x40 * vars.fri_params.max_batch * max_coset);
->>>>>>> 72276d679ddb80fd915638e37c158ca382866fed
     }
 
     function verify(
