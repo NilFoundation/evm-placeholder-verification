@@ -161,8 +161,6 @@ def init_skipping_layers_test():
     step_list.append(1);
     params['init_params'].append(len(step_list))
     params['init_params'].extend(step_list)  # step_list
-    params['init_params'].append(
-        26217937587563095239723870254092982918845276250263818911301829349969290592257)  # const 1/2
 
     params['evaluation_points'] = [[7, ]]
 

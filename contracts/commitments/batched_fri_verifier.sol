@@ -46,7 +46,9 @@ library batched_fri_verifier {
         //0xe0     
         uint256     c2;                                      // fs2 coefficient.
         //0x100
-        uint256 interpolant;                                 // interpolant
+        uint256     interpolant;                             // interpolant
+        //0x120
+        uint256     prev_coeffs_len;
 
         // Fri proof fields
         uint256 final_poly_offset;                           // one for all rounds
@@ -82,18 +84,16 @@ library batched_fri_verifier {
         uint256 indices_size;
         uint256 ind;
         uint256 newind;
-        uint256 coeffs_len;
         uint256 mul;
         // Useful previous round values.
         // uint256 prev_p_offset;
         uint256 prev_polynomial_vector_size;
         uint256 prev_step;
-        uint256 prev_coeffs_len;
+        uint256 coeffs_len;
     }
 
     uint256 constant FRI_PARAMS_BYTES_B_OFFSET = 0x260;
     uint256 constant FRI_PARAMS_COEFFS_OFFSET = 0x280;
-    uint256 constant CONSTANT_1_2_OFFSET = 0x1e0;
 
     uint256 constant S1_OFFSET = 0x00;                                      
     uint256 constant X_OFFSET = 0x20;                                      
@@ -104,6 +104,7 @@ library batched_fri_verifier {
     uint256 constant C1_OFFSET = 0xc0;                                      // coefficient1_offset
     uint256 constant C2_OFFSET = 0xe0;                                      // coefficient2_offset
     uint256 constant INTERPOLANT_OFFSET = 0x100;
+    uint256 constant PREV_COEFFS_LEN_OFFSET = 0x120;
 
     uint256 constant m = 2;
 
@@ -627,14 +628,10 @@ library batched_fri_verifier {
                         mstore(
                             add(local_vars, C1_OFFSET),
                             mulmod(
-                                mload(add(fri_params, CONSTANT_1_2_OFFSET)),
-                                mulmod(
+                                mload(local_vars),
+                                addmod(
                                     mload(local_vars),
-                                    addmod(
-                                        mload(local_vars),
-                                        mload(add(local_vars, ALPHA_OFFSET)),
-                                        mload(fri_params)
-                                    ),
+                                    mload(add(local_vars, ALPHA_OFFSET)),
                                     mload(fri_params)
                                 ),
                                 mload(fri_params)
@@ -643,14 +640,10 @@ library batched_fri_verifier {
                         mstore(
                             add(local_vars, C2_OFFSET),
                             mulmod(
-                                mload(add(fri_params, CONSTANT_1_2_OFFSET)),
-                                mulmod(
+                                mload(local_vars),
+                                addmod(
                                     mload(local_vars),
-                                    addmod(
-                                        mload(local_vars),
-                                        sub(mload(fri_params), mload(add(local_vars, ALPHA_OFFSET))),
-                                        mload(fri_params)
-                                    ),
+                                    sub(mload(fri_params), mload(add(local_vars, ALPHA_OFFSET))),
                                     mload(fri_params)
                                 ),
                                 mload(fri_params)
@@ -676,25 +669,17 @@ library batched_fri_verifier {
                         assembly{
                             mstore(
                                 add(local_vars, C1_OFFSET),
-                                mulmod(
-                                    mload(add(fri_params, CONSTANT_1_2_OFFSET)),
-                                    addmod(
-                                        mload(local_vars),
-                                        mload(add(local_vars, ALPHA_OFFSET)),
-                                        mload(fri_params)
-                                    ),
+                                addmod(
+                                    mload(local_vars),
+                                    mload(add(local_vars, ALPHA_OFFSET)),
                                     mload(fri_params)
                                 )
                             )
                             mstore(
                                 add(local_vars, C2_OFFSET),
-                                mulmod(
-                                    mload(add(fri_params, CONSTANT_1_2_OFFSET)),
-                                    addmod(
-                                        mload(add(local_vars, ALPHA_OFFSET)),
-                                        sub(mload(fri_params), mload(local_vars)),
-                                        mload(fri_params)
-                                    ),
+                                addmod(
+                                    mload(add(local_vars, ALPHA_OFFSET)),
+                                    sub(mload(fri_params), mload(local_vars)),
                                     mload(fri_params)
                                 )
                             )
@@ -893,7 +878,7 @@ library batched_fri_verifier {
                         assembly{
                             c := calldataload(add(blob.offset, mload(add(local_vars, COLINEAR_OFFSET))))
                             c := mulmod(mload(add(local_vars, X_OFFSET)), c, mload(fri_params))
-                            c := addmod(c, c, mload(fri_params))
+                            c := mulmod(c, mload(add(local_vars,PREV_COEFFS_LEN_OFFSET)), mload(fri_params))
                         }
                         if( local_vars.interpolant != c ){
                             require(false, "Interpolant failes");
@@ -931,10 +916,11 @@ library batched_fri_verifier {
                         assembly{
                             c := calldataload(add(blob.offset, mload(add(local_vars, COLINEAR_OFFSET))))
                             c := mulmod(mload(add(local_vars, X_OFFSET)), c, mload(fri_params))
-                            c := addmod(c, c, mload(fri_params))
+                            c := mulmod(c, mload(add(local_vars,PREV_COEFFS_LEN_OFFSET)), mload(fri_params))
                             mstore(add(local_vars, Y_OFFSET),      add( mload(add(local_vars, Y_OFFSET)), 0x8))
                         }
                         if( local_vars.interpolant != c ){
+                            require(false, logging.uint2decstr(local_vars.prev_coeffs_len));
                             require(false, "Interpolant failes");
                             return false;
                         }

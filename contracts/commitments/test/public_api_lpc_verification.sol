@@ -78,8 +78,6 @@ contract TestLpcVerifier {
             sum += fri_params.step_list[i];
         }
 
-        fri_params.const1_2 = init_params[idx++];
-
         require(sum == fri_params.r, "Sum of fri_params.step_list and fri_params.r are different");
         placeholder_proof_map_parser.init(fri_params, fri_params.leaf_size);
         

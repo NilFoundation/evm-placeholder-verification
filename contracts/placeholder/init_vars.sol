@@ -47,7 +47,6 @@ library init_vars {
         vars.fri_params.r = init_params[idx++];
         vars.fri_params.max_degree = init_params[idx++];
         vars.fri_params.lambda = init_params[idx++];
-        vars.fri_params.const1_2 = field.inverse_static(2, vars.fri_params.modulus);
 
         vars.common_data.rows_amount = init_params[idx++];
         vars.common_data.omega = init_params[idx++];

@@ -176,7 +176,7 @@ library types {
         //0x1c0
         uint256[] step_list;
         //0x1e0
-        uint256 const1_2;       // !!! It's important. Set it please. Uninitialized 1/2 => colinear check error.
+        uint256[]    s;                    // Coset indices
         //0x200
         uint256 i_fri_proof;    // It is useful for debugging
         //0x220
@@ -190,7 +190,6 @@ library types {
         //0x280
         uint256[]    coeffs;                  // coeffs -- ancestor of ys
         uint256[]    s_indices;
-        uint256[]    s;                    // Coset indices
         uint256[]    tmp_arr;
         uint256[]    correct_order_idx;       // Ordered indices to pack ys to check merkle proofs
     }
