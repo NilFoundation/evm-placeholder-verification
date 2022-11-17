@@ -178,10 +178,6 @@ library permutation_argument {
 
         require(
             batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_fixed_values_offset) == ar_params.permutation_columns + ar_params.permutation_columns + ar_params.constant_columns + ar_params.selector_columns + 2,
-            logging.uint2decstr(batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_fixed_values_offset))
-        );
-        require(
-            batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_fixed_values_offset) == ar_params.permutation_columns + ar_params.permutation_columns + ar_params.constant_columns + ar_params.selector_columns + 2,
             "Something wrong with number of fixed values polys"
         );
         //local_vars.tmp1 = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_witness_offset);

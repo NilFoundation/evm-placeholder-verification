@@ -1,5 +1,3 @@
-
-
 // SPDX-License-Identifier: Apache-2.0.
 //---------------------------------------------------------------------------//
 // Copyright (c) 2022 Mikhail Komarov <nemo@nil.foundation>
@@ -28,7 +26,7 @@ import "../../logging.sol";
 import "../../components/unified_addition_gen.sol";
 import "../init_vars.sol";
 
-contract TestPlaceholderVerifierUnifiedAddition {
+contract TestPlaceholderVerifierUniversal {
     function verify(
         bytes calldata blob,
     // 0) modulus
@@ -43,7 +41,8 @@ contract TestPlaceholderVerifierUnifiedAddition {
     // 8 + D_omegas_size) q_size
     //  [..., q_i, ...]
         uint256[] calldata init_params,
-        int256[][] calldata columns_rotations
+        int256[][] calldata columns_rotations,
+        uint160    gate_argument_address
     ) public {
         init_vars.vars_t memory vars;
         init_vars.init(blob, init_params, columns_rotations, vars);
@@ -59,6 +58,7 @@ contract TestPlaceholderVerifierUnifiedAddition {
             vars.proof_map, vars.fri_params,
             vars.common_data, local_vars, vars.arithmetization_params);
         // 7. gate argument specific for circuit
+        // Wait for better times.
         types.gate_argument_local_vars memory gate_params;
         gate_params.modulus = vars.fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
@@ -66,7 +66,9 @@ contract TestPlaceholderVerifierUnifiedAddition {
         gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
         gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
-        local_vars.gate_argument = unified_addition_component_gen.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
+        require(false, "Gate argument problem");
+/*        unified_addition_component_gen gate_argument_component = unified_addition_component_gen(address(gate_argument_address));
+        local_vars.gate_argument = gate_argument_component.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
         require(
             placeholder_verifier.verify_proof_be(
                 blob,
@@ -78,6 +80,6 @@ contract TestPlaceholderVerifierUnifiedAddition {
                 vars.arithmetization_params
             ),
             "Proof is not correct!"
-        );
+        );*/
     }
 }
