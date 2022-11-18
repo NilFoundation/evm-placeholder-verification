@@ -4,13 +4,14 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 import os
 import sys
+import argparse
 
 base_path = os.path.dirname(os.path.realpath(__file__))
 contracts_dir = base_path + '/contracts'
 
 
-def init_connection():
-    w3 = Web3(Web3.HTTPProvider('http://127.0.0.1:8545', request_kwargs={'timeout': 600}))
+def init_connection(url):
+    w3 = Web3(Web3.HTTPProvider(url, request_kwargs={'timeout': 600}))
     w3.middleware_onion.inject(geth_poa_middleware, layer=0)
     w3.eth.default_account = w3.eth.accounts[0]
     return w3
@@ -97,7 +98,12 @@ if __name__ == '__main__':
         "placeholder_verifier",
     ]
 
-    w3 = init_connection()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--url', help='Ethereum node url', default='http://127.0.0.1:8545')
+    parser.add_argument('--address-output', help='Output file for contract address')
+    args = parser.parse_args()
+
+    w3 = init_connection(args.url)
     solcx.install_solc('0.8.17')
     print(f'{contracts_dir}/{contract_path}')
     compiled = solcx.compile_files(
@@ -118,6 +124,6 @@ if __name__ == '__main__':
     print("Deployment cost:", deploy_tx_receipt.gasUsed)
     print("contractAddress:", deploy_tx_receipt.contractAddress)
     print("abi:", abi)
-    if (len(sys.argv) > 1):
-        with open(sys.argv[1], 'w') as f:
+    if (args.address_output is not None):
+        with open(args.address_output, 'w') as f:
             f.write(deploy_tx_receipt.contractAddress)
