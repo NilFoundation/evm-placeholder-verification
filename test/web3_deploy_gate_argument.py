@@ -7,19 +7,6 @@ from web3_test import deploy_link_libs
 import os
 import sys
 
-linked_gates_libs_names = [
-    "gate0",
-    "gate1",
-    "gate2",
-    "gate3",
-    "gate4",
-    "gate5",
-    "gate6",
-    "gate7",
-    "gate8",
-    "gate9"
-]
-
 base_path = os.path.abspath(os.getcwd())
 contracts_dir = base_path + '/contracts'
 
@@ -44,15 +31,20 @@ def find_compiled_contract(compiled, contract_name):
     return compiled_id, compiled_interface
 
 if __name__ == '__main__':
+    if len(sys.argv) == 1:
+        folder_name = 'generated_gate_argument'
+    else:
+        folder_name = sys.argv[1]
+        
     contract_name = 'gate_argument_split_gen'
-    contract_path = 'generated_gate_argument/gate_argument.sol'
+    contract_path = folder_name + '/gate_argument.sol'
 
     w3 = init_connection()
     solcx.install_solc('0.8.17')
     print(f'{base_path}/{contract_path}')
     compiled = solcx.compile_files(
         [f'{base_path}/{contract_path}'],
-        allow_paths=[f'{contracts_dir}', f'{base_path}/generated_gate_argument'],
+        allow_paths=[f'{contracts_dir}', f'{base_path}/{folder_name}'],
         output_values=['abi', 'bin'],
         solc_version="0.8.17",
         optimize=True,
@@ -61,7 +53,7 @@ if __name__ == '__main__':
     bytecode = compiled_test_contract_interface['bin']
     abi = compiled_test_contract_interface['abi']
 
-    jsonf = open(f"{base_path}/generated_gate_argument/linked_libs_list.json");
+    jsonf = open(f"{base_path}/{folder_name}/linked_libs_list.json");
     parsed_json = json.load(jsonf);
     jsonf.close()
     bytecode = deploy_link_libs(w3, compiled, bytecode, parsed_json)
@@ -72,6 +64,5 @@ if __name__ == '__main__':
     print("Deployment cost:", deploy_tx_receipt.gasUsed)
     print("contractAddress:", deploy_tx_receipt.contractAddress)
     print("abi:", abi)
-    if (len(sys.argv) > 1):
-        with open(sys.argv[1], 'w') as f:
-            f.write(deploy_tx_receipt.contractAddress)
+    with open(f'{base_path}/{folder_name}/addr', 'w') as f:
+        f.write(deploy_tx_receipt.contractAddress)

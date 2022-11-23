@@ -23,7 +23,7 @@ import "../../cryptography/transcript.sol";
 import "../proof_map_parser.sol";
 import "../placeholder_verifier.sol";
 import "../../logging.sol";
-import "../../components/unified_addition_gen.sol";
+import "../../gate_argument_interface.sol";
 import "../init_vars.sol";
 
 contract TestPlaceholderVerifierUniversal {
@@ -66,8 +66,7 @@ contract TestPlaceholderVerifierUniversal {
         gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
         gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
-        require(false, "Gate argument problem");
-/*        unified_addition_component_gen gate_argument_component = unified_addition_component_gen(address(gate_argument_address));
+        gate_argument_split_gen gate_argument_component = gate_argument_split_gen(address(gate_argument_address));
         local_vars.gate_argument = gate_argument_component.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
         require(
             placeholder_verifier.verify_proof_be(
@@ -80,6 +79,6 @@ contract TestPlaceholderVerifierUniversal {
                 vars.arithmetization_params
             ),
             "Proof is not correct!"
-        );*/
+        );
     }
 }
