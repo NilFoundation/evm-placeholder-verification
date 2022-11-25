@@ -5,23 +5,28 @@ import solcx
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 import os
+import argparse
 
 base_path = os.path.dirname(os.path.realpath(__file__))
 
 
-def init_connection():
-    w3 = Web3(Web3.HTTPProvider('http://127.0.0.1:8545', request_kwargs={'timeout': 600}))
+def init_connection(url):
+    w3 = Web3(Web3.HTTPProvider(url, request_kwargs={'timeout': 600}))
     w3.middleware_onion.inject(geth_poa_middleware, layer=0)
     w3.eth.default_account = w3.eth.accounts[0]
     return w3
 
 
 if __name__ == '__main__':
-    w3 = init_connection()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--url', help='Ethereum node url', default='http://127.0.0.1:8545')
+    parser.add_argument('--proof-path', help='Path to proof file', default=base_path + '/proof.data')
+    parser.add_argument('--address', help='Verification instructions address', required=True)
+    args = parser.parse_args()
+
+    w3 = init_connection(args.url)
     params = dict()
-    proof_path = base_path + '/proof.data'
-    if len(sys.argv) > 2:
-        proof_path = sys.argv[2]
+    proof_path = args.proof_path
     f = open(proof_path)
     params["proof"] = f.read()
     f.close()
@@ -109,12 +114,10 @@ if __name__ == '__main__':
 
     print("Placeholder proof verification for Mina aux state proof")
     abi = [{'anonymous': False, 'inputs': [{'indexed': False, 'internalType': 'uint256', 'name': 'gas_usage', 'type': 'uint256'}], 'name': 'gas_usage_emit', 'type': 'event'}, {'inputs': [{'internalType': 'bytes', 'name': 'blob', 'type': 'bytes'}, {'internalType': 'uint256[][]', 'name': 'init_params', 'type': 'uint256[][]'}, {'internalType': 'int256[][][]', 'name': 'columns_rotations', 'type': 'int256[][][]'}], 'name': 'verify', 'outputs': [], 'stateMutability': 'nonpayable', 'type': 'function'}]
-    test_contract_inst = w3.eth.contract(address=sys.argv[1], abi=abi)
+    test_contract_inst = w3.eth.contract(address=args.address, abi=abi)
     run_tx_hash = test_contract_inst.functions.verify(params['proof'], params['init_params'],
                                                       params['columns_rotations']).transact()
     run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
     print(run_tx_receipt.transactionHash.hex())
     print("Gas used =", test_contract_inst.events.gas_usage_emit.getLogs()[0]['args']['gas_usage'])
-    if len(sys.argv) > 3 and sys.argv[3] == '1':
-        print("Gas used with extra technical costs: ", run_tx_receipt.gasUsed)
 
