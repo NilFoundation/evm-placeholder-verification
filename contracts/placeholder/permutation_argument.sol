@@ -149,7 +149,8 @@ library permutation_argument {
         types.placeholder_common_data memory common_data,
         types.placeholder_local_variables memory local_vars,
         types.arithmetization_params memory ar_params
-    ) internal pure returns (uint256[] memory F) {
+    ) internal returns (uint256[] memory F) {
+        logging.profiling_start_block("permutation_argument::verify_eval_be");
         local_vars.beta = transcript.get_field_challenge(
             tr_state,
             fri_params.modulus
@@ -176,10 +177,10 @@ library permutation_argument {
             "id_permutation length is not equal to sigma_permutation length!"
         );*/
 
-        require(
+        /*require(
             batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_fixed_values_offset) == ar_params.permutation_columns + ar_params.permutation_columns + ar_params.constant_columns + ar_params.selector_columns + 2,
-            logging.uint2decstr(batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_fixed_values_offset))
-        );
+            logging.uint2decstr(ar_params.permutation_columns + ar_params.permutation_columns + ar_params.constant_columns + ar_params.selector_columns + 2)
+        );*/
         require(
             batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_fixed_values_offset) == ar_params.permutation_columns + ar_params.permutation_columns + ar_params.constant_columns + ar_params.selector_columns + 2,
             "Something wrong with number of fixed values polys"
@@ -424,5 +425,6 @@ library permutation_argument {
                 )
             )
         }
+        logging.profiling_end_block();
     }
 }

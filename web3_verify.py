@@ -113,11 +113,10 @@ if __name__ == '__main__':
     params['columns_rotations'][1][13] = [0, 1]
 
     print("Placeholder proof verification for Mina aux state proof")
-    abi = [{'anonymous': False, 'inputs': [{'indexed': False, 'internalType': 'uint256', 'name': 'gas_usage', 'type': 'uint256'}], 'name': 'gas_usage_emit', 'type': 'event'}, {'inputs': [{'internalType': 'bytes', 'name': 'blob', 'type': 'bytes'}, {'internalType': 'uint256[][]', 'name': 'init_params', 'type': 'uint256[][]'}, {'internalType': 'int256[][][]', 'name': 'columns_rotations', 'type': 'int256[][][]'}], 'name': 'verify', 'outputs': [], 'stateMutability': 'nonpayable', 'type': 'function'}]
+    abi = [{'anonymous': False, 'inputs': [{'indexed': False, 'internalType': 'uint256', 'name': 'gas_usage', 'type': 'uint256'}], 'name': 'mina_gas_usage_emit', 'type': 'event'}, {'inputs': [{'internalType': 'bytes', 'name': 'blob', 'type': 'bytes'}, {'internalType': 'uint256[][]', 'name': 'init_params', 'type': 'uint256[][]'}, {'internalType': 'int256[][][]', 'name': 'columns_rotations', 'type': 'int256[][][]'}], 'name': 'verify', 'outputs': [], 'stateMutability': 'nonpayable', 'type': 'function'}]
     test_contract_inst = w3.eth.contract(address=args.address, abi=abi)
     run_tx_hash = test_contract_inst.functions.verify(params['proof'], params['init_params'],
                                                       params['columns_rotations']).transact()
     run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
     print(run_tx_receipt.transactionHash.hex())
-    print("Gas used =", test_contract_inst.events.gas_usage_emit.getLogs()[0]['args']['gas_usage'])
-
+    print("Gas used =", test_contract_inst.events.mina_gas_usage_emit.getLogs()[0]['args']['gas_usage'])

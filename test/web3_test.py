@@ -59,6 +59,70 @@ def deploy_link_libs(w3, compiled, test_contract_bytecode, linked_libs_names):
     print('Bytecode size:', len(linked_bytecode) // 2)
     return linked_bytecode
 
+profiling_start_block = 0;
+profiling_end_block = 1;
+profiling_log_message = 2;
+
+class gas_usage_event:
+    def  __init__(self, event):
+        self.command = event['args']['command'];
+        self.gas_usage = event['args']['gas_usage'];
+        self.function_name = event['args']['function_name'];
+
+def print_profiling_log(logs, totalGas, filename):
+    f = open(filename, "w")
+    stack = [];
+    result = [];
+    depth = 1;
+    prefix = "";
+    cur_gas_start = 0;
+    for i in range(len(logs)):
+        event = logs[i]
+        e = gas_usage_event(event)
+
+        if( e.command == profiling_start_block):
+            cur_gas_start = e.gas_usage
+            e.block_gas_usage = e.gas_usage
+            result.append(e)
+            stack.append(i)
+        if( e.command == profiling_end_block):
+            start_ind = stack.pop()
+            cur_gas_start = result[start_ind].block_gas_usage
+            e.block_gas_usage = cur_gas_start - e.gas_usage
+            result.append(e)
+            result[start_ind].block_gas_usage = cur_gas_start - e.gas_usage
+        if( e.command == profiling_log_message):
+            e.block_gas_usage = cur_gas_start - e.gas_usage
+            result.append(e)
+    first = True
+    print("{\"totalGas\":","\"", totalGas, "\",", file = f, sep = "")
+    i = 0
+    depth = 0
+    for e in result:
+        gas_usage = e.gas_usage;
+        block_gas_usage = e.block_gas_usage
+        if( e.command == profiling_start_block ):
+            if not first:
+                print(",",file = f)
+            first = False
+            print(prefix, "\"",i,"_",e.function_name,'\":{', file = f, sep = "")
+            depth += 1
+            prefix = "    " * depth
+            print(prefix,"\"gas_usage\":\"",block_gas_usage, "\"", file = f, end = "", sep = "")
+        if( e.command == profiling_end_block ):
+            first = False
+            depth -=1
+            prefix = "    " * depth
+            print("", file=f)
+            print(prefix, "}", file = f, end="")   
+        if( e.command == profiling_log_message ):
+            if not first:
+                print(",", file = f)
+            print(prefix, "\"", e.function_name, ":\"",block_gas_usage, "\"", file = f,  end="")   
+            first = False
+        i = i + 1;
+    print("", file = f)
+    print("}", file = f)
 
 def do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names,
                                                          init_test_params_func):
@@ -91,6 +155,14 @@ def do_placeholder_verification_test_via_transact_simple(test_contract_name, tes
     run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
     print_tx_info(w3, run_tx_receipt, params['_test_name'])
 
+    if hasattr(test_contract_inst.events, "gas_usage_emit"):
+        logfilename = "logs/log.json"
+        if "log_file" in params.keys():
+            logfilename = params["log_file"]
+        print("Print log in ", logfilename)
+        print_profiling_log(test_contract_inst.events.gas_usage_emit.getLogs(), run_tx_receipt.gasUsed, logfilename)
+    else:
+        print("Logging disabled")
 
 def do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path,
                                                   linked_gates_entry_libs_names,
@@ -180,3 +252,11 @@ def do_placeholder_verification_test_via_transact_with_external_gates(
         params['proof'], params['init_params'], params['columns_rotations'], params['gate_argument_address']).transact()
     run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
     print_tx_info(w3, run_tx_receipt, params['_test_name'])
+    if hasattr(test_contract_inst.events, "gas_usage_emit"):
+        logfilename = "log.json"
+        if "log_file" in params.keys():
+            logfilename = params["log_file"]
+        print("Print log in ", logfilename)
+        print_profiling_log(test_contract_inst.events.gas_usage_emit.getLogs(), run_tx_receipt.gasUsed, logfilename)
+    else:
+        print("Logging disabled")

@@ -66,8 +66,9 @@ library mina_base_split_gen {
         types.gate_argument_local_vars memory gate_params,
         types.arithmetization_params memory ar_params,
         int256[][] memory columns_rotations
-    ) internal pure returns (uint256 gates_evaluation) {
+    ) internal returns (uint256 gates_evaluation) {
         // TODO: check witnesses number in proof
+        logging.profiling_start_block("mina_base_split_gen:evaluate_gates_be");
 
         gate_params.witness_evaluations = new uint256[][](WITNESSES_N);
         gate_params.offset = batched_lpc_verifier.skip_to_z(blob,  gate_params.eval_proof_witness_offset);
@@ -131,5 +132,6 @@ library mina_base_split_gen {
 //        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate21.evaluate_gate_be(gate_params, columns_rotations);
 
         gates_evaluation = gate_params.gates_evaluation;
+        logging.profiling_end_block();
     }
 }

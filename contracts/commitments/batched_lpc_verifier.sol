@@ -174,7 +174,9 @@ library batched_lpc_verifier {
     function parse_verify_proof_be(bytes calldata blob,
         uint256 offset, uint256[][] memory evaluation_points,
         types.transcript_data memory tr_state, types.fri_params_type memory fri_params)
-    internal view returns (bool result) {
+    internal returns (bool result) {
+        logging.profiling_start_block("batched_lpc_verifier::parse_verify_proof_be");
+        logging.profiling_start_block("batched_lpc_verifier::prepare U and V");
         result = false;
         uint256 ind;
         uint256 ind2;
@@ -231,6 +233,8 @@ library batched_lpc_verifier {
             unchecked{ polynom_index++; }
         }
 
+        logging.profiling_end_block();
+        logging.profiling_start_block("batched_lpc_verifier::FRI_checks");
         offset = skip_to_first_fri_proof_be(blob, offset);
         for (round_id = 0; round_id < fri_params.lambda;) {
             fri_params.i_fri_proof = round_id;  // for debug only
@@ -242,5 +246,7 @@ library batched_lpc_verifier {
             unchecked{ round_id++; }
         }
         result = true;
-    }
+        logging.profiling_end_block();
+        logging.profiling_end_block();
+   }
 }

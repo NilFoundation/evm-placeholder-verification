@@ -30,7 +30,8 @@ import "../components/mina_base_split_gen.sol";
 import "../components/mina_scalar_split_gen.sol";
 
 contract MinaStateProof {
-    event gas_usage_emit(uint256 gas_usage);
+    // event renamed to prevent conflicts with logging system
+    event mina_gas_usage_emit(uint256 gas_usage);
 
     struct gas_usage_t {
         uint256 start;
@@ -193,6 +194,6 @@ contract MinaStateProof {
             "Proof is not correct!"
         );
         gas_usage.end = gasleft();
-        emit gas_usage_emit(gas_usage.start - gas_usage.end);
+        emit mina_gas_usage_emit(gas_usage.start - gas_usage.end);
     }
 }

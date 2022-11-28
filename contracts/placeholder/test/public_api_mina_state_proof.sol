@@ -28,6 +28,8 @@ import "../../components/mina_base_split_gen.sol";
 import "../../components/mina_scalar_split_gen.sol";
 
 contract TestMinaStateProof {
+    event gas_usage_emit(uint8 command, string function_name, uint256 gas_usage);
+
     struct test_local_vars {
         uint256 proofs_num;
         uint256 ind;
@@ -116,12 +118,14 @@ contract TestMinaStateProof {
         uint256[][] calldata init_params,
         int256[][][] calldata columns_rotations
     ) public {
+        logging.profiling_start_block("public_api_mina_state_proof::verify");
         test_local_vars memory vars;
         uint256 max_step;
         uint256 max_batch;
 
         require(blob.length == init_params[0][1], "Invalid input length");
 
+        logging.profiling_start_block("public_api_mina_state_proof::verify base proof");
         for( vars.ind = 0; vars.ind < 2; ){
             init_vars(vars, init_params[vars.ind+1], columns_rotations[vars.ind]);
             if(vars.fri_params.max_step > max_step) max_step = vars.fri_params.max_step;
@@ -147,10 +151,13 @@ contract TestMinaStateProof {
 
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
         // 5. permutation argument
+        logging.profiling_start_block("public_api_mina_state_proof::permutation_argument");
         local_vars.permutation_argument = permutation_argument.verify_eval_be(blob, vars.tr_state,
             vars.proof_map, vars.fri_params,
             vars.common_data, local_vars, vars.arithmetization_params);
+        logging.profiling_end_block();
         // 7. gate argument specific for circuit
+        logging.profiling_start_block("public_api_mina_state_proof::gate_argument");
         types.gate_argument_local_vars memory gate_params;
         gate_params.modulus = vars.fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
@@ -159,13 +166,16 @@ contract TestMinaStateProof {
         gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
         local_vars.gate_argument = mina_base_split_gen.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
+        logging.profiling_end_block();
 
         require(
             placeholder_verifier.verify_proof_be(blob, vars.tr_state,  vars.proof_map, vars.fri_params,
                                                  vars.common_data, local_vars, vars.arithmetization_params),
             "Base proof is not correct!"
         );
-        
+
+        logging.profiling_end_block();
+        logging.profiling_start_block("public_api_mina_state_proof::verify base proof");
         vars.proof_offset += vars.proof_size;
 
         (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser.parse_be(blob, vars.proof_offset);
@@ -180,10 +190,13 @@ contract TestMinaStateProof {
 
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
         // 5. permutation argument
+        logging.profiling_start_block("public_api_mina_state_proof::permutation_argument");
         local_vars_scalar.permutation_argument = permutation_argument.verify_eval_be(blob, vars.tr_state,
             vars.proof_map, vars.fri_params,
             vars.common_data, local_vars_scalar, vars.arithmetization_params);
+        logging.profiling_end_block();
         // 7. gate argument specific for circuit
+        logging.profiling_start_block("public_api_mina_state_proof::gate_argument");
         gate_params.modulus = vars.fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
         gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_variable_values_offset;
@@ -197,5 +210,7 @@ contract TestMinaStateProof {
                                                  vars.common_data, local_vars_scalar, vars.arithmetization_params),
             "Scalar proof is not correct!"
         );
+        logging.profiling_end_block();
+        logging.profiling_end_block();
     }
 }

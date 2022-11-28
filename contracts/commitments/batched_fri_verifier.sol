@@ -535,10 +535,11 @@ library batched_fri_verifier {
         uint256 offset, 
         types.transcript_data memory tr_state,
         types.fri_params_type memory fri_params
-    ) internal view returns (bool result) {
+    ) internal returns (bool result) {
         // TODO: offsets in local vars should be better
         // But it needs assembly work
 
+        logging.profiling_start_block("batched_fri_verifier::parse_verify_proof_be");
         uint256 c;
         result = false;
         //require(m == 2, "m has to be equal to 2!");
@@ -969,6 +970,7 @@ library batched_fri_verifier {
             local_vars.final_poly_offset = basic_marshalling.skip_vector_of_uint256_be(blob, local_vars.final_poly_offset);
             unchecked{ local_vars.p_ind++; local_vars.p_offset += local_vars.polynomial_vector_size;}
         }
+        logging.profiling_end_block();
         return true;
     }
 }

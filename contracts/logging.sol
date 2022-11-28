@@ -18,11 +18,27 @@
 pragma solidity >=0.8.4;
 
 library logging {
+    uint8 constant START_BLOCK_COMMAND_CODE=0;
+    uint8 constant END_BLOCK_COMMAND_CODE=1;
+    uint8 constant LOG_MESSAGE_CODE=2;
+
+    event gas_usage_emit(uint8 command, string function_name, uint256 gas_usage);
+
+    function profiling_start_block(string memory function_name) internal {
+        emit gas_usage_emit(START_BLOCK_COMMAND_CODE, function_name, gasleft());
+    }
+
+    function profiling_end_block() internal {
+        emit gas_usage_emit(END_BLOCK_COMMAND_CODE, "", gasleft()) ;
+    }
+
+    function profiling_log_message(string memory message) internal {
+        emit gas_usage_emit(LOG_MESSAGE_CODE, message, gasleft()) ;
+    }
+    
     function uint2decstr(uint256 _i)
-        internal
-        pure
-        returns (string memory _uintAsString)
-    {
+        internal pure returns (string memory _uintAsString)
+    { 
         if (_i == 0) {
             return "0";
         }
