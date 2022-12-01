@@ -25,6 +25,7 @@ import "../cryptography/transcript.sol";
 import "../algebra/polynomial.sol";
 import "../basic_marshalling.sol";
 import "../logging.sol";
+import "../profiling.sol";
 
 library batched_fri_verifier {
     struct local_vars_type {
@@ -539,7 +540,7 @@ library batched_fri_verifier {
         // TODO: offsets in local vars should be better
         // But it needs assembly work
 
-        logging.profiling_start_block("batched_fri_verifier::parse_verify_proof_be");
+        profiling.start_block("batched_fri_verifier::parse_verify_proof_be");
         uint256 c;
         result = false;
         //require(m == 2, "m has to be equal to 2!");
@@ -549,7 +550,6 @@ library batched_fri_verifier {
 
         local_vars_type memory local_vars;
         init_local_vars(blob, offset, fri_params, local_vars);
-
         transcript.update_transcript_b32_by_offset_calldata(tr_state, blob, local_vars.round_proof_T_root_offset);
         local_vars.x_index = transcript.get_integral_challenge_be(tr_state, 8) & local_vars.domain_size_mod;
         local_vars.x = field.expmod_static(
@@ -573,7 +573,6 @@ library batched_fri_verifier {
             fri_params.tmp_arr[local_vars.y_ind] = fri_params.s[local_vars.y_ind];
             unchecked{local_vars.y_ind++;}
         }
-
 
         while ( local_vars.i_step < fri_params.step_list.length - 1 ) {
             // Check p. Data for it is prepared before cycle or at the end of it.
@@ -945,7 +944,7 @@ library batched_fri_verifier {
                 require(false, "Round_proof.colinear_path verifier failes");
                 return false;
             }
-        }
+       }
 
         require(fri_params.leaf_size == basic_marshalling.get_length(blob, local_vars.final_poly_offset),
             "Final poly array size is not equal to params.leaf_size!");
@@ -970,7 +969,7 @@ library batched_fri_verifier {
             local_vars.final_poly_offset = basic_marshalling.skip_vector_of_uint256_be(blob, local_vars.final_poly_offset);
             unchecked{ local_vars.p_ind++; local_vars.p_offset += local_vars.polynomial_vector_size;}
         }
-        logging.profiling_end_block();
+        profiling.end_block();
         return true;
     }
 }

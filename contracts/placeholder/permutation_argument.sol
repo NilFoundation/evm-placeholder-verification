@@ -20,6 +20,7 @@ pragma solidity >=0.8.4;
 
 import "../types.sol";
 import "../logging.sol";
+import "../profiling.sol";
 import "../basic_marshalling.sol";
 import "../cryptography/transcript.sol";
 import "../commitments/batched_lpc_verifier.sol";
@@ -150,7 +151,7 @@ library permutation_argument {
         types.placeholder_local_variables memory local_vars,
         types.arithmetization_params memory ar_params
     ) internal returns (uint256[] memory F) {
-        logging.profiling_start_block("permutation_argument::verify_eval_be");
+        profiling.start_block("permutation_argument::verify_eval_be");
         local_vars.beta = transcript.get_field_challenge(
             tr_state,
             fri_params.modulus
@@ -425,6 +426,6 @@ library permutation_argument {
                 )
             )
         }
-        logging.profiling_end_block();
+        profiling.end_block();
     }
 }

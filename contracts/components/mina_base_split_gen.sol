@@ -18,6 +18,7 @@
 pragma solidity >=0.8.4;
 
 import "../types.sol";
+import "../profiling.sol";
 import "../basic_marshalling.sol";
 import "../commitments/batched_lpc_verifier.sol";
 import "./mina_base/mina_base_gate0.sol";
@@ -68,7 +69,7 @@ library mina_base_split_gen {
         int256[][] memory columns_rotations
     ) internal returns (uint256 gates_evaluation) {
         // TODO: check witnesses number in proof
-        logging.profiling_start_block("mina_base_split_gen:evaluate_gates_be");
+        profiling.start_block("mina_base_split_gen:evaluate_gates_be");
 
         gate_params.witness_evaluations = new uint256[][](WITNESSES_N);
         gate_params.offset = batched_lpc_verifier.skip_to_z(blob,  gate_params.eval_proof_witness_offset);
@@ -132,6 +133,6 @@ library mina_base_split_gen {
 //        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate21.evaluate_gate_be(gate_params, columns_rotations);
 
         gates_evaluation = gate_params.gates_evaluation;
-        logging.profiling_end_block();
+        profiling.end_block();
     }
 }

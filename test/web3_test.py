@@ -3,10 +3,18 @@ import solcx
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 import os
+import sys
+import shutil
 
 base_path = os.path.abspath(os.getcwd()) + '/../'
 contracts_dir = base_path + '/contracts'
 
+def init_profiling():
+    if "--nolog" in sys.argv:
+        print("No logging!")
+        shutil.copyfile(contracts_dir+"/profiling_disabled.sol", contracts_dir+"/profiling.sol")
+    else:
+        shutil.copyfile(contracts_dir+"/profiling_enabled.sol", contracts_dir+"/profiling.sol")
 
 def init_connection():
     w3 = Web3(Web3.HTTPProvider('http://127.0.0.1:8545', request_kwargs={'timeout': 600}))
@@ -126,6 +134,7 @@ def print_profiling_log(logs, totalGas, filename):
 
 def do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names,
                                                          init_test_params_func):
+    init_profiling()
     w3 = init_connection()
     solcx.install_solc('0.8.17')
     print(f'{contracts_dir}/{test_contract_path}')
@@ -155,12 +164,15 @@ def do_placeholder_verification_test_via_transact_simple(test_contract_name, tes
     run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
     print_tx_info(w3, run_tx_receipt, params['_test_name'])
 
-    if hasattr(test_contract_inst.events, "gas_usage_emit"):
-        logfilename = "logs/log.json"
-        if "log_file" in params.keys():
-            logfilename = params["log_file"]
-        print("Print log in ", logfilename)
-        print_profiling_log(test_contract_inst.events.gas_usage_emit.getLogs(), run_tx_receipt.gasUsed, logfilename)
+    if "--nolog" not in sys.argv:
+        if hasattr(test_contract_inst.events, "gas_usage_emit"):
+            logfilename = "logs/log.json"
+            if "log_file" in params.keys():
+                logfilename = params["log_file"]
+            print("Print log in ", logfilename)
+            print_profiling_log(test_contract_inst.events.gas_usage_emit.getLogs(), run_tx_receipt.gasUsed, logfilename)
+        else:
+            print("No logging events in solidity abi")
     else:
         print("Logging disabled")
 
@@ -224,6 +236,7 @@ def do_placeholder_verification_test_via_transact_with_external_gates(
     linked_libs_names,
     init_test_params_func
 ):
+    init_profiling()
     w3 = init_connection()
     solcx.install_solc('0.8.17')
     print(f'{contracts_dir}/{test_contract_path}')
@@ -252,11 +265,15 @@ def do_placeholder_verification_test_via_transact_with_external_gates(
         params['proof'], params['init_params'], params['columns_rotations'], params['gate_argument_address']).transact()
     run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
     print_tx_info(w3, run_tx_receipt, params['_test_name'])
-    if hasattr(test_contract_inst.events, "gas_usage_emit"):
-        logfilename = "log.json"
-        if "log_file" in params.keys():
-            logfilename = params["log_file"]
-        print("Print log in ", logfilename)
-        print_profiling_log(test_contract_inst.events.gas_usage_emit.getLogs(), run_tx_receipt.gasUsed, logfilename)
+
+    if "--nolog" not in sys.argv:
+        if hasattr(test_contract_inst.events, "gas_usage_emit"):
+            logfilename = "logs/log.json"
+            if "log_file" in params.keys():
+                logfilename = params["log_file"]
+            print("Print log in ", logfilename)
+            print_profiling_log(test_contract_inst.events.gas_usage_emit.getLogs(), run_tx_receipt.gasUsed, logfilename)
+        else:
+            print("No logging events in solidity abi")
     else:
         print("Logging disabled")
