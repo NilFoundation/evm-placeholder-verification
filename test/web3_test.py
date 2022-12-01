@@ -126,7 +126,7 @@ def print_profiling_log(logs, totalGas, filename):
         if( e.command == profiling_log_message ):
             if not first:
                 print(",", file = f)
-            print(prefix, "\"", e.function_name, ":\"",block_gas_usage, "\"", file = f,  end="")   
+            print(prefix, "\"", e.function_name, "\":\"",block_gas_usage, "\"", file = f,  end="", sep="")   
             first = False
         i = i + 1;
     print("", file = f)
