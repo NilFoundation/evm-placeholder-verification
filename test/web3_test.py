@@ -6,7 +6,7 @@ import os
 import sys
 import shutil
 
-base_path = os.path.abspath(os.getcwd()) + '/../'
+base_path = os.path.abspath(os.getcwd())  + '/../'
 contracts_dir = base_path + '/contracts'
 
 def init_profiling():
@@ -126,7 +126,7 @@ def print_profiling_log(logs, totalGas, filename):
         if( e.command == profiling_log_message ):
             if not first:
                 print(",", file = f)
-            print(prefix, "\"", e.function_name, "\":\"",block_gas_usage, "\"", file = f,  end="", sep="")   
+            print(prefix, "\"",i,"_message\":\"",e.function_name, "\"", file = f,  end="", sep="")   
             first = False
         i = i + 1;
     print("", file = f)
