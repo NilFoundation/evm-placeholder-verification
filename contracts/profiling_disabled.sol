@@ -26,4 +26,10 @@ library profiling{
 
     function log_message(string memory message) internal {
     }
+
+    function log_dec(string memory description, uint256 num) internal{
+    }
+    
+    function log_hex(string memory description, uint256 num) internal{
+    }
 }

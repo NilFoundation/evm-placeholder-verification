@@ -21,6 +21,8 @@ library profiling{
     uint8 constant START_BLOCK_COMMAND_CODE=0;
     uint8 constant END_BLOCK_COMMAND_CODE=1;
     uint8 constant LOG_MESSAGE_CODE=2;
+    uint8 constant LOG_DECIMAL_CODE=3;
+    uint8 constant LOG_HEXADECIMAL_CODE=4;
 
     event gas_usage_emit(uint8 command, string function_name, uint256 gas_usage);
 
@@ -34,5 +36,13 @@ library profiling{
 
     function log_message(string memory message) internal {
         emit gas_usage_emit(LOG_MESSAGE_CODE, message, gasleft()) ;
+    }
+
+    function log_dec(string memory description, uint256 num) internal{
+        emit gas_usage_emit(LOG_DECIMAL_CODE, description, num);
+    }
+    
+    function log_hex(string memory description, uint256 num) internal{
+        emit gas_usage_emit(LOG_HEXADECIMAL_CODE, description, num);
     }
 }

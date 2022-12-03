@@ -70,6 +70,8 @@ def deploy_link_libs(w3, compiled, test_contract_bytecode, linked_libs_names):
 profiling_start_block = 0;
 profiling_end_block = 1;
 profiling_log_message = 2;
+profiling_log_decimal = 3;
+profiling_log_hexadecimal = 4;
 
 class gas_usage_event:
     def  __init__(self, event):
@@ -102,6 +104,12 @@ def print_profiling_log(logs, totalGas, filename):
         if( e.command == profiling_log_message):
             e.block_gas_usage = cur_gas_start - e.gas_usage
             result.append(e)
+        if( e.command == profiling_log_decimal):
+            e.block_gas_usage = e.gas_usage
+            result.append(e)
+        if( e.command == profiling_log_hexadecimal):
+            e.block_gas_usage = e.gas_usage
+            result.append(e)
     first = True
     print("{\"totalGas\":","\"", totalGas, "\",", file = f, sep = "")
     i = 0
@@ -127,6 +135,16 @@ def print_profiling_log(logs, totalGas, filename):
             if not first:
                 print(",", file = f)
             print(prefix, "\"",i,"_message\":\"",e.function_name, "\"", file = f,  end="", sep="")   
+            first = False
+        if( e.command == profiling_log_decimal):
+            if not first:
+                print(",", file = f)
+            print(prefix, "\"",i,"_",e.function_name, "\":\"", block_gas_usage,"\"", file = f,  end="", sep="")   
+            first = False
+        if( e.command == profiling_log_hexadecimal):
+            if not first:
+                print(",", file = f)
+            print(prefix, "\"",i,"_",e.function_name, "\":\"", hex(block_gas_usage),"\"", file = f,  end="", sep="")   
             first = False
         i = i + 1;
     print("", file = f)
