@@ -47,7 +47,7 @@ library unified_addition_component_gen {
         types.gate_argument_local_vars memory gate_params,
         types.arithmetization_params memory ar_params,
         int256[][] memory columns_rotations
-    ) external pure returns (uint256 gates_evaluation) {
+    ) internal pure returns (uint256 gates_evaluation) {
         // TODO: check witnesses number in proof
 
         gate_params.offset = basic_marshalling.skip_length(
