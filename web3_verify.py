@@ -22,6 +22,7 @@ if __name__ == '__main__':
     parser.add_argument('--url', help='Ethereum node url', default='http://127.0.0.1:8545')
     parser.add_argument('--proof-path', help='Path to proof file', default=base_path + '/proof.data')
     parser.add_argument('--address', help='Verification instructions address', required=True)
+    parser.add_argument('--public_input', required=True)
     args = parser.parse_args()
 
     w3 = init_connection(args.url)
