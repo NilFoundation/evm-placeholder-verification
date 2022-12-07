@@ -141,6 +141,7 @@ def init_test1():
     params['columns_rotations'][1][5] = [0, -1]
     params['columns_rotations'][1][13] = [0, 1]
 
+    params['log_file'] = 'logs/mina_state_proof.json'
     return params
 
 

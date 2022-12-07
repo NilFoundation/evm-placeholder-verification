@@ -18,11 +18,15 @@
 pragma solidity >=0.8.4;
 
 library logging {
+    uint8 constant START_BLOCK_COMMAND_CODE=0;
+    uint8 constant END_BLOCK_COMMAND_CODE=1;
+    uint8 constant LOG_MESSAGE_CODE=2;
+
+    event gas_usage_emit(uint8 command, string function_name, uint256 gas_usage);
+
     function uint2decstr(uint256 _i)
-        internal
-        pure
-        returns (string memory _uintAsString)
-    {
+        internal pure returns (string memory _uintAsString)
+    { 
         if (_i == 0) {
             return "0";
         }

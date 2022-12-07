@@ -24,9 +24,13 @@ import "../proof_map_parser.sol";
 import "../../components/mina_base_split_gen.sol";
 import "../placeholder_verifier.sol";
 import "../../logging.sol";
+import "../../profiling.sol";
 import "../init_vars.sol";
 
 contract TestPlaceholderVerifierMinaBase {
+    // For external interface. 
+    // logging.gase_usage emit events will be thrown too.
+    event gas_usage_emit(uint8 command, string function_name, uint256 gas_usage);
 
     function verify(
         bytes calldata blob,
@@ -44,6 +48,7 @@ contract TestPlaceholderVerifierMinaBase {
         uint256[] calldata init_params,
         int256[][] calldata columns_rotations
     ) public {
+        profiling.start_block("public_api_placeholder_mina_base_component::verify");
         init_vars.vars_t memory vars;
         init_vars.init(blob, init_params, columns_rotations, vars);
 
@@ -53,10 +58,13 @@ contract TestPlaceholderVerifierMinaBase {
 
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
         // 5. permutation argument
+        profiling.start_block("public_api_placeholder_mina_base_component::permutation_argument");
         local_vars.permutation_argument = permutation_argument.verify_eval_be(blob, vars.tr_state,
             vars.proof_map, vars.fri_params,
             vars.common_data, local_vars, vars.arithmetization_params);
+        profiling.end_block();
         // 7. gate argument specific for circuit
+        profiling.start_block("public_api_placeholder_mina_base_component::gate_argument");
         types.gate_argument_local_vars memory gate_params;
         gate_params.modulus = vars.fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
@@ -65,6 +73,7 @@ contract TestPlaceholderVerifierMinaBase {
         gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
         local_vars.gate_argument = mina_base_split_gen.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
+        profiling.end_block();
 
         require(
             placeholder_verifier.verify_proof_be(
@@ -78,5 +87,6 @@ contract TestPlaceholderVerifierMinaBase {
             ),
             "Proof is not correct!"
         );
+        profiling.end_block();
     }
 }

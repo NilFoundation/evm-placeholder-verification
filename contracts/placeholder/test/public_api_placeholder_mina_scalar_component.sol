@@ -24,9 +24,12 @@ import "../proof_map_parser.sol";
 import "../../components/mina_scalar_split_gen.sol";
 import "../placeholder_verifier.sol";
 import "../../logging.sol";
+import "../../profiling.sol";
 import "../init_vars.sol";
 
 contract TestPlaceholderVerifierMinaScalar {
+    event gas_usage_emit(uint8 command, string function_name, uint256 gas_usage);
+
     function verify(
         bytes calldata blob,
         // 0) modulus
@@ -42,7 +45,8 @@ contract TestPlaceholderVerifierMinaScalar {
         //  [..., q_i, ...]
         uint256[] calldata init_params,
         int256[][] calldata columns_rotations
-    ) public view{
+    ) public{
+        profiling.start_block("public_api_placeholder_mina_scalar_component::verify");
         init_vars.vars_t memory vars;
 
         // scheme params may be hardcoded. Now we should fill them in public_api_... files
@@ -53,12 +57,15 @@ contract TestPlaceholderVerifierMinaScalar {
         // 3. append variable values commitments to transcript
         transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
 
+        profiling.start_block("public_api_placeholder_mina_scalar_component::permutation_argument");
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
         // 5. permutation argument
         local_vars.permutation_argument = permutation_argument.verify_eval_be(blob, vars.tr_state,
                                                                               vars.proof_map, vars.fri_params,
                                                                               vars.common_data, local_vars, vars.arithmetization_params);
+        profiling.end_block();
         // 7. gate argument specific for circuit
+        profiling.start_block("public_api_placeholder_mina_scalar_component::gate_argument");
         types.gate_argument_local_vars memory gate_params;
         gate_params.modulus = vars.fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
@@ -67,6 +74,7 @@ contract TestPlaceholderVerifierMinaScalar {
         gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
         local_vars.gate_argument = mina_split_gen.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
+        profiling.end_block();
 
         require(
             placeholder_verifier.verify_proof_be(
@@ -80,5 +88,6 @@ contract TestPlaceholderVerifierMinaScalar {
             ),
             "Proof is not correct!"
         );
+        profiling.end_block();
     }
 }

@@ -23,9 +23,7 @@ import "../basic_marshalling.sol";
 import "../commitments/batched_lpc_verifier.sol";
 import "../logging.sol";
 
-contract unified_addition_component_gen {
-    uint256 constant WITNESSES_N = 11;
-    uint256 constant WITNESSES_TOTAL_N = 11;
+library unified_addition_component_gen {
     uint256 constant GATES_N = 1;
 
     uint256 constant MODULUS_OFFSET = 0x0;
@@ -34,11 +32,8 @@ contract unified_addition_component_gen {
     uint256 constant GATE_EVAL_OFFSET = 0x60;
     uint256 constant WITNESS_EVALUATIONS_OFFSET = 0x80;
     uint256 constant SELECTOR_EVALUATIONS_OFFSET = 0xa0;
-    uint256 constant EVAL_PROOF_WITNESS_OFFSET_OFFSET = 0xc0;
-    uint256 constant EVAL_PROOF_SELECTOR_OFFSET_OFFSET = 0xe0;
     uint256 constant GATES_EVALUATION_OFFSET = 0x100;
     uint256 constant THETA_ACC_OFFSET = 0x120;
-    uint256 constant SELECTOR_EVALUATIONS_OFFSET_OFFSET = 0x140;
     uint256 constant OFFSET_OFFSET = 0x160;
 
     // TODO: columns_rotations could be hard-coded
@@ -47,7 +42,7 @@ contract unified_addition_component_gen {
         types.gate_argument_local_vars memory gate_params,
         types.arithmetization_params memory ar_params,
         int256[][] memory columns_rotations
-    ) external pure returns (uint256 gates_evaluation) {
+    ) internal pure returns (uint256 gates_evaluation) {
         // TODO: check witnesses number in proof
 
         gate_params.offset = basic_marshalling.skip_length(
@@ -56,8 +51,8 @@ contract unified_addition_component_gen {
                 gate_params.eval_proof_witness_offset
             )
         );
-        gate_params.witness_evaluations_offsets = new uint256[](WITNESSES_N);
-        for (uint256 i = 0; i < WITNESSES_N; i++) {
+        gate_params.witness_evaluations_offsets = new uint256[](ar_params.witness_columns);
+        for (uint256 i = 0; i < ar_params.witness_columns; i++) {
             gate_params.witness_evaluations_offsets[i] = basic_marshalling
                 .get_i_uint256_ptr_from_vector(blob, gate_params.offset, 0);
             gate_params.offset = basic_marshalling.skip_vector_of_uint256_be(

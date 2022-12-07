@@ -23,10 +23,13 @@ import "../../cryptography/transcript.sol";
 import "../proof_map_parser.sol";
 import "../placeholder_verifier.sol";
 import "../../logging.sol";
+import "../../profiling.sol";
 import "../../components/unified_addition_gen.sol";
 import "../init_vars.sol";
 
 contract TestPlaceholderVerifierUnifiedAddition {
+    event gas_usage_emit(uint8 command, string function_name, uint256 gas_usage);
+
     function verify(
         bytes calldata blob,
     // 0) modulus
@@ -41,9 +44,9 @@ contract TestPlaceholderVerifierUnifiedAddition {
     // 8 + D_omegas_size) q_size
     //  [..., q_i, ...]
         uint256[] calldata init_params,
-        int256[][] calldata columns_rotations,
-        uint160    gate_argument_address
+        int256[][] calldata columns_rotations
     ) public {
+        profiling.start_block("public_api_placeholder_unified_addition::component verify");
         init_vars.vars_t memory vars;
         init_vars.init(blob, init_params, columns_rotations, vars);
 
@@ -54,10 +57,14 @@ contract TestPlaceholderVerifierUnifiedAddition {
 
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
         // 5. permutation argument
+        profiling.start_block("public_api_placeholder_unified_addition::component permutation argument");
         local_vars.permutation_argument = permutation_argument.verify_eval_be(blob, vars.tr_state,
             vars.proof_map, vars.fri_params,
             vars.common_data, local_vars, vars.arithmetization_params);
+        profiling.end_block();
+
         // 7. gate argument specific for circuit
+        profiling.start_block("public_api_placeholder_unified_addition::component gate argument");
         types.gate_argument_local_vars memory gate_params;
         gate_params.modulus = vars.fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
@@ -65,8 +72,9 @@ contract TestPlaceholderVerifierUnifiedAddition {
         gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
         gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
-        unified_addition_component_gen gate_argument_component = unified_addition_component_gen(address(gate_argument_address));
-        local_vars.gate_argument = gate_argument_component.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
+        local_vars.gate_argument = unified_addition_component_gen.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
+        profiling.end_block();
+
         require(
             placeholder_verifier.verify_proof_be(
                 blob,
@@ -79,5 +87,6 @@ contract TestPlaceholderVerifierUnifiedAddition {
             ),
             "Proof is not correct!"
         );
+        profiling.end_block();
     }
 }

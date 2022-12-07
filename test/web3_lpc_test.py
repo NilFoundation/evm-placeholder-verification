@@ -5,6 +5,7 @@ import os
 import pathlib
 from pathlib import Path
 from web3_test import find_compiled_contract, print_tx_info
+import sys
 
 w3 = Web3(Web3.HTTPProvider('http://127.0.0.1:8545'))
 w3.middleware_onion.inject(geth_poa_middleware, layer=0)
@@ -184,23 +185,48 @@ if __name__ == '__main__':
     deploy_tx_receipt = w3.eth.wait_for_transaction_receipt(deploy_tx_hash)
     contract_inst = w3.eth.contract(address=deploy_tx_receipt.contractAddress, abi=abi)
 
-    print("Skipping layers test")
-    params = init_skipping_layers_test()
-    run_tx_hash = contract_inst.functions.batched_verify(
-        params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
-    run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
-    print_tx_info(w3, run_tx_receipt, params['_test_name'])
+    if "1" in sys.argv:
+        print("Basic test")
+        params = init_basic_test()
+        run_tx_hash = contract_inst.functions.batched_verify(
+            params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
+        run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
+        print_tx_info(w3, run_tx_receipt, params['_test_name'])
 
-    print("Basic test")
-    params = init_basic_test()
-    run_tx_hash = contract_inst.functions.batched_verify(
-        params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
-    run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
-    print_tx_info(w3, run_tx_receipt, params['_test_name'])
+    if "2" in sys.argv:
+        print("Skipping layers test")
+        params = init_skipping_layers_test()
+        run_tx_hash = contract_inst.functions.batched_verify(
+            params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
+        run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
+        print_tx_info(w3, run_tx_receipt, params['_test_name'])
 
-    print("Batched test")
-    params = init_batched_test()
-    run_tx_hash = contract_inst.functions.batched_verify(
-        params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
-    run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
-    print_tx_info(w3, run_tx_receipt, params['_test_name'])
+    if "3" in sys.argv:
+        print("Batched test")
+        params = init_batched_test()
+        run_tx_hash = contract_inst.functions.batched_verify(
+            params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
+        run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
+        print_tx_info(w3, run_tx_receipt, params['_test_name'])
+
+    if "1" not in sys.argv and "2" not in sys.argv and "3" not in sys.argv:
+        print("Basic test")
+        params = init_basic_test()
+        run_tx_hash = contract_inst.functions.batched_verify(
+            params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
+        run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
+        print_tx_info(w3, run_tx_receipt, params['_test_name'])
+
+        print("Skipping layers test")
+        params = init_skipping_layers_test()
+        run_tx_hash = contract_inst.functions.batched_verify(
+            params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
+        run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
+        print_tx_info(w3, run_tx_receipt, params['_test_name'])
+
+        print("Batched test")
+        params = init_batched_test()
+        run_tx_hash = contract_inst.functions.batched_verify(
+            params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
+        run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
+        print_tx_info(w3, run_tx_receipt, params['_test_name'])

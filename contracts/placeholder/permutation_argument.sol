@@ -20,6 +20,7 @@ pragma solidity >=0.8.4;
 
 import "../types.sol";
 import "../logging.sol";
+import "../profiling.sol";
 import "../basic_marshalling.sol";
 import "../cryptography/transcript.sol";
 import "../commitments/batched_lpc_verifier.sol";
@@ -149,7 +150,8 @@ library permutation_argument {
         types.placeholder_common_data memory common_data,
         types.placeholder_local_variables memory local_vars,
         types.arithmetization_params memory ar_params
-    ) internal pure returns (uint256[] memory F) {
+    ) internal returns (uint256[] memory F) {
+        profiling.start_block("permutation_argument::verify_eval_be");
         local_vars.beta = transcript.get_field_challenge(
             tr_state,
             fri_params.modulus
@@ -167,28 +169,13 @@ library permutation_argument {
 
         // splash
         local_vars.len = ar_params.permutation_columns;
-/*        require(
-            local_vars.len ==
-                batched_lpc_verifier.get_z_n_be(
-                    blob,
-                    proof_map.eval_proof_sigma_permutation_offset
-                ),
-            "id_permutation length is not equal to sigma_permutation length!"
-        );*/
 
-        require(
-            batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_fixed_values_offset) == ar_params.permutation_columns + ar_params.permutation_columns + ar_params.constant_columns + ar_params.selector_columns + 2,
-            logging.uint2decstr(batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_fixed_values_offset))
-        );
         require(
             batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_fixed_values_offset) == ar_params.permutation_columns + ar_params.permutation_columns + ar_params.constant_columns + ar_params.selector_columns + 2,
             "Something wrong with number of fixed values polys"
         );
-        //local_vars.tmp1 = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_witness_offset);
         local_vars.tmp1 = ar_params.witness_columns;
-        // local_vars.tmp2 = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_public_input_offset );
         local_vars.tmp2 = ar_params.public_input_columns;
-        //local_vars.tmp3 = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_constant_offset );
         local_vars.tmp3 = ar_params.constant_columns;
 
 
@@ -209,13 +196,6 @@ library permutation_argument {
                 }
             }
             
-            //local_vars.S_id_i = batched_lpc_verifier.get_z_i_j_from_proof_be(
-            //    blob,
-            //    proof_map.eval_proof_id_permutation_offset,
-            //    local_vars.idx1,
-            //    0
-            //);
-            // id_perm_polys
             local_vars.S_id_i = batched_lpc_verifier.get_z_i_j_from_proof_be(
                 blob,
                 proof_map.eval_proof_fixed_values_offset,
@@ -223,12 +203,7 @@ library permutation_argument {
                 0
             );
 
-            //local_vars.S_sigma_i = batched_lpc_verifier.get_z_i_j_from_proof_be(
-            //    blob,
-            //    proof_map.eval_proof_sigma_permutation_offset,
-            //    local_vars.idx1,
-            //    0
-            //);
+            // sigma_i
             local_vars.S_sigma_i = batched_lpc_verifier.get_z_i_j_from_proof_be(
                 blob,
                 proof_map.eval_proof_fixed_values_offset,
@@ -424,5 +399,6 @@ library permutation_argument {
                 )
             )
         }
+        profiling.end_block();
     }
 }

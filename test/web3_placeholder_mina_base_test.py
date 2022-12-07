@@ -2,7 +2,6 @@ from web3_test import do_placeholder_verification_test_via_transact, base_path, 
 
 test_contract_name = 'TestPlaceholderVerifierMinaBase'
 test_contract_path = 'placeholder/test/public_api_placeholder_mina_base_component.sol'
-#linked_gates_entry_lib_name = 'placeholder_verifier_mina_base_component' # 'mina_base_split_gen' # placeholder_verifier_mina_base_component
 linked_libs_names = [
     "mina_base_gate0",
     "mina_base_gate1",
@@ -77,6 +76,7 @@ def init_test1():
                                    [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ],
                                    [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ],
                                    [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ]]
+    params['log_file'] = 'logs/mina_base_test_eval10_step_1.json'
     return params
 
 

@@ -24,6 +24,7 @@ import "./permutation_argument.sol";
 import "../basic_marshalling.sol";
 import "../algebra/field.sol";
 import "../logging.sol";
+import "../profiling.sol";
 
 
 library placeholder_verifier {
@@ -66,7 +67,8 @@ library placeholder_verifier {
         types.placeholder_common_data memory common_data,
         types.placeholder_local_variables memory local_vars,
         types.arithmetization_params memory ar_params
-    ) external view returns (bool result) {
+    ) external returns (bool result) {
+        profiling.start_block("placeholder_verifier::verify_proof_be");
         // 8. alphas computations
         local_vars.alphas = new uint256[](f_parts);
         transcript.get_field_challenges(tr_state, local_vars.alphas, fri_params.modulus);
@@ -78,8 +80,9 @@ library placeholder_verifier {
         if (local_vars.challenge != basic_marshalling.get_uint256_be(blob, proof_map.eval_proof_offset)) {
             return false;
         }
-
         // variable values
+        profiling.start_block("placeholder_verifier::variable_values prepare points and lpc check");
+        profiling.start_block("placeholder_verifier::variable_values prepare points");
         fri_params.leaf_size = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_variable_values_offset);
         local_vars.variable_values_evaluation_points = new uint256[][](fri_params.leaf_size);
         for (uint256 i = 0; i < ar_params.witness_columns;) {
@@ -122,14 +125,16 @@ library placeholder_verifier {
             local_vars.variable_values_evaluation_points[i][0] = local_vars.challenge;
             unchecked{i++;}
         }
-
+        profiling.end_block();
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_variable_values_offset,
             local_vars.variable_values_evaluation_points, tr_state, fri_params)) {
             require(false, "Wrong variable values LPC proof");
             return false;
         }
+        profiling.end_block();
 
         // permutation
+        profiling.start_block("placeholder_verifier::permutation prepare points and lpc check");
         local_vars.evaluation_points = new uint256[][](1);
         local_vars.evaluation_points[0] = new uint256[](2);
         local_vars.evaluation_points[0][0] = local_vars.challenge;
@@ -156,8 +161,10 @@ library placeholder_verifier {
             require(false, "Wrong permutation LPC proof");
             return false;
         }
+        profiling.end_block();
 
         // quotient
+        profiling.start_block("placeholder_verifier::quotient prepare points and lpc check");
         local_vars.evaluation_points = new uint256[][](1);
         local_vars.evaluation_points[0] = new uint256[](1);
         local_vars.evaluation_points[0][0] = local_vars.challenge;
@@ -166,14 +173,18 @@ library placeholder_verifier {
             require(false, "Wrong quotient LPC proof");
             return false;
         }
+        profiling.end_block();
 
+        profiling.start_block("placeholder_verifier::fixed_values prepare points and lpc check");
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_fixed_values_offset,
             local_vars.evaluation_points, tr_state, fri_params)) {
             require(false, "Wrong fixed values LPC proof");
             return false;
         }
+        profiling.end_block();
 
         // 10. final check
+        profiling.start_block("placeholder_verifier::final check");
         local_vars.F = new uint256[](f_parts);
         local_vars.F[0] = local_vars.permutation_argument[0];
         local_vars.F[1] = local_vars.permutation_argument[1];
@@ -274,7 +285,8 @@ library placeholder_verifier {
         if (local_vars.F_consolidated != local_vars.Z_at_challenge) {
             return false;
         }
- 
+        profiling.end_block();
+        profiling.end_block();
         return true;
     }
 }
