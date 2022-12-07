@@ -187,6 +187,7 @@ def do_placeholder_verification_test_via_transact_simple(test_contract_name, tes
             logfilename = "logs/log.json"
             if "log_file" in params.keys():
                 logfilename = params["log_file"]
+            logfilename = base_path + logfilename
             print("Print log in ", logfilename)
             print_profiling_log(test_contract_inst.events.gas_usage_emit.getLogs(), run_tx_receipt.gasUsed, logfilename)
         else:
@@ -289,6 +290,7 @@ def do_placeholder_verification_test_via_transact_with_external_gates(
             logfilename = "logs/log.json"
             if "log_file" in params.keys():
                 logfilename = params["log_file"]
+            logfilename = base_path + logfilename
             print("Print log in ", logfilename)
             print_profiling_log(test_contract_inst.events.gas_usage_emit.getLogs(), run_tx_receipt.gasUsed, logfilename)
         else:
