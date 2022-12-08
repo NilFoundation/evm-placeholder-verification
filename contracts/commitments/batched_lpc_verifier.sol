@@ -180,21 +180,16 @@ library batched_lpc_verifier {
         profiling.start_block("batched_lpc_verifier::prepare U and V");
         result = false;
         uint256 ind;
-        uint256 ind2;
-        uint256[] memory eval;
 
         fri_params.leaf_size = get_z_n_be(blob, offset);
 
         // If there is only one point for multiple polynomials;
         if (fri_params.leaf_size != evaluation_points.length && evaluation_points.length == 1){
+            uint256[] memory eval;
             eval = evaluation_points[0];
             evaluation_points = new uint256[][](fri_params.leaf_size);
             for(ind = 0; ind < fri_params.leaf_size;){
-                evaluation_points[ind] = new uint256[](eval.length);
-                for (ind2 = 0; ind2 < eval.length;){
-                    evaluation_points[ind][ind2] = eval[ind2];
-                    unchecked{ ind2++; }
-                }
+                evaluation_points[ind] = eval;
                 unchecked{ ind++; }
             }
         }
