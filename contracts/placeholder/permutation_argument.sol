@@ -152,6 +152,7 @@ library permutation_argument {
         types.arithmetization_params memory ar_params
     ) internal returns (uint256[] memory F) {
         profiling.start_block("permutation_argument::verify_eval_be");
+        // 1. Get beta, gamma
         local_vars.beta = transcript.get_field_challenge(
             tr_state,
             fri_params.modulus
@@ -161,6 +162,7 @@ library permutation_argument {
             fri_params.modulus
         );
 
+        // 2. Add commitment to V_P to transcript
         transcript.update_transcript_b32_by_offset_calldata(
             tr_state,
             blob,
@@ -179,6 +181,7 @@ library permutation_argument {
         local_vars.tmp3 = ar_params.constant_columns;
 
 
+        // 3. Calculate h_perm, g_perm at challenge point
         local_vars.g = 1;
         local_vars.h = 1;
         for (
