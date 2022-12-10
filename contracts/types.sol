@@ -158,9 +158,9 @@ library types {
         uint256[] q;
 
         //0xe0
-        uint256[] U;
+        uint256[]    s_indices;
         //0x100
-        uint256[] V;
+        uint256[]    correct_order_idx;       // Ordered indices to pack ys to check merkle proofs
         //0x120
         uint256[][] batched_U;
         //0x140
@@ -189,9 +189,11 @@ library types {
         bytes        b;
         //0x280
         uint256[]    coeffs;                  // coeffs -- ancestor of ys
-        uint256[]    s_indices;
         uint256[]    tmp_arr;
-        uint256[]    correct_order_idx;       // Ordered indices to pack ys to check merkle proofs
+        uint256[][]  evaluation_points;
+        uint256      z_offset;
+        uint256      prev_xi;
+        uint256   []precomputed_4_eval;
     }
 
     struct placeholder_proof_map {

@@ -3,6 +3,7 @@
 // Copyright (c) 2021 Mikhail Komarov <nemo@nil.foundation>
 // Copyright (c) 2021 Ilias Khairullin <ilias@nil.foundation>
 // Copyright (c) 2022 Aleksei Moskvin <alalmoskvin@nil.foundation>
+// Copyright (c) 2022 Elena Tatuzova <e.tatuzova@nil.foundation>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -172,6 +173,10 @@ library batched_lpc_verifier {
             basic_marshalling.skip_octet_vector_32_be_check(blob, offset), i, j);
     }
 
+    function precompute(bytes calldata blob, uint256 offset, uint256[][] memory evaluation_points, types.fri_params_type memory fri_params) 
+    internal view{
+    }
+
     function parse_verify_proof_be(bytes calldata blob,
         uint256 offset, uint256[][] memory evaluation_points,
         types.transcript_data memory tr_state, types.fri_params_type memory fri_params)
@@ -179,26 +184,20 @@ library batched_lpc_verifier {
         profiling.start_block("batched_lpc_verifier::parse_verify_proof_be");
         profiling.start_block("batched_lpc_verifier::prepare U and V");
         result = false;
-        uint256 ind;
-        uint256 ind2;
-        uint256[] memory eval;
 
         fri_params.leaf_size = get_z_n_be(blob, offset);
 
         // If there is only one point for multiple polynomials;
-        if (fri_params.leaf_size != evaluation_points.length && evaluation_points.length == 1){
+        /*if (fri_params.leaf_size != evaluation_points.length && evaluation_points.length == 1){
             eval = evaluation_points[0];
             evaluation_points = new uint256[][](fri_params.leaf_size);
             for(ind = 0; ind < fri_params.leaf_size;){
-                evaluation_points[ind] = new uint256[](eval.length);
-                for (ind2 = 0; ind2 < eval.length;){
-                    evaluation_points[ind][ind2] = eval[ind2];
-                    unchecked{ ind2++; }
-                }
+                evaluation_points[ind] = eval;
                 unchecked{ ind++; }
             }
-        }
-        require(fri_params.leaf_size == evaluation_points.length, "Array of evaluation points size is not equal to leaf_size!");
+        }*/
+
+        require(evaluation_points.length == 1 || fri_params.leaf_size == evaluation_points.length, "Array of evaluation points size is not equal to leaf_size!");
         require(fri_params.lambda == get_fri_proof_n_be(blob, offset), "Fri proofs number is not equal to lambda!");
 
         uint256 z_offset;
@@ -207,39 +206,82 @@ library batched_lpc_verifier {
         uint256 round_id;
 
         z_offset = basic_marshalling.skip_length(skip_to_z(blob, offset));
-        for (polynom_index = 0; polynom_index < fri_params.leaf_size;) {
-            fri_params.batched_U[polynom_index] = polynomial.interpolate(
-                blob,
-                evaluation_points[polynom_index],
-                z_offset,
-                fri_params.modulus
-            );
-            z_offset = basic_marshalling.skip_vector_of_uint256_be(blob, z_offset);
+        if( evaluation_points.length == 1){
+            if(evaluation_points[0].length != 1 || fri_params.step_list[0] != 1){
+                for (polynom_index = 0; polynom_index < fri_params.leaf_size;) {
+                    fri_params.batched_U[polynom_index] = polynomial.interpolate(
+                        blob,
+                        evaluation_points[0],
+                        z_offset,
+                        fri_params.modulus
+                    );
+                    z_offset = basic_marshalling.skip_vector_of_uint256_be(blob, z_offset);
 
-            unchecked{ polynom_index++; }
-        }
-
-        for (polynom_index = 0; polynom_index < fri_params.leaf_size;) {
-            fri_params.batched_V[polynom_index] = new uint256[](1);
-            fri_params.batched_V[polynom_index][0] = 1;
-            for (point_index = 0; point_index < evaluation_points[polynom_index].length;) {
-                fri_params.lpc_z[0] = fri_params.modulus - evaluation_points[polynom_index][point_index];
-                fri_params.batched_V[polynom_index] = polynomial.mul_poly(
-                    fri_params.batched_V[polynom_index],
-                    fri_params.lpc_z,
-                    fri_params.modulus
-                );
-                unchecked{ point_index++; }
+                unchecked{ polynom_index++; }
+                }
             }
-            unchecked{ polynom_index++; }
+        } else {
+            for (polynom_index = 0; polynom_index < fri_params.leaf_size; ) {
+                if( evaluation_points[polynom_index].length != 1 || fri_params.step_list[0] != 1){
+                    fri_params.batched_U[polynom_index] = polynomial.interpolate(
+                        blob,
+                        evaluation_points[polynom_index],
+                        z_offset,
+                        fri_params.modulus
+                    );
+                }
+                z_offset = basic_marshalling.skip_vector_of_uint256_be(blob, z_offset);
+                unchecked{ polynom_index++; }
+            }
         }
+
+        if(evaluation_points.length == 1){
+            if(evaluation_points[0].length != 1 || fri_params.step_list[0] != 1){
+                fri_params.batched_V[0] = new uint256[](1);
+                fri_params.batched_V[0][0] = 1;
+                for (point_index = 0; point_index < evaluation_points[0].length;) {
+                    fri_params.lpc_z[0] = fri_params.modulus - evaluation_points[0][point_index];
+                    fri_params.batched_V[0] = polynomial.mul_poly(
+                        fri_params.batched_V[0],
+                        fri_params.lpc_z,
+                        fri_params.modulus
+                    );
+                    unchecked{ point_index++; }
+                }
+                for (polynom_index = 1; polynom_index < fri_params.leaf_size;) {
+                    fri_params.batched_V[polynom_index] = fri_params.batched_V[0];
+                unchecked{ polynom_index++; }
+                }
+            }
+        } else {
+            for (polynom_index = 0; polynom_index < fri_params.leaf_size;) {
+                if( evaluation_points[polynom_index].length != 1 || fri_params.step_list[0] != 1){
+                    fri_params.batched_V[polynom_index] = new uint256[](1);
+                    fri_params.batched_V[polynom_index][0] = 1;
+                    for (point_index = 0; point_index < evaluation_points[polynom_index].length;) {
+                        fri_params.lpc_z[0] = fri_params.modulus - evaluation_points[polynom_index][point_index];
+                        fri_params.batched_V[polynom_index] = polynomial.mul_poly(
+                            fri_params.batched_V[polynom_index],
+                            fri_params.lpc_z,
+                            fri_params.modulus
+                        );
+                        unchecked{ point_index++; }
+                    }
+                }
+                unchecked{ polynom_index++; }
+            }
+        }
+
+        fri_params.evaluation_points = evaluation_points;
+        fri_params.z_offset = basic_marshalling.skip_octet_vector_32_be(offset);
 
         profiling.end_block();
         profiling.start_block("batched_lpc_verifier::FRI_checks");
         offset = skip_to_first_fri_proof_be(blob, offset);
         for (round_id = 0; round_id < fri_params.lambda;) {
             fri_params.i_fri_proof = round_id;  // for debug only
-            if (!batched_fri_verifier.parse_verify_proof_be(blob, offset, tr_state, fri_params)) {
+            fri_params.prev_xi = 0;
+            if (!batched_fri_verifier.parse_verify_proof_be_updated(blob, offset, tr_state, fri_params)) {
                 require(false, "FRI-proof problem");
                 return false;
             }

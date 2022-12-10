@@ -94,5 +94,6 @@ library init_vars {
         vars.fri_params.s = new uint256[](max_coset);
         vars.fri_params.coeffs = new uint256[](max_coset << 1);
         vars.fri_params.b = new bytes(vars.fri_params.max_batch << (vars.fri_params.max_step + 5));
+        vars.fri_params.precomputed_4_eval = new uint256[](5);
     }
 }
