@@ -101,6 +101,7 @@ contract TestMinaStateProof {
         vars.fri_params.coeffs = new uint256[](max_coset << 1);
 
         vars.fri_params.b = new bytes(0x40 * vars.fri_params.max_batch * max_coset);
+        vars.fri_params.precomputed_eval1 = new uint256[](5);
     }
 
     function verify(

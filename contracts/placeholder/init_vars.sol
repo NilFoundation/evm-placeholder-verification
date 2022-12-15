@@ -42,6 +42,7 @@ library init_vars {
 
         uint256 idx;
         uint256 max_coset;
+        uint256 i;
 
         vars.fri_params.modulus = init_params[idx++];
         vars.fri_params.r = init_params[idx++];
@@ -56,19 +57,19 @@ library init_vars {
         vars.common_data.columns_rotations = columns_rotations;
 
         vars.fri_params.D_omegas = new uint256[](init_params[idx++]);
-        for (uint256 i = 0; i < vars.fri_params.D_omegas.length;) {
+        for (i = 0; i < vars.fri_params.D_omegas.length;) {
             vars.fri_params.D_omegas[i] = init_params[idx];
         unchecked{ i++; idx++;}
         }
         vars.fri_params.q = new uint256[](init_params[idx++]);
-        for (uint256 i = 0; i < vars.fri_params.q.length;) {
+        for (i = 0; i < vars.fri_params.q.length;) {
             vars.fri_params.q[i] = init_params[idx];
         unchecked{ i++; idx++;}
         }
 
         vars.fri_params.max_step = 0;
         vars.fri_params.step_list = new uint256[](init_params[idx++]);
-        for (uint256 i = 0; i < vars.fri_params.step_list.length;) {
+        for (i = 0; i < vars.fri_params.step_list.length;) {
             vars.fri_params.step_list[i] = init_params[idx];
             if(vars.fri_params.step_list[i] > vars.fri_params.max_step)
                 vars.fri_params.max_step = vars.fri_params.step_list[i];
@@ -94,6 +95,6 @@ library init_vars {
         vars.fri_params.s = new uint256[](max_coset);
         vars.fri_params.coeffs = new uint256[](max_coset << 1);
         vars.fri_params.b = new bytes(vars.fri_params.max_batch << (vars.fri_params.max_step + 5));
-        vars.fri_params.precomputed_4_eval = new uint256[](5);
+        vars.fri_params.precomputed_eval1 = new uint256[](5);
     }
 }

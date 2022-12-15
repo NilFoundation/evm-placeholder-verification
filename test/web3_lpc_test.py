@@ -11,15 +11,15 @@ w3 = Web3(Web3.HTTPProvider('http://127.0.0.1:8545'))
 w3.middleware_onion.inject(geth_poa_middleware, layer=0)
 w3.eth.default_account = w3.eth.accounts[0]
 
-base_path = os.path.abspath(os.getcwd())
-contracts_dir = base_path + '/contracts'
+base_path = os.path.abspath(os.getcwd())  + '/../'
+contracts_dir = base_path + 'contracts'
 contract_name = 'TestLpcVerifier'
 
 
 def init_basic_test():
     params = dict()
     params['_test_name'] = "Lpc basic verification test"
-    f = open('./test/data/lpc_basic_test.txt')
+    f = open(base_path + '/test/data/lpc_basic_test.txt')
     params["proof"] = f.read()
     f.close()
     params['init_transcript'] = '0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
@@ -66,7 +66,7 @@ def init_basic_test():
 def init_batched_test():
     params = dict()
     params['_test_name'] = "Lpc batched verification test"
-    f = open('./test/data/lpc_batched_basic_test.txt')
+    f = open(base_path + 'test/data/lpc_batched_basic_test.txt')
     params["proof"] = f.read()
     f.close()
     params['init_transcript'] = '0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
@@ -113,11 +113,11 @@ def init_batched_test():
 def init_skipping_layers_test():
     params = dict()
     params['_test_name'] = "Lpc verification skipping layers test (case 1)"
-    test_path = Path('./test/data/lpc_skipping_layers_test.txt')
+    test_path = Path(base_path + 'test/data/lpc_skipping_layers_test.txt')
     if not test_path.is_file():
         print("Non-existing test file")
         return
-    f = open('./test/data/lpc_skipping_layers_test.txt')
+    f = open(test_path)
     params["proof"] = f.read()
     f.close()
 
@@ -171,6 +171,7 @@ def init_skipping_layers_test():
 if __name__ == '__main__':
     compiled = solcx.compile_files(
         [f'{contracts_dir}/commitments/test/public_api_lpc_verification.sol'],
+        allow_paths=[f'{contracts_dir}/'],
         output_values=['abi', 'bin'],
         solc_version="0.8.12",
         optimize=True,

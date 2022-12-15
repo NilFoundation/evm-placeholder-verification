@@ -34,6 +34,7 @@ contract TestLpcVerifier {
         fri_params.tmp_arr = new uint256[](max_coset << 1);
         fri_params.coeffs = new uint256[](max_coset << 2);
         fri_params.b = new bytes(0x40 * max_batch * max_coset);
+        fri_params.precomputed_eval1 = new uint256[](5);
     }
 
     function batched_verify(

@@ -7,7 +7,7 @@ import sys
 import shutil
 
 base_path = os.path.abspath(os.getcwd())  + '/../'
-contracts_dir = base_path + '/contracts'
+contracts_dir = base_path + 'contracts'
 
 def init_profiling():
     if "--nolog" in sys.argv:
