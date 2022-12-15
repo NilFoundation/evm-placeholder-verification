@@ -76,53 +76,64 @@ library placeholder_verifier {
         // 9. Evaluation proof check
         transcript.update_transcript_b32_by_offset_calldata(tr_state, blob, basic_marshalling.skip_length(proof_map.T_commitments_offset));
         local_vars.challenge = transcript.get_field_challenge(tr_state, fri_params.modulus);
-
         if (local_vars.challenge != basic_marshalling.get_uint256_be(blob, proof_map.eval_proof_offset)) {
             return false;
         }
+
         // variable values
         profiling.start_block("PV::variable_values");
         profiling.start_block("PV::prepare points");
+
+        uint256 inversed_omega = field.inverse_static(common_data.omega, fri_params.modulus);
+        uint256 challenge_omega = field.fmul(local_vars.challenge, common_data.omega, fri_params.modulus);
+        uint256 challenge_inversed_omega = field.fmul(local_vars.challenge, inversed_omega, fri_params.modulus);
+        uint256[] memory challenge_point = new uint256[](1);
+        challenge_point[0] = local_vars.challenge;
+
         fri_params.leaf_size = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_variable_values_offset);
         local_vars.variable_values_evaluation_points = new uint256[][](fri_params.leaf_size);
+
         for (uint256 i = 0; i < ar_params.witness_columns;) {
             local_vars.variable_values_evaluation_points[i] = new uint256[](common_data.columns_rotations[i].length);
             for (uint256 j = 0; j < common_data.columns_rotations[i].length;) {
-                local_vars.e = uint256(common_data.columns_rotations[i][j]);
-                if (common_data.columns_rotations[i][j] < 0) {
-                    local_vars.e = uint256(-common_data.columns_rotations[i][j]);
-                    local_vars.e = field.expmod_static(field.inverse_static(common_data.omega, fri_params.modulus), local_vars.e, fri_params.modulus);
+                if(common_data.columns_rotations[i][j] == 0){
+                    local_vars.variable_values_evaluation_points[i][j] = local_vars.challenge;
+                } else if(common_data.columns_rotations[i][j] == 1){
+                    local_vars.variable_values_evaluation_points[i][j] = challenge_omega;
+                } else if(common_data.columns_rotations[i][j] == -1) {
+                    local_vars.variable_values_evaluation_points[i][j] = challenge_inversed_omega;
                 } else {
-                    local_vars.e = field.expmod_static(common_data.omega, local_vars.e, fri_params.modulus);
-                }
-                local_vars.e = field.fmul(local_vars.e, local_vars.challenge, fri_params.modulus);
+                    // TODO: check properly if column_rotations will be not one of 0, +-1
+                    // local_vars.variable_values_evaluation_points[i][j] = local_vars.challenge * omega ^ column_rotations[i][j]
+                    uint256 omega;
+                    uint256 e;
 
-                //                if ( common_data.columns_rotations[i].length == 3 && j == 1) {
-                //                    require(false, logging.uint2decstr(local_vars.e));
-                //                }
-                //                require(false, logging.uint2decstr(local_vars.e));
-                //                assembly {
-                //                    mstore(
-                //                        add(local_vars, E_OFFSET),
-                //                        // challenge * omega^rotation_gates[j]
-                //                        mulmod(
-                //                            // challenge
-                //                            mload(add(local_vars, CHALLENGE_OFFSET)),
-                //                            // e = omega^rotation_gates[j]
-                //                            mload(add(local_vars, E_OFFSET)),
-                //                            // modulus
-                //                            mload(fri_params)
-                //                        )
-                //                    )
-                //                }
-                local_vars.variable_values_evaluation_points[i][j] = local_vars.e;
+                    if (common_data.columns_rotations[i][j] < 0) {
+                        omega = inversed_omega;
+                        e = uint256(-common_data.columns_rotations[i][j]);
+                    } else {
+                        omega = common_data.omega;
+                        e = uint256(common_data.columns_rotations[i][j]);
+                    }
+                    assembly{
+                        for{mstore(add(local_vars, E_OFFSET), mload(add(local_vars, CHALLENGE_OFFSET)))} gt(e,0) {e := shr(e, 1)} {
+                            if not(eq(and(e,1), 0)){
+                                mstore(add(local_vars, E_OFFSET),mulmod(mload(add(local_vars, E_OFFSET)), omega, mload(fri_params)))
+                            }
+                            if not(eq(e, 1)){
+                                omega := mulmod(omega,omega, mload(fri_params))
+                            }
+                        }
+                    }
+                    local_vars.variable_values_evaluation_points[i][j] = local_vars.e;
+                }
             unchecked{j++;}
             }
         unchecked{i++;}
         }
+
         for (uint256 i = ar_params.witness_columns; i < ar_params.witness_columns + ar_params.public_input_columns;) {
-            local_vars.variable_values_evaluation_points[i] = new uint256[](1);
-            local_vars.variable_values_evaluation_points[i][0] = local_vars.challenge;
+            local_vars.variable_values_evaluation_points[i] = challenge_point;
             unchecked{i++;}
         }
         profiling.end_block();
@@ -137,24 +148,21 @@ library placeholder_verifier {
         profiling.start_block("PV::permutation");
         local_vars.evaluation_points = new uint256[][](1);
         local_vars.evaluation_points[0] = new uint256[](2);
-        local_vars.evaluation_points[0][0] = local_vars.challenge;
-        local_vars.evaluation_points[0][1] = field.fmul(local_vars.challenge, common_data.omega, fri_params.modulus);
-//        assembly {
-//            mstore(
-//                // local_vars.evaluation_points[0][1]
-//                add(mload(mload(add(local_vars, EVALUATION_POINTS_OFFSET))), 0x40),
-//                // (local_vars.challenge * common_data.omega) % fri_params.modulus
-//                mulmod(
-//                    // local_vars.challenge
-//                    mload(add(local_vars, CHALLENGE_OFFSET)),
-//                    // common_data.omega
-//                    mload(add(common_data, OMEGA_OFFSET)),
-//                    // modulus
-//                    mload(fri_params)
-//                )
-//            )
-//        }
-        local_vars.evaluation_points[0][1] = field.fmul(local_vars.challenge, common_data.omega, fri_params.modulus);
+        assembly {
+            let addr:= mload(add(mload(add(local_vars, EVALUATION_POINTS_OFFSET)), 0x20))
+            mstore(
+                // local_vars.evaluation_points[0][1]
+                add(addr, 0x20),
+                // (local_vars.challenge * common_data.omega) % fri_params.modulus
+                mload(add(local_vars, CHALLENGE_OFFSET))
+            )
+            mstore(
+                // local_vars.evaluation_points[0][1]
+                add(addr, 0x40),
+                // (local_vars.challenge * common_data.omega) % fri_params.modulus
+                challenge_omega
+            )
+        }
 
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_permutation_offset,
             local_vars.evaluation_points, tr_state, fri_params)) {
@@ -164,9 +172,7 @@ library placeholder_verifier {
         profiling.end_block();
         // quotient
         profiling.start_block("PV::quotient");
-        local_vars.evaluation_points = new uint256[][](1);
-        local_vars.evaluation_points[0] = new uint256[](1);
-        local_vars.evaluation_points[0][0] = local_vars.challenge;
+        local_vars.evaluation_points[0] = challenge_point;
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_quotient_offset,
             local_vars.evaluation_points, tr_state, fri_params)) {
 //            require(false, "Wrong quotient LPC proof");
@@ -218,9 +224,9 @@ library placeholder_verifier {
         for (uint256 i = 0; i < local_vars.len; i++) {
             local_vars.zero_index = batched_lpc_verifier.get_z_i_j_from_proof_be(blob, proof_map.eval_proof_quotient_offset, i, 0);
             local_vars.e = field.expmod_static(local_vars.challenge, (fri_params.max_degree + 1) * i, fri_params.modulus);
-            local_vars.zero_index = field.fmul(local_vars.zero_index, local_vars.e, fri_params.modulus);
-            local_vars.T_consolidated  = field.fadd(local_vars.T_consolidated, local_vars.zero_index, fri_params.modulus);
-            /*assembly {
+            //local_vars.zero_index = field.fmul(local_vars.zero_index, local_vars.e, fri_params.modulus);
+            //local_vars.T_consolidated  = field.fadd(local_vars.T_consolidated, local_vars.zero_index, fri_params.modulus);
+            assembly {
                 mstore(
                     // local_vars.zero_index
                     add(local_vars, ZERO_INDEX_OFFSET),
@@ -248,39 +254,38 @@ library placeholder_verifier {
                     )
                 )
             }
-            */
         }
         local_vars.Z_at_challenge = field.expmod_static(local_vars.challenge, common_data.rows_amount, fri_params.modulus);
-        local_vars.Z_at_challenge = field.fsub(local_vars.Z_at_challenge, 1, fri_params.modulus);
-        local_vars.Z_at_challenge = field.fmul(local_vars.Z_at_challenge, local_vars.T_consolidated, fri_params.modulus);
-        /*        assembly {
-                    mstore(
-                        // local_vars.Z_at_challenge
-                        add(local_vars, Z_AT_CHALLENGE_OFFSET),
-                        // local_vars.Z_at_challenge - 1
-                        addmod(
-                            // Z_at_challenge
-                            mload(add(local_vars, Z_AT_CHALLENGE_OFFSET)),
-                            // -1
-                            sub(mload(fri_params), 1),
-                            // modulus
-                            mload(fri_params)
-                        )
-                    )
-                    mstore(
-                        // local_vars.Z_at_challenge
-                        add(local_vars, Z_AT_CHALLENGE_OFFSET),
-                        // Z_at_challenge * T_consolidated
-                        mulmod(
-                            // Z_at_challenge
-                            mload(add(local_vars, Z_AT_CHALLENGE_OFFSET)),
-                            // T_consolidated
-                            mload(add(local_vars, T_CONSOLIDATED_OFFSET)),
-                            // modulus
-                            mload(fri_params)
-                        )
-                    )
-                }*/
+        //local_vars.Z_at_challenge = field.fsub(local_vars.Z_at_challenge, 1, fri_params.modulus);
+        //local_vars.Z_at_challenge = field.fmul(local_vars.Z_at_challenge, local_vars.T_consolidated, fri_params.modulus);
+        assembly {
+            mstore(
+                // local_vars.Z_at_challenge
+                add(local_vars, Z_AT_CHALLENGE_OFFSET),
+                // local_vars.Z_at_challenge - 1
+                addmod(
+                    // Z_at_challenge
+                    mload(add(local_vars, Z_AT_CHALLENGE_OFFSET)),
+                    // -1
+                    sub(mload(fri_params), 1),
+                    // modulus
+                    mload(fri_params)
+                )
+            )
+            mstore(
+                // local_vars.Z_at_challenge
+                add(local_vars, Z_AT_CHALLENGE_OFFSET),
+                // Z_at_challenge * T_consolidated
+                mulmod(
+                    // Z_at_challenge
+                    mload(add(local_vars, Z_AT_CHALLENGE_OFFSET)),
+                    // T_consolidated
+                    mload(add(local_vars, T_CONSOLIDATED_OFFSET)),
+                    // modulus
+                    mload(fri_params)
+                )
+            )
+        }
         if (local_vars.F_consolidated != local_vars.Z_at_challenge) {
             return false;
         }
