@@ -11,7 +11,7 @@ w3 = Web3(Web3.HTTPProvider('http://127.0.0.1:8545'))
 w3.middleware_onion.inject(geth_poa_middleware, layer=0)
 w3.eth.default_account = w3.eth.accounts[0]
 
-base_path = os.path.abspath(os.getcwd())  + '/../'
+base_path = os.path.abspath(os.getcwd())  + '/'
 contracts_dir = base_path + 'contracts'
 contract_name = 'TestLpcVerifier'
 
@@ -168,6 +168,57 @@ def init_skipping_layers_test():
     return params
 
 
+def init_smaller_r_test():
+    params = dict()
+    params['_test_name'] = "Lpc smaller r verification test"
+    f = open('./test/data/lpc_smaller_r_test.txt')
+    params["proof"] = f.read()
+    f.close()
+    params['init_transcript'] = '0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
+
+    params['init_params'] = []
+    params['init_params'].append(
+        52435875175126190479447740508185965837690552500527637822603658699938581184513)  # modulus
+    params['init_params'].append(4)  # r - smaller by 2
+    params['init_params'].append(127)  # max_degree
+    params['init_params'].append(1)  # leaf_size
+    params['init_params'].append(2)  # lambda
+
+    D_omegas = [
+        47309214877430199588914062438791732591241783999377560080318349803002842391998,
+        31519469946562159605140591558550197856588417350474800936898404023113662197331,
+        36581797046584068049060372878520385032448812009597153775348195406694427778894,
+        14788168760825820622209131888203028446852016562542525606630160374691593895118,
+        23674694431658770659612952115660802947967373701506253797663184111817857449850,
+        3465144826073652318776269530687742778270252468765361963008,
+    ]
+
+    params['init_params'].append(len(D_omegas))
+    params['init_params'].extend(D_omegas)  # Domain
+
+    q = []
+    q.append(0)
+    q.append(0)
+    q.append(1)
+    params['init_params'].append(len(q))
+    params['init_params'].extend(q)  # q
+
+    step_list = [];
+    step_list.append(1);
+    step_list.append(1);
+    step_list.append(1);
+    step_list.append(1);
+    params['init_params'].append(len(step_list))
+    params['init_params'].extend(step_list)  # step_list
+
+    params['init_params'].append(
+        26217937587563095239723870254092982918845276250263818911301829349969290592257)  # const 1/2
+
+    params['evaluation_points'] = [[7, ], ]
+
+    return params
+
+
 if __name__ == '__main__':
     compiled = solcx.compile_files(
         [f'{contracts_dir}/commitments/test/public_api_lpc_verification.sol'],
@@ -227,6 +278,13 @@ if __name__ == '__main__':
 
         print("Batched test")
         params = init_batched_test()
+        run_tx_hash = contract_inst.functions.batched_verify(
+            params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
+        run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
+        print_tx_info(w3, run_tx_receipt, params['_test_name'])
+
+        print("Smaller r test")
+        params = init_smaller_r_test()
         run_tx_hash = contract_inst.functions.batched_verify(
             params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
         run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)

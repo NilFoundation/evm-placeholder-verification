@@ -6,7 +6,7 @@ import os
 import sys
 import shutil
 
-base_path = os.path.abspath(os.getcwd())  + '/../'
+base_path = os.path.abspath(os.getcwd())  + '/'
 contracts_dir = base_path + 'contracts'
 
 def init_profiling():
