@@ -11,7 +11,7 @@ w3 = Web3(Web3.HTTPProvider('http://127.0.0.1:8545'))
 w3.middleware_onion.inject(geth_poa_middleware, layer=0)
 w3.eth.default_account = w3.eth.accounts[0]
 
-base_path = os.path.abspath(os.getcwd())  + '/'
+base_path = os.path.abspath(os.getcwd())  + '/../'
 contracts_dir = base_path + 'contracts'
 contract_name = 'TestLpcVerifier'
 
@@ -171,7 +171,7 @@ def init_skipping_layers_test():
 def init_smaller_r_test():
     params = dict()
     params['_test_name'] = "Lpc smaller r verification test"
-    f = open('./test/data/lpc_smaller_r_test.txt')
+    f = open(base_path + 'test/data/lpc_smaller_r_test.txt')
     params["proof"] = f.read()
     f.close()
     params['init_transcript'] = '0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
@@ -261,7 +261,15 @@ if __name__ == '__main__':
         run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
         print_tx_info(w3, run_tx_receipt, params['_test_name'])
 
-    if "1" not in sys.argv and "2" not in sys.argv and "3" not in sys.argv:
+    if "4" in sys.argv:
+        print("Smaller r test")
+        params = init_smaller_r_test()
+        run_tx_hash = contract_inst.functions.batched_verify(
+            params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
+        run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
+        print_tx_info(w3, run_tx_receipt, params['_test_name'])
+
+    if "1" not in sys.argv and "2" not in sys.argv and "3" not in sys.argv and "4" not in sys.argv:
         print("Basic test")
         params = init_basic_test()
         run_tx_hash = contract_inst.functions.batched_verify(
