@@ -2,7 +2,7 @@ from web3_test import do_placeholder_verification_test_via_transact, base_path, 
 
 test_contract_name = 'TestPlaceholderVerifierMinaBase'
 test_contract_path = 'placeholder/test/public_api_placeholder_mina_base_component.sol'
-linked_gates_entry_lib_name = 'placeholder_verifier_mina_base_component' # 'mina_base_split_gen' # placeholder_verifier_mina_base_component
+#linked_gates_entry_lib_name = 'placeholder_verifier_mina_base_component' # 'mina_base_split_gen' # placeholder_verifier_mina_base_component
 linked_libs_names = [
     "mina_base_gate0",
     "mina_base_gate1",
@@ -51,6 +51,14 @@ def init_test1():
     params['init_params'].append(len(q))
     params['init_params'].extend(q)
 
+    step_list = [1] * 16
+    params['init_params'].append(len(step_list))
+    params['init_params'].extend(step_list)  # step_list
+
+    arithmentization_params = [15, 1, 1, 30] # witness, public_input, constant, selector
+    params['init_params'].append((len(arithmentization_params)))
+    params['init_params'].extend(arithmentization_params)
+
     params['columns_rotations'] = [[0, 1, -1, ],
                                    [0, 1, -1, ],
                                    [0, 1, -1, ],
@@ -69,9 +77,6 @@ def init_test1():
                                    [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ],
                                    [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ],
                                    [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ]]
-    step_list = [1] * 16
-    params['init_params'].append(len(step_list))
-    params['init_params'].extend(step_list)  # step_list
     return params
 
 

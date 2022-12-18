@@ -42,7 +42,7 @@ library mina_scalar_gate21 {
     function evaluate_gate_be(
         types.gate_argument_local_vars memory gate_params,
         int256[][] memory columns_rotations
-    ) internal pure returns (uint256 gates_evaluation, uint256 theta_acc) {
+    ) external pure returns (uint256 gates_evaluation, uint256 theta_acc) {
         gates_evaluation = gate_params.gates_evaluation;
         theta_acc = gate_params.theta_acc;
         assembly {
@@ -65,10 +65,8 @@ library mina_scalar_gate21 {
         // TODO: insert generated code for gate argument evaluation here
             mstore(add(gate_params, GATE_EVAL_OFFSET), 0)
             mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET), 0)
-            mstore(add(add(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),0x80), 0x1c0), 0x1)
-            mstore(add(add(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),0x60), 0x1c0), sub(mload(add(add(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),0x80), 0x1c0)), 0x1))
             mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x10000000000000000,get_eval_i_by_rotation_idx(1,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),modulus),modulus))
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),get_eval_i_by_rotation_idx(0,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),modulus))
+            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x1,get_eval_i_by_rotation_idx(0,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),modulus),modulus))
             mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x40000000000000000000000000000000224698fc0994a8dd8c46eb2100000000,get_eval_i_by_rotation_idx(2,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),modulus),modulus))
             mstore(add(gate_params, GATE_EVAL_OFFSET),addmod(mload(add(gate_params, GATE_EVAL_OFFSET)),mulmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
             theta_acc := mulmod(theta_acc,mload(add(gate_params, THETA_OFFSET)),modulus)

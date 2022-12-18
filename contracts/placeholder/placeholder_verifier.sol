@@ -58,23 +58,14 @@ library placeholder_verifier {
     uint256 constant WITNESS_EVALUATION_POINTS_OFFSET = 0x2e0;
     uint256 constant STATUS_OFFSET = 0x3a0;
 
-    uint256 constant PERMUTATION_COLUMNS = 7;
-    uint256 constant WITNESS_COLUMNS = 15;
-    uint256 constant PUBLIC_INPUT_COLUMNS = 1;
-    uint256 constant CONSTANT_COLUMNS = 1;
-    uint256 constant SELECTOR_COLUMNS = 30;
-    uint256 constant LOOKUP_TABLE_SIZE = 0;
-
-    uint256 constant ID_PERMUTATION_COLUMNS = 17; // WITNESS_COLUMNS +  PUBLIC_INPUT_COLUMNS + CONSTANT_COLUMNTS
-    uint256 constant PERMUTATION_PERMUTATION_COLUMNS = 17; // WITNESS_COLUMNS +  PUBLIC_INPUT_COLUMNS + CONSTANT_COLUMNS
-
     function verify_proof_be(
         bytes calldata blob,
         types.transcript_data memory tr_state,
         types.placeholder_proof_map memory proof_map,
         types.fri_params_type memory fri_params,
         types.placeholder_common_data memory common_data,
-        types.placeholder_local_variables memory local_vars
+        types.placeholder_local_variables memory local_vars,
+        types.arithmetization_params memory ar_params
     ) external view returns (bool result) {
         // 8. alphas computations
         local_vars.alphas = new uint256[](f_parts);
@@ -87,10 +78,11 @@ library placeholder_verifier {
         if (local_vars.challenge != basic_marshalling.get_uint256_be(blob, proof_map.eval_proof_offset)) {
             return false;
         }
-        
+
         // variable values
-        local_vars.variable_values_evaluation_points = new uint256[][](WITNESS_COLUMNS + PUBLIC_INPUT_COLUMNS);
-        for (uint256 i = 0; i < WITNESS_COLUMNS;) {
+        fri_params.leaf_size = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_variable_values_offset);
+        local_vars.variable_values_evaluation_points = new uint256[][](fri_params.leaf_size);
+        for (uint256 i = 0; i < ar_params.witness_columns;) {
             local_vars.variable_values_evaluation_points[i] = new uint256[](common_data.columns_rotations[i].length);
             for (uint256 j = 0; j < common_data.columns_rotations[i].length;) {
                 local_vars.e = uint256(common_data.columns_rotations[i][j]);
@@ -125,7 +117,7 @@ library placeholder_verifier {
             }
         unchecked{i++;}
         }
-        for (uint256 i = WITNESS_COLUMNS; i < WITNESS_COLUMNS + PUBLIC_INPUT_COLUMNS;) {
+        for (uint256 i = ar_params.witness_columns; i < ar_params.witness_columns + ar_params.public_input_columns;) {
             local_vars.variable_values_evaluation_points[i] = new uint256[](1);
             local_vars.variable_values_evaluation_points[i][0] = local_vars.challenge;
             unchecked{i++;}
@@ -136,6 +128,7 @@ library placeholder_verifier {
             require(false, "Wrong variable values LPC proof");
             return false;
         }
+
         // permutation
         local_vars.evaluation_points = new uint256[][](1);
         local_vars.evaluation_points[0] = new uint256[](2);

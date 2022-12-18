@@ -46,8 +46,9 @@ library batched_lpc_verifier {
     function skip_vector_of_proofs_be(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 result_offset){
         uint256 value_len;
+        uint256 i;
         (value_len, result_offset) = basic_marshalling.get_skip_length(blob, offset);
-        for (uint256 i = 0; i < value_len;) {
+        for (i = 0; i < value_len;) {
             result_offset = skip_proof_be(blob, result_offset);
             unchecked{ i++; }
         }
@@ -116,8 +117,9 @@ library batched_lpc_verifier {
         // fri_proof
         uint256 value_len;
         (value_len, result_offset) = basic_marshalling.get_skip_length_check(blob, result_offset);
+        uint256 i;
 
-        for (uint256 i = 0; i < value_len;) {
+        for (i = 0; i < value_len;) {
             // TODO realized FRI::skip_proof_be checked better
             result_offset = batched_fri_verifier.skip_proof_be(blob, result_offset);
             unchecked{ i++; }
@@ -127,8 +129,9 @@ library batched_lpc_verifier {
     function skip_vector_of_proofs_be_check(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 result_offset) {
         uint256 value_len;
+        uint256 i;
         (value_len, result_offset) = basic_marshalling.get_skip_length_check(blob, offset);
-        for (uint256 i = 0; i < value_len;) {
+        for ( i = 0; i < value_len;) {
             result_offset = skip_proof_be_check(blob, result_offset);
             unchecked{ i++; }
         }
@@ -137,9 +140,10 @@ library batched_lpc_verifier {
     function skip_n_proofs_in_vector_be_check(bytes calldata blob, uint256 offset, uint256 n)
     internal pure returns (uint256 result_offset) {
         uint256 value_len;
+        uint256 i;
         (value_len, result_offset) = basic_marshalling.get_skip_length_check(blob, offset);
         require(n <= value_len);
-        for (uint256 i = 0; i < n;) {
+        for (i = 0; i < n;) {
             result_offset = skip_proof_be_check(blob, result_offset);
             unchecked{ i++; }
         }
@@ -172,40 +176,50 @@ library batched_lpc_verifier {
         types.transcript_data memory tr_state, types.fri_params_type memory fri_params)
     internal view returns (bool result) {
         result = false;
+        uint256 ind;
+        uint256 ind2;
+        uint256[] memory eval;
 
-//        if (fri_params.leaf_size != evaluation_points.length && evaluation_points.length == 1){
-//            uint256[] memory eval = evaluation_points[0];
-//            evaluation_points = new uint256[][](fri_params.leaf_size);
-//            for(uint256 ind = 0; ind < fri_params.leaf_size;){
-//                evaluation_points[ind] = new uint256[](eval.length);
-//                for (uint256 ind2 = 0; ind2 < eval.length;){
-//                    evaluation_points[ind][ind2] = eval[ind2];
-//                    unchecked{ ind2++; }
-//                }
-//                unchecked{ ind++; }
-//            }
-//        }
-//        require(fri_params.leaf_size == evaluation_points.length, "Array of evaluation points size is not equal to leaf_size!");
-//        require(fri_params.lambda == get_fri_proof_n_be(blob, offset), "Fri proofs number is not equal to lambda!");
+        fri_params.leaf_size = get_z_n_be(blob, offset);
 
-        uint256 local_vars;
-        local_vars = basic_marshalling.skip_length(skip_to_z(blob, offset));
-        for (uint256 polynom_index = 0; polynom_index < fri_params.leaf_size;) {
+        // If there is only one point for multiple polynomials;
+        if (fri_params.leaf_size != evaluation_points.length && evaluation_points.length == 1){
+            eval = evaluation_points[0];
+            evaluation_points = new uint256[][](fri_params.leaf_size);
+            for(ind = 0; ind < fri_params.leaf_size;){
+                evaluation_points[ind] = new uint256[](eval.length);
+                for (ind2 = 0; ind2 < eval.length;){
+                    evaluation_points[ind][ind2] = eval[ind2];
+                    unchecked{ ind2++; }
+                }
+                unchecked{ ind++; }
+            }
+        }
+        require(fri_params.leaf_size == evaluation_points.length, "Array of evaluation points size is not equal to leaf_size!");
+        require(fri_params.lambda == get_fri_proof_n_be(blob, offset), "Fri proofs number is not equal to lambda!");
+
+        uint256 z_offset;
+        uint256 polynom_index;
+        uint256 point_index;
+        uint256 round_id;
+
+        z_offset = basic_marshalling.skip_length(skip_to_z(blob, offset));
+        for (polynom_index = 0; polynom_index < fri_params.leaf_size;) {
             fri_params.batched_U[polynom_index] = polynomial.interpolate(
                 blob,
                 evaluation_points[polynom_index],
-                local_vars,
+                z_offset,
                 fri_params.modulus
             );
-            local_vars = basic_marshalling.skip_vector_of_uint256_be(blob, local_vars);
+            z_offset = basic_marshalling.skip_vector_of_uint256_be(blob, z_offset);
 
             unchecked{ polynom_index++; }
         }
 
-        for (uint256 polynom_index = 0; polynom_index < fri_params.leaf_size;) {
+        for (polynom_index = 0; polynom_index < fri_params.leaf_size;) {
             fri_params.batched_V[polynom_index] = new uint256[](1);
             fri_params.batched_V[polynom_index][0] = 1;
-            for (uint256 point_index = 0; point_index < evaluation_points[polynom_index].length;) {
+            for (point_index = 0; point_index < evaluation_points[polynom_index].length;) {
                 fri_params.lpc_z[0] = fri_params.modulus - evaluation_points[polynom_index][point_index];
                 fri_params.batched_V[polynom_index] = polynomial.mul_poly(
                     fri_params.batched_V[polynom_index],
@@ -218,7 +232,7 @@ library batched_lpc_verifier {
         }
 
         offset = skip_to_first_fri_proof_be(blob, offset);
-        for (uint256 round_id = 0; round_id < fri_params.lambda;) {
+        for (round_id = 0; round_id < fri_params.lambda;) {
             fri_params.i_fri_proof = round_id;  // for debug only
             if (!batched_fri_verifier.parse_verify_proof_be(blob, offset, tr_state, fri_params)) {
                 require(false, "FRI-proof problem");

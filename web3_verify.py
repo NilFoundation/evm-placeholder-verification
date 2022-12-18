@@ -50,6 +50,14 @@ if __name__ == '__main__':
     params['init_params'][1].append(len(q))
     params['init_params'][1].extend(q)
 
+    step_list = [1] * 16
+    params['init_params'][1].append(len(step_list))
+    params['init_params'][1].extend(step_list)
+
+    arithmetization_params = [15, 1, 1, 30] # witness, public_input, constant, selector
+    params['init_params'][1].append((len(arithmetization_params)))
+    params['init_params'][1].extend(arithmetization_params)
+
     params['columns_rotations'][0] = []
     params['columns_rotations'][0] = [[0, 1, -1, ],
                                       [0, 1, -1, ],
@@ -71,9 +79,6 @@ if __name__ == '__main__':
                                       [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ],
                                       [0, ],
                                       [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ]]
-    step_list = [1] * 16
-    params['init_params'][1].append(len(step_list))
-    params['init_params'][1].extend(step_list)
 
     params['init_params'][2] = []
     params['init_params'][2].append(28948022309329048855892746252171976963363056481941647379679742748393362948097)
@@ -92,6 +97,14 @@ if __name__ == '__main__':
     params['init_params'][2].append(len(q))
     params['init_params'][2].extend(q)
 
+    step_list = [1] * 17
+    params['init_params'][2].append(len(step_list))
+    params['init_params'][2].extend(step_list)  # step_list
+
+    arithmetization_params = [15, 1, 1, 30] # witness, public_input, constant, selector
+    params['init_params'][2].append((len(arithmetization_params)))
+    params['init_params'][2].extend(arithmetization_params)
+
     for i in range(47):
         params['columns_rotations'][1].append([0, ])
     params['columns_rotations'][1][0] = [0, 1, -1]
@@ -99,9 +112,6 @@ if __name__ == '__main__':
     params['columns_rotations'][1][2] = [0, 1]
     params['columns_rotations'][1][5] = [0, -1]
     params['columns_rotations'][1][13] = [0, 1]
-    step_list = [1] * 17
-    params['init_params'][2].append(len(step_list))
-    params['init_params'][2].extend(step_list)  # step_list
 
     print("Placeholder proof verification for Mina aux state proof")
     abi = [{'anonymous': False, 'inputs': [{'indexed': False, 'internalType': 'uint256', 'name': 'gas_usage', 'type': 'uint256'}], 'name': 'gas_usage_emit', 'type': 'event'}, {'inputs': [{'internalType': 'bytes', 'name': 'blob', 'type': 'bytes'}, {'internalType': 'uint256[][]', 'name': 'init_params', 'type': 'uint256[][]'}, {'internalType': 'int256[][][]', 'name': 'columns_rotations', 'type': 'int256[][][]'}], 'name': 'verify', 'outputs': [], 'stateMutability': 'nonpayable', 'type': 'function'}]

@@ -25,7 +25,6 @@ import "../logging.sol";
 
 library unified_addition_component_gen {
     uint256 constant WITNESSES_N = 11;
-    uint256 constant WITNESSES_TOTAL_N = 11;
     uint256 constant GATES_N = 1;
 
     uint256 constant MODULUS_OFFSET = 0x0;
@@ -45,6 +44,7 @@ library unified_addition_component_gen {
     function evaluate_gates_be(
         bytes calldata blob,
         types.gate_argument_local_vars memory gate_params,
+        types.arithmetization_params memory ar_params,
         int256[][] memory columns_rotations
     ) external pure returns (uint256 gates_evaluation) {
         // TODO: check witnesses number in proof
@@ -70,7 +70,7 @@ library unified_addition_component_gen {
                 .get_z_i_j_from_proof_be(
                     blob,
                     gate_params.eval_proof_selector_offset,
-                    i,
+                    i + ar_params.permutation_columns + ar_params.permutation_columns + ar_params.constant_columns,
                     0
                 );
         }

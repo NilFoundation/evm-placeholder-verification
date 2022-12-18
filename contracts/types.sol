@@ -176,7 +176,7 @@ library types {
         //0x1c0
         uint256[] step_list;
         //0x1e0
-        uint256 const1_2;       // !!! It's important. Set it please. Uninitialized 1/2 => colinear check error.
+        uint256[]    s;                    // Coset indices
         //0x200
         uint256 i_fri_proof;    // It is useful for debugging
         //0x220
@@ -187,10 +187,11 @@ library types {
         // These are local variables for FRI. But it's useful to allocate memory once
         //0x260
         bytes        b;
-        uint256[2][] s_indices;              // Indices of current coset S
-        uint256[2][] s;                      // Coset S
-        uint256[2][] correct_order_idx;      // Ordered indices to pack ys to check merkle proofs
-        uint256[2][][][3] ys;                // ys -- previous, current, next
+        //0x280
+        uint256[]    coeffs;                  // coeffs -- ancestor of ys
+        uint256[]    s_indices;
+        uint256[]    tmp_arr;
+        uint256[]    correct_order_idx;       // Ordered indices to pack ys to check merkle proofs
     }
 
     struct placeholder_proof_map {
@@ -290,6 +291,17 @@ library types {
         uint256 idx2;
     }
 
+    struct arithmetization_params{
+        uint256 witness_columns;
+        uint256 public_input_columns;
+        uint256 constant_columns;
+        uint256 selector_columns;
+        uint256 lookup_table_size;
+
+        // computed from other params
+        uint256 permutation_columns;
+    }
+
     struct gate_argument_local_vars {
         // 0x0
         uint256 modulus;
@@ -303,9 +315,9 @@ library types {
         uint256[] witness_evaluations_offsets;
         // 0xa0
         uint256[] selector_evaluations;
-        // 0xc0
-        uint256 eval_proof_witness_offset;
         // 0xe0
+        uint256 eval_proof_witness_offset;
+        // 0xc0
         uint256 eval_proof_selector_offset;
         // 0x100
         uint256 gates_evaluation;

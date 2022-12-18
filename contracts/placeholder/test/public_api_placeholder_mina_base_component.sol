@@ -55,7 +55,7 @@ contract TestPlaceholderVerifierMinaBase {
         // 5. permutation argument
         local_vars.permutation_argument = permutation_argument.verify_eval_be(blob, vars.tr_state,
             vars.proof_map, vars.fri_params,
-            vars.common_data, local_vars);
+            vars.common_data, local_vars, vars.arithmetization_params);
         // 7. gate argument specific for circuit
         types.gate_argument_local_vars memory gate_params;
         gate_params.modulus = vars.fri_params.modulus;
@@ -64,7 +64,7 @@ contract TestPlaceholderVerifierMinaBase {
         gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
         gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
-        local_vars.gate_argument = mina_base_split_gen.evaluate_gates_be(blob, gate_params, vars.common_data.columns_rotations);
+        local_vars.gate_argument = mina_base_split_gen.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
 
         require(
             placeholder_verifier.verify_proof_be(
@@ -73,7 +73,8 @@ contract TestPlaceholderVerifierMinaBase {
                 vars.proof_map,
                 vars.fri_params,
                 vars.common_data,
-                local_vars
+                local_vars,
+                vars.arithmetization_params
             ),
             "Proof is not correct!"
         );

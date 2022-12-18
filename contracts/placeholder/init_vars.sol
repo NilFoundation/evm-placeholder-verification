@@ -30,6 +30,7 @@ library init_vars {
         uint256 proof_size;
         types.transcript_data tr_state;
         types.placeholder_common_data common_data;
+        types.arithmetization_params arithmetization_params;
     }
 
     function init(bytes calldata blob, uint256[] calldata init_params,
@@ -46,7 +47,6 @@ library init_vars {
         vars.fri_params.r = init_params[idx++];
         vars.fri_params.max_degree = init_params[idx++];
         vars.fri_params.lambda = init_params[idx++];
-        vars.fri_params.const1_2 = field.inverse_static(2, vars.fri_params.modulus);
 
         vars.common_data.rows_amount = init_params[idx++];
         vars.common_data.omega = init_params[idx++];
@@ -72,25 +72,27 @@ library init_vars {
             vars.fri_params.step_list[i] = init_params[idx];
             if(vars.fri_params.step_list[i] > vars.fri_params.max_step)
                 vars.fri_params.max_step = vars.fri_params.step_list[i];
-        unchecked{ i++; idx++;}
+            unchecked{ i++; idx++;}
         }
+
+        unchecked{
+            idx++; // arithmetization_params length;
+            vars.arithmetization_params.witness_columns = init_params[idx++];
+            vars.arithmetization_params.public_input_columns = init_params[idx++];
+            vars.arithmetization_params.constant_columns = init_params[idx++];
+            vars.arithmetization_params.selector_columns = init_params[idx++];
+            vars.arithmetization_params.permutation_columns = vars.arithmetization_params.witness_columns 
+                + vars.arithmetization_params.public_input_columns 
+                + vars.arithmetization_params.constant_columns;
+        }
+
         unchecked{ max_coset = 1 << (vars.fri_params.max_step - 1);}
 
-        vars.fri_params.s_indices = new uint256[2][](max_coset);
-        vars.fri_params.s = new uint256[2][](max_coset);
-        vars.fri_params.correct_order_idx = new uint256[2][](max_coset);
-
-        vars.fri_params.ys[0] = new uint256[2][][](vars.fri_params.max_batch);
-        vars.fri_params.ys[1] = new uint256[2][][](vars.fri_params.max_batch);
-        vars.fri_params.ys[2] = new uint256[2][][](vars.fri_params.max_batch);
-
-        for(uint256 i = 0; i < vars.fri_params.max_batch;){
-            vars.fri_params.ys[0][i] = new uint256[2][](max_coset);
-            vars.fri_params.ys[1][i] = new uint256[2][](max_coset);
-            vars.fri_params.ys[2][i] = new uint256[2][](max_coset);
-        unchecked{i++;}
-        }
-
-        vars.fri_params.b = new bytes(0x40 * vars.fri_params.max_batch * max_coset);
+        vars.fri_params.s_indices = new uint256[](max_coset);
+        vars.fri_params.correct_order_idx = new uint256[](max_coset);
+        vars.fri_params.tmp_arr = new uint256[](max_coset << 1);
+        vars.fri_params.s = new uint256[](max_coset);
+        vars.fri_params.coeffs = new uint256[](max_coset << 1);
+        vars.fri_params.b = new bytes(vars.fri_params.max_batch << (vars.fri_params.max_step + 5));
     }
 }

@@ -33,6 +33,7 @@ contract TestMinaStateProof {
         uint256 ind;
 
         types.placeholder_proof_map proof_map;
+        types.arithmetization_params arithmetization_params;
         uint256 proof_offset;
         uint256 proof_size;
         types.transcript_data tr_state;
@@ -73,25 +74,28 @@ contract TestMinaStateProof {
                 vars.fri_params.max_step = vars.fri_params.step_list[i];
             unchecked{ i++; idx++;}
         }
+
+        unchecked{
+            idx++; // arithmetization_params length;
+            vars.arithmetization_params.witness_columns = init_params[idx++];
+            vars.arithmetization_params.public_input_columns = init_params[idx++];
+            vars.arithmetization_params.constant_columns = init_params[idx++];
+            vars.arithmetization_params.selector_columns = init_params[idx++];
+            vars.arithmetization_params.permutation_columns = vars.arithmetization_params.witness_columns 
+                + vars.arithmetization_params.public_input_columns 
+                + vars.arithmetization_params.constant_columns;
+        }
     }
 
     function allocate_all(test_local_vars memory vars, uint256 max_step, uint256 max_batch) internal view{
         uint256 max_coset = 1 << (vars.fri_params.max_step - 1);
 
-        vars.fri_params.s_indices = new uint256[2][](max_coset);
-        vars.fri_params.s = new uint256[2][](max_coset);
-        vars.fri_params.correct_order_idx = new uint256[2][](max_coset);
+        vars.fri_params.s_indices = new uint256[](max_coset);
+        vars.fri_params.s = new uint256[](max_coset);
 
-        vars.fri_params.ys[0] = new uint256[2][][](max_batch);
-        vars.fri_params.ys[1] = new uint256[2][][](max_batch);
-        vars.fri_params.ys[2] = new uint256[2][][](max_batch);
-
-        for(uint256 i = 0; i < vars.fri_params.max_batch;){
-            vars.fri_params.ys[0][i] = new uint256[2][](max_coset);
-            vars.fri_params.ys[1][i] = new uint256[2][](max_coset);
-            vars.fri_params.ys[2][i] = new uint256[2][](max_coset);
-            unchecked{i++;}
-        }
+        vars.fri_params.correct_order_idx = new uint256[](max_coset);
+        vars.fri_params.tmp_arr = new uint256[](max_coset << 1);
+        vars.fri_params.coeffs = new uint256[](max_coset << 1);
 
         vars.fri_params.b = new bytes(0x40 * vars.fri_params.max_batch * max_coset);
     }
@@ -137,6 +141,7 @@ contract TestMinaStateProof {
         transcript.init_transcript(vars.tr_state, hex"");
 
         types.placeholder_local_variables memory local_vars;
+
         // 3. append variable commitments to transcript
         transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
 
@@ -144,7 +149,7 @@ contract TestMinaStateProof {
         // 5. permutation argument
         local_vars.permutation_argument = permutation_argument.verify_eval_be(blob, vars.tr_state,
             vars.proof_map, vars.fri_params,
-            vars.common_data, local_vars);
+            vars.common_data, local_vars, vars.arithmetization_params);
         // 7. gate argument specific for circuit
         types.gate_argument_local_vars memory gate_params;
         gate_params.modulus = vars.fri_params.modulus;
@@ -153,11 +158,11 @@ contract TestMinaStateProof {
         gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
         gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
-        local_vars.gate_argument = mina_base_split_gen.evaluate_gates_be(blob, gate_params, vars.common_data.columns_rotations);
+        local_vars.gate_argument = mina_base_split_gen.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
 
         require(
             placeholder_verifier.verify_proof_be(blob, vars.tr_state,  vars.proof_map, vars.fri_params,
-                                                 vars.common_data, local_vars),
+                                                 vars.common_data, local_vars, vars.arithmetization_params),
             "Base proof is not correct!"
         );
         
@@ -169,6 +174,7 @@ contract TestMinaStateProof {
         transcript.init_transcript(vars.tr_state, hex"");
 
         types.placeholder_local_variables memory local_vars_scalar;
+
         // 3. append variable_values commitments to transcript
         transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
 
@@ -176,7 +182,7 @@ contract TestMinaStateProof {
         // 5. permutation argument
         local_vars_scalar.permutation_argument = permutation_argument.verify_eval_be(blob, vars.tr_state,
             vars.proof_map, vars.fri_params,
-            vars.common_data, local_vars_scalar);
+            vars.common_data, local_vars_scalar, vars.arithmetization_params);
         // 7. gate argument specific for circuit
         gate_params.modulus = vars.fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
@@ -184,11 +190,11 @@ contract TestMinaStateProof {
         gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
         gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
-        local_vars_scalar.gate_argument = mina_split_gen.evaluate_gates_be(blob, gate_params, vars.common_data.columns_rotations);
+        local_vars_scalar.gate_argument = mina_split_gen.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
 
         require(
             placeholder_verifier.verify_proof_be(blob, vars.tr_state,  vars.proof_map, vars.fri_params,
-                                                 vars.common_data, local_vars_scalar),
+                                                 vars.common_data, local_vars_scalar, vars.arithmetization_params),
             "Scalar proof is not correct!"
         );
     }
