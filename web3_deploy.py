@@ -119,11 +119,21 @@ if __name__ == '__main__':
     bytecode = deploy_link_libs(w3, compiled, bytecode, linked_gates_libs_names)
 
     test_contract = w3.eth.contract(abi=abi, bytecode=bytecode)
-    deploy_tx_hash = test_contract.constructor().transact()
-    deploy_tx_receipt = w3.eth.wait_for_transaction_receipt(deploy_tx_hash)
-    print("Deployment cost:", deploy_tx_receipt.gasUsed)
-    print("contractAddress:", deploy_tx_receipt.contractAddress)
+
+    account_from = w3.eth.account.privateKeyToAccount(open('.private_key', 'r').read())
+    deploy_tx_hash = test_contract.constructor().buildTransaction(
+        {
+            'from': account_from.address,
+            'nonce': w3.eth.get_transaction_count(account_from.address),
+        }
+    )
+    tx_create = w3.eth.account.sign_transaction(deploy_tx_hash, account_from.privateKey)
+    tx_hash = w3.eth.send_raw_transaction(tx_create.rawTransaction)
+    tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+
+    print("Deployment cost:", tx_receipt.gasUsed)
+    print("contractAddress:", tx_receipt.contractAddress)
     print("abi:", abi)
-    if (args.address_output is not None):
+    if args.address_output is not None:
         with open(args.address_output, 'w') as f:
-            f.write(deploy_tx_receipt.contractAddress)
+            f.write(tx_receipt.contractAddress)

@@ -232,6 +232,9 @@ blockchain/geth/**
 blockchain/keystore/**
 blockchain/history
 .secret
+**/.secret
+.private_key
+**/.private_key
 
 #truffle
 yarn.lock
