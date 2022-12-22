@@ -28,11 +28,12 @@ import "../placeholder/init_vars.sol";
 
 import "../components/mina_base_split_gen.sol";
 import "../components/mina_scalar_split_gen.sol";
+import "../verifier.sol";
 
-contract MinaStateProof {
+contract MinaStateProof is IVerifier {
     event gas_usage_emit(uint256 gas_usage);
 
-    struct gas_usage_t {
+    struct gas_usage {
         uint256 start;
         uint256 end;
     }
@@ -50,7 +51,7 @@ contract MinaStateProof {
         types.arithmetization_params arithmetization_params;
     }
 
-    function init_vars(test_local_vars memory vars, uint256[] memory init_params, int256[][] memory columns_rotations) internal view{
+    function init_vars(test_local_vars memory vars, uint256[] memory init_params, int256[][] memory columns_rotations) internal view {
         uint256 idx = 0;
         vars.fri_params.modulus = init_params[idx++];
         vars.fri_params.r = init_params[idx++];
@@ -67,36 +68,40 @@ contract MinaStateProof {
         vars.fri_params.D_omegas = new uint256[](init_params[idx++]);
         for (uint256 i = 0; i < vars.fri_params.D_omegas.length;) {
             vars.fri_params.D_omegas[i] = init_params[idx];
-            unchecked{ i++; idx++;}
+        unchecked{i++;
+            idx++;}
         }
         vars.fri_params.q = new uint256[](init_params[idx++]);
         for (uint256 i = 0; i < vars.fri_params.q.length;) {
             vars.fri_params.q[i] = init_params[idx];
-            unchecked{ i++; idx++;}
+        unchecked{i++;
+            idx++;}
         }
 
         vars.fri_params.step_list = new uint256[](init_params[idx++]);
         vars.fri_params.max_step = 0;
         for (uint256 i = 0; i < vars.fri_params.step_list.length;) {
             vars.fri_params.step_list[i] = init_params[idx];
-            if(vars.fri_params.step_list[i] > vars.fri_params.max_step)
+            if (vars.fri_params.step_list[i] > vars.fri_params.max_step)
                 vars.fri_params.max_step = vars.fri_params.step_list[i];
-            unchecked{ i++; idx++;}
+        unchecked{i++;
+            idx++;}
         }
 
-        unchecked{
-            idx++; // arithmetization_params length;
-            vars.arithmetization_params.witness_columns = init_params[idx++];
-            vars.arithmetization_params.public_input_columns = init_params[idx++];
-            vars.arithmetization_params.constant_columns = init_params[idx++];
-            vars.arithmetization_params.selector_columns = init_params[idx++];
-            vars.arithmetization_params.permutation_columns = vars.arithmetization_params.witness_columns 
-                + vars.arithmetization_params.public_input_columns 
-                + vars.arithmetization_params.constant_columns;
-        }
+    unchecked{
+        idx++;
+        // arithmetization_params length;
+        vars.arithmetization_params.witness_columns = init_params[idx++];
+        vars.arithmetization_params.public_input_columns = init_params[idx++];
+        vars.arithmetization_params.constant_columns = init_params[idx++];
+        vars.arithmetization_params.selector_columns = init_params[idx++];
+        vars.arithmetization_params.permutation_columns = vars.arithmetization_params.witness_columns
+        + vars.arithmetization_params.public_input_columns
+        + vars.arithmetization_params.constant_columns;
+    }
     }
 
-    function allocate_all(test_local_vars memory vars, uint256 max_step, uint256 max_batch) internal view{
+    function allocate_all(test_local_vars memory vars, uint256 max_step, uint256 max_batch) internal view {
         uint256 max_coset = 1 << (vars.fri_params.max_step - 1);
 
         vars.fri_params.s_indices = new uint256[](max_coset);
@@ -107,12 +112,9 @@ contract MinaStateProof {
         vars.fri_params.b = new bytes(vars.fri_params.max_batch << (vars.fri_params.max_step + 5));
     }
 
-    function verify(
-        bytes calldata blob,
-        uint256[][] calldata init_params,
-        int256[][][] calldata columns_rotations
-    ) public {
-        gas_usage_t memory gas_usage;
+    function verify(bytes calldata blob, uint256[][] calldata init_params,
+        int256[][][] calldata columns_rotations) public returns (bool) {
+        gas_usage memory gas_usage;
         gas_usage.start = gasleft();
         test_local_vars memory vars;
         uint256 max_step;
@@ -120,11 +122,11 @@ contract MinaStateProof {
 
         require(blob.length == init_params[0][1], "Proof is not correct!");
 
-        for( vars.ind = 0; vars.ind < 2; ){
-            init_vars(vars, init_params[vars.ind+1], columns_rotations[vars.ind]);
-            if(vars.fri_params.max_step > max_step) max_step = vars.fri_params.max_step;
-            if(vars.fri_params.max_batch > max_step) max_batch = vars.fri_params.max_batch;
-            unchecked{ vars.ind++; }
+        for (vars.ind = 0; vars.ind < 2;) {
+            init_vars(vars, init_params[vars.ind + 1], columns_rotations[vars.ind]);
+            if (vars.fri_params.max_step > max_step) max_step = vars.fri_params.max_step;
+            if (vars.fri_params.max_batch > max_step) max_batch = vars.fri_params.max_batch;
+        unchecked{vars.ind++;}
         }
         allocate_all(vars, vars.fri_params.max_step, vars.fri_params.max_batch);
 
@@ -156,11 +158,9 @@ contract MinaStateProof {
 
         local_vars.gate_argument = mina_base_split_gen.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
 
-        require(
-            placeholder_verifier.verify_proof_be(blob, vars.tr_state,  vars.proof_map, vars.fri_params,
+        require(placeholder_verifier.verify_proof_be(blob, vars.tr_state, vars.proof_map, vars.fri_params,
             vars.common_data, local_vars, vars.arithmetization_params),
-            "Proof is not correct!"
-        );
+            "Proof is not correct!");
 
         vars.proof_offset += vars.proof_size;
 
@@ -187,12 +187,14 @@ contract MinaStateProof {
 
         local_vars_scalar.gate_argument = mina_split_gen.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
 
-        require(
-            placeholder_verifier.verify_proof_be(blob, vars.tr_state,  vars.proof_map, vars.fri_params,
-            vars.common_data, local_vars_scalar, vars.arithmetization_params),
-            "Proof is not correct!"
-        );
+        bool result = placeholder_verifier.verify_proof_be(blob, vars.tr_state, vars.proof_map, vars.fri_params,
+            vars.common_data, local_vars_scalar, vars.arithmetization_params);
+
+        require(result, "Proof is not correct");
+
         gas_usage.end = gasleft();
         emit gas_usage_emit(gas_usage.start - gas_usage.end);
+
+        return result;
     }
 }
