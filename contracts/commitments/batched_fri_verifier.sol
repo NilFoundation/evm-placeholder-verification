@@ -818,6 +818,19 @@ library batched_fri_verifier {
         return commitment_calc.eval2_colinear_check(precomputed, input, fri_params.modulus);
     }
 
+    /*
+        Precomputed data is stored in fri_params.precomputed_eval1.
+            0 -- z
+            1 -- s0 - xi
+            2 -- -s0 - xi1
+            3 -- (s0-xi)(-s0-xi)
+            4 -- c
+        Main equations is
+            2 * c * x * (s0-xi)(-s0-xi) == c0*(-s0-xi)(y0-z) + c1(s0-xi)(y1-z)
+        There are large polynomial batches with one similar evaluation point
+        We store precomputed data only for previous evalutaion point.
+        But it makes this calculation much more efficient.
+    */
     uint256 constant EVAL1_Z_OFFSET = 0x20;                                      
     uint256 constant EVAL1_XI0_OFFSET = 0x40;                                      
     uint256 constant EVAL1_XI1_OFFSET = 0x60;                                      
@@ -831,6 +844,7 @@ library batched_fri_verifier {
     ) internal pure returns(bool b){
         uint256[] memory tmp = fri_params.precomputed_eval1;
         tmp[0] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(blob, fri_params.z_offset, local_vars.p_ind, 0);        
+        // store -z
         assembly{
             mstore(add(tmp, EVAL1_Z_OFFSET), sub(mload(fri_params), mload(add(tmp, EVAL1_Z_OFFSET))))
         }
@@ -838,20 +852,20 @@ library batched_fri_verifier {
             fri_params.prev_xi = xi;
             //fri_params.precomputed_eval1 = tmp;
             assembly{
-                xi := sub(mload(fri_params), xi)
+                xi := sub(mload(fri_params), xi)    //xi = -xi
             }
-            tmp[1] = fri_params.tmp_arr[0];
+            tmp[1] = fri_params.tmp_arr[0];         //tmp[1] = s0
             assembly{           
                 let modulus := mload(fri_params)
 
-                mstore(add(tmp, EVAL1_XI1_OFFSET), sub(modulus, mload(add(tmp, EVAL1_XI0_OFFSET))))
-                mstore(add(tmp, EVAL1_XI0_OFFSET), addmod(
+                mstore(add(tmp, EVAL1_XI1_OFFSET), sub(modulus, mload(add(tmp, EVAL1_XI0_OFFSET)))) // -s0
+                mstore(add(tmp, EVAL1_XI0_OFFSET), addmod(                                           // s0 - xi
                     mload(add(tmp, EVAL1_XI0_OFFSET)), xi, modulus
                 ))
-                mstore(add(tmp, EVAL1_XI1_OFFSET), addmod(
+                mstore(add(tmp, EVAL1_XI1_OFFSET), addmod(                                          // -s0 - xi
                     mload(add(tmp, EVAL1_XI1_OFFSET)), xi, modulus
                 ))
-                mstore(add(tmp, EVAL1_XI0_XI1_OFFSET), mulmod(
+                mstore(add(tmp, EVAL1_XI0_XI1_OFFSET), mulmod(                                      // (s0 - xi)(-s0 - xi)
                     mload(add(tmp, EVAL1_XI0_OFFSET)),
                     mload(add(tmp, EVAL1_XI1_OFFSET)),
                     modulus
@@ -861,7 +875,8 @@ library batched_fri_verifier {
         assembly{
             let modulus := mload(fri_params)
             mstore(add(local_vars,INTERPOLANT_OFFSET), addmod(
-                mulmod(
+                // (y-z)*(-s0-xi)
+                mulmod(                                   
                     mload(mload(add(local_vars, COEFFS_OFFSET))),
                     mulmod(
                         addmod(
@@ -871,6 +886,7 @@ library batched_fri_verifier {
                     ),
                     modulus
                 ),
+                // (y-z)*(-s1-xi)
                 mulmod(
                     mload(add(mload(add(local_vars, COEFFS_OFFSET)), 0x20)),
                     mulmod(
@@ -889,7 +905,7 @@ library batched_fri_verifier {
                     calldataload(add(blob.offset, mload(add(local_vars, COLINEAR_OFFSET)))), 
                     modulus
                 ), 
-                mulmod(mload(add(tmp, EVAL1_XI0_OFFSET)), mload(add(tmp, EVAL1_XI1_OFFSET)), modulus), 
+                mload(add(tmp, EVAL1_XI0_XI1_OFFSET)), 
                 modulus
             ))
             mstore(add(tmp, EVAL1_C_OFFSET), addmod(mload(add(tmp, EVAL1_C_OFFSET)), mload(add(tmp, EVAL1_C_OFFSET)), modulus))

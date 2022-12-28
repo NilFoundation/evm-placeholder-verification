@@ -22,16 +22,17 @@ library commitment_calc{
 
         out[8] = field.fmul(field.fadd(xi0, modulus - xi1, modulus), field.fmul(field.fadd(xi1, modulus- xi2, modulus), field.fadd(xi2, modulus - xi0, modulus), modulus), modulus);
     }
-/*  precomputed
-        0 -- V(x)
-        1 -- V(-x)
-        2 -- c00
-        3 -- c01
-        4 -- c02
-        5 -- c10
-        6 -- c11
-        7 -- c12
-        8 -- Sigma
+/*  This function output is different for each of lambda FRI rounds, because s0 depends on challenge x.
+    Precomputed array is similar for all polynomials with similar evaluation points
+        0 -- V(s0)  = (s0 - xi0)(s0 - xi1)(s0 - xi2)
+        1 -- V(-s0) = (-s0 - xi0)(-s0 - xi1)(-s0 - xi2) = -(s0 + xi0)(s0 + xi1)(s0 + xi2)
+        2 -- c00 = (xi1 - xi2)(s0 - xi1)(s0 - xi2)
+        3 -- c01 = (xi2 - xi0)(s0 - xi0)(s0 - xi2)
+        4 -- c02 = (xi0 - xi1)(s0 - xi0)(s0 - xi1)
+        5 -- c10 = (xi1 - xi2)(-s0 - xi1)(-s0 - xi2) = (xi1 - xi2)(s0 + xi1)(s0 + xi2)
+        6 -- c11 = (xi2 - xi0)(-s0 - xi0)(-s0 - xi2) = (xi2 - xi0)(s0 + xi0)(s0 + xi2)
+        7 -- c12 = (xi0 - xi1)(-s0 - xi0)(-s0 - xi1) = (xi0 - xi1)(s0 + xi0)(s0 + xi1)
+        8 -- Sigma = (xi0 - xi1) * (xi1 - xi2) * (xi2 - xi0)
     input
         0 -- z0
         1 -- z1
@@ -42,6 +43,10 @@ library commitment_calc{
         6 -- y1
         7 -- c      //colinear_value
         8 -- x
+    Main equation is
+        2 * c * Sigma * x * V(s0) * V(-s0) == (V(-s0)*c0)(y0*Sigma + c00*z0 + c01*z1 + c02*z2) + (V(s0)*c1)(y1*Sigma + c10*z0 + c11*z1 + c12*z2) 
+    This calculation is expensive. 
+    So we store all precomputed values for each triple evaluation points.
 */
     function eval3_colinear_check(
         uint256[9] memory precomputed, uint256[9] memory input, uint256 modulus
@@ -109,13 +114,14 @@ library commitment_calc{
         out[6] = field.fadd(xi1, modulus - xi0, modulus);
     }
 
-/*  precomputed
-        0 -- V(x)
-        1 -- V(-x)
-        2 -- c00
-        3 -- c01
-        4 -- c10
-        5 -- c11
+/*  This function output is different for lambda FRI rounds, because s0 depends on challenge x.
+    precomputed
+        0 -- V(s0) = (s0 - xi0)(s0 - xi1)
+        1 -- V(-s0) = (-s0 - xi0)(-s0 - xi1) = (s0+xi0)(s0+xi1)
+        2 -- c00 = (s0 - xi1)
+        3 -- c01 = (xi0 - s0)
+        4 -- c10 = (-s0 - xi1) = -(s0 + xi1)
+        5 -- c11 = (xi0 + s0)
         6 -- xi1 - xi0
     input    
         0 -- z0
@@ -125,7 +131,12 @@ library commitment_calc{
         4 -- y0
         5 -- y1
         6 -- c
-        7 -- x
+        7 -- x = s0^2
+    Main equation is
+        2cx(xi1-xi0)V(s0)V(-s0) = (V(-s0)c0)[y0(xi0-x1)+c00*z0+c01*z1] + (V(s0)c1)*[y1(xi0-x1)+c10*z0+c11*z1]
+    For mina circuits cost of storing additional data is more than cost of recomputing precomputed arrays.
+    So we don't store any additional data for the case evaluation points.length == 2
+    Another strategy may be more efficient for another circuits
     */
     function eval2_colinear_check(uint256[7] memory precomputed, uint256[8] memory input, uint256 modulus)
     internal view returns(bool b){      
