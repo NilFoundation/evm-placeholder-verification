@@ -6,6 +6,7 @@ import pathlib
 from pathlib import Path
 from web3_test import find_compiled_contract, print_tx_info
 import sys
+import shutil
 
 w3 = Web3(Web3.HTTPProvider('http://127.0.0.1:8545'))
 w3.middleware_onion.inject(geth_poa_middleware, layer=0)
@@ -15,6 +16,13 @@ base_path = os.path.abspath(os.getcwd())  + '/../'
 contracts_dir = base_path + 'contracts'
 contract_name = 'TestLpcVerifier'
 
+
+def init_profiling():
+    if "--nolog" in sys.argv:
+        print("No logging!")
+        shutil.copyfile(contracts_dir+"/profiling_disabled.sol", contracts_dir+"/profiling.sol")
+    else:
+        shutil.copyfile(contracts_dir+"/profiling_enabled.sol", contracts_dir+"/profiling.sol")
 
 def init_basic_test():
     params = dict()
@@ -220,6 +228,9 @@ def init_smaller_r_test():
 
 
 if __name__ == '__main__':
+    solcx.install_solc('0.8.12')
+    init_profiling()
+    
     compiled = solcx.compile_files(
         [f'{contracts_dir}/commitments/test/public_api_lpc_verification.sol'],
         allow_paths=[f'{contracts_dir}/'],
