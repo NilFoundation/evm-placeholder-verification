@@ -292,7 +292,7 @@ library batched_lpc_verifier {
             fri_params.i_fri_proof = ind;  // for debug only
             fri_params.prev_xi = 0;
             if (!batched_fri_verifier.parse_verify_proof_be(blob, offset, tr_state, fri_params)) {
-                require(false, "Er FRI");
+                require(false, "FRI verification failed");
                 return false;
             }
             offset = batched_fri_verifier.skip_proof_be(blob, offset);

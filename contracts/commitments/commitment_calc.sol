@@ -1,7 +1,6 @@
 pragma solidity >=0.8.4;
 
 import "../types.sol";
-//import "../algebra/field.sol";
 import "../algebra/polynomial.sol";
 import "../logging.sol";
 import "../profiling.sol";
