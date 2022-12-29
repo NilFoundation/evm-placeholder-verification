@@ -3,6 +3,7 @@
 // Copyright (c) 2021 Mikhail Komarov <nemo@nil.foundation>
 // Copyright (c) 2021 Ilias Khairullin <ilias@nil.foundation>
 // Copyright (c) 2022 Aleksei Moskvin <alalmoskvin@nil.foundation>
+// Copyright (c) 2022 Elena Tatuzova <e.tatuzova@nil.foundation>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,6 +24,8 @@ import "./batched_fri_verifier.sol";
 import "../algebra/polynomial.sol";
 import "../basic_marshalling.sol";
 import "../profiling.sol";
+import "./commitment_calc.sol";
+
 
 library batched_lpc_verifier {
 
@@ -172,79 +175,128 @@ library batched_lpc_verifier {
             basic_marshalling.skip_octet_vector_32_be_check(blob, offset), i, j);
     }
 
+    uint256 constant PRECOMPUTE_EVAL3_SIZE = 5;
     function parse_verify_proof_be(bytes calldata blob,
         uint256 offset, uint256[][] memory evaluation_points,
         types.transcript_data memory tr_state, types.fri_params_type memory fri_params)
     internal returns (bool result) {
-        profiling.start_block("batched_lpc_verifier::parse_verify_proof_be");
-        profiling.start_block("batched_lpc_verifier::prepare U and V");
+        profiling.start_block("LPC::parse_verify_proof_be");
+        profiling.start_block("LPC::prepare U and V");
         result = false;
-        uint256 ind;
-        uint256 ind2;
-        uint256[] memory eval;
 
         fri_params.leaf_size = get_z_n_be(blob, offset);
 
-        // If there is only one point for multiple polynomials;
-        if (fri_params.leaf_size != evaluation_points.length && evaluation_points.length == 1){
-            eval = evaluation_points[0];
-            evaluation_points = new uint256[][](fri_params.leaf_size);
-            for(ind = 0; ind < fri_params.leaf_size;){
-                evaluation_points[ind] = new uint256[](eval.length);
-                for (ind2 = 0; ind2 < eval.length;){
-                    evaluation_points[ind][ind2] = eval[ind2];
-                    unchecked{ ind2++; }
-                }
-                unchecked{ ind++; }
-            }
-        }
-        require(fri_params.leaf_size == evaluation_points.length, "Array of evaluation points size is not equal to leaf_size!");
+        require(evaluation_points.length == 1 || fri_params.leaf_size == evaluation_points.length, "Array of evaluation points size is not equal to leaf_size!");
         require(fri_params.lambda == get_fri_proof_n_be(blob, offset), "Fri proofs number is not equal to lambda!");
 
         uint256 z_offset;
         uint256 polynom_index;
         uint256 point_index;
-        uint256 round_id;
+        uint256 ind;
 
         z_offset = basic_marshalling.skip_length(skip_to_z(blob, offset));
-        for (polynom_index = 0; polynom_index < fri_params.leaf_size;) {
-            fri_params.batched_U[polynom_index] = polynomial.interpolate(
-                blob,
-                evaluation_points[polynom_index],
-                z_offset,
-                fri_params.modulus
-            );
-            z_offset = basic_marshalling.skip_vector_of_uint256_be(blob, z_offset);
+        if( fri_params.step_list[0] != 1){
+            uint256[] memory eval;
 
-            unchecked{ polynom_index++; }
-        }
-
-        for (polynom_index = 0; polynom_index < fri_params.leaf_size;) {
-            fri_params.batched_V[polynom_index] = new uint256[](1);
-            fri_params.batched_V[polynom_index][0] = 1;
-            for (point_index = 0; point_index < evaluation_points[polynom_index].length;) {
-                fri_params.lpc_z[0] = fri_params.modulus - evaluation_points[polynom_index][point_index];
-                fri_params.batched_V[polynom_index] = polynomial.mul_poly(
-                    fri_params.batched_V[polynom_index],
-                    fri_params.lpc_z,
+            for (polynom_index = 0; polynom_index < fri_params.leaf_size;) {
+                eval = evaluation_points.length == 1? eval = evaluation_points[0]: eval = evaluation_points[polynom_index];
+                fri_params.batched_U[polynom_index] = polynomial.interpolate(
+                    blob,
+                    eval,
+                    z_offset,
                     fri_params.modulus
                 );
-                unchecked{ point_index++; }
+                z_offset = basic_marshalling.skip_vector_of_uint256_be(blob, z_offset);
+
+                unchecked{ polynom_index++; }
             }
+
+            // If there are similar points for all polynomials, don't recompute V
+            for (polynom_index = 0; polynom_index < fri_params.leaf_size;) {
+                if( evaluation_points.length == 1  && polynom_index !=0 )
+                    fri_params.batched_V[polynom_index] = fri_params.batched_V[0];
+                else{
+                    eval = evaluation_points[polynom_index];
+                    fri_params.batched_V[polynom_index] = new uint256[](1);
+                    fri_params.batched_V[polynom_index][0] = 1;
+                    for (point_index = 0; point_index < eval.length;) {
+                        fri_params.lpc_z[0] = fri_params.modulus - eval[point_index];
+                        fri_params.batched_V[polynom_index] = polynomial.mul_poly(
+                            fri_params.batched_V[polynom_index],
+                            fri_params.lpc_z,
+                            fri_params.modulus
+                        );
+                        unchecked{ point_index++; }
+                    }
+                }
             unchecked{ polynom_index++; }
+            }
+        }  else {
+            // Compute number of polynoms with 2 and 3 evaluation points
+            uint256 eval3 = 1;
+            uint256 eval2 = 1;
+            bool found;
+            for(point_index = 0; point_index < evaluation_points.length;){
+                if( evaluation_points[point_index].length == 3){
+                    unchecked{eval3++;}
+                } 
+                if (evaluation_points[point_index].length == 2){
+                    unchecked{eval2++;}
+                }
+            unchecked{point_index++;}
+            }
+            fri_params.precomputed_indices = new uint256[](eval3 > eval2? eval3: eval2);
+
+            // Compute number of different sets of evaluation points
+            if( eval3 != 0 ){
+                for(point_index = 0; point_index < evaluation_points.length;){
+                    if( evaluation_points[point_index].length == 3){
+                        found = false;
+                        for(ind = 1; ind < fri_params.precomputed_indices[0] + 1;){
+                            if(evaluation_points[fri_params.precomputed_indices[ind]][0] == evaluation_points[point_index][0]&&
+                            evaluation_points[fri_params.precomputed_indices[ind]][1] == evaluation_points[point_index][1]&&
+                            evaluation_points[fri_params.precomputed_indices[ind]][2] == evaluation_points[point_index][2]){
+                                found = true;
+                                break;
+                            }
+                        unchecked{ind++;}
+                        }
+                        if( !found ){
+                            unchecked{fri_params.precomputed_indices[0]++;}
+                            fri_params.precomputed_indices[fri_params.precomputed_indices[0]] = point_index;
+                        }
+                    } 
+                unchecked{point_index++;}
+                }
+                fri_params.precomputed_eval3_points = new uint256[][](fri_params.precomputed_indices[0]);
+                fri_params.precomputed_eval3_data = new uint256[9][](fri_params.precomputed_indices[0]);
+                for(ind = 1; ind < fri_params.precomputed_indices[0] + 1;){
+                    point_index = fri_params.precomputed_indices[ind];
+                    fri_params.precomputed_eval3_points[point_index] = new uint256[](PRECOMPUTE_EVAL3_SIZE);
+                    fri_params.precomputed_eval3_points[point_index][0] = evaluation_points[point_index][0];
+                    fri_params.precomputed_eval3_points[point_index][1] = evaluation_points[point_index][1];
+                    fri_params.precomputed_eval3_points[point_index][2] = evaluation_points[point_index][2];
+                    fri_params.precomputed_eval3_points[point_index][3] = 0;
+                unchecked{ind++;}
+                }
+            }
         }
 
+        fri_params.evaluation_points = evaluation_points;
+        fri_params.z_offset = basic_marshalling.skip_octet_vector_32_be(offset);
+
         profiling.end_block();
-        profiling.start_block("batched_lpc_verifier::FRI_checks");
+        profiling.start_block("LPC::FRI");
         offset = skip_to_first_fri_proof_be(blob, offset);
-        for (round_id = 0; round_id < fri_params.lambda;) {
-            fri_params.i_fri_proof = round_id;  // for debug only
+        for (ind = 0; ind < fri_params.lambda;) {
+            fri_params.i_fri_proof = ind;  // for debug only
+            fri_params.prev_xi = 0;
             if (!batched_fri_verifier.parse_verify_proof_be(blob, offset, tr_state, fri_params)) {
-                require(false, "FRI-proof problem");
+                require(false, "FRI verification failed");
                 return false;
             }
             offset = batched_fri_verifier.skip_proof_be(blob, offset);
-            unchecked{ round_id++; }
+            unchecked{ ind++; }
         }
         result = true;
         profiling.end_block();

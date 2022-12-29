@@ -5,10 +5,17 @@ from web3.middleware import geth_poa_middleware
 import os
 import sys
 import argparse
+import shutil
 
 base_path = os.path.dirname(os.path.realpath(__file__))
 contracts_dir = base_path + '/contracts'
 
+def init_profiling():
+    if "--nolog" in sys.argv:
+        print("No logging!")
+        shutil.copyfile(contracts_dir+"/profiling_disabled.sol", contracts_dir+"/profiling.sol")
+    else:
+        shutil.copyfile(contracts_dir+"/profiling_enabled.sol", contracts_dir+"/profiling.sol")
 
 def init_connection(url):
     w3 = Web3(Web3.HTTPProvider(url, request_kwargs={'timeout': 600}))
@@ -51,6 +58,7 @@ def deploy_link_libs(w3, compiled, contract_bytecode, linked_libs_names):
 
 
 if __name__ == '__main__':
+    init_profiling()
     contract_name = 'MinaStateProof'
     contract_path = '/mina/mina_state_proof.sol'
 

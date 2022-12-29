@@ -106,6 +106,7 @@ contract MinaStateProof {
         vars.fri_params.s = new uint256[](max_coset);
         vars.fri_params.coeffs = new uint256[](max_coset << 1);
         vars.fri_params.b = new bytes(vars.fri_params.max_batch << (vars.fri_params.max_step + 5));
+        vars.fri_params.precomputed_eval1 = new uint256[](5);
     }
 
     function verify(

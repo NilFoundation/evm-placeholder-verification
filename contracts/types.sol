@@ -158,9 +158,9 @@ library types {
         uint256[] q;
 
         //0xe0
-        uint256[] U;
+        uint256[]    s_indices;
         //0x100
-        uint256[] V;
+        uint256[]    correct_order_idx;       // Ordered indices to pack ys to check merkle proofs
         //0x120
         uint256[][] batched_U;
         //0x140
@@ -189,9 +189,79 @@ library types {
         bytes        b;
         //0x280
         uint256[]    coeffs;                  // coeffs -- ancestor of ys
-        uint256[]    s_indices;
         uint256[]    tmp_arr;
-        uint256[]    correct_order_idx;       // Ordered indices to pack ys to check merkle proofs
+        uint256[][]  evaluation_points;
+        uint256      z_offset;
+        uint256      prev_xi;
+        uint256[]    precomputed_eval1;
+        uint256[][]   precomputed_eval3_points;
+        uint256[9][]  precomputed_eval3_data;
+        uint256[]     precomputed_indices;
+    }
+
+    struct fri_local_vars_type {
+        // some internal variables used in assemblys
+        // 0x0
+        uint256     s1;                                     // It's extremely important, it's the first field.
+        //0x20
+        uint256     x;                                      // challenge x value
+        //0x40
+        uint256     alpha;                                   // alpha challenge
+        //0x60
+        uint256     coeffs_offset;                           // address of current coeffs array(fri_params.coeffs)
+        //0x80 
+        uint256     y_offset;                                // address of current y (offset in blob)
+        //0xa0     
+        uint256     colinear_offset;                         // colinear_value_offset. Used only in colinear check
+        //0xc0     
+        uint256     c1;                                      // fs1 coefficient.
+        //0xe0     
+        uint256     c2;                                      // fs2 coefficient.
+        //0x100
+        uint256     interpolant;                             // interpolant
+        //0x120
+        uint256     prev_coeffs_len;
+
+        // Fri proof fields
+        uint256 final_poly_offset;                           // one for all rounds
+        uint256 values_offset;                               // one for all rounds
+
+        // Fri round proof fields (for step)
+        uint256 round_proof_offset;                      // current round proof offset. It's round_proof.p offset too.
+        uint256 round_proof_T_root_offset;               // prepared for transcript.
+        uint256 round_proof_colinear_path_offset;        // current round proof colinear_path offset.
+        uint256 round_proof_colinear_path_T_root_offset; // current round proof colinear_path offset.
+        uint256 round_proof_values_offset;               // offset item in fri_proof.values structure for current round proof
+        uint256 round_proof_colinear_value;              // It is the value. Not offset
+        uint256 i_step;                                  // current step
+        uint256 r_step;                                  // rounds in step                                     
+        uint256 b_length;                                // length of bytes for merkle verifier input
+
+        // Fri params for one round (in step)
+        uint256 x_index;
+        uint256 domain_size;                             // domain size
+        uint256 domain_size_mod;
+        uint256 omega;                                   // domain generator
+        uint256 global_round_index;                      // current FRI round
+        uint256 i_round;                                 // current round in step
+
+        // Some internal variables
+        uint256 p_ind;          // ??
+        uint256 y_ind;                   // ?
+        uint256 p_offset;
+        uint256 polynomial_vector_size;
+        uint256 y_size;
+        uint256 colinear_path_offset;
+        // Variables for colinear check. Sorry! There are a so many of them.
+        uint256 indices_size;
+        uint256 ind;
+        uint256 newind;
+        uint256 mul;
+        // Useful previous round values.
+        // uint256 prev_p_offset;
+        uint256 prev_polynomial_vector_size;
+        uint256 prev_step;
+        uint256 coeffs_len;
     }
 
     struct placeholder_proof_map {

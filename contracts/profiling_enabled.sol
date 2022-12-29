@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: MIT OR Apache-2.0
 //---------------------------------------------------------------------------//
-// Copyright (c) 2021 Mikhail Komarov <nemo@nil.foundation>
-// Copyright (c) 2021 Ilias Khairullin <ilias@nil.foundation>
+// SPDX-License-Identifier: Apache-2.0.
+//---------------------------------------------------------------------------//
+// Copyright (c) 2022 Elena Tatuzova <e.tatuzova@nil.foundation>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
