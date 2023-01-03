@@ -3,7 +3,7 @@ import json
 import sys
 
 test_contract_name = 'TestPlaceholderVerifierUniversal'
-test_contract_path = 'placeholder/test/public_api_placeholder_universal_test_component.sol'
+test_contract_path = 'placeholder/test/verifier.sol'
 linked_libs_names = ["placeholder_verifier"]
 
 

@@ -18,15 +18,18 @@
 //---------------------------------------------------------------------------//
 pragma solidity >=0.8.4;
 
-import "../../types.sol";
-import "../../cryptography/transcript.sol";
-import "../proof_map_parser.sol";
-import "../placeholder_verifier.sol";
-import "../../logging.sol";
-import "../init_vars.sol";
-import "../../interfaces/gate_argument.sol";
+import "./types.sol";
+import ".logging.sol";
 
-contract TestPlaceholderVerifierUniversal {
+import "./cryptography/transcript.sol";
+
+import "./placeholder/proof_map_parser.sol";
+import "./placeholder/placeholder_verifier.sol";
+
+import "./placeholder/init_vars.sol";
+import "./interfaces/gate_argument.sol";
+
+contract PlaceholderVerifier {
     function verify(bytes calldata blob,
     // 0) modulus
     // 1) r
