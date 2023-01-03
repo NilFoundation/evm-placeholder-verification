@@ -1,6 +1,6 @@
 {
   "name": "@nilfoundation/evm-placeholder-verification",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "dependencies": {
     "@truffle/hdwallet-provider": "^2.0.1",
     "as-table": "1.0.55",
