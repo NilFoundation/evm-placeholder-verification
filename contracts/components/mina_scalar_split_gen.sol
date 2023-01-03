@@ -41,8 +41,10 @@ import "./mina_scalar/mina_scalar_gate20.sol";
 import "./mina_scalar/mina_scalar_gate21.sol";
 import "./mina_scalar/mina_scalar_gate22.sol";
 
+import "../interfaces/gate_argument.sol";
+
 // TODO: name component
-library mina_split_gen {
+library mina_split_gen is IGateArgument {
     // TODO: specify constants
     uint256 constant WITNESSES_N = 15;
     uint256 constant SELECTOR_N = 1;
