@@ -135,7 +135,7 @@ library types {
         // Not actually part of the verification key, but we put it here to prevent stack depth errors
         uint256 zeta_pow_n;
     }
-    
+
     struct transcript_data {
         bytes32 current_challenge;
     }
@@ -176,7 +176,7 @@ library types {
         //0x1c0
         uint256[] step_list;
         //0x1e0
-        uint256[]    s;                    // Coset indices
+        uint256[] s;                    // Coset indices
         //0x200
         uint256 i_fri_proof;    // It is useful for debugging
         //0x220
@@ -186,12 +186,12 @@ library types {
 
         // These are local variables for FRI. But it's useful to allocate memory once
         //0x260
-        bytes        b;
+        bytes b;
         //0x280
-        uint256[]    coeffs;                  // coeffs -- ancestor of ys
-        uint256[]    s_indices;
-        uint256[]    tmp_arr;
-        uint256[]    correct_order_idx;       // Ordered indices to pack ys to check merkle proofs
+        uint256[] coeffs;                  // coeffs -- ancestor of ys
+        uint256[] s_indices;
+        uint256[] tmp_arr;
+        uint256[] correct_order_idx;       // Ordered indices to pack ys to check merkle proofs
     }
 
     struct placeholder_proof_map {
@@ -227,10 +227,10 @@ library types {
         uint256 rows_amount;
         // 0x20
         uint256 omega;
-        int256[][] columns_rotations; 
+        int256[][] columns_rotations;
     }
 
-    struct placeholder_local_variables{
+    struct placeholder_local_variables {
         // 0x0
         uint256 len;
         // 0x20
@@ -291,7 +291,7 @@ library types {
         uint256 idx2;
     }
 
-    struct arithmetization_params{
+    struct arithmetization_params {
         uint256 witness_columns;
         uint256 public_input_columns;
         uint256 constant_columns;
@@ -337,7 +337,7 @@ library types {
         uint256 eval_proof_constant_offset;
     }
 
-    struct gate_argument_local_vars_updated{
+    struct gate_argument_local_vars_updated {
         // 0x0
         uint256 modulus;
         // 0x20
