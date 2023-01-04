@@ -4,7 +4,7 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 import os
 
-base_path = os.path.abspath(os.getcwd()) + '/../'
+base_path = os.path.abspath(os.getcwd()) + '/..'
 contracts_dir = base_path + '/contracts'
 
 
@@ -176,7 +176,9 @@ def do_placeholder_verification_test_via_transact_with_external_gates(
     test_contract_inst = w3.eth.contract(
         address=deploy_tx_receipt.contractAddress, abi=abi)
     params = init_test_params_func()
+    print("address:",hex(params['gate_argument_address']))
     run_tx_hash = test_contract_inst.functions.verify(
-        params['proof'], params['init_params'], params['columns_rotations'], params['gate_argument_address']).transact()
+        params['proof'], params['init_params'], params['columns_rotations'], params['gate_argument_address']
+    ).transact()
     run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
     print_tx_info(w3, run_tx_receipt, params['_test_name'])

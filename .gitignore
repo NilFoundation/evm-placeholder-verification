@@ -240,4 +240,10 @@ blockchain/history
 yarn.lock
 package-lock.json
 
+#temporary files
+contracts/profiling.sol
+*__pycache__* 
+*tx_calldata.txt
+**/addr
+
 # End of https://www.toptal.com/developers/gitignore/api/solidity,soliditytruffle,node

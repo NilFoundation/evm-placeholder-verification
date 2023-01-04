@@ -3,13 +3,9 @@ import json
 
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
-from web3_test import deploy_link_libs
+from web3_test import deploy_link_libs, base_path, contracts_dir
 import os
 import sys
-
-base_path = os.path.abspath(os.getcwd())
-contracts_dir = base_path + '/contracts'
-
 
 def init_connection():
     w3 = Web3(Web3.HTTPProvider('http://127.0.0.1:8545', request_kwargs={'timeout': 600}))
@@ -38,6 +34,7 @@ if __name__ == '__main__':
         
     contract_name = 'gate_argument_split_gen'
     contract_path = folder_name + '/gate_argument.sol'
+    print(folder_name);
 
     w3 = init_connection()
     solcx.install_solc('0.8.17')
