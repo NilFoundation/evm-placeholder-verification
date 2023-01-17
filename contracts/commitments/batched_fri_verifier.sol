@@ -744,19 +744,20 @@ library batched_fri_verifier {
         bytes calldata blob,
         types.fri_params_type memory fri_params, 
         types.fri_local_vars_type memory local_vars,
-        uint256 []memory xi
+        uint256 [4]memory xi
     ) internal view returns(bool b){
         uint256[9] memory precomputed;
         uint256[9] memory input;
 
-        for(local_vars.ind = 0; local_vars.ind < fri_params.precomputed_eval3_points.length;){
-            if( xi[0] == fri_params.precomputed_eval3_points[local_vars.ind][0]&&
-                xi[1] == fri_params.precomputed_eval3_points[local_vars.ind][1]&&
-                xi[2] == fri_params.precomputed_eval3_points[local_vars.ind][2]
+        for(local_vars.ind = 0; local_vars.ind < fri_params.precomputed_points.length;){
+            if( xi[0] == fri_params.precomputed_points[local_vars.ind][0]&&
+                xi[1] == fri_params.precomputed_points[local_vars.ind][1]&&
+                xi[2] == fri_params.precomputed_points[local_vars.ind][2]&&
+                xi[3] == fri_params.precomputed_points[local_vars.ind][3]
             ){
-                if(fri_params.precomputed_eval3_points[local_vars.ind][3] == 0){
-                    fri_params.precomputed_eval3_data[local_vars.ind] = commitment_calc.eval3_precompute(fri_params.tmp_arr[0], xi[0], xi[1], xi[2], fri_params.modulus);
-                    fri_params.precomputed_eval3_points[local_vars.ind][3] = 1;
+                if(fri_params.precomputed_points[local_vars.ind][4] == 0){
+                    fri_params.precomputed_eval3_data[local_vars.ind] = commitment_calc.eval3_precompute(fri_params.tmp_arr[0], xi[1], xi[2], xi[3], fri_params.modulus);
+                    fri_params.precomputed_points[local_vars.ind][4] = 1;
                 }
                 precomputed = fri_params.precomputed_eval3_data[local_vars.ind];
                 
@@ -772,8 +773,6 @@ library batched_fri_verifier {
                 }
                 input[8] = local_vars.x; // It's x for the next step
                 return commitment_calc.eval3_colinear_check(precomputed, input, fri_params.modulus);
-
-                break;
             } 
         unchecked{local_vars.ind++;}
         }
@@ -801,9 +800,9 @@ library batched_fri_verifier {
         bytes calldata blob,
         types.fri_params_type memory fri_params, 
         types.fri_local_vars_type memory local_vars,
-        uint256 []memory xi
-    ) internal view returns(bool b){
-        uint256[7] memory precomputed = commitment_calc.eval2_precompute(fri_params.tmp_arr[0], xi[0], xi[1], fri_params.modulus);
+        uint256 [4]memory xi
+    ) internal returns(bool b){
+        uint256[7] memory precomputed = commitment_calc.eval2_precompute(fri_params.tmp_arr[0], xi[1], xi[2], fri_params.modulus);
         uint256[8] memory input;
         input[0] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(blob, fri_params.z_offset, local_vars.p_ind, 0); // z0
         input[1] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(blob, fri_params.z_offset, local_vars.p_ind, 1); // z1
@@ -844,7 +843,9 @@ library batched_fri_verifier {
         uint256 xi
     ) internal pure returns(bool b){
         uint256[] memory tmp = fri_params.precomputed_eval1;
+        uint256 modulus = fri_params.modulus;
         tmp[0] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(blob, fri_params.z_offset, local_vars.p_ind, 0);        
+
         // store -z
         assembly{
             mstore(add(tmp, EVAL1_Z_OFFSET), sub(mload(fri_params), mload(add(tmp, EVAL1_Z_OFFSET))))
@@ -857,7 +858,6 @@ library batched_fri_verifier {
             }
             tmp[1] = fri_params.tmp_arr[0];         //tmp[1] = s0
             assembly{           
-                let modulus := mload(fri_params)
 
                 mstore(add(tmp, EVAL1_XI1_OFFSET), sub(modulus, mload(add(tmp, EVAL1_XI0_OFFSET)))) // -s0
                 mstore(add(tmp, EVAL1_XI0_OFFSET), addmod(                                           // s0 - xi
@@ -874,9 +874,8 @@ library batched_fri_verifier {
             }
         }  
         assembly{
-            let modulus := mload(fri_params)
             mstore(add(local_vars,INTERPOLANT_OFFSET), addmod(
-                // (y-z)*(-s0-xi)
+                // c0*(y-z)*(-s0-xi)
                 mulmod(                                   
                     mload(mload(add(local_vars, COEFFS_OFFSET))),
                     mulmod(
@@ -887,7 +886,7 @@ library batched_fri_verifier {
                     ),
                     modulus
                 ),
-                // (y-z)*(-s1-xi)
+                // c1*(y-z)*(-s0-xi)
                 mulmod(
                     mload(add(mload(add(local_vars, COEFFS_OFFSET)), 0x20)),
                     mulmod(
@@ -912,7 +911,6 @@ library batched_fri_verifier {
             mstore(add(tmp, EVAL1_C_OFFSET), addmod(mload(add(tmp, EVAL1_C_OFFSET)), mload(add(tmp, EVAL1_C_OFFSET)), modulus))
         }
         if( tmp[4] != local_vars.interpolant ) {
-//            require(false, "Wrong colinear check");
             return false;
         }
         return true;
@@ -922,21 +920,27 @@ library batched_fri_verifier {
         bytes calldata blob,
         types.fri_params_type memory fri_params, 
         types.fri_local_vars_type memory local_vars
-    ) internal view returns(bool b) {
+    ) internal returns(bool b) {
         b = true;
         uint256 c;
-        uint256[] memory eval = fri_params.evaluation_points[0];
+        uint256[4] memory eval = fri_params.evaluation_points[0];
 
         //local_vars.colinear_offset == local_vars.p_offset + 0x8;
         local_vars.y_offset -= 0x8;
         for( local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size;){
             if( fri_params.evaluation_points.length != 1 ) eval = fri_params.evaluation_points[local_vars.p_ind];
-            if( eval.length == 1) {
-                if( !one_round_first_step_eval1_colinear_check(blob, fri_params, local_vars, eval[0]) ) return false;
-            } else if( eval.length == 3) {
-                if( !one_round_first_step_eval3_colinear_check(blob, fri_params, local_vars, eval) ) return false;
-            } else if( eval.length == 2) {
-                if( !one_round_first_step_eval2_colinear_check(blob, fri_params, local_vars, eval) ) return false;
+            if( eval[0] == 1) {
+                if( !one_round_first_step_eval1_colinear_check(blob, fri_params, local_vars, eval[1]) ){
+                    return false;
+                } 
+            } else if( eval[0] == 3) {
+                if( !one_round_first_step_eval3_colinear_check(blob, fri_params, local_vars, eval) ){
+                    return false;
+                }
+            } else if( eval[0] == 2) {
+                if( !one_round_first_step_eval2_colinear_check(blob, fri_params, local_vars, eval) ){
+                    return false;
+                }
             } else {
                 return false;
             }

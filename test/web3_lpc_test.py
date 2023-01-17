@@ -63,10 +63,7 @@ def init_basic_test():
     params['init_params'].append(len(step_list))
     params['init_params'].extend(step_list)  # step_list
 
-    params['init_params'].append(
-        26217937587563095239723870254092982918845276250263818911301829349969290592257)  # const 1/2
-
-    params['evaluation_points'] = [[7, ], ]
+    params['evaluation_points'] = [[1, 7, 0, 0], ]
 
     return params
 
@@ -110,10 +107,7 @@ def init_batched_test():
     params['init_params'].append(len(step_list))
     params['init_params'].extend(step_list)  # step_list
 
-    params['init_params'].append(
-        26217937587563095239723870254092982918845276250263818911301829349969290592257)  # const 1/2
-
-    params['evaluation_points'] = [[7, ], [7, ]]
+    params['evaluation_points'] = [[1, 7, 0, 0], [1, 7, 0, 0]]
 
     return params
 
@@ -171,7 +165,7 @@ def init_skipping_layers_test():
     params['init_params'].append(len(step_list))
     params['init_params'].extend(step_list)  # step_list
 
-    params['evaluation_points'] = [[7, ]]
+    params['evaluation_points'] = [[1, 7, 0, 0 ]]
 
     return params
 
@@ -219,10 +213,7 @@ def init_smaller_r_test():
     params['init_params'].append(len(step_list))
     params['init_params'].extend(step_list)  # step_list
 
-    params['init_params'].append(
-        26217937587563095239723870254092982918845276250263818911301829349969290592257)  # const 1/2
-
-    params['evaluation_points'] = [[7, ], ]
+    params['evaluation_points'] = [[1, 7, 0, 0], ]
 
     return params
 

@@ -190,11 +190,11 @@ library types {
         //0x280
         uint256[]    coeffs;                  // coeffs -- ancestor of ys
         uint256[]    tmp_arr;
-        uint256[][]  evaluation_points;
+        uint256[4][]  evaluation_points;
         uint256      z_offset;
         uint256      prev_xi;
         uint256[]    precomputed_eval1;
-        uint256[][]   precomputed_eval3_points;
+        uint256[5][]   precomputed_points;
         uint256[9][]  precomputed_eval3_data;
         uint256[]     precomputed_indices;
     }
@@ -318,7 +318,7 @@ library types {
         // 0xe0
         uint256 e;
         // 0x100
-        uint256[][] evaluation_points;
+        uint256[4][] evaluation_points;
         // 0x120
         uint256[] F;
         // 0x140
@@ -348,7 +348,7 @@ library types {
         // 0x2c0
         uint256 S_sigma_i;
         // 0x2e0
-        uint256[][] variable_values_evaluation_points;
+        uint256 variable_values_evaluation_points;
         // 0x300
         uint256 tmp1;
         // 0x320

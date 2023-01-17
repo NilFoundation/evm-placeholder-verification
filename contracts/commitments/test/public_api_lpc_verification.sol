@@ -50,7 +50,7 @@ contract TestLpcVerifier {
         // 6 + D_omegas_size) q_size
         //  [..., q_i, ...]
         uint256[] calldata init_params,
-        uint256[][] calldata evaluation_points
+        uint256[4][] calldata evaluation_points
     ) public {
         types.transcript_data memory tr_state;
         transcript.init_transcript(tr_state, init_transcript_blob);

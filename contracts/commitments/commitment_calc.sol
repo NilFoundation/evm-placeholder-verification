@@ -62,7 +62,7 @@ library commitment_calc{
     Main equation is
         2 * c * Sigma * x * V(s0) * V(-s0) == (V(-s0)*c0)(y0*Sigma + c00*z0 + c01*z1 + c02*z2) + (V(s0)*c1)(y1*Sigma + c10*z0 + c11*z1 + c12*z2) 
     This calculation is expensive. 
-    So we store all precomputed values for each triple evaluation points.
+    So we store all precomputed values for each triple evaluation point.
 */
     function eval3_colinear_check(
         uint256[9] memory precomputed, uint256[9] memory input, uint256 modulus

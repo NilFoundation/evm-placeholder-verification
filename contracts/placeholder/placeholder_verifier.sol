@@ -56,8 +56,6 @@ library placeholder_verifier {
     uint256 constant Q_LAST_EVAL_OFFSET = 0x280;
     uint256 constant S_ID_I_OFFSET = 0x2a0;
     uint256 constant S_SIGMA_I_OFFSET = 0x2c0;
-    uint256 constant WITNESS_EVALUATION_POINTS_OFFSET = 0x2e0;
-    uint256 constant STATUS_OFFSET = 0x3a0;
 
     function verify_proof_be(
         bytes calldata blob,
@@ -87,24 +85,25 @@ library placeholder_verifier {
         uint256 inversed_omega = field.inverse_static(common_data.omega, fri_params.modulus);
         uint256 challenge_omega = field.fmul(local_vars.challenge, common_data.omega, fri_params.modulus);
         uint256 challenge_inversed_omega = field.fmul(local_vars.challenge, inversed_omega, fri_params.modulus);
-        uint256[] memory challenge_point = new uint256[](1);
-        challenge_point[0] = local_vars.challenge;
+        uint256[4] memory challenge_point;
+        challenge_point[0] = 1;
+        challenge_point[1] = local_vars.challenge;
 
         fri_params.leaf_size = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_variable_values_offset);
-        local_vars.variable_values_evaluation_points = new uint256[][](fri_params.leaf_size);
+        local_vars.evaluation_points = new uint256[4][](fri_params.leaf_size);
 
         for (uint256 i = 0; i < ar_params.witness_columns;) {
-            local_vars.variable_values_evaluation_points[i] = new uint256[](common_data.columns_rotations[i].length);
+            local_vars.evaluation_points[i][0] = common_data.columns_rotations[i].length;
             for (uint256 j = 0; j < common_data.columns_rotations[i].length;) {
                 if(common_data.columns_rotations[i][j] == 0){
-                    local_vars.variable_values_evaluation_points[i][j] = local_vars.challenge;
+                    local_vars.evaluation_points[i][j+1] = local_vars.challenge;
                 } else if(common_data.columns_rotations[i][j] == 1){
-                    local_vars.variable_values_evaluation_points[i][j] = challenge_omega;
+                    local_vars.evaluation_points[i][j+1] = challenge_omega;
                 } else if(common_data.columns_rotations[i][j] == -1) {
-                    local_vars.variable_values_evaluation_points[i][j] = challenge_inversed_omega;
+                    local_vars.evaluation_points[i][j+1] = challenge_inversed_omega;
                 } else {
                     // TODO: check properly if column_rotations will be not one of 0, +-1
-                    // local_vars.variable_values_evaluation_points[i][j] = local_vars.challenge * omega ^ column_rotations[i][j]
+                    // local_vars.evaluation_points[i][j] = local_vars.challenge * omega ^ column_rotations[i][j]
                     uint256 omega;
                     uint256 e;
 
@@ -125,7 +124,7 @@ library placeholder_verifier {
                             }
                         }
                     }
-                    local_vars.variable_values_evaluation_points[i][j] = local_vars.e;
+                    local_vars.evaluation_points[i][j+1] = local_vars.e;
                 }
             unchecked{j++;}
             }
@@ -133,12 +132,12 @@ library placeholder_verifier {
         }
 
         for (uint256 i = ar_params.witness_columns; i < ar_params.witness_columns + ar_params.public_input_columns;) {
-            local_vars.variable_values_evaluation_points[i] = challenge_point;
+            local_vars.evaluation_points[i] = challenge_point;
             unchecked{i++;}
         }
         profiling.end_block();
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_variable_values_offset,
-            local_vars.variable_values_evaluation_points, tr_state, fri_params)) {
+            local_vars.evaluation_points, tr_state, fri_params)) {
             //require(false, "Wrong variable values LPC proof");
             return false;
         }
@@ -146,23 +145,10 @@ library placeholder_verifier {
         profiling.end_block();
         // permutation
         profiling.start_block("PV::permutation");
-        local_vars.evaluation_points = new uint256[][](1);
-        local_vars.evaluation_points[0] = new uint256[](2);
-        assembly {
-            let addr:= mload(add(mload(add(local_vars, EVALUATION_POINTS_OFFSET)), 0x20))
-            mstore(
-                // local_vars.evaluation_points[0][1]
-                add(addr, 0x20),
-                // (local_vars.challenge * common_data.omega) % fri_params.modulus
-                mload(add(local_vars, CHALLENGE_OFFSET))
-            )
-            mstore(
-                // local_vars.evaluation_points[0][1]
-                add(addr, 0x40),
-                // (local_vars.challenge * common_data.omega) % fri_params.modulus
-                challenge_omega
-            )
-        }
+        local_vars.evaluation_points = new uint256[4][](1);
+        local_vars.evaluation_points[0][0] = 2;
+        local_vars.evaluation_points[0][1] = local_vars.challenge;
+        local_vars.evaluation_points[0][2] = challenge_omega;
 
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_permutation_offset,
             local_vars.evaluation_points, tr_state, fri_params)) {
