@@ -22,33 +22,63 @@ import "../logging.sol";
 import "../profiling.sol";
 
 library commitment_calc{
-    function eval3_precompute(uint256 s0, uint256 xi0, uint256 xi1, uint256 xi2, uint256 modulus) 
-    internal pure returns (uint256[9] memory out){
-        out[0] = field.fmul(field.fadd(s0,modulus-xi0, modulus),field.fmul(field.fadd(s0,modulus-xi1,modulus),field.fadd(s0, modulus-xi2, modulus), modulus), modulus);
-        out[1] = modulus - field.fmul(field.fadd(s0,xi0, modulus),field.fmul(field.fadd(s0,xi1,modulus),field.fadd(s0, xi2, modulus), modulus), modulus);
+    function eval3_precompute(uint256 s0, uint256 xi0, uint256 xi1, uint256 xi2, uint256 c0, uint256 c1, uint256 modulus) 
+    internal pure returns (uint256[6] memory out){
+        uint256[9] memory local;
+        local[0] = mulmod(addmod(s0,modulus-xi0, modulus),mulmod(addmod(s0,modulus-xi1,modulus),addmod(s0, modulus-xi2, modulus), modulus), modulus);
+        local[1] = modulus - mulmod(addmod(s0,xi0, modulus),mulmod(addmod(s0,xi1,modulus),addmod(s0, xi2, modulus), modulus), modulus);
+        local[2] = mulmod(addmod(xi0, modulus - xi1, modulus), mulmod(addmod(xi1, modulus- xi2, modulus), addmod(xi2, modulus - xi0, modulus), modulus), modulus);
 
-        out[2] = field.fmul(field.fadd(xi1, modulus-xi2, modulus), field.fmul(field.fadd(s0, modulus - xi1, modulus),field.fadd(s0, modulus - xi2, modulus),modulus), modulus);
-        out[3] = field.fmul(field.fadd(xi2, modulus-xi0, modulus), field.fmul(field.fadd(s0, modulus - xi0, modulus),field.fadd(s0, modulus - xi2, modulus),modulus), modulus);
-        out[4] = field.fmul(field.fadd(xi0, modulus-xi1, modulus), field.fmul(field.fadd(s0, modulus - xi0, modulus),field.fadd(s0, modulus - xi1, modulus),modulus), modulus);
+        out[5] = mulmod(local[0], local[1], modulus);
+        out[5] = mulmod(out[5], local[2], modulus);
+        out[5] = mulmod(out[5], s0, modulus);
+        out[5] = mulmod(out[5], s0, modulus);
+        out[5] = addmod(out[5], out[5], modulus);
 
+        local[0] = mulmod(c1, local[0], modulus); 
+        local[1] = mulmod(c0, local[1], modulus);
 
-        out[5] = field.fmul(field.fadd(xi1, modulus-xi2, modulus), field.fmul(field.fadd(s0, xi1, modulus),field.fadd(s0, xi2, modulus),modulus), modulus);
-        out[6] = field.fmul(field.fadd(xi2, modulus-xi0, modulus), field.fmul(field.fadd(s0, xi0, modulus),field.fadd(s0, xi2, modulus),modulus), modulus);
-        out[7] = field.fmul(field.fadd(xi0, modulus-xi1, modulus), field.fmul(field.fadd(s0, xi0, modulus),field.fadd(s0, xi1, modulus),modulus), modulus);
+        local[3] = mulmod(addmod(xi1, modulus-xi2, modulus), mulmod(addmod(s0, modulus - xi1, modulus),addmod(s0, modulus - xi2, modulus),modulus), modulus);
+        local[4] = mulmod(addmod(xi1, modulus-xi2, modulus), mulmod(addmod(s0, xi1, modulus),addmod(s0, xi2, modulus),modulus), modulus);
+        out[2]= addmod(
+            mulmod(local[1], local[3], modulus), 
+            mulmod(local[0], local[4], modulus), 
+        modulus);
 
-        out[8] = field.fmul(field.fadd(xi0, modulus - xi1, modulus), field.fmul(field.fadd(xi1, modulus- xi2, modulus), field.fadd(xi2, modulus - xi0, modulus), modulus), modulus);
+        local[5] = mulmod(addmod(xi2, modulus-xi0, modulus), mulmod(addmod(s0, modulus - xi0, modulus),addmod(s0, modulus - xi2, modulus),modulus), modulus);
+        local[6] = mulmod(addmod(xi2, modulus-xi0, modulus), mulmod(addmod(s0, xi0, modulus),addmod(s0, xi2, modulus),modulus), modulus);
+        out[3]= addmod(mulmod(local[1], local[5], modulus), mulmod(local[0], local[6], modulus), modulus);
+
+        local[7] = mulmod(local[1], mulmod(addmod(xi0, modulus-xi1, modulus), mulmod(addmod(s0, modulus - xi0, modulus),addmod(s0, modulus - xi1, modulus),modulus), modulus), modulus);
+        local[8] = mulmod(local[0], mulmod(addmod(xi0, modulus-xi1, modulus), mulmod(addmod(s0, xi0, modulus),addmod(s0, xi1, modulus),modulus), modulus), modulus);
+        out[4]= addmod(
+            local[7], 
+            local[8], 
+            modulus
+        );
+
+        out[0] = mulmod(local[1], local[2], modulus);
+        out[1]= mulmod(local[0], local[2], modulus);
+
     }
 /*  This function output is different for each of lambda FRI rounds, because s0 depends on challenge x.
     Precomputed array is similar for all polynomials with similar evaluation points
-        0 -- V(s0)  = (s0 - xi0)(s0 - xi1)(s0 - xi2)
-        1 -- V(-s0) = (-s0 - xi0)(-s0 - xi1)(-s0 - xi2) = -(s0 + xi0)(s0 + xi1)(s0 + xi2)
-        2 -- c00 = (xi1 - xi2)(s0 - xi1)(s0 - xi2)
-        3 -- c01 = (xi2 - xi0)(s0 - xi0)(s0 - xi2)
-        4 -- c02 = (xi0 - xi1)(s0 - xi0)(s0 - xi1)
-        5 -- c10 = (xi1 - xi2)(-s0 - xi1)(-s0 - xi2) = (xi1 - xi2)(s0 + xi1)(s0 + xi2)
-        6 -- c11 = (xi2 - xi0)(-s0 - xi0)(-s0 - xi2) = (xi2 - xi0)(s0 + xi0)(s0 + xi2)
-        7 -- c12 = (xi0 - xi1)(-s0 - xi0)(-s0 - xi1) = (xi0 - xi1)(s0 + xi0)(s0 + xi1)
-        8 -- Sigma = (xi0 - xi1) * (xi1 - xi2) * (xi2 - xi0)
+        local[0] = V(s0)  = (s0 - xi0)(s0 - xi1)(s0 - xi2)
+        local[1] = V(-s0) = (-s0 - xi0)(-s0 - xi1)(-s0 - xi2) = -(s0 + xi0)(s0 + xi1)(s0 + xi2)
+        local[2] = Sigma = (xi0 - xi1) * (xi1 - xi2) * (xi2 - xi0)
+        local[3] = c00 = (xi1 - xi2)(s0 - xi1)(s0 - xi2)
+        local[4] = (xi2 - xi0)(s0 - xi0)(s0 - xi2)
+        local[5] = (xi0 - xi1)(s0 - xi0)(s0 - xi1)
+        local[6] = (xi1 - xi2)(-s0 - xi1)(-s0 - xi2) = (xi1 - xi2)(s0 + xi1)(s0 + xi2)
+        local[7] = (xi2 - xi0)(-s0 - xi0)(-s0 - xi2) = (xi2 - xi0)(s0 + xi0)(s0 + xi2)
+        local[8] = (xi0 - xi1)(-s0 - xi0)(-s0 - xi1) = (xi0 - xi1)(s0 + xi0)(s0 + xi1)
+
+        0 -- V(-s0) * c0 * local[2]
+        1-- V(s0) * c1 * local[2]
+        2-- V(-s0) * c0 * c00 + V(s0) * c1 * c10
+        3-- V(-s0) * c0 * c01 + V(s0) * c1 * c11
+        4-- V(-s0) * c0 * c02 + V(s0) * c1 * c12
+        5-- 2 * local[2] * V(s0) * V(-s0)
     input
         0 -- z0
         1 -- z1
@@ -60,58 +90,32 @@ library commitment_calc{
         7 -- c      //colinear_value
         8 -- x
     Main equation is
-        2 * c * Sigma * x * V(s0) * V(-s0) == (V(-s0)*c0)(y0*Sigma + c00*z0 + c01*z1 + c02*z2) + (V(s0)*c1)(y1*Sigma + c10*z0 + c11*z1 + c12*z2) 
+        2 * c * local[2] * x * V(s0) * V(-s0) == (V(-s0)*c0)(y0*local[2] + c00*z0 + c01*z1 + c02*z2) + (V(s0)*c1)(y1*local[2] + c10*z0 + c11*z1 + c12*z2) 
     This calculation is expensive. 
     So we store all precomputed values for each triple evaluation points.
 */
     function eval3_colinear_check(
-        uint256[9] memory precomputed, uint256[9] memory input, uint256 modulus
+        uint256[6] memory precomputed, uint256[9] memory input, uint256 modulus
     )internal view returns(bool b){
-        uint256 interpolant = field.fadd(
-            field.fmul(
-                field.fmul(precomputed[1], input[3], modulus),
-                field.fadd(
-                    field.fadd(
-                        field.fmul(input[5], precomputed[8], modulus),
-                        field.fmul(input[0], precomputed[2], modulus),
-                        modulus
-                    ),
-                    field.fadd(
-                        field.fmul(input[1], precomputed[3], modulus),
-                        field.fmul(input[2], precomputed[4], modulus),
-                        modulus
-                    ),
+        uint256 interpolant = addmod(
+            addmod(
+                addmod(
+                    mulmod(input[5], precomputed[0], modulus),
+                    mulmod(input[6], precomputed[1], modulus),
                     modulus
                 ),
+                mulmod(input[2], precomputed[4], modulus),
                 modulus
             ),
-            field.fmul(
-                field.fmul(precomputed[0],input[4], modulus),
-                field.fadd(
-                    field.fadd(
-                        field.fmul(input[6], precomputed[8], modulus),
-                        field.fmul(input[0], precomputed[5], modulus),
-                        modulus
-                    ),
-                    field.fadd(
-                        field.fmul(input[1], precomputed[6], modulus),
-                        field.fmul(input[2], precomputed[7], modulus),
-                        modulus
-                    ),
-                    modulus
-                ),
+            addmod(
+                mulmod(input[0], precomputed[2], modulus),
+                mulmod(input[1], precomputed[3], modulus),
                 modulus
             ),
             modulus
         );
 
-        uint256 c = field.fmul(
-            field.fmul(field.fmul(input[7], input[8], modulus), precomputed[8], modulus), 
-            field.fmul(precomputed[0], precomputed[1], modulus), 
-            modulus
-        );
-        c = field.fadd(c, c, modulus);
-
+        uint256 c = mulmod(precomputed[5], input[7], modulus);
         if( interpolant == c ) {
             return true;
         } else {
@@ -121,13 +125,13 @@ library commitment_calc{
 
     function eval2_precompute(uint256 s0, uint256 xi0, uint256 xi1, uint256 modulus) 
     internal pure returns(uint256[7] memory out){
-        out[0] = field.fmul(field.fadd(s0, modulus - xi0, modulus), field.fadd(s0, modulus - xi1, modulus), modulus );
-        out[1] = field.fmul(field.fadd(s0, xi0, modulus), field.fadd(s0, xi1, modulus), modulus );
-        out[2] = field.fadd(s0, modulus-xi1, modulus);
-        out[3] = field.fadd(xi0, modulus-s0, modulus);
-        out[4] = modulus - field.fadd(s0, xi1, modulus);
-        out[5] = field.fadd(xi0, s0, modulus);
-        out[6] = field.fadd(xi1, modulus - xi0, modulus);
+        out[0] = mulmod(addmod(s0, modulus - xi0, modulus), addmod(s0, modulus - xi1, modulus), modulus );
+        out[1] = mulmod(addmod(s0, xi0, modulus), addmod(s0, xi1, modulus), modulus );
+        out[2] = addmod(s0, modulus-xi1, modulus);
+        out[3] = addmod(xi0, modulus-s0, modulus);
+        out[4] = modulus - addmod(s0, xi1, modulus);
+        out[5] = addmod(xi0, s0, modulus);
+        out[6] = addmod(xi1, modulus - xi0, modulus);
     }
 
 /*  This function output is different for lambda FRI rounds, because s0 depends on challenge x.
@@ -156,45 +160,45 @@ library commitment_calc{
     */
     function eval2_colinear_check(uint256[7] memory precomputed, uint256[8] memory input, uint256 modulus)
     internal view returns(bool b){      
-        uint256 interpolant = field.fadd(
-            field.fmul(
-                field.fadd(
-                    field.fadd(
-                        field.fmul(input[0],precomputed[2], modulus), 
-                        field.fmul(input[1],precomputed[3], modulus), 
+        uint256 interpolant = addmod(
+            mulmod(
+                addmod(
+                    addmod(
+                        mulmod(input[0],precomputed[2], modulus), 
+                        mulmod(input[1],precomputed[3], modulus), 
                         modulus
                     ),
-                    field.fmul(precomputed[6],input[4],modulus),
+                    mulmod(precomputed[6],input[4],modulus),
                     modulus
                 ),
-                field.fmul(precomputed[1], input[2], modulus),
+                mulmod(precomputed[1], input[2], modulus),
                 modulus
             ),
-            field.fmul(
-                field.fadd(
-                    field.fadd(
-                        field.fmul(input[0],precomputed[4], modulus), 
-                        field.fmul(input[1],precomputed[5],modulus), 
+            mulmod(
+                addmod(
+                    addmod(
+                        mulmod(input[0],precomputed[4], modulus), 
+                        mulmod(input[1],precomputed[5],modulus), 
                         modulus),
-                    field.fmul(input[5], precomputed[6],modulus),
+                    mulmod(input[5], precomputed[6],modulus),
                     modulus
                 ),
-                field.fmul(input[3], precomputed[0], modulus),
+                mulmod(input[3], precomputed[0], modulus),
                 modulus
             ),
             modulus
         );
 
-        uint256 c = field.fmul(
-            field.fmul(
-                field.fmul(input[6],input[7], modulus),
-                field.fmul(precomputed[0], precomputed[1], modulus),
+        uint256 c = mulmod(
+            mulmod(
+                mulmod(input[6],input[7], modulus),
+                mulmod(precomputed[0], precomputed[1], modulus),
                 modulus
             ),
             precomputed[6], 
             modulus
         );
-        c = field.fadd(c, c, modulus);
+        c = addmod(c, c, modulus);
         if(interpolant == c){
             return true;
         }

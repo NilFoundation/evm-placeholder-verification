@@ -269,7 +269,7 @@ library batched_lpc_verifier {
                 unchecked{point_index++;}
                 }
                 fri_params.precomputed_eval3_points = new uint256[][](fri_params.precomputed_indices[0]);
-                fri_params.precomputed_eval3_data = new uint256[9][](fri_params.precomputed_indices[0]);
+                fri_params.precomputed_eval3_data = new uint256[6][](fri_params.precomputed_indices[0]);
                 for(ind = 1; ind < fri_params.precomputed_indices[0] + 1;){
                     point_index = fri_params.precomputed_indices[ind];
                     fri_params.precomputed_eval3_points[point_index] = new uint256[](PRECOMPUTE_EVAL3_SIZE);
@@ -292,7 +292,7 @@ library batched_lpc_verifier {
             fri_params.i_fri_proof = ind;  // for debug only
             fri_params.prev_xi = 0;
             if (!batched_fri_verifier.parse_verify_proof_be(blob, offset, tr_state, fri_params)) {
-                require(false, "FRI verification failed");
+                //require(false, "FRI verification failed");
                 return false;
             }
             offset = batched_fri_verifier.skip_proof_be(blob, offset);

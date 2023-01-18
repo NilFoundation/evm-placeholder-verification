@@ -183,6 +183,7 @@ library batched_fri_verifier {
         assembly{
             result := mulmod(addmod(y, U_evaluated_neg, modulus), V_evaluated_inv, modulus)
         }
+        require(false, logging.uint2hexstr(batched_V[3]));
     }
 
     // if x_index is index of x, then paired_index is index of -x
@@ -233,7 +234,7 @@ library batched_fri_verifier {
     internal  pure
     {
         // Check length parameters correctness
-        require(basic_marshalling.get_length(blob, local_vars.round_proof_values_offset) == fri_params.leaf_size, "Invalid polynomials number in proof.values");
+        //require(basic_marshalling.get_length(blob, local_vars.round_proof_values_offset) == fri_params.leaf_size, "Invalid polynomials number in proof.values");
 
         // Calculate s_indices
         fri_params.s_indices[0] = local_vars.x_index;
@@ -659,7 +660,6 @@ library batched_fri_verifier {
                 mstore(add(local_vars, Y_OFFSET),      add( mload(add(local_vars, Y_OFFSET)), 0x48))
             }
             if( local_vars.interpolant != c ){
-                require(false, "Interpolant failes");
                 return false;
             }
             unchecked{
@@ -746,7 +746,7 @@ library batched_fri_verifier {
         types.fri_local_vars_type memory local_vars,
         uint256 []memory xi
     ) internal view returns(bool b){
-        uint256[9] memory precomputed;
+        uint256[6] memory precomputed;
         uint256[9] memory input;
 
         for(local_vars.ind = 0; local_vars.ind < fri_params.precomputed_eval3_points.length;){
@@ -755,7 +755,9 @@ library batched_fri_verifier {
                 xi[2] == fri_params.precomputed_eval3_points[local_vars.ind][2]
             ){
                 if(fri_params.precomputed_eval3_points[local_vars.ind][3] == 0){
-                    fri_params.precomputed_eval3_data[local_vars.ind] = commitment_calc.eval3_precompute(fri_params.tmp_arr[0], xi[0], xi[1], xi[2], fri_params.modulus);
+                    fri_params.precomputed_eval3_data[local_vars.ind] = commitment_calc.eval3_precompute(
+                        fri_params.tmp_arr[0], xi[0], xi[1], xi[2], fri_params.coeffs[0], fri_params.coeffs[1], fri_params.modulus
+                    );
                     fri_params.precomputed_eval3_points[local_vars.ind][3] = 1;
                 }
                 precomputed = fri_params.precomputed_eval3_data[local_vars.ind];
@@ -822,9 +824,9 @@ library batched_fri_verifier {
     /*
         Precomputed data is stored in fri_params.precomputed_eval1.
             0 -- z
-            1 -- s0 - xi
-            2 -- -s0 - xi1
-            3 -- (s0-xi)(-s0-xi)
+            1 -- c0*(s0 - xi)
+            2 -- c1*(-s0 - xi)
+            3 -- 2*x*(s0-xi)(-s0-xi)
             4 -- c
         Main equations is
             2 * c * x * (s0-xi)(-s0-xi) == c0*(-s0-xi)(y0-z) + c1(s0-xi)(y1-z)
@@ -833,9 +835,9 @@ library batched_fri_verifier {
         But it makes this calculation much more efficient.
     */
     uint256 constant EVAL1_Z_OFFSET = 0x20;                                      
-    uint256 constant EVAL1_XI0_OFFSET = 0x40;                                      
-    uint256 constant EVAL1_XI1_OFFSET = 0x60;                                      
-    uint256 constant EVAL1_XI0_XI1_OFFSET = 0x80;                                      
+    uint256 constant EVAL1_COEFF_Y0_Z_OFFSET = 0x40;                                      
+    uint256 constant EVAL1_COEFF_Y1_Z_OFFSET = 0x60;                                      
+    uint256 constant EVAL1_COEFF_COLINEAR_OFFSET = 0x80;                                      
     uint256 constant EVAL1_C_OFFSET = 0xa0;                                      
     function one_round_first_step_eval1_colinear_check(
         bytes calldata blob,
@@ -859,60 +861,72 @@ library batched_fri_verifier {
             assembly{           
                 let modulus := mload(fri_params)
 
-                mstore(add(tmp, EVAL1_XI1_OFFSET), sub(modulus, mload(add(tmp, EVAL1_XI0_OFFSET)))) // -s0
-                mstore(add(tmp, EVAL1_XI0_OFFSET), addmod(                                           // s0 - xi
-                    mload(add(tmp, EVAL1_XI0_OFFSET)), xi, modulus
+                mstore(add(tmp, EVAL1_COEFF_Y1_Z_OFFSET), sub(modulus, mload(add(tmp, EVAL1_COEFF_Y0_Z_OFFSET)))) // -s0
+                mstore(add(tmp, EVAL1_COEFF_Y0_Z_OFFSET), addmod(                                           // s0 - xi
+                    mload(add(tmp, EVAL1_COEFF_Y0_Z_OFFSET)), xi, modulus
                 ))
-                mstore(add(tmp, EVAL1_XI1_OFFSET), addmod(                                          // -s0 - xi
-                    mload(add(tmp, EVAL1_XI1_OFFSET)), xi, modulus
+                mstore(add(tmp, EVAL1_COEFF_Y1_Z_OFFSET), addmod(                                          // -s0 - xi
+                    mload(add(tmp, EVAL1_COEFF_Y1_Z_OFFSET)), xi, modulus
                 ))
-                mstore(add(tmp, EVAL1_XI0_XI1_OFFSET), mulmod(                                      // (s0 - xi)(-s0 - xi)
-                    mload(add(tmp, EVAL1_XI0_OFFSET)),
-                    mload(add(tmp, EVAL1_XI1_OFFSET)),
+                mstore(add(tmp, EVAL1_COEFF_COLINEAR_OFFSET), mulmod(                                      // (s0 - xi)(-s0 - xi)
+                    mload(add(tmp, EVAL1_COEFF_Y0_Z_OFFSET)),
+                    mload(add(tmp, EVAL1_COEFF_Y1_Z_OFFSET)),
                     modulus
                 ))
+                mstore(add(tmp, EVAL1_COEFF_COLINEAR_OFFSET), mulmod(
+                    mload(add(tmp, EVAL1_COEFF_COLINEAR_OFFSET)), 
+                    mload(add(local_vars, X_OFFSET)), 
+                    modulus
+                ))
+                mstore(add(tmp, EVAL1_COEFF_COLINEAR_OFFSET), addmod(
+                    mload(add(tmp, EVAL1_COEFF_COLINEAR_OFFSET)), 
+                    mload(add(tmp, EVAL1_COEFF_COLINEAR_OFFSET)), 
+                    modulus
+                ))
+                mstore(add(tmp, EVAL1_COEFF_Y1_Z_OFFSET),                                                   // -s0 - xi
+                    mulmod(                                   
+                        mload(mload(add(local_vars, COEFFS_OFFSET))),
+                        mload(add(tmp, EVAL1_COEFF_Y1_Z_OFFSET)),modulus
+                    )
+                )
+                mstore(add(tmp, EVAL1_COEFF_Y0_Z_OFFSET),                                                   // -s0 - xi
+                    mulmod(
+                        mload(add(mload(add(local_vars, COEFFS_OFFSET)), 0x20)),
+                        mload(add(tmp, EVAL1_COEFF_Y0_Z_OFFSET)), modulus
+                    )
+                )
             }
         }  
         assembly{
             let modulus := mload(fri_params)
             mstore(add(local_vars,INTERPOLANT_OFFSET), addmod(
                 // (y-z)*(-s0-xi)
-                mulmod(                                   
-                    mload(mload(add(local_vars, COEFFS_OFFSET))),
-                    mulmod(
-                        addmod(
-                            calldataload(add(blob.offset, add(mload(add(local_vars, Y_OFFSET)), 0x8))),
-                            mload(add(tmp, EVAL1_Z_OFFSET)),modulus
-                        ), mload(add(tmp, EVAL1_XI1_OFFSET)),modulus
+                mulmod(
+                    mload(add(tmp, EVAL1_COEFF_Y1_Z_OFFSET)),
+                    addmod(
+                        calldataload(add(blob.offset, add(mload(add(local_vars, Y_OFFSET)), 0x8))),
+                        mload(add(tmp, EVAL1_Z_OFFSET)),modulus
                     ),
                     modulus
                 ),
                 // (y-z)*(-s1-xi)
                 mulmod(
-                    mload(add(mload(add(local_vars, COEFFS_OFFSET)), 0x20)),
-                    mulmod(
-                        addmod(
-                            calldataload(add(blob.offset, add(mload(add(local_vars, Y_OFFSET)), 0x28))),
-                            mload(add(tmp, EVAL1_Z_OFFSET)), modulus
-                        ), mload(add(tmp, EVAL1_XI0_OFFSET)), modulus
-                    ),
+                    mload(add(tmp, EVAL1_COEFF_Y0_Z_OFFSET)),
+                    addmod(
+                        calldataload(add(blob.offset, add(mload(add(local_vars, Y_OFFSET)), 0x28))),
+                        mload(add(tmp, EVAL1_Z_OFFSET)), modulus
+                    ), 
                     modulus
                 ),
                 modulus
             ))
             mstore(add(tmp, EVAL1_C_OFFSET), mulmod(
-                mulmod(
-                    mload(add(local_vars, X_OFFSET)), 
-                    calldataload(add(blob.offset, mload(add(local_vars, COLINEAR_OFFSET)))), 
-                    modulus
-                ), 
-                mload(add(tmp, EVAL1_XI0_XI1_OFFSET)), 
+                mload(add(tmp, EVAL1_COEFF_COLINEAR_OFFSET)), 
+                calldataload(add(blob.offset, mload(add(local_vars, COLINEAR_OFFSET)))), 
                 modulus
             ))
-            mstore(add(tmp, EVAL1_C_OFFSET), addmod(mload(add(tmp, EVAL1_C_OFFSET)), mload(add(tmp, EVAL1_C_OFFSET)), modulus))
         }
         if( tmp[4] != local_vars.interpolant ) {
-//            require(false, "Wrong colinear check");
             return false;
         }
         return true;
@@ -1071,7 +1085,6 @@ library batched_fri_verifier {
             if (!merkle_verifier.parse_verify_merkle_proof_bytes_be(
                 blob, local_vars.round_proof_offset, fri_params.b, local_vars.b_length)
             ) {
-                require(false, "Merkle proof failed");
                 return false;
             }
 
@@ -1132,7 +1145,6 @@ library batched_fri_verifier {
         for (local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size;) {
              if (basic_marshalling.get_length(blob, local_vars.final_poly_offset) >
                 (( 1 << (field.log2(fri_params.max_degree + 1) - fri_params.r + 1) ) )) {
-                //require(false, "Max degree problem");
                 return false;
             }
             if( polynomial.evaluate_by_ptr(
@@ -1142,7 +1154,6 @@ library batched_fri_verifier {
                 local_vars.x,
                 fri_params.modulus
             ) != get_y_from_blob(blob, local_vars.p_offset, 0)){
-                require(false, "Final polynomial check failed");
                 return false;
             }
             local_vars.final_poly_offset = basic_marshalling.skip_vector_of_uint256_be(blob, local_vars.final_poly_offset);

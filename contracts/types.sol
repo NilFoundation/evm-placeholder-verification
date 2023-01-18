@@ -140,6 +140,7 @@ library types {
         bytes32 current_challenge;
     }
 
+    uint256 public constant EVAL3_PRECOMPUTED_SIZE = 15;
     struct fri_params_type {
         //0x00
         uint256 modulus;
@@ -195,7 +196,7 @@ library types {
         uint256      prev_xi;
         uint256[]    precomputed_eval1;
         uint256[][]   precomputed_eval3_points;
-        uint256[9][]  precomputed_eval3_data;
+        uint256[6][]  precomputed_eval3_data;
         uint256[]     precomputed_indices;
     }
 
@@ -252,7 +253,6 @@ library types {
         uint256 polynomial_vector_size;
         uint256 y_size;
         uint256 colinear_path_offset;
-        // Variables for colinear check. Sorry! There are a so many of them.
         uint256 indices_size;
         uint256 ind;
         uint256 newind;
