@@ -191,10 +191,10 @@ library permutation_argument {
         ) {
             for (
                 local_vars.idx2 = 0;
-                local_vars.idx2 < common_data.columns_rotations[local_vars.idx1].length;
+                local_vars.idx2 < uint256(common_data.columns_rotations[local_vars.idx1][0]);
                 local_vars.idx2++
             ) {
-                if (common_data.columns_rotations[local_vars.idx1][local_vars.idx2] == 0 ) {
+                if (common_data.columns_rotations[local_vars.idx1][local_vars.idx2+1] == 0 ) {
                     local_vars.zero_index = local_vars.idx2;
                 }
             }

@@ -34,7 +34,7 @@ library init_vars {
     }
 
     function init(bytes calldata blob, uint256[] calldata init_params,
-                       int256[][] calldata columns_rotations, vars_t memory vars) internal view {
+                       int256[4][] calldata columns_rotations, vars_t memory vars) internal view {
 
         (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser.parse_be(blob, 0);
         require(vars.proof_size == blob.length, "Proof is not correct!");

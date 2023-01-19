@@ -52,7 +52,7 @@ library mina_split_gen {
         bytes calldata blob,
         types.gate_argument_local_vars memory gate_params,
         types.arithmetization_params memory ar_params,
-        int256[][] memory columns_rotations
+        int256[4][] memory columns_rotations
     ) internal returns (uint256 gates_evaluation) {
         // TODO: check witnesses number in proof
         profiling.start_block("mina_scalar_split_gen::evaluate_gates_be");

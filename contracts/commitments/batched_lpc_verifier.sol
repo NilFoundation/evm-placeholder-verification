@@ -205,10 +205,13 @@ library batched_lpc_verifier {
         z_offset = basic_marshalling.skip_length(skip_to_z(blob, offset));
         if( fri_params.step_list[0] != 1){
             uint256[4] memory eval4;
+            uint256[] memory V;
+            uint256[] memory U;
+            uint256   i;
 
             for (polynom_index = 0; polynom_index < fri_params.leaf_size;) {
                 eval4 = evaluation_points.length == 1? evaluation_points[0]: evaluation_points[polynom_index];
-                fri_params.batched_U[polynom_index] = polynomial.interpolate(
+                U = polynomial.interpolate(
                     blob,
                     eval4_to_eval(eval4),
                     z_offset,
@@ -216,6 +219,14 @@ library batched_lpc_verifier {
                 );
                 z_offset = basic_marshalling.skip_vector_of_uint256_be(blob, z_offset);
 
+                fri_params.batched_U[polynom_index][0] = 
+                    fri_params.batched_U[polynom_index][1] = 
+                    fri_params.batched_U[polynom_index][2] = 
+                    fri_params.batched_U[polynom_index][3] = 0;
+                for(i = 0; i < eval4[0];){
+                    fri_params.batched_U[polynom_index][i] = U[i];
+                    unchecked{ i++; }
+                }
                 unchecked{ polynom_index++; }
             }
 
@@ -225,17 +236,26 @@ library batched_lpc_verifier {
                     fri_params.batched_V[polynom_index] = fri_params.batched_V[0];
                 else{
                     eval4 = evaluation_points[polynom_index];
-                    fri_params.batched_V[polynom_index] = new uint256[](1);
-                    fri_params.batched_V[polynom_index][0] = 1;
+                    V = new uint256[](1);
+                    V[0] = 1;
                     for (point_index = 0; point_index < eval4[0];) {
                         fri_params.lpc_z[0] = fri_params.modulus - eval4[point_index+1];
-                        fri_params.batched_V[polynom_index] = polynomial.mul_poly(
-                            fri_params.batched_V[polynom_index],
+                        V = polynomial.mul_poly(
+                            V,
                             fri_params.lpc_z,
                             fri_params.modulus
                         );
                         unchecked{ point_index++; }
                     }
+                    fri_params.batched_V[polynom_index][0] = 
+                        fri_params.batched_V[polynom_index][1] = 
+                        fri_params.batched_V[polynom_index][2] = 
+                        fri_params.batched_V[polynom_index][3] = 0;
+                    for(i = 0; i <= eval4[0];){
+                        fri_params.batched_V[polynom_index][i] = V[i];
+                        unchecked{ i++; }
+                    }
+                    //require(false, logging.uint2hexstr(eval4[0]));
                 }
             unchecked{ polynom_index++; }
             }

@@ -162,9 +162,9 @@ library types {
         //0x100
         uint256[]    correct_order_idx;       // Ordered indices to pack ys to check merkle proofs
         //0x120
-        uint256[][] batched_U;
+        uint256[4][] batched_U;
         //0x140
-        uint256[][] batched_V;
+        uint256[4][] batched_V;
 
         //0x160
         bytes batched_fri_verified_data;
@@ -297,7 +297,7 @@ library types {
         uint256 rows_amount;
         // 0x20
         uint256 omega;
-        int256[][] columns_rotations; 
+        int256[4][] columns_rotations; 
     }
 
     struct placeholder_local_variables{

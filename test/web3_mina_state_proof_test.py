@@ -4,7 +4,7 @@ test_contract_name = 'TestMinaStateProof'
 test_contract_path = 'placeholder/test/public_api_mina_state_proof.sol'
 
 linked_proofs_libs_names = []
-linked_unified_addition_libs_names = [
+linked_libs_names = [
     "mina_scalar_gate0",
     "mina_scalar_gate1",
     "mina_scalar_gate2",
@@ -78,27 +78,29 @@ def init_test1():
     params['init_params'][1].append(len(q))
     params['init_params'][1].extend(q)
 
-    params['columns_rotations'][0] = []
-    params['columns_rotations'][0] = [[0, 1, -1, ],
-                                      [0, 1, -1, ],
-                                      [0, 1, -1, ],
-                                      [0, 1, -1, ],
-                                      [0, 1, -1, ],
-                                      [0, 1, -1, ],
-                                      [0, 1, ],
-                                      [0, 1, -1, ],
-                                      [0, 1, -1, ],
-                                      [0, 1, -1, ],
-                                      [0, 1, -1, ],
-                                      [0, 1, -1, ],
-                                      [0, -1, ],
-                                      [0, -1, ],
-                                      [0, -1, ],
-                                      [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ],
-                                      [0, ],
-                                      [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ],
-                                      [0, ],
-                                      [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ]]
+    params['columns_rotations'][0] = [ [3, 0, 1, -1 ],
+                                [3, 0, 1, -1 ],
+                                [3, 0, 1, -1 ],
+                                [3, 0, 1, -1 ],
+                                [3, 0, 1, -1 ],
+                                [3, 0, 1, -1 ],
+                                [2, 0, 1, 0 ],
+                                [3, 0, 1, -1 ],
+                                [3, 0, 1, -1 ],
+                                [3, 0, 1, -1 ],
+                                [3, 0, 1, -1 ],
+                                [3, 0, 1, -1 ],
+                                [2, 0, -1, 0],
+                                [2, 0, -1, 0],
+                                [2, 0, -1, 0],
+                                [1, 0, 0, 0 ], [1, 0, 0, 0 ], [1, 0, 0, 0 ], [1, 0, 0, 0 ], [1, 0, 0, 0 ], 
+                                [1, 0, 0, 0 ], [1, 0, 0, 0 ], [1, 0, 0, 0 ], [1, 0, 0, 0 ], [1, 0, 0, 0 ], 
+                                [1, 0, 0, 0 ], [1, 0, 0, 0 ], [1, 0, 0, 0 ], [1, 0, 0, 0 ], [1, 0, 0, 0 ], 
+                                [1, 0, 0, 0 ], [1, 0, 0, 0 ], [1, 0, 0, 0 ], [1, 0, 0, 0 ], [1, 0, 0, 0 ], 
+                                [1, 0, 0, 0 ], [1, 0, 0, 0 ], [1, 0, 0, 0 ], [1, 0, 0, 0 ], [1, 0, 0, 0 ], 
+                                [1, 0, 0, 0 ], [1, 0, 0, 0 ], [1, 0, 0, 0 ], [1, 0, 0, 0 ], [1, 0, 0, 0 ], 
+                                [1, 0, 0, 0 ], [1, 0, 0, 0 ]]
+
     step_list = [1] * 16
     params['init_params'][1].append(len(step_list))
     params['init_params'][1].extend(step_list)  # step_list
@@ -132,14 +134,14 @@ def init_test1():
     params['init_params'][2].append((len(arithmetization_params)))
     params['init_params'][2].extend(arithmetization_params)
 
-
+    params['columns_rotations'][1] = []
     for i in range(47):
-        params['columns_rotations'][1].append([0, ])
-    params['columns_rotations'][1][0] = [0, 1, -1]
-    params['columns_rotations'][1][1] = [0, -1, 1]
-    params['columns_rotations'][1][2] = [0, 1]
-    params['columns_rotations'][1][5] = [0, -1]
-    params['columns_rotations'][1][13] = [0, 1]
+        params['columns_rotations'][1].append([1, 0, 0, 0 ])
+    params['columns_rotations'][1][0] = [3, 0, 1, -1]
+    params['columns_rotations'][1][1] = [3, 0,-1, 1]
+    params['columns_rotations'][1][2] = [2, 0, 1, 0]
+    params['columns_rotations'][1][5] = [2, 0,-1, 0]
+    params['columns_rotations'][1][13] = [2, 0, 1, 0]
 
     params['log_file'] = 'logs/mina_state_proof.json'
     return params
@@ -147,4 +149,4 @@ def init_test1():
 
 if __name__ == '__main__':
     do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path,
-                                                         linked_unified_addition_libs_names, init_test1)
+                                                         linked_libs_names, init_test1)

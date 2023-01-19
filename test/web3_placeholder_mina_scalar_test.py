@@ -72,12 +72,12 @@ def init_test1():
 
     params['columns_rotations'] = []
     for i in range(47):
-        params['columns_rotations'].append([0, ])
-    params['columns_rotations'][0] = [0, 1, -1]
-    params['columns_rotations'][1] = [0, -1, 1]
-    params['columns_rotations'][2] = [0, 1]
-    params['columns_rotations'][5] = [0, -1]
-    params['columns_rotations'][13] = [0, 1]
+        params['columns_rotations'].append([1, 0, 0, 0 ])
+    params['columns_rotations'][0] = [3, 0, 1, -1]
+    params['columns_rotations'][1] = [3, 0,-1, 1]
+    params['columns_rotations'][2] = [2, 0, 1, 0]
+    params['columns_rotations'][5] = [2, 0,-1, 0]
+    params['columns_rotations'][13] = [2, 0, 1, 0]
 
     params['log_file'] = 'logs/mina_scalar_test_eval1_step1.json'
 
@@ -117,12 +117,12 @@ def init_test2():
 
     params['columns_rotations'] = []
     for i in range(47):
-        params['columns_rotations'].append([0, ])
-    params['columns_rotations'][0] = [0, 1, -1]
-    params['columns_rotations'][1] = [0, -1, 1]
-    params['columns_rotations'][2] = [0, 1]
-    params['columns_rotations'][5] = [0, -1]
-    params['columns_rotations'][13] = [0, 1]
+        params['columns_rotations'].append([1, 0, 0, 0 ])
+    params['columns_rotations'][0] = [3, 0, 1, -1]
+    params['columns_rotations'][1] = [3, 0,-1, 1]
+    params['columns_rotations'][2] = [2, 0, 1, 0]
+    params['columns_rotations'][5] = [2, 0,-1, 0]
+    params['columns_rotations'][13] = [2, 0, 1, 0]
 
     params['log_file'] = 'logs/mina_scalar_test_eval15_step1.json'
     return params
@@ -171,12 +171,12 @@ def init_test3():
 
     params['columns_rotations'] = []
     for i in range(47):
-        params['columns_rotations'].append([0, ])
-    params['columns_rotations'][0] = [0, 1, -1]
-    params['columns_rotations'][1] = [0, -1, 1]
-    params['columns_rotations'][2] = [0, 1]
-    params['columns_rotations'][5] = [0, -1]
-    params['columns_rotations'][13] = [0, 1]
+        params['columns_rotations'].append([1, 0, 0, 0 ])
+    params['columns_rotations'][0] = [3, 0, 1, -1]
+    params['columns_rotations'][1] = [3, 0,-1, 1]
+    params['columns_rotations'][2] = [2, 0, 1, 0]
+    params['columns_rotations'][5] = [2, 0,-1, 0]
+    params['columns_rotations'][13] = [2, 0, 1, 0]
 
     params['log_file'] = 'logs/mina_scalar_test_eval1_step3_3_3_1_1.json'
     return params
@@ -225,12 +225,12 @@ def init_test3():
 
     params['columns_rotations'] = []
     for i in range(47):
-        params['columns_rotations'].append([0, ])
-    params['columns_rotations'][0] = [0, 1, -1]
-    params['columns_rotations'][1] = [0, -1, 1]
-    params['columns_rotations'][2] = [0, 1]
-    params['columns_rotations'][5] = [0, -1]
-    params['columns_rotations'][13] = [0, 1]
+        params['columns_rotations'].append([1, 0, 0, 0 ])
+    params['columns_rotations'][0] = [3, 0, 1, -1]
+    params['columns_rotations'][1] = [3, 0,-1, 1]
+    params['columns_rotations'][2] = [2, 0, 1, 0]
+    params['columns_rotations'][5] = [2, 0,-1, 0]
+    params['columns_rotations'][13] = [2, 0, 1, 0]
 
     params['log_file'] = 'logs/mina_scalar_test_eval1_step3_3_3_1_1.json'
     return params
@@ -279,12 +279,12 @@ def init_test4():
 
     params['columns_rotations'] = []
     for i in range(47):
-        params['columns_rotations'].append([0, ])
-    params['columns_rotations'][0] = [0, 1, -1]
-    params['columns_rotations'][1] = [0, -1, 1]
-    params['columns_rotations'][2] = [0, 1]
-    params['columns_rotations'][5] = [0, -1]
-    params['columns_rotations'][13] = [0, 1]
+        params['columns_rotations'].append([1, 0, 0, 0 ])
+    params['columns_rotations'][0] = [3, 0, 1, -1]
+    params['columns_rotations'][1] = [3, 0,-1, 1]
+    params['columns_rotations'][2] = [2, 0, 1, 0]
+    params['columns_rotations'][5] = [2, 0,-1, 0]
+    params['columns_rotations'][13] = [2, 0, 1, 0]
 
     params['log_file'] = 'logs/mina_scalar_test_eval1_step1_4_4_1_1.json'
     return params
@@ -333,12 +333,12 @@ def init_test5():
 
     params['columns_rotations'] = []
     for i in range(47):
-        params['columns_rotations'].append([0, ])
-    params['columns_rotations'][0] = [0, 1, -1]
-    params['columns_rotations'][1] = [0, -1, 1]
-    params['columns_rotations'][2] = [0, 1]
-    params['columns_rotations'][5] = [0, -1]
-    params['columns_rotations'][13] = [0, 1]
+        params['columns_rotations'].append([1, 0, 0, 0 ])
+    params['columns_rotations'][0] = [3, 0, 1, -1]
+    params['columns_rotations'][1] = [3, 0,-1, 1]
+    params['columns_rotations'][2] = [2, 0, 1, 0]
+    params['columns_rotations'][5] = [2, 0,-1, 0]
+    params['columns_rotations'][13] = [2, 0, 1, 0]
 
     params['log_file'] = 'logs/mina_scalar_test_eval1_step_1_3_3_1_1_1_1.json'
     return params
@@ -387,12 +387,12 @@ def init_test6():
 
     params['columns_rotations'] = []
     for i in range(47):
-        params['columns_rotations'].append([0, ])
-    params['columns_rotations'][0] = [0, 1, -1]
-    params['columns_rotations'][1] = [0, -1, 1]
-    params['columns_rotations'][2] = [0, 1]
-    params['columns_rotations'][5] = [0, -1]
-    params['columns_rotations'][13] = [0, 1]
+        params['columns_rotations'].append([1, 0, 0, 0 ])
+    params['columns_rotations'][0] = [3, 0, 1, -1]
+    params['columns_rotations'][1] = [3, 0,-1, 1]
+    params['columns_rotations'][2] = [2, 0, 1, 0]
+    params['columns_rotations'][5] = [2, 0,-1, 0]
+    params['columns_rotations'][13] = [2, 0, 1, 0]
 
     params['log_file'] = 'logs/mina_scalar_test_eval1_step_1_3_3_3_1.json'
     return params

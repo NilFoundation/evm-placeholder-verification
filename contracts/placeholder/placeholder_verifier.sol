@@ -93,13 +93,13 @@ library placeholder_verifier {
         local_vars.evaluation_points = new uint256[4][](fri_params.leaf_size);
 
         for (uint256 i = 0; i < ar_params.witness_columns;) {
-            local_vars.evaluation_points[i][0] = common_data.columns_rotations[i].length;
-            for (uint256 j = 0; j < common_data.columns_rotations[i].length;) {
-                if(common_data.columns_rotations[i][j] == 0){
+            local_vars.evaluation_points[i][0] = uint256(common_data.columns_rotations[i][0]);
+            for (uint256 j = 0; j < uint256(common_data.columns_rotations[i][0]);) {
+                if(common_data.columns_rotations[i][j+1] == 0){
                     local_vars.evaluation_points[i][j+1] = local_vars.challenge;
-                } else if(common_data.columns_rotations[i][j] == 1){
+                } else if(common_data.columns_rotations[i][j+1] == 1){
                     local_vars.evaluation_points[i][j+1] = challenge_omega;
-                } else if(common_data.columns_rotations[i][j] == -1) {
+                } else if(common_data.columns_rotations[i][j+1] == -1) {
                     local_vars.evaluation_points[i][j+1] = challenge_inversed_omega;
                 } else {
                     // TODO: check properly if column_rotations will be not one of 0, +-1
@@ -107,12 +107,12 @@ library placeholder_verifier {
                     uint256 omega;
                     uint256 e;
 
-                    if (common_data.columns_rotations[i][j] < 0) {
+                    if (common_data.columns_rotations[i][j+1] < 0) {
                         omega = inversed_omega;
-                        e = uint256(-common_data.columns_rotations[i][j]);
+                        e = uint256(-common_data.columns_rotations[i][j+1]);
                     } else {
                         omega = common_data.omega;
-                        e = uint256(common_data.columns_rotations[i][j]);
+                        e = uint256(common_data.columns_rotations[i][j+1]);
                     }
                     assembly{
                         for{mstore(add(local_vars, E_OFFSET), mload(add(local_vars, CHALLENGE_OFFSET)))} gt(e,0) {e := shr(e, 1)} {
@@ -138,7 +138,7 @@ library placeholder_verifier {
         profiling.end_block();
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_variable_values_offset,
             local_vars.evaluation_points, tr_state, fri_params)) {
-            //require(false, "Wrong variable values LPC proof");
+            require(false, "Wrong variable values LPC proof");
             return false;
         }
 
@@ -152,7 +152,7 @@ library placeholder_verifier {
 
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_permutation_offset,
             local_vars.evaluation_points, tr_state, fri_params)) {
-         //   require(false, "Wrong permutation LPC proof");
+            require(false, "Wrong permutation LPC proof");
             return false;
         }
         profiling.end_block();
@@ -161,7 +161,7 @@ library placeholder_verifier {
         local_vars.evaluation_points[0] = challenge_point;
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_quotient_offset,
             local_vars.evaluation_points, tr_state, fri_params)) {
-//            require(false, "Wrong quotient LPC proof");
+            require(false, "Wrong quotient LPC proof");
             return false;
         }
         profiling.end_block();
@@ -169,7 +169,7 @@ library placeholder_verifier {
         profiling.start_block("PV::fixed");
         if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_fixed_values_offset,
             local_vars.evaluation_points, tr_state, fri_params)) {
-//            require(false, "Wrong fixed values LPC proof");
+            require(false, "Wrong fixed values LPC proof");
             return false;
         }
         profiling.end_block();
@@ -273,6 +273,7 @@ library placeholder_verifier {
             )
         }
         if (local_vars.F_consolidated != local_vars.Z_at_challenge) {
+            require(false, "Final check");
             return false;
         }
         profiling.end_block();

@@ -163,17 +163,18 @@ library batched_fri_verifier {
         y_ij = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(blob, offset, i, j);
     }
 
-    function y_to_y0_for_first_step(uint256 x, uint256 y, uint256[] memory batched_U, uint256[] memory batched_V, uint256 modulus)
+    function y_to_y0_for_first_step(uint256 x, uint256 y, uint256[4] memory batched_U, uint256[4] memory batched_V, uint256 modulus)
     internal view returns(uint256 result){
         uint256 U_evaluated_neg;
         uint256 V_evaluated_inv;
-        U_evaluated_neg = modulus - polynomial.evaluate(
+
+        U_evaluated_neg = modulus - polynomial.evaluate4(
             batched_U,
             x,
             modulus
         );
         V_evaluated_inv = field.inverse_static(
-            polynomial.evaluate(
+            polynomial.evaluate4(
                 batched_V,
                 x,
                 modulus

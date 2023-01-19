@@ -46,7 +46,7 @@ contract TestPlaceholderVerifierMinaBase {
     // 8 + D_omegas_size) q_size
     //  [..., q_i, ...]
         uint256[] calldata init_params,
-        int256[][] calldata columns_rotations
+        int256[4][] calldata columns_rotations
     ) public {
         profiling.start_block("public_api_placeholder_mina_base_component::verify");
         init_vars.vars_t memory vars;

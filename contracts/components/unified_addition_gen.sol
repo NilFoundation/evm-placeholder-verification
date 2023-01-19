@@ -41,7 +41,7 @@ library unified_addition_component_gen {
         bytes calldata blob,
         types.gate_argument_local_vars memory gate_params,
         types.arithmetization_params memory ar_params,
-        int256[][] memory columns_rotations
+        int256[4][] memory columns_rotations
     ) internal pure returns (uint256 gates_evaluation) {
         // TODO: check witnesses number in proof
 

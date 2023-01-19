@@ -55,6 +55,21 @@ library polynomial {
         return result;
     }
 
+    /*
+        evaluate fixed length polynomial
+    */
+    function evaluate4(uint256[4] memory coeffs, uint256 point, uint256 modulus)
+    internal pure returns (uint256) {
+        uint256 result;
+        
+        for( uint256 i = 0; i < 4;){
+            result = mulmod(result, point, modulus);
+            result = addmod(result, coeffs[3 - i], modulus);
+            unchecked{i++;}
+        }
+        return result;
+    }
+
     function evaluate_by_ptr(bytes calldata blob, uint256 offset, uint256 len, uint256 point, uint256 modulus)
     internal pure returns (uint256) {
         uint256 result;
@@ -126,7 +141,7 @@ library polynomial {
 
     function mul_poly(uint256[] memory a, uint256[] memory b, uint256 modulus)
     internal pure returns (uint256[] memory result) {
-        uint256[] memory result = new uint256[](a.length + b.length - 1);
+        result = new uint256[](a.length + b.length - 1);
         for (uint256 i = 0; i < b.length;) {
             for (uint256 j = 0; j < a.length;) {
                 assembly {

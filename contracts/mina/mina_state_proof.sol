@@ -51,7 +51,7 @@ contract MinaStateProof {
         types.arithmetization_params arithmetization_params;
     }
 
-    function init_vars(test_local_vars memory vars, uint256[] memory init_params, int256[][] memory columns_rotations) internal view{
+    function init_vars(test_local_vars memory vars, uint256[] memory init_params, int256[4][] memory columns_rotations) internal view{
         uint256 idx = 0;
         vars.fri_params.modulus = init_params[idx++];
         vars.fri_params.r = init_params[idx++];
@@ -112,7 +112,7 @@ contract MinaStateProof {
     function verify(
         bytes calldata blob,
         uint256[][] calldata init_params,
-        int256[][][] calldata columns_rotations
+        int256[4][][2] calldata columns_rotations
     ) public {
         gas_usage_t memory gas_usage;
         gas_usage.start = gasleft();
