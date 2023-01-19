@@ -55,40 +55,48 @@ library mina_split_gen {
         int256[4][] memory columns_rotations
     ) internal returns (uint256 gates_evaluation) {
         // TODO: check witnesses number in proof
+        uint256 i;
+        uint256 j;
+
         profiling.start_block("mina_scalar_split_gen::evaluate_gates_be");
 
-        gate_params.witness_evaluations = new uint256[][](ar_params.witness_columns);
+        gate_params.witness_evaluations = new uint256[4][](ar_params.witness_columns);
         gate_params.offset = batched_lpc_verifier.skip_to_z(blob,  gate_params.eval_proof_witness_offset);
-        for (uint256 i = 0; i < ar_params.witness_columns; i++) {
-            gate_params.witness_evaluations[i] = new uint256[](columns_rotations[i].length);
-            for (uint256 j = 0; j < columns_rotations[i].length; j++) {
-                gate_params.witness_evaluations[i][j] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(blob, gate_params.offset, i, j);
+        for (i = 0; i < ar_params.witness_columns;) {
+            gate_params.witness_evaluations[i][0] = uint256(columns_rotations[i][0]);
+            for (j = 0; j < uint256(columns_rotations[i][0]);) {
+                gate_params.witness_evaluations[i][j+1] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(blob, gate_params.offset, i, j);
+                unchecked{j++;}
             }
+            unchecked{i++;}
         }
 
         gate_params.selector_evaluations = new uint256[](GATES_N);
         gate_params.offset = batched_lpc_verifier.skip_to_z(blob,  gate_params.eval_proof_selector_offset);
-        for (uint256 i = 0; i < GATES_N; i++) {
+        for (i = 0; i < GATES_N;) {
             gate_params.selector_evaluations[i] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(
                 blob, 
                 gate_params.offset, 
                 i + ar_params.permutation_columns + ar_params.permutation_columns + ar_params.constant_columns, 
                 0
             );
+            unchecked{i++;}
         }
 
-        gate_params.constant_evaluations = new uint256[][](ar_params.constant_columns);
+        gate_params.constant_evaluations = new uint256[4][](ar_params.constant_columns);
         gate_params.offset = batched_lpc_verifier.skip_to_z(blob,  gate_params.eval_proof_constant_offset);
-        for (uint256 i = 0; i < ar_params.constant_columns; i++) {
-            gate_params.constant_evaluations[i] = new uint256[](columns_rotations[i].length);
-            for (uint256 j = 0; j < columns_rotations[i].length; j++) {
-                gate_params.constant_evaluations[i][j] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(
+        for (i = 0; i < ar_params.constant_columns;) {
+            gate_params.constant_evaluations[i][0] = uint256(columns_rotations[i][0]);
+            for (j = 0; j < uint256(columns_rotations[i][0]); j++) {
+                gate_params.constant_evaluations[i][j+1] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(
                     blob, 
                     gate_params.offset, 
                     i + ar_params.permutation_columns + ar_params.permutation_columns, 
                     j
                 );
+                unchecked{j++;}
             }
+            unchecked{i++;}
         }
 
         gate_params.theta_acc = 1;
