@@ -241,9 +241,9 @@ def init_test2():
                                    [0, -1, ],
                                    [0, -1, ],
                                    [0, -1, ],
-                                   [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ],
-                                   [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ],
-                                   [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ], [0, ]]
+                                   [0, ],
+                                   [0, ],
+                                   [0, ]]  # changed the column rotations to singular array format in order to reduce gas consumption
     params['log_file'] = 'logs/mina_base_test_eval10_step_1.json'
     return params
 

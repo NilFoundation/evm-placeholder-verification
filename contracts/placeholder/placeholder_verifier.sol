@@ -195,9 +195,16 @@ library placeholder_verifier {
         local_vars.F[1] = local_vars.permutation_argument[1];
         local_vars.F[2] = local_vars.permutation_argument[2];
         // lookup argument is not used in unified addition component
-        for (uint256 i = 3; i < 8; i++) {
-            local_vars.F[i] = 0;
-        }
+        // for (uint256 i = 3; i < 8; i++) {
+        //     local_vars.F[i] = 0;
+        // }
+
+        //commented the above for loop - saves 2000 units of gas
+        local_vars.F[3] = 0;
+        local_vars.F[4] = 0;
+        local_vars.F[5] = 0;
+        local_vars.F[6] = 0;
+        local_vars.F[7] = 0;
         local_vars.F[8] = local_vars.gate_argument;
 
         local_vars.F_consolidated = 0;
