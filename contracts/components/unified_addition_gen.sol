@@ -40,7 +40,7 @@ library unified_addition_component_gen {
     function evaluate_gates_be(
         bytes calldata blob,
         types.gate_argument_local_vars memory gate_params,
-        types.arithmetization_params memory ar_params,
+        types.arithmetization_params memory ar_params
     ) internal pure returns (uint256 gates_evaluation) {
         // TODO: check witnesses number in proof
 

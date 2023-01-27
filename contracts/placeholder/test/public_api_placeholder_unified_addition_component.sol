@@ -74,12 +74,11 @@ contract TestPlaceholderVerifierUnifiedAddition {
         gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
         gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
-        local_vars.gate_argument = unified_addition_component_gen.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
-<<<<<<< HEAD
+        local_vars.gate_argument = unified_addition_component_gen.evaluate_gates_be(
+            blob, gate_params, vars.arithmetization_params
+        );
         profiling.end_block();
 
-=======
->>>>>>> f0735c66538aa923aea89521847ba814ccd53cba
         require(
             placeholder_verifier.verify_proof_be(
                 blob,
