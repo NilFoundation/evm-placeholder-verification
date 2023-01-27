@@ -1,9 +1,16 @@
 from web3_test import do_placeholder_verification_test_via_transact, base_path, do_placeholder_verification_test_via_transact_simple
 import json
+<<<<<<< HEAD
 import sys
 
 test_contract_name = 'TestPlaceholderVerifierUnifiedAddition'
 test_contract_path = 'placeholder/test/public_api_placeholder_unified_addition_component.sol'
+=======
+
+test_contract_name = 'TestPlaceholderVerifierUnifiedAddition'
+test_contract_path = 'placeholder/test/public_api_placeholder_unified_addition_component.sol'
+# linked_gates_entry_lib_name = "unified_addition_component_gen"
+>>>>>>> f0735c66538aa923aea89521847ba814ccd53cba
 linked_libs_names = ["unified_addition_component_gen", "placeholder_verifier"]
 
 def load_params(paramsfile, prooffile):

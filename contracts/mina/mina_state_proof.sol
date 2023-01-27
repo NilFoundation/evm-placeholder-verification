@@ -30,9 +30,14 @@ import "../components/mina_base_split_gen.sol";
 import "../components/mina_scalar_split_gen.sol";
 import "../verifier.sol";
 
+<<<<<<< HEAD
 contract MinaStateProof is IVerifier{
     // event renamed to prevent conflicts with logging system
     event mina_gas_usage_emit(uint256 gas_usage);
+=======
+contract MinaStateProof is IVerifier {
+    event gas_usage_emit(uint256 gas_usage);
+>>>>>>> f0735c66538aa923aea89521847ba814ccd53cba
 
     struct gas_usage {
         uint256 start;
