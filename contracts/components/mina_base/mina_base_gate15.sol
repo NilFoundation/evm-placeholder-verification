@@ -37,10 +37,10 @@ library mina_base_gate15 {
     uint256 constant WITNESS_EVALUATIONS_OFFSET = 0x180;
     uint256 constant CONSTANT_EVALUATIONS_OFFSET = 0x1a0;
     uint256 constant PUBLIC_INPUT_EVALUATIONS_OFFSET = 0x1c0;
+
     // TODO: columns_rotations could be hard-coded
     function evaluate_gate_be(
-        types.gate_argument_local_vars memory gate_params,
-        int256[][] memory columns_rotations
+        types.gate_argument_local_vars memory gate_params
     ) external pure returns (uint256 gates_evaluation, uint256 theta_acc) {
         gates_evaluation = gate_params.gates_evaluation;
         theta_acc = gate_params.theta_acc;
