@@ -1,6 +1,6 @@
 {
-  "name": "evm-mina-verification",
-  "version": "1.0.0",
+  "name": "@nilfoundation/evm-placeholder-verification",
+  "version": "1.0.1",
   "dependencies": {
     "@truffle/hdwallet-provider": "^2.0.1",
     "as-table": "1.0.55",
@@ -16,17 +16,25 @@
   "main": "src/common.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nilfoundation/evm-mina-verification.git"
+    "url": "https://github.com/nilfoundation/evm-placeholder-verification.git"
   },
-  "author": "Mikhail Komarov",
+  "author": "Mikhail Komarov, Aleksey Moskvin, Ilia Shirobokov, Elena Tatuzova, Polina Chernyshova",
   "license": "Apache",
   "bugs": {
-    "url": "https://github.com/nilfoundation/evm-mina-verification/issues"
+    "url": "https://github.com/nilfoundation/evm-placeholder-verification/issues"
   },
-  "homepage": "https://github.com/nilfoundation/evm-mina-verification#readme",
-  "description": "",
+  "homepage": "https://github.com/nilfoundation/evm-placeholder-verification",
+  "description": "=nil; Foundation's Placeholder Proof System In-EVM Verifier",
   "devDependencies": {
     "json5": "^2.2.1",
     "solpp": "^0.11.5"
+  },
+  "files": [
+    "/contracts/**/*.sol",
+    "/build/contracts/*.json",
+    "!/contracts/mocks/**/*"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   }
 }

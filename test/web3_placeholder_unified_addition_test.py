@@ -42,28 +42,22 @@ def load_params(paramsfile, prooffile):
     return params
 
 def init_test1():
-    params = load_params(
+    return load_params(
         base_path + '/test/data/unified_addition_test1_params.json',
         base_path + '/test/data/unified_addition_proof1.data'
     )
-    params['log_file'] = "logs/unified_addition_test1.json"
-    return params
-
 
 def init_test2():
-    params = load_params(
+    return load_params(
         base_path + '/test/data/unified_addition_test2_params.json',
         base_path + '/test/data/unified_addition_proof2.data'
     )
-    params['log_file'] = "logs/unified_addition_test2.json"
-    return params
 
 def init_test3():
-    params = load_params(
+    return load_params(
         base_path + '/test/data/unified_addition_lambda40_params.json',
         base_path + '/test/data/unified_addition_lambda40.data'
     )
-    return params
 
 if __name__ == '__main__':
     if "1" in sys.argv:

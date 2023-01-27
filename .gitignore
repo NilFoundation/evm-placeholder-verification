@@ -232,6 +232,9 @@ blockchain/geth/**
 blockchain/keystore/**
 blockchain/history
 .secret
+**/.secret
+.private_key
+**/.private_key
 
 #truffle
 yarn.lock
@@ -241,4 +244,5 @@ package-lock.json
 contracts/profiling.sol
 *__pycache__* 
 *tx_calldata.txt
+**/addr
 # End of https://www.toptal.com/developers/gitignore/api/solidity,soliditytruffle,node
