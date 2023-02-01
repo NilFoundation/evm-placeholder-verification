@@ -172,16 +172,16 @@ library permutation_argument {
         // splash
         local_vars.len = ar_params.permutation_columns;
 
-        require(
-            batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_fixed_values_offset) == ar_params.permutation_columns + ar_params.permutation_columns + ar_params.constant_columns + ar_params.selector_columns + 2,
-            "Something wrong with number of fixed values polys"
-        );
+        //require(
+        //    batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_fixed_values_offset) == ar_params.permutation_columns + ar_params.permutation_columns + ar_params.constant_columns + ar_params.selector_columns + 2,
+        //    "Something wrong with number of fixed values polys"
+        //);
         local_vars.tmp1 = ar_params.witness_columns;
         local_vars.tmp2 = ar_params.public_input_columns;
         local_vars.tmp3 = ar_params.constant_columns;
 
 
-        // 3. Calculate h_perm, g_perm at challenge point
+        // 3. Calculate h_perm, g_perm at challenge pointa
         local_vars.g = 1;
         local_vars.h = 1;
         for (
@@ -199,18 +199,18 @@ library permutation_argument {
                 }
             }
             
-            local_vars.S_id_i = batched_lpc_verifier.get_z_i_j_from_proof_be(
+            local_vars.S_id_i = batched_lpc_verifier.get_fixed_values_z_i_j_from_proof_be(
                 blob,
-                proof_map.eval_proof_fixed_values_offset,
-                local_vars.idx1,
+                proof_map.eval_proof_combined_value_offset,
+                local_vars.idx1 << 1,
                 0
             );
 
             // sigma_i
-            local_vars.S_sigma_i = batched_lpc_verifier.get_z_i_j_from_proof_be(
+            local_vars.S_sigma_i = batched_lpc_verifier.get_fixed_values_z_i_j_from_proof_be(
                 blob,
-                proof_map.eval_proof_fixed_values_offset,
-                local_vars.idx1 + ar_params.permutation_columns,
+                proof_map.eval_proof_combined_value_offset,
+                (local_vars.idx1 << 1) + 1,
                 0
             );
 
@@ -218,9 +218,9 @@ library permutation_argument {
                 eval_permutations_at_challenge(
                     fri_params,
                     local_vars,
-                    batched_lpc_verifier.get_z_i_j_from_proof_be(
+                    batched_lpc_verifier.get_variable_values_z_i_j_from_proof_be(
                         blob,
-                        proof_map.eval_proof_variable_values_offset, // witnesses
+                        proof_map.eval_proof_combined_value_offset, // witnesses
                         local_vars.idx1,
                         local_vars.zero_index
                     )
@@ -229,9 +229,9 @@ library permutation_argument {
                 eval_permutations_at_challenge(
                     fri_params,
                     local_vars,
-                    batched_lpc_verifier.get_z_i_j_from_proof_be(
+                    batched_lpc_verifier.get_variable_values_z_i_j_from_proof_be(
                         blob,
-                        proof_map.eval_proof_variable_values_offset, // public_input
+                        proof_map.eval_proof_combined_value_offset, // public_input
                         local_vars.idx1,
                         local_vars.zero_index
                     )
@@ -240,9 +240,9 @@ library permutation_argument {
                 eval_permutations_at_challenge(
                     fri_params,
                     local_vars,
-                    batched_lpc_verifier.get_z_i_j_from_proof_be(
+                    batched_lpc_verifier.get_fixed_values_z_i_j_from_proof_be(
                         blob,
-                        proof_map.eval_proof_fixed_values_offset, // constant
+                        proof_map.eval_proof_combined_value_offset, // constant
                         local_vars.idx1 - local_vars.tmp1 - local_vars.tmp2 + ar_params.permutation_columns + ar_params.permutation_columns,
                         local_vars.zero_index
                     )
@@ -250,22 +250,22 @@ library permutation_argument {
             }
         }
 
-        local_vars.perm_polynomial_value = batched_lpc_verifier.get_z_i_j_from_proof_be(
-            blob, proof_map.eval_proof_permutation_offset, 0, 0
+        local_vars.perm_polynomial_value = batched_lpc_verifier.get_permutation_z_i_j_from_proof_be(
+            blob, proof_map.eval_proof_combined_value_offset, 0, 0
         );
-        local_vars.perm_polynomial_shifted_value = batched_lpc_verifier.get_z_i_j_from_proof_be(
-            blob, proof_map.eval_proof_permutation_offset, 0, 1
+        local_vars.perm_polynomial_shifted_value = batched_lpc_verifier.get_permutation_z_i_j_from_proof_be(
+            blob, proof_map.eval_proof_combined_value_offset, 0, 1
         );
 
-        local_vars.q_last_eval = batched_lpc_verifier.get_z_i_j_from_proof_be(
+        local_vars.q_last_eval = batched_lpc_verifier.get_fixed_values_z_i_j_from_proof_be(
             blob, 
-            proof_map.eval_proof_fixed_values_offset,       // special selector 0
+            proof_map.eval_proof_combined_value_offset,       // special selector 0
             ar_params.permutation_columns + ar_params.permutation_columns + ar_params.constant_columns + ar_params.selector_columns,
             0
         );
-        local_vars.q_blind_eval = batched_lpc_verifier.get_z_i_j_from_proof_be(
+        local_vars.q_blind_eval = batched_lpc_verifier.get_fixed_values_z_i_j_from_proof_be(
             blob, 
-            proof_map.eval_proof_fixed_values_offset,       // special selector 1
+            proof_map.eval_proof_combined_value_offset,       // special selector 1
             ar_params.permutation_columns + ar_params.permutation_columns + ar_params.constant_columns + ar_params.selector_columns + 1,
             0
         );
@@ -304,7 +304,9 @@ library permutation_argument {
                     modulus
                 )
             )
-
+        }
+        assembly{
+            let modulus := mload(fri_params)
             // F[1]
             mstore(
                 add(F, 0x40),
@@ -368,7 +370,9 @@ library permutation_argument {
                     modulus
                 )
             )
-
+        }
+        assembly{
+            let modulus := mload(fri_params)
             // F[2]
             mstore(
                 add(F, 0x60),

@@ -126,7 +126,7 @@ library polynomial {
 
     function mul_poly(uint256[] memory a, uint256[] memory b, uint256 modulus)
     internal pure returns (uint256[] memory result) {
-        uint256[] memory result = new uint256[](a.length + b.length - 1);
+        result = new uint256[](a.length + b.length - 1);
         for (uint256 i = 0; i < b.length;) {
             for (uint256 j = 0; j < a.length;) {
                 assembly {

@@ -77,6 +77,7 @@ library placeholder_verifier {
         transcript.update_transcript_b32_by_offset_calldata(tr_state, blob, basic_marshalling.skip_length(proof_map.T_commitments_offset));
         local_vars.challenge = transcript.get_field_challenge(tr_state, fri_params.modulus);
         if (local_vars.challenge != basic_marshalling.get_uint256_be(blob, proof_map.eval_proof_offset)) {
+            require(false, "Wrong challenge");
             return false;
         }
 
@@ -90,7 +91,7 @@ library placeholder_verifier {
         uint256[] memory challenge_point = new uint256[](1);
         challenge_point[0] = local_vars.challenge;
 
-        fri_params.leaf_size = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_variable_values_offset);
+        fri_params.leaf_size = batched_lpc_verifier.get_variable_values_n_be(blob, proof_map.eval_proof_combined_value_offset);
         local_vars.variable_values_evaluation_points = new uint256[][](fri_params.leaf_size);
 
         for (uint256 i = 0; i < ar_params.witness_columns;) {
@@ -137,57 +138,14 @@ library placeholder_verifier {
             unchecked{i++;}
         }
         profiling.end_block();
-        if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_variable_values_offset,
-            local_vars.variable_values_evaluation_points, tr_state, fri_params)) {
-            //require(false, "Wrong variable values LPC proof");
-            return false;
-        }
-
-        profiling.end_block();
-        // permutation
-        profiling.start_block("PV::permutation");
-        local_vars.evaluation_points = new uint256[][](1);
-        local_vars.evaluation_points[0] = new uint256[](2);
-        assembly {
-            let addr:= mload(add(mload(add(local_vars, EVALUATION_POINTS_OFFSET)), 0x20))
-            mstore(
-                // local_vars.evaluation_points[0][1]
-                add(addr, 0x20),
-                // (local_vars.challenge * common_data.omega) % fri_params.modulus
-                mload(add(local_vars, CHALLENGE_OFFSET))
-            )
-            mstore(
-                // local_vars.evaluation_points[0][1]
-                add(addr, 0x40),
-                // (local_vars.challenge * common_data.omega) % fri_params.modulus
-                challenge_omega
-            )
-        }
-
-        if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_permutation_offset,
-            local_vars.evaluation_points, tr_state, fri_params)) {
+        fri_params.leaf_size = 1;
+        if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_combined_value_offset, tr_state, fri_params)) {
          //   require(false, "Wrong permutation LPC proof");
             return false;
         }
         profiling.end_block();
+
         // quotient
-        profiling.start_block("PV::quotient");
-        local_vars.evaluation_points[0] = challenge_point;
-        if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_quotient_offset,
-            local_vars.evaluation_points, tr_state, fri_params)) {
-//            require(false, "Wrong quotient LPC proof");
-            return false;
-        }
-        profiling.end_block();
-
-        profiling.start_block("PV::fixed");
-        if (!batched_lpc_verifier.parse_verify_proof_be(blob, proof_map.eval_proof_fixed_values_offset,
-            local_vars.evaluation_points, tr_state, fri_params)) {
-//            require(false, "Wrong fixed values LPC proof");
-            return false;
-        }
-        profiling.end_block();
-
         // 10. final check
         profiling.start_block("PV::final check");
         local_vars.F = new uint256[](f_parts);
@@ -195,8 +153,9 @@ library placeholder_verifier {
         local_vars.F[1] = local_vars.permutation_argument[1];
         local_vars.F[2] = local_vars.permutation_argument[2];
         // lookup argument is not used in unified addition component
-        for (uint256 i = 3; i < 8; i++) {
+        for (uint256 i = 3; i < 8;) {
             local_vars.F[i] = 0;
+            unchecked{i++;}
         }
         local_vars.F[8] = local_vars.gate_argument;
 
@@ -219,10 +178,10 @@ library placeholder_verifier {
             unchecked{ i++; }
         }
         local_vars.T_consolidated = 0;
-        local_vars.len = batched_lpc_verifier.get_z_n_be(blob, proof_map.eval_proof_quotient_offset);
+        local_vars.len = batched_lpc_verifier.get_quotient_z_n_be(blob, proof_map.eval_proof_combined_value_offset);
 
         for (uint256 i = 0; i < local_vars.len; i++) {
-            local_vars.zero_index = batched_lpc_verifier.get_z_i_j_from_proof_be(blob, proof_map.eval_proof_quotient_offset, i, 0);
+            local_vars.zero_index = batched_lpc_verifier.get_quotient_z_i_j_from_proof_be(blob, proof_map.eval_proof_combined_value_offset, i, 0);
             local_vars.e = field.expmod_static(local_vars.challenge, (fri_params.max_degree + 1) * i, fri_params.modulus);
             //local_vars.zero_index = field.fmul(local_vars.zero_index, local_vars.e, fri_params.modulus);
             //local_vars.T_consolidated  = field.fadd(local_vars.T_consolidated, local_vars.zero_index, fri_params.modulus);
@@ -287,6 +246,7 @@ library placeholder_verifier {
             )
         }
         if (local_vars.F_consolidated != local_vars.Z_at_challenge) {
+            require(false, "Final check is not correct");
             return false;
         }
         profiling.end_block();

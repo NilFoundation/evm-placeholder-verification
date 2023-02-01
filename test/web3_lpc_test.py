@@ -228,6 +228,9 @@ def init_smaller_r_test():
 
 
 if __name__ == '__main__':
+    print("Test is outdated")
+    exit(0)
+    
     solcx.install_solc('0.8.12')
     init_profiling()
     

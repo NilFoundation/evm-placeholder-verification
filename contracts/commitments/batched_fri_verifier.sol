@@ -26,7 +26,6 @@ import "../algebra/polynomial.sol";
 import "../basic_marshalling.sol";
 import "../logging.sol";
 import "../profiling.sol";
-import "./commitment_calc.sol";
 
 library batched_fri_verifier {
     uint256 constant FRI_PARAMS_BYTES_B_OFFSET = 0x260;
@@ -85,7 +84,7 @@ library batched_fri_verifier {
         // number of round proofs
         // round_proofs
         uint256 value_len;
-        (value_len, result_offset) = basic_marshalling.get_skip_length_check(blob, offset);
+        (value_len, result_offset) = basic_marshalling.get_skip_length(blob, offset);
         for (uint256 i = 0; i < value_len;) {
             result_offset = skip_round_proof_be_check(blob, result_offset);
             unchecked{ i++; }
@@ -351,7 +350,6 @@ library batched_fri_verifier {
         // Fri proof fields
         local_vars.final_poly_offset = skip_to_final_poly(blob, offset);  // one for all rounds
         local_vars.values_offset = skip_to_values_be(blob, offset);  // one for all rounds
-
         // Fri round proof fields (for step)
         local_vars.round_proof_offset = skip_to_first_round_proof_be(blob, offset); // current round proof offset. It's round_proof.p offset too.
         local_vars.round_proof_T_root_offset = skip_to_round_proof_T_root_be(blob, local_vars.round_proof_offset);   // prepared for transcript.
@@ -717,276 +715,6 @@ library batched_fri_verifier {
         }    
     }
 
- 
-/*
-    precomputed
-        0 -- V(x)
-        1 -- V(-x)
-        2 -- c00
-        3 -- c01
-        4 -- c02
-        5 -- c10
-        6 -- c11
-        7 -- c12
-        8 -- Sigma
-    input
-        0 -- z0
-        1 -- z1
-        2 -- z2
-        3 -- c0
-        4 -- c1
-        5 -- y0
-        6 -- y1
-        7 -- c      //colinear_value
-        8 -- x
-*/
-    function one_round_first_step_eval3_colinear_check(
-        bytes calldata blob,
-        types.fri_params_type memory fri_params, 
-        types.fri_local_vars_type memory local_vars,
-        uint256 []memory xi
-    ) internal view returns(bool b){
-        uint256[9] memory precomputed;
-        uint256[9] memory input;
-
-        for(local_vars.ind = 0; local_vars.ind < fri_params.precomputed_eval3_points.length;){
-            if( xi[0] == fri_params.precomputed_eval3_points[local_vars.ind][0]&&
-                xi[1] == fri_params.precomputed_eval3_points[local_vars.ind][1]&&
-                xi[2] == fri_params.precomputed_eval3_points[local_vars.ind][2]
-            ){
-                if(fri_params.precomputed_eval3_points[local_vars.ind][3] == 0){
-                    fri_params.precomputed_eval3_data[local_vars.ind] = commitment_calc.eval3_precompute(fri_params.tmp_arr[0], xi[0], xi[1], xi[2], fri_params.modulus);
-                    fri_params.precomputed_eval3_points[local_vars.ind][3] = 1;
-                }
-                precomputed = fri_params.precomputed_eval3_data[local_vars.ind];
-                
-                input[0] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(blob, fri_params.z_offset, local_vars.p_ind, 0); // z0
-                input[1] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(blob, fri_params.z_offset, local_vars.p_ind, 1); // z1
-                input[2] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(blob, fri_params.z_offset, local_vars.p_ind, 2); // z2
-                assembly{
-                    mstore(add(input,0x60), mload(mload(add(local_vars, COEFFS_OFFSET))))               // coeffs0
-                    mstore(add(input, 0x80), mload(add(mload(add(local_vars, COEFFS_OFFSET)), 0x20)))     // coeffs1
-                    mstore(add(input, 0xa0), calldataload(add(blob.offset, add(mload(add(local_vars, Y_OFFSET)), 0x8))))
-                    mstore(add(input, 0xc0), calldataload(add(blob.offset, add(mload(add(local_vars, Y_OFFSET)), 0x28))))
-                    mstore(add(input, 0xe0), calldataload(add(blob.offset, mload(add(local_vars, COLINEAR_OFFSET)))))
-                }
-                input[8] = local_vars.x; // It's x for the next step
-                return commitment_calc.eval3_colinear_check(precomputed, input, fri_params.modulus);
-
-                break;
-            } 
-        unchecked{local_vars.ind++;}
-        }
-    }
-
-/*  precomputed
-        0 -- V(x)
-        1 -- V(-x)
-        2 -- c00
-        3 -- c01
-        4 -- c10
-        5 -- c11
-        6 -- xi1 - xi0
-    input    
-        0 -- z0
-        1 -- z1
-        2 -- c0
-        3 -- c1
-        4 -- y0
-        5 -- y1
-        6 -- c
-        7 -- x
-    */
-    function one_round_first_step_eval2_colinear_check(
-        bytes calldata blob,
-        types.fri_params_type memory fri_params, 
-        types.fri_local_vars_type memory local_vars,
-        uint256 []memory xi
-    ) internal view returns(bool b){
-        uint256[7] memory precomputed = commitment_calc.eval2_precompute(fri_params.tmp_arr[0], xi[0], xi[1], fri_params.modulus);
-        uint256[8] memory input;
-        input[0] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(blob, fri_params.z_offset, local_vars.p_ind, 0); // z0
-        input[1] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(blob, fri_params.z_offset, local_vars.p_ind, 1); // z1
-        assembly{
-            mstore(add(input, 0x40), mload(mload(add(local_vars, COEFFS_OFFSET))))               // coeffs0
-            mstore(add(input, 0x60), mload(add(mload(add(local_vars, COEFFS_OFFSET)), 0x20)))     // coeffs1
-            mstore(add(input, 0x80), calldataload(add(blob.offset, add(mload(add(local_vars, Y_OFFSET)), 0x8))))
-            mstore(add(input, 0xa0), calldataload(add(blob.offset, add(mload(add(local_vars, Y_OFFSET)), 0x28))))
-            mstore(add(input, 0xc0), calldataload(add(blob.offset, mload(add(local_vars, COLINEAR_OFFSET)))))
-        }
-        input[7] = local_vars.x; // It's x for the next step
-        
-        return commitment_calc.eval2_colinear_check(precomputed, input, fri_params.modulus);
-    }
-
-    /*
-        Precomputed data is stored in fri_params.precomputed_eval1.
-            0 -- z
-            1 -- s0 - xi
-            2 -- -s0 - xi1
-            3 -- (s0-xi)(-s0-xi)
-            4 -- c
-        Main equations is
-            2 * c * x * (s0-xi)(-s0-xi) == c0*(-s0-xi)(y0-z) + c1(s0-xi)(y1-z)
-        There are large polynomial batches with one similar evaluation point
-        We store precomputed data only for previous evalutaion point.
-        But it makes this calculation much more efficient.
-    */
-    uint256 constant EVAL1_Z_OFFSET = 0x20;                                      
-    uint256 constant EVAL1_XI0_OFFSET = 0x40;                                      
-    uint256 constant EVAL1_XI1_OFFSET = 0x60;                                      
-    uint256 constant EVAL1_XI0_XI1_OFFSET = 0x80;                                      
-    uint256 constant EVAL1_C_OFFSET = 0xa0;                                      
-    function one_round_first_step_eval1_colinear_check(
-        bytes calldata blob,
-        types.fri_params_type memory fri_params, 
-        types.fri_local_vars_type memory local_vars,
-        uint256 xi
-    ) internal pure returns(bool b){
-        uint256[] memory tmp = fri_params.precomputed_eval1;
-        tmp[0] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(blob, fri_params.z_offset, local_vars.p_ind, 0);        
-        // store -z
-        assembly{
-            mstore(add(tmp, EVAL1_Z_OFFSET), sub(mload(fri_params), mload(add(tmp, EVAL1_Z_OFFSET))))
-        }
-        if( xi != fri_params.prev_xi ){
-            fri_params.prev_xi = xi;
-            //fri_params.precomputed_eval1 = tmp;
-            assembly{
-                xi := sub(mload(fri_params), xi)    //xi = -xi
-            }
-            tmp[1] = fri_params.tmp_arr[0];         //tmp[1] = s0
-            assembly{           
-                let modulus := mload(fri_params)
-
-                mstore(add(tmp, EVAL1_XI1_OFFSET), sub(modulus, mload(add(tmp, EVAL1_XI0_OFFSET)))) // -s0
-                mstore(add(tmp, EVAL1_XI0_OFFSET), addmod(                                           // s0 - xi
-                    mload(add(tmp, EVAL1_XI0_OFFSET)), xi, modulus
-                ))
-                mstore(add(tmp, EVAL1_XI1_OFFSET), addmod(                                          // -s0 - xi
-                    mload(add(tmp, EVAL1_XI1_OFFSET)), xi, modulus
-                ))
-                mstore(add(tmp, EVAL1_XI0_XI1_OFFSET), mulmod(                                      // (s0 - xi)(-s0 - xi)
-                    mload(add(tmp, EVAL1_XI0_OFFSET)),
-                    mload(add(tmp, EVAL1_XI1_OFFSET)),
-                    modulus
-                ))
-            }
-        }  
-        assembly{
-            let modulus := mload(fri_params)
-            mstore(add(local_vars,INTERPOLANT_OFFSET), addmod(
-                // (y-z)*(-s0-xi)
-                mulmod(                                   
-                    mload(mload(add(local_vars, COEFFS_OFFSET))),
-                    mulmod(
-                        addmod(
-                            calldataload(add(blob.offset, add(mload(add(local_vars, Y_OFFSET)), 0x8))),
-                            mload(add(tmp, EVAL1_Z_OFFSET)),modulus
-                        ), mload(add(tmp, EVAL1_XI1_OFFSET)),modulus
-                    ),
-                    modulus
-                ),
-                // (y-z)*(-s1-xi)
-                mulmod(
-                    mload(add(mload(add(local_vars, COEFFS_OFFSET)), 0x20)),
-                    mulmod(
-                        addmod(
-                            calldataload(add(blob.offset, add(mload(add(local_vars, Y_OFFSET)), 0x28))),
-                            mload(add(tmp, EVAL1_Z_OFFSET)), modulus
-                        ), mload(add(tmp, EVAL1_XI0_OFFSET)), modulus
-                    ),
-                    modulus
-                ),
-                modulus
-            ))
-            mstore(add(tmp, EVAL1_C_OFFSET), mulmod(
-                mulmod(
-                    mload(add(local_vars, X_OFFSET)), 
-                    calldataload(add(blob.offset, mload(add(local_vars, COLINEAR_OFFSET)))), 
-                    modulus
-                ), 
-                mload(add(tmp, EVAL1_XI0_XI1_OFFSET)), 
-                modulus
-            ))
-            mstore(add(tmp, EVAL1_C_OFFSET), addmod(mload(add(tmp, EVAL1_C_OFFSET)), mload(add(tmp, EVAL1_C_OFFSET)), modulus))
-        }
-        if( tmp[4] != local_vars.interpolant ) {
-//            require(false, "Wrong colinear check");
-            return false;
-        }
-        return true;
-    }
-
-    function one_round_first_step_colinear_check_updated(
-        bytes calldata blob,
-        types.fri_params_type memory fri_params, 
-        types.fri_local_vars_type memory local_vars
-    ) internal view returns(bool b) {
-        b = true;
-        uint256 c;
-        uint256[] memory eval = fri_params.evaluation_points[0];
-
-        //local_vars.colinear_offset == local_vars.p_offset + 0x8;
-        local_vars.y_offset -= 0x8;
-        for( local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size;){
-            if( fri_params.evaluation_points.length != 1 ) eval = fri_params.evaluation_points[local_vars.p_ind];
-            if( eval.length == 1) {
-                if( !one_round_first_step_eval1_colinear_check(blob, fri_params, local_vars, eval[0]) ) return false;
-            } else if( eval.length == 3) {
-                if( !one_round_first_step_eval3_colinear_check(blob, fri_params, local_vars, eval) ) return false;
-            } else if( eval.length == 2) {
-                if( !one_round_first_step_eval2_colinear_check(blob, fri_params, local_vars, eval) ) return false;
-            } else {
-                return false;
-            }
-            unchecked{
-                local_vars.p_ind++;
-                local_vars.y_offset += local_vars.prev_polynomial_vector_size;
-                local_vars.colinear_offset += local_vars.polynomial_vector_size;
-            }
-        }
-    }
-
-    function multiple_rounds_first_step_colinear_check(
-        bytes calldata blob,
-        types.fri_params_type memory fri_params, 
-        types.fri_local_vars_type memory local_vars
-    ) internal view returns(bool b) {
-        b = true;
-        uint256 c;
-
-        local_vars.y_offset -= 0x8;
-        for( local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size;){
-            local_vars.interpolant = 0;
-            for( local_vars.y_ind = 0; local_vars.y_ind < local_vars.prev_coeffs_len; ) {
-                local_vars.interpolant = field.fadd( 
-                    local_vars.interpolant, 
-                    field.fmul(
-                        fri_params.coeffs[local_vars.y_ind], 
-                        get_evaluated_y_from_blob(blob, fri_params, local_vars, local_vars.y_offset, local_vars.p_ind, local_vars.y_ind),
-                        fri_params.modulus
-                    ),
-                    fri_params.modulus
-                );
-                unchecked{ local_vars.y_ind++;}
-            } 
-            assembly{
-                c := calldataload(add(blob.offset, mload(add(local_vars, COLINEAR_OFFSET))))
-                c := mulmod(mload(add(local_vars, X_OFFSET)), c, mload(fri_params))
-                c := mulmod(c, mload(add(local_vars,PREV_COEFFS_LEN_OFFSET)), mload(fri_params))
-            }
-            if( local_vars.interpolant != c ){
-                return false;
-            }
-            unchecked{
-                local_vars.p_ind++;
-                local_vars.y_offset += local_vars.prev_polynomial_vector_size;
-                local_vars.colinear_offset += local_vars.polynomial_vector_size;
-            }
-        }
-    }
-
     function calculate_step_coeffs(
         bytes calldata blob,
         uint256 offset,
@@ -1096,20 +824,10 @@ library batched_fri_verifier {
 
             // 5. Colinear check
             local_vars.colinear_offset = local_vars.round_proof_values_offset + 0x10;
-            if(local_vars.i_step == 1){
-                profiling.start_block("1st cc");
-                if(local_vars.prev_step == 1 ){
-                    if( !one_round_first_step_colinear_check_updated(blob, fri_params, local_vars) ) return false;
-                } else {
-                    if(!multiple_rounds_first_step_colinear_check(blob, fri_params, local_vars)) return false;
-                }
-                profiling.end_block();
+            if(local_vars.prev_step == 1 ){
+                if( !one_round_step_colinear_check(blob, fri_params, local_vars) ) return false;
             } else {
-                if(local_vars.prev_step == 1 ){
-                    if( !one_round_step_colinear_check(blob, fri_params, local_vars) ) return false;
-                } else {
-                    if(!multiple_rounds_step_colinear_check(blob, fri_params, local_vars)) return false;
-                }
+                if(!multiple_rounds_step_colinear_check(blob, fri_params, local_vars)) return false;
             }
 
             // 6. Prepare leaf data for the next round

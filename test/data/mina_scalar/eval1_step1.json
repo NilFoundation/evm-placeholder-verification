@@ -1,0 +1,8 @@
+{
+    "_test_name": "Mina scalar test, evaluation_rounds = 1, max_step = 1",
+    "log_file":"logs/mina_scalar_eval1_step1.json",
+    "r":12,
+    "max_degree":8191,
+    "rows_amount":8192,
+    "step_list":[1, 1, 1, 1, 1, 1,   1, 1, 1, 1, 1, 1]
+}

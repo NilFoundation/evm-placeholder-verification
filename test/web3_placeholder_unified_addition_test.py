@@ -43,25 +43,15 @@ def load_params(paramsfile, prooffile):
 
 def init_test1():
     params = load_params(
-        base_path + '/test/data/unified_addition_test1_params.json',
-        base_path + '/test/data/unified_addition_proof1.data'
+        base_path + 'test/data/unified_addition/unified_addition_lambda2_params.json',
+        base_path + 'test/data/unified_addition/batched_unified_addition_lambda2.data'
     )
-    params['log_file'] = "logs/unified_addition_test1.json"
     return params
-
 
 def init_test2():
     params = load_params(
-        base_path + '/test/data/unified_addition_test2_params.json',
-        base_path + '/test/data/unified_addition_proof2.data'
-    )
-    params['log_file'] = "logs/unified_addition_test2.json"
-    return params
-
-def init_test3():
-    params = load_params(
-        base_path + '/test/data/unified_addition_lambda40_params.json',
-        base_path + '/test/data/unified_addition_lambda40.data'
+        base_path + 'test/data/unified_addition/unified_addition_lambda40_params.json',
+        base_path + 'test/data/unified_addition/batched_unified_addition_lambda40.data'
     )
     return params
 
@@ -70,10 +60,7 @@ if __name__ == '__main__':
         do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test1)
     if "2" in sys.argv:
         do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test2)
-    if "3" in sys.argv:
-        do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test3)
         
-    if "1" not in sys.argv and "2" not in sys.argv and "3" not in sys.argv:
+    if "1" not in sys.argv and "2" not in sys.argv:
         do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test1)
         do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test2)
-        do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test3)

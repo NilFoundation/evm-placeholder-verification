@@ -68,11 +68,14 @@ contract TestPlaceholderVerifierMinaBase {
         types.gate_argument_local_vars memory gate_params;
         gate_params.modulus = vars.fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
-        gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_variable_values_offset;
-        gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
-        gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
-        local_vars.gate_argument = mina_base_split_gen.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
+        local_vars.gate_argument = mina_base_split_gen.evaluate_gates_be(
+            blob, 
+            gate_params, 
+            vars.proof_map.eval_proof_combined_value_offset,
+            vars.arithmetization_params, 
+            vars.common_data.columns_rotations
+        );
         profiling.end_block();
 
         require(

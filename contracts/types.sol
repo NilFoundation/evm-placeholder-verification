@@ -282,14 +282,10 @@ library types {
         // 0xe0
         uint256 eval_proof_lagrange_0_offset;
         // 0x100
-        uint256 eval_proof_fixed_values_offset;
+        uint256 eval_proof_combined_value_offset;
         // 0x120
         uint256 eval_proof_variable_values_offset;
         // 0x140
-        uint256 eval_proof_permutation_offset;
-        // 0x160
-        uint256 eval_proof_quotient_offset;
-        // 0x180
         uint256 eval_proof_lookups_offset;
     }
 
@@ -382,63 +378,14 @@ library types {
         // 0x60
         uint256 gate_eval;
         // 0x80
-        uint256[] witness_evaluations_offsets;
-        // 0xa0
-        uint256[] selector_evaluations;
-        // 0xe0
-        uint256 eval_proof_witness_offset;
-        // 0xc0
-        uint256 eval_proof_selector_offset;
-        // 0x100
         uint256 gates_evaluation;
-        // 0x120
-        uint256 theta_acc;
-        // 0x140
-        uint256 selector_evaluations_offset;
-        // 0x160
-        uint256 offset;
-        // 0x180
-        uint256[][] witness_evaluations;
-        // 0x1a0
-        uint256[][] constant_evaluations;
-        // 0x1c0
-        uint256[][] public_input_evaluations;
-        // 0x1e0
-        uint256 eval_proof_constant_offset;
-    }
-
-    struct gate_argument_local_vars_updated{
-        // 0x0
-        uint256 modulus;
-        // 0x20
-        uint256 theta;
-        // 0x40
-        uint256 constraint_eval;
-        // 0x60
-        uint256 gate_eval;
-        // 0x80
-        uint256[] witness_evaluations_offsets;
         // 0xa0
-        uint256[] selector_evaluations;
-        // 0xc0
-        uint256 eval_proof_witness_offset;
-        // 0xe0
-        uint256 eval_proof_selector_offset;
-        // 0x100
-        uint256 gates_evaluation;
-        // 0x120
         uint256 theta_acc;
-        // 0x140
-        uint256 selector_evaluations_offset;
-        // 0x160
-        uint256 offset;
-        // 0x180
+        // 0xc0
         uint256[][] witness_evaluations;
-        // 0x1a0
-        uint256[][] constant_evaluations;
-        // 0x1c0
-        uint256[][] public_input_evaluations;
-        // 0x1e0
-        uint256 eval_proof_constant_offset;
+        // 0xe0
+        uint256[] constant_evaluations;
+        // 0x100
+        uint256[] selector_evaluations;
     }
 }

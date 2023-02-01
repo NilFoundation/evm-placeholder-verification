@@ -230,7 +230,6 @@ library merkle_verifier {
         assembly {
             root := calldataload(add(blob.offset, add(offset, ROOT_OFFSET)))
         }
-//        require(false, logging.uint2decstr(depth));
         result = (verified_data == root);
     }
 

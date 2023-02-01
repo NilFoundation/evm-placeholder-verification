@@ -141,7 +141,6 @@ contract TestMinaStateProof {
         (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser.parse_be(blob, vars.proof_offset);
 
         require(vars.proof_size <= blob.length, "Base proof length was detected incorrectly!");
-        require(vars.proof_size == init_params[0][0], logging.uint2decstr(vars.proof_size));
         require(vars.proof_size == init_params[0][0], "Invalid first proof length");
         init_vars(vars, init_params[1], columns_rotations[0]);
         transcript.init_transcript(vars.tr_state, hex"");

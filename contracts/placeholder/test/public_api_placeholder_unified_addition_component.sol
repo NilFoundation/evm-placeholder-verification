@@ -54,7 +54,6 @@ contract TestPlaceholderVerifierUnifiedAddition {
 
         // 3. append witness commitments to transcript
         transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
-
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
         // 5. permutation argument
         profiling.start_block("public_api_placeholder_unified_addition::component permutation argument");
@@ -68,11 +67,11 @@ contract TestPlaceholderVerifierUnifiedAddition {
         types.gate_argument_local_vars memory gate_params;
         gate_params.modulus = vars.fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
-        gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_variable_values_offset;
-        gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
-        gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
-        local_vars.gate_argument = unified_addition_component_gen.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
+        local_vars.gate_argument = unified_addition_component_gen.evaluate_gates_be(
+            blob, gate_params, vars.proof_map.eval_proof_combined_value_offset, 
+            vars.arithmetization_params, vars.common_data.columns_rotations
+        );
         profiling.end_block();
 
         require(

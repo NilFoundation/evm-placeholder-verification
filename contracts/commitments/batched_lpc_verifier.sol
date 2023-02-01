@@ -24,8 +24,6 @@ import "./batched_fri_verifier.sol";
 import "../algebra/polynomial.sol";
 import "../basic_marshalling.sol";
 import "../profiling.sol";
-import "./commitment_calc.sol";
-
 
 library batched_lpc_verifier {
 
@@ -33,15 +31,21 @@ library batched_lpc_verifier {
 
     function skip_proof_be(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 result_offset) {
+        uint256 i;
         // T_root
-        result_offset = basic_marshalling.skip_octet_vector_32_be(offset);
+        result_offset = basic_marshalling.skip_octet_vector_32_be_check(blob, offset);
         // z
-        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, result_offset);
-        
+        result_offset = basic_marshalling.skip_length(result_offset);
+        for (i = 0; i < 4;) {
+            result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be_check(blob, result_offset);
+            unchecked{i++;}
+        }
         // fri_proof
         uint256 value_len;
-        (value_len, result_offset) = basic_marshalling.get_skip_length(blob, result_offset);
-        for (uint256 i = 0; i < value_len;) {
+        (value_len, result_offset) = basic_marshalling.get_skip_length_check(blob, result_offset);
+
+        for (i = 0; i < value_len;) {
+            // TODO realized FRI::skip_proof_be checked better
             result_offset = batched_fri_verifier.skip_proof_be(blob, result_offset);
             unchecked{ i++; }
         }
@@ -73,12 +77,64 @@ library batched_lpc_verifier {
         // T_root
         result_offset = basic_marshalling.skip_octet_vector_32_be(offset);
         // z
+        result_offset = basic_marshalling.skip_length(result_offset);
         result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, result_offset);
+        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, result_offset);
+        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, result_offset);
+        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, result_offset);
+
         // fri_proof
         result_offset = basic_marshalling.skip_length(result_offset);
     }
 
-    function get_z_i_j_from_proof_be(bytes calldata blob, uint256 offset, uint256 i, uint256 j)
+    // Input is proof_map.eval_proof_combined_value_offset
+    function get_variable_values_z_i_j_from_proof_be(bytes calldata blob, uint256 offset, uint256 i, uint256 j) 
+    internal pure returns (uint256 z_i_j){
+        uint256 vv_offset = basic_marshalling.skip_octet_vector_32_be(offset);
+        vv_offset = basic_marshalling.skip_length(vv_offset);
+
+        z_i_j = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(
+            blob, vv_offset, i, j
+        );
+    }
+
+    function get_permutation_z_i_j_from_proof_be(bytes calldata blob, uint256 offset, uint256 i, uint256 j) 
+    internal pure returns (uint256 z_i_j){
+        uint256 p_offset = basic_marshalling.skip_octet_vector_32_be(offset);
+        p_offset = basic_marshalling.skip_length(p_offset);
+        
+        p_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, p_offset);
+        z_i_j = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(
+            blob, p_offset, i, j
+        );
+    }
+
+    function get_quotient_z_i_j_from_proof_be(bytes calldata blob, uint256 offset, uint256 i, uint256 j) 
+    internal pure returns (uint256 z_i_j){
+        uint256 q_offset = basic_marshalling.skip_octet_vector_32_be(offset);
+        q_offset = basic_marshalling.skip_length(q_offset);
+        
+        q_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, q_offset);
+        q_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, q_offset);
+        z_i_j = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(
+            blob, q_offset, i, j
+        );
+    }
+
+    // TODO add starting offsets of eval arrays to some kind of proof map
+    function get_fixed_values_z_i_j_from_proof_be(bytes calldata blob, uint256 offset, uint256 i, uint256 j) 
+    internal pure returns (uint256 z_i_j){
+        uint256 fv_offset = basic_marshalling.skip_octet_vector_32_be(offset);
+        fv_offset = basic_marshalling.skip_length(fv_offset);
+        
+        fv_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, fv_offset);
+        fv_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, fv_offset);
+        fv_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, fv_offset);
+        z_i_j = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(
+            blob, fv_offset, i, j
+        );
+    }
+/*    function get_z_i_j_from_proof_be(bytes calldata blob, uint256 offset, uint256 i, uint256 j)
     internal pure returns (uint256 z_i_j) {
         // 0x28 (skip T_root)
         z_i_j = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(
@@ -86,14 +142,15 @@ library batched_lpc_verifier {
             basic_marshalling.skip_octet_vector_32_be(offset),
             i,
             j);
-    }
-
+    }*/
+/*
     function get_z_i_j_ptr_from_proof_be(bytes calldata blob, uint256 offset, uint256 i, uint256 j)
     internal pure returns (uint256 z_i_j_ptr) {
         // 0x28 (skip T_root)
         z_i_j_ptr = basic_marshalling.get_i_j_uint256_ptr_from_vector_of_vectors(blob, basic_marshalling.skip_octet_vector_32_be(offset), i, j);
     }
-
+*/
+/*
     function get_z_n_be(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 n) {
         // T_root
@@ -101,27 +158,73 @@ library batched_lpc_verifier {
         // z
         n = basic_marshalling.get_length(blob, result_offset);
     }
+*/
+    function get_variable_values_n_be(bytes calldata blob, uint256 offset)
+    internal pure returns(uint256 n){
+        uint256 vv_offset = basic_marshalling.skip_octet_vector_32_be(offset);
+        vv_offset = basic_marshalling.skip_length(vv_offset);
 
+        n = basic_marshalling.get_length(blob, vv_offset);
+    }
+
+    function get_permutation_z_n_be(bytes calldata blob, uint256 offset) 
+    internal pure returns (uint256 n){
+        uint256 p_offset = basic_marshalling.skip_octet_vector_32_be(offset);
+        p_offset = basic_marshalling.skip_length(p_offset);
+        
+        p_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, p_offset);
+        n = basic_marshalling.get_length(blob, p_offset);
+    }
+
+    function get_quotient_z_n_be(bytes calldata blob, uint256 offset) 
+    internal pure returns (uint256 n){
+        uint256 q_offset = basic_marshalling.skip_octet_vector_32_be(offset);
+        q_offset = basic_marshalling.skip_length(q_offset);
+        
+        q_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, q_offset);
+        q_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, q_offset);
+        n = basic_marshalling.get_length(blob, q_offset);
+    }
+
+    function get_fixed_values_z_n_be(bytes calldata blob, uint256 offset) 
+    internal pure returns (uint256 n){
+        uint256 fv_offset = basic_marshalling.skip_octet_vector_32_be(offset);
+        fv_offset = basic_marshalling.skip_length(fv_offset);
+        
+        fv_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, fv_offset);
+        fv_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, fv_offset);
+        fv_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, fv_offset);
+        n = basic_marshalling.get_length(blob, fv_offset);
+    }
     function get_fri_proof_n_be(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 n) {
+        uint256 i;
         // T_root
-        uint256 result_offset = basic_marshalling.skip_octet_vector_32_be(offset);
+        offset = basic_marshalling.skip_octet_vector_32_be_check(blob, offset);
         // z
-        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, result_offset);
+        offset = basic_marshalling.skip_length(offset);
+        for (i = 0; i < 4;) {
+            offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be_check(blob, offset);
+            unchecked{i++;}
+        }
         // fri_proof
-        n = basic_marshalling.get_length(blob, result_offset);
+        n = basic_marshalling.get_length(blob, offset);
     }
 
     function skip_proof_be_check(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 result_offset) {
+        uint256 i;
         // T_root
         result_offset = basic_marshalling.skip_octet_vector_32_be_check(blob, offset);
         // z
-        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be_check(blob, result_offset);
+        result_offset = basic_marshalling.skip_length(result_offset);
+        for (i = 0; i < 4;) {
+            result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be_check(blob, result_offset);
+            unchecked{i++;}
+        }
         // fri_proof
         uint256 value_len;
         (value_len, result_offset) = basic_marshalling.get_skip_length_check(blob, result_offset);
-        uint256 i;
 
         for (i = 0; i < value_len;) {
             // TODO realized FRI::skip_proof_be checked better
@@ -177,115 +280,16 @@ library batched_lpc_verifier {
 
     uint256 constant PRECOMPUTE_EVAL3_SIZE = 5;
     function parse_verify_proof_be(bytes calldata blob,
-        uint256 offset, uint256[][] memory evaluation_points,
-        types.transcript_data memory tr_state, types.fri_params_type memory fri_params)
+        uint256 offset, 
+        types.transcript_data memory tr_state, 
+        types.fri_params_type memory fri_params)
     internal returns (bool result) {
         profiling.start_block("LPC::parse_verify_proof_be");
-        profiling.start_block("LPC::prepare U and V");
-        result = false;
-
-        fri_params.leaf_size = get_z_n_be(blob, offset);
-
-        require(evaluation_points.length == 1 || fri_params.leaf_size == evaluation_points.length, "Array of evaluation points size is not equal to leaf_size!");
-        require(fri_params.lambda == get_fri_proof_n_be(blob, offset), "Fri proofs number is not equal to lambda!");
-
-        uint256 z_offset;
-        uint256 polynom_index;
-        uint256 point_index;
         uint256 ind;
+        uint256 combined_alpha = transcript.get_field_challenge(tr_state, fri_params.modulus);
 
-        z_offset = basic_marshalling.skip_length(skip_to_z(blob, offset));
-        if( fri_params.step_list[0] != 1){
-            uint256[] memory eval;
-
-            for (polynom_index = 0; polynom_index < fri_params.leaf_size;) {
-                eval = evaluation_points.length == 1? eval = evaluation_points[0]: eval = evaluation_points[polynom_index];
-                fri_params.batched_U[polynom_index] = polynomial.interpolate(
-                    blob,
-                    eval,
-                    z_offset,
-                    fri_params.modulus
-                );
-                z_offset = basic_marshalling.skip_vector_of_uint256_be(blob, z_offset);
-
-                unchecked{ polynom_index++; }
-            }
-
-            // If there are similar points for all polynomials, don't recompute V
-            for (polynom_index = 0; polynom_index < fri_params.leaf_size;) {
-                if( evaluation_points.length == 1  && polynom_index !=0 )
-                    fri_params.batched_V[polynom_index] = fri_params.batched_V[0];
-                else{
-                    eval = evaluation_points[polynom_index];
-                    fri_params.batched_V[polynom_index] = new uint256[](1);
-                    fri_params.batched_V[polynom_index][0] = 1;
-                    for (point_index = 0; point_index < eval.length;) {
-                        fri_params.lpc_z[0] = fri_params.modulus - eval[point_index];
-                        fri_params.batched_V[polynom_index] = polynomial.mul_poly(
-                            fri_params.batched_V[polynom_index],
-                            fri_params.lpc_z,
-                            fri_params.modulus
-                        );
-                        unchecked{ point_index++; }
-                    }
-                }
-            unchecked{ polynom_index++; }
-            }
-        }  else {
-            // Compute number of polynoms with 2 and 3 evaluation points
-            uint256 eval3 = 1;
-            uint256 eval2 = 1;
-            bool found;
-            for(point_index = 0; point_index < evaluation_points.length;){
-                if( evaluation_points[point_index].length == 3){
-                    unchecked{eval3++;}
-                } 
-                if (evaluation_points[point_index].length == 2){
-                    unchecked{eval2++;}
-                }
-            unchecked{point_index++;}
-            }
-            fri_params.precomputed_indices = new uint256[](eval3 > eval2? eval3: eval2);
-
-            // Compute number of different sets of evaluation points
-            if( eval3 != 0 ){
-                for(point_index = 0; point_index < evaluation_points.length;){
-                    if( evaluation_points[point_index].length == 3){
-                        found = false;
-                        for(ind = 1; ind < fri_params.precomputed_indices[0] + 1;){
-                            if(evaluation_points[fri_params.precomputed_indices[ind]][0] == evaluation_points[point_index][0]&&
-                            evaluation_points[fri_params.precomputed_indices[ind]][1] == evaluation_points[point_index][1]&&
-                            evaluation_points[fri_params.precomputed_indices[ind]][2] == evaluation_points[point_index][2]){
-                                found = true;
-                                break;
-                            }
-                        unchecked{ind++;}
-                        }
-                        if( !found ){
-                            unchecked{fri_params.precomputed_indices[0]++;}
-                            fri_params.precomputed_indices[fri_params.precomputed_indices[0]] = point_index;
-                        }
-                    } 
-                unchecked{point_index++;}
-                }
-                fri_params.precomputed_eval3_points = new uint256[][](fri_params.precomputed_indices[0]);
-                fri_params.precomputed_eval3_data = new uint256[9][](fri_params.precomputed_indices[0]);
-                for(ind = 1; ind < fri_params.precomputed_indices[0] + 1;){
-                    point_index = fri_params.precomputed_indices[ind];
-                    fri_params.precomputed_eval3_points[point_index] = new uint256[](PRECOMPUTE_EVAL3_SIZE);
-                    fri_params.precomputed_eval3_points[point_index][0] = evaluation_points[point_index][0];
-                    fri_params.precomputed_eval3_points[point_index][1] = evaluation_points[point_index][1];
-                    fri_params.precomputed_eval3_points[point_index][2] = evaluation_points[point_index][2];
-                    fri_params.precomputed_eval3_points[point_index][3] = 0;
-                unchecked{ind++;}
-                }
-            }
-        }
-
-        fri_params.evaluation_points = evaluation_points;
         fri_params.z_offset = basic_marshalling.skip_octet_vector_32_be(offset);
 
-        profiling.end_block();
         profiling.start_block("LPC::FRI");
         offset = skip_to_first_fri_proof_be(blob, offset);
         for (ind = 0; ind < fri_params.lambda;) {
@@ -299,7 +303,6 @@ library batched_lpc_verifier {
             unchecked{ ind++; }
         }
         result = true;
-        profiling.end_block();
         profiling.end_block();
    }
 }
