@@ -5,29 +5,14 @@ test_contract_name = 'TestPlaceholderVerifierMinaScalar'
 test_contract_path = 'placeholder/test/public_api_placeholder_mina_scalar_component.sol'
 linked_libs_names = [
     "mina_scalar_gate0",
-    "mina_scalar_gate1",
-    "mina_scalar_gate2",
     "mina_scalar_gate3",
-    "mina_scalar_gate4",
-    "mina_scalar_gate5",
-    "mina_scalar_gate6",
-    "mina_scalar_gate7",
     "mina_scalar_gate8",
-    "mina_scalar_gate9",
     "mina_scalar_gate10",
-    "mina_scalar_gate11",
     "mina_scalar_gate12",
-    "mina_scalar_gate13",
     "mina_scalar_gate14",
-    "mina_scalar_gate15",
     "mina_scalar_gate16",
-    "mina_scalar_gate17",
     "mina_scalar_gate18",
-    "mina_scalar_gate19",
-    "mina_scalar_gate20",
-    "mina_scalar_gate21",
     "mina_scalar_gate22",
-    "mina_scalar_gate23",
     "placeholder_verifier"
 ]
 
