@@ -22,25 +22,13 @@ import "../profiling.sol";
 import "../basic_marshalling.sol";
 import "../commitments/batched_lpc_verifier.sol";
 import "./mina_base/mina_base_gate0.sol";
-import "./mina_base/mina_base_gate1.sol";
-import "./mina_base/mina_base_gate2.sol";
-import "./mina_base/mina_base_gate3.sol";
 import "./mina_base/mina_base_gate4.sol";
-import "./mina_base/mina_base_gate5.sol";
-import "./mina_base/mina_base_gate6.sol";
 import "./mina_base/mina_base_gate7.sol";
-import "./mina_base/mina_base_gate8.sol";
-import "./mina_base/mina_base_gate9.sol";
 import "./mina_base/mina_base_gate10.sol";
-import "./mina_base/mina_base_gate11.sol";
-import "./mina_base/mina_base_gate12.sol";
 import "./mina_base/mina_base_gate13.sol";
-import "./mina_base/mina_base_gate14.sol";
 import "./mina_base/mina_base_gate15.sol";
 import "./mina_base/mina_base_gate16.sol";
 import "./mina_base/mina_base_gate16_1.sol";
-import "./mina_base/mina_base_gate17.sol";
-import "./mina_base/mina_base_gate18.sol";
 
 // TODO: name component
 library mina_base_split_gen {
@@ -93,29 +81,25 @@ library mina_base_split_gen {
         gate_params.theta_acc = 1;
         gate_params.gates_evaluation = 0;
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate0.evaluate_gate_be(gate_params);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate1.evaluate_gate_be(gate_params);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate2.evaluate_gate_be(gate_params);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate3.evaluate_gate_be(gate_params);
+//        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate1.evaluate_gate_be(gate_params);
+//        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate2.evaluate_gate_be(gate_params);
+//        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate3.evaluate_gate_be(gate_params);
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate4.evaluate_gate_be(gate_params);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate5.evaluate_gate_be(gate_params);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate6.evaluate_gate_be(gate_params);
+//        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate5.evaluate_gate_be(gate_params);
+//        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate6.evaluate_gate_be(gate_params);
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate7.evaluate_gate_be(gate_params);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate8.evaluate_gate_be(gate_params);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate9.evaluate_gate_be(gate_params);
+//        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate8.evaluate_gate_be(gate_params);
+//        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate9.evaluate_gate_be(gate_params);
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate10.evaluate_gate_be(gate_params);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate11.evaluate_gate_be(gate_params);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate12.evaluate_gate_be(gate_params);
+ //       (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate11.evaluate_gate_be(gate_params);
+ //       (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate12.evaluate_gate_be(gate_params);
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate13.evaluate_gate_be(gate_params);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate14.evaluate_gate_be(gate_params);
+//        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate14.evaluate_gate_be(gate_params);
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate15.evaluate_gate_be(gate_params);
         (gate_params.gate_eval, gate_params.theta_acc) = mina_base_gate16.evaluate_gate_be(gate_params);
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate16_1.evaluate_gate_be(gate_params);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate17.evaluate_gate_be(gate_params);
-        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate18.evaluate_gate_be(gate_params);
-//      This last contain gate18
-//        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate19.evaluate_gate_be(gate_params);
-//        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate20.evaluate_gate_be(gate_params);
-//        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate21.evaluate_gate_be(gate_params);
+//        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate17.evaluate_gate_be(gate_params);
+ //       (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate18.evaluate_gate_be(gate_params);
 
         gates_evaluation = gate_params.gates_evaluation;
         profiling.end_block();

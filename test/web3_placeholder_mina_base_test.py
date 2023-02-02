@@ -5,25 +5,13 @@ test_contract_name = 'TestPlaceholderVerifierMinaBase'
 test_contract_path = 'placeholder/test/public_api_placeholder_mina_base_component.sol'
 linked_libs_names = [
     "mina_base_gate0",
-    "mina_base_gate1",
-    "mina_base_gate2",
-    "mina_base_gate3",
     "mina_base_gate4",
-    "mina_base_gate5",
-    "mina_base_gate6",
     "mina_base_gate7",
-    "mina_base_gate8",
-    "mina_base_gate9",
     "mina_base_gate10",
-    "mina_base_gate11",
-    "mina_base_gate12",
     "mina_base_gate13",
-    "mina_base_gate14",
     "mina_base_gate15",
     "mina_base_gate16",
     "mina_base_gate16_1",
-    "mina_base_gate17",
-    "mina_base_gate18",
     "placeholder_verifier"
 ]
 

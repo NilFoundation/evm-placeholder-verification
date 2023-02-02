@@ -56,65 +56,6 @@ library mina_base_gate18 {
             function get_selector_i(idx, ptr) -> result {
                 result := mload(add(add(ptr, 0x20), mul(0x20, idx)))
             }
-
-
-            function get_constant_i(idx, ptr) -> result {
-                result := mload(add(add(ptr, 0x20), mul(0x20, idx)))
-            }
-            
-            mstore(add(gate_params, GATE_EVAL_OFFSET), 0)
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET), 0)
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x1,mulmod(get_eval_i_by_rotation_idx(0,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),get_constant_i(0, mload(add(gate_params, CONSTANT_EVALUATIONS_OFFSET))), modulus),modulus),modulus))
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,get_eval_i_by_rotation_idx(1,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),modulus),modulus))
-            mstore(add(gate_params, GATE_EVAL_OFFSET),addmod(mload(add(gate_params, GATE_EVAL_OFFSET)),mulmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
-            theta_acc := mulmod(theta_acc,mload(add(gate_params, THETA_OFFSET)),modulus)
-            mstore(add(gate_params, GATE_EVAL_OFFSET),mulmod(mload(add(gate_params, GATE_EVAL_OFFSET)),get_selector_i(18,mload(add(gate_params, SELECTOR_EVALUATIONS_OFFSET))),modulus))
-            gates_evaluation := addmod(gates_evaluation,mload(add(gate_params, GATE_EVAL_OFFSET)),modulus)
-            //-------------------
-            mstore(add(gate_params, GATE_EVAL_OFFSET), 0)
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET), 0)
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x1,mulmod(get_eval_i_by_rotation_idx(0,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),get_eval_i_by_rotation_idx(1,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))), modulus),modulus),modulus))
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,get_eval_i_by_rotation_idx(2,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),modulus),modulus))
-            mstore(add(gate_params, GATE_EVAL_OFFSET),addmod(mload(add(gate_params, GATE_EVAL_OFFSET)),mulmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
-            theta_acc := mulmod(theta_acc,mload(add(gate_params, THETA_OFFSET)),modulus)
-            mstore(add(gate_params, GATE_EVAL_OFFSET),mulmod(mload(add(gate_params, GATE_EVAL_OFFSET)),get_selector_i(19,mload(add(gate_params, SELECTOR_EVALUATIONS_OFFSET))),modulus))
-            gates_evaluation := addmod(gates_evaluation,mload(add(gate_params, GATE_EVAL_OFFSET)),modulus)
-        //---------
-            mstore(add(gate_params, GATE_EVAL_OFFSET), 0)
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET), 0)
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x1,mulmod(get_eval_i_by_rotation_idx(1,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),get_eval_i_by_rotation_idx(3,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))), modulus),modulus),modulus))
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,get_eval_i_by_rotation_idx(4,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),modulus),modulus))
-            mstore(add(gate_params, GATE_EVAL_OFFSET),addmod(mload(add(gate_params, GATE_EVAL_OFFSET)),mulmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
-            theta_acc := mulmod(theta_acc,mload(add(gate_params, THETA_OFFSET)),modulus)
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET), 0)
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,get_eval_i_by_rotation_idx(4,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),modulus),modulus))
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x1,mulmod(get_eval_i_by_rotation_idx(4,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),get_eval_i_by_rotation_idx(4,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))), modulus),modulus),modulus))
-            mstore(add(gate_params, GATE_EVAL_OFFSET),addmod(mload(add(gate_params, GATE_EVAL_OFFSET)),mulmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
-            theta_acc := mulmod(theta_acc,mload(add(gate_params, THETA_OFFSET)),modulus)
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET), 0)
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x1,get_eval_i_by_rotation_idx(1,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),modulus),modulus))
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(get_eval_i_by_rotation_idx(1,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),get_eval_i_by_rotation_idx(4,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))), modulus),modulus),modulus))
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,get_eval_i_by_rotation_idx(3,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),modulus),modulus))
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x1,mulmod(get_eval_i_by_rotation_idx(3,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),get_eval_i_by_rotation_idx(4,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))), modulus),modulus),modulus))
-            mstore(add(gate_params, GATE_EVAL_OFFSET),addmod(mload(add(gate_params, GATE_EVAL_OFFSET)),mulmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
-            theta_acc := mulmod(theta_acc,mload(add(gate_params, THETA_OFFSET)),modulus)
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET), 0)
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x1,mulmod(get_eval_i_by_rotation_idx(0,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),get_eval_i_by_rotation_idx(3,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))), modulus),modulus),modulus))
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,get_eval_i_by_rotation_idx(2,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),modulus),modulus))
-            mstore(add(gate_params, GATE_EVAL_OFFSET),addmod(mload(add(gate_params, GATE_EVAL_OFFSET)),mulmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
-            theta_acc := mulmod(theta_acc,mload(add(gate_params, THETA_OFFSET)),modulus)
-            mstore(add(gate_params, GATE_EVAL_OFFSET),mulmod(mload(add(gate_params, GATE_EVAL_OFFSET)),get_selector_i(20,mload(add(gate_params, SELECTOR_EVALUATIONS_OFFSET))),modulus))
-            gates_evaluation := addmod(gates_evaluation,mload(add(gate_params, GATE_EVAL_OFFSET)),modulus)
-        //----------
-            mstore(add(gate_params, GATE_EVAL_OFFSET), 0)
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET), 0)
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,get_eval_i_by_rotation_idx(1,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),modulus),modulus))
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x1,get_eval_i_by_rotation_idx(0,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),modulus),modulus))
-            mstore(add(gate_params, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,get_eval_i_by_rotation_idx(2,0, mload(add(gate_params, WITNESS_EVALUATIONS_OFFSET))),modulus),modulus))
-            mstore(add(gate_params, GATE_EVAL_OFFSET),addmod(mload(add(gate_params, GATE_EVAL_OFFSET)),mulmod(mload(add(gate_params, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
-            theta_acc := mulmod(theta_acc,mload(add(gate_params, THETA_OFFSET)),modulus)
-            mstore(add(gate_params, GATE_EVAL_OFFSET),mulmod(mload(add(gate_params, GATE_EVAL_OFFSET)),get_selector_i(21,mload(add(gate_params, SELECTOR_EVALUATIONS_OFFSET))),modulus))
-            gates_evaluation := addmod(gates_evaluation,mload(add(gate_params, GATE_EVAL_OFFSET)),modulus)
         }
     }
 }
