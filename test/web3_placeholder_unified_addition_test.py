@@ -43,15 +43,15 @@ def load_params(paramsfile, prooffile):
 
 def init_test1():
     params = load_params(
-        base_path + 'test/data/unified_addition/unified_addition_lambda2_params.json',
-        base_path + 'test/data/unified_addition/batched_unified_addition_lambda2.data'
+        base_path + 'test/data/unified_addition/lambda2.json',
+        base_path + 'test/data/unified_addition/lambda2.data'
     )
     return params
 
 def init_test2():
     params = load_params(
-        base_path + 'test/data/unified_addition/unified_addition_lambda40_params.json',
-        base_path + 'test/data/unified_addition/batched_unified_addition_lambda40.data'
+        base_path + 'test/data/unified_addition/lambda40.json',
+        base_path + 'test/data/unified_addition/lambda40.data'
     )
     return params
 

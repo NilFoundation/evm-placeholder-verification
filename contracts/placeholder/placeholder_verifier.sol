@@ -152,11 +152,11 @@ library placeholder_verifier {
         local_vars.F[0] = local_vars.permutation_argument[0];
         local_vars.F[1] = local_vars.permutation_argument[1];
         local_vars.F[2] = local_vars.permutation_argument[2];
-        // lookup argument is not used in unified addition component
-        for (uint256 i = 3; i < 8;) {
-            local_vars.F[i] = 0;
-            unchecked{i++;}
-        }
+        local_vars.F[3] = 0;
+        local_vars.F[4] = 0;
+        local_vars.F[5] = 0;
+        local_vars.F[6] = 0;
+        local_vars.F[7] = 0;
         local_vars.F[8] = local_vars.gate_argument;
 
         local_vars.F_consolidated = 0;

@@ -1,5 +1,3 @@
-
-
 // SPDX-License-Identifier: Apache-2.0.
 //---------------------------------------------------------------------------//
 // Copyright (c) 2022 Mikhail Komarov <nemo@nil.foundation>
@@ -25,13 +23,10 @@ import "../../cryptography/transcript.sol";
 import "../proof_map_parser.sol";
 import "../placeholder_verifier.sol";
 import "../../logging.sol";
-import "../../profiling.sol";
-import "../../components/unified_addition_gen.sol";
+import "../../gate_argument_interface.sol";
 import "../init_vars.sol";
 
-contract TestPlaceholderVerifierUnifiedAddition {
-    event gas_usage_emit(uint8 command, string function_name, uint256 gas_usage);
-
+contract TestPlaceholderVerifierUniversal {
     function verify(
         bytes calldata blob,
     // 0) modulus
@@ -46,9 +41,9 @@ contract TestPlaceholderVerifierUnifiedAddition {
     // 8 + D_omegas_size) q_size
     //  [..., q_i, ...]
         uint256[] calldata init_params,
-        int256[][] calldata columns_rotations
+        int256[][] calldata columns_rotations,
+        uint160    gate_argument_address
     ) public {
-        profiling.start_block("public_api_placeholder_unified_addition::component verify");
         init_vars.vars_t memory vars;
         init_vars.init(blob, init_params, columns_rotations, vars);
 
@@ -56,26 +51,23 @@ contract TestPlaceholderVerifierUnifiedAddition {
 
         // 3. append witness commitments to transcript
         transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
+
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
         // 5. permutation argument
-        profiling.start_block("public_api_placeholder_unified_addition::component permutation argument");
         local_vars.permutation_argument = permutation_argument.verify_eval_be(blob, vars.tr_state,
             vars.proof_map, vars.fri_params,
             vars.common_data, local_vars, vars.arithmetization_params);
-        profiling.end_block();
-
         // 7. gate argument specific for circuit
-        profiling.start_block("public_api_placeholder_unified_addition::component gate argument");
+        // Wait for better times.
         types.gate_argument_local_vars memory gate_params;
         gate_params.modulus = vars.fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
+        gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_variable_values_offset;
+        gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
+        gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
-        local_vars.gate_argument = unified_addition_component_gen.evaluate_gates_be(
-            blob, gate_params, vars.proof_map.eval_proof_combined_value_offset, 
-            vars.arithmetization_params, vars.common_data.columns_rotations
-        );
-        profiling.end_block();
-
+        gate_argument_split_gen gate_argument_component = gate_argument_split_gen(address(gate_argument_address));
+        local_vars.gate_argument = gate_argument_component.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
         require(
             placeholder_verifier.verify_proof_be(
                 blob,
@@ -88,6 +80,5 @@ contract TestPlaceholderVerifierUnifiedAddition {
             ),
             "Proof is not correct!"
         );
-        profiling.end_block();
     }
 }
