@@ -62,12 +62,15 @@ contract TestPlaceholderVerifierUniversal {
         types.gate_argument_local_vars memory gate_params;
         gate_params.modulus = vars.fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
-        gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_variable_values_offset;
-        gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
-        gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
-        gate_argument_split_gen gate_argument_component = gate_argument_split_gen(address(gate_argument_address));
-        local_vars.gate_argument = gate_argument_component.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
+        IGateArgument gate_argument_component = IGateArgument(address(gate_argument_address));
+        local_vars.gate_argument = gate_argument_component.evaluate_gates_be(
+            blob, 
+            gate_params, 
+            vars.proof_map.eval_proof_combined_value_offset, 
+            vars.arithmetization_params, 
+            vars.common_data.columns_rotations
+        );
         require(
             placeholder_verifier.verify_proof_be(
                 blob,

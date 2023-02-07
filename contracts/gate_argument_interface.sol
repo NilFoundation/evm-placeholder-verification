@@ -2,12 +2,12 @@ pragma solidity >=0.8.4;
 
 import "../contracts/types.sol";
 
-contract gate_argument_split_gen {
+interface IGateArgument {
     function evaluate_gates_be(
         bytes calldata blob,
         types.gate_argument_local_vars memory gate_params,
+        uint256 eval_proof_combined_value_offset,
         types.arithmetization_params memory ar_params,
-        int256[][] memory columns_rotations
-    ) external pure returns (uint256 gates_evaluation) {
-    }
+        int256[][] calldata columns_rotations
+    ) external view returns (uint256 gates_evaluation);
 }

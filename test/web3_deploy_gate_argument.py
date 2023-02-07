@@ -40,8 +40,8 @@ if __name__ == '__main__':
     solcx.install_solc('0.8.17')
     print(f'{base_path}/{contract_path}')
     compiled = solcx.compile_files(
-        [f'{base_path}/{contract_path}'],
-        allow_paths=[f'{contracts_dir}', f'{base_path}/{folder_name}'],
+        [f'{base_path}{contract_path}'],
+        allow_paths=[f'{contracts_dir}', f'{base_path}{folder_name}'],
         output_values=['abi', 'bin'],
         solc_version="0.8.17",
         optimize=True,
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     bytecode = compiled_test_contract_interface['bin']
     abi = compiled_test_contract_interface['abi']
 
-    jsonf = open(f"{base_path}/{folder_name}/linked_libs_list.json");
+    jsonf = open(f"{base_path}{folder_name}/linked_libs_list.json");
     parsed_json = json.load(jsonf);
     jsonf.close()
     bytecode = deploy_link_libs(w3, compiled, bytecode, parsed_json)
@@ -61,5 +61,5 @@ if __name__ == '__main__':
     print("Deployment cost:", deploy_tx_receipt.gasUsed)
     print("contractAddress:", deploy_tx_receipt.contractAddress)
     print("abi:", abi)
-    with open(f'{base_path}/{folder_name}/addr', 'w') as f:
+    with open(f'{base_path}{folder_name}/addr', 'w') as f:
         f.write(deploy_tx_receipt.contractAddress)

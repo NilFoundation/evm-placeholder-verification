@@ -387,5 +387,7 @@ library types {
         uint256[] constant_evaluations;
         // 0x100
         uint256[] selector_evaluations;
+        // 0x120
+        uint256[] public_input_evaluations;
     }
 }
