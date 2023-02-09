@@ -27,6 +27,8 @@ import "../../gate_argument_interface.sol";
 import "../init_vars.sol";
 
 contract TestPlaceholderVerifierUniversal {
+    event gas_usage_emit(uint8 command, string function_name, uint256 gas_usage);
+
     function verify(
         bytes calldata blob,
     // 0) modulus
