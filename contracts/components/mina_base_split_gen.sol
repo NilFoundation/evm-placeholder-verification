@@ -42,6 +42,8 @@ import "./mina_base/mina_base_gate16_1.sol";
 import "./mina_base/mina_base_gate17.sol";
 import "./mina_base/mina_base_gate18.sol";
 
+import "../interfaces/gate_argument.sol";
+
 // TODO: name component
 library mina_base_split_gen {
     // TODO: specify constants

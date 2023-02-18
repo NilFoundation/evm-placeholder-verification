@@ -22,6 +22,7 @@ import "../types.sol";
 import "../basic_marshalling.sol";
 import "../commitments/batched_lpc_verifier.sol";
 import "../logging.sol";
+import "../interfaces/gate_argument.sol";
 
 library unified_addition_component_gen {
     uint256 constant GATES_N = 1;

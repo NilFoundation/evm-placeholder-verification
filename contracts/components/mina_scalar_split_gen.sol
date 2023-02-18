@@ -42,6 +42,8 @@ import "./mina_scalar/mina_scalar_gate20.sol";
 import "./mina_scalar/mina_scalar_gate21.sol";
 import "./mina_scalar/mina_scalar_gate22.sol";
 
+import "../interfaces/gate_argument.sol";
+
 // TODO: name component
 library mina_split_gen {
     // TODO: specify constants

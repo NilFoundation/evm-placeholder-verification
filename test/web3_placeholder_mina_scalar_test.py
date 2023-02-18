@@ -1,6 +1,8 @@
 from web3_test import do_placeholder_verification_test_via_transact, do_placeholder_verification_test_via_transact_simple, base_path
 import sys
 
+from prepare_logs import create_logs_dir
+
 test_contract_name = 'TestPlaceholderVerifierMinaScalar'
 test_contract_path = 'placeholder/test/public_api_placeholder_mina_scalar_component.sol'
 linked_libs_names = [
@@ -398,6 +400,7 @@ def init_test6():
     return params
     
 if __name__ == '__main__':
+    create_logs_dir(base_path + '/logs')
     if "1" not in sys.argv and "2" not in sys.argv and "3" not in sys.argv and "4" not in sys.argv and "5" not in sys.argv and "6" not in sys.argv:
         #   eval1_step1
         do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test1)

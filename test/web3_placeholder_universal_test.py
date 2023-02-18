@@ -2,6 +2,8 @@ from web3_test import base_path, do_placeholder_verification_test_via_transact_w
 import json
 import sys
 
+from prepare_logs import create_logs_dir
+
 test_contract_name = 'TestPlaceholderVerifierUniversal'
 test_contract_path = 'placeholder/test/public_api_placeholder_universal_test_component.sol'
 linked_libs_names = ["placeholder_verifier"]
@@ -62,6 +64,7 @@ def init_test1():
     return params;
 
 if __name__ == '__main__':
+    create_logs_dir(base_path + '/logs')
     if( len(sys.argv) < 2 ):
         print("Print input folder name in command_line")
         exit        

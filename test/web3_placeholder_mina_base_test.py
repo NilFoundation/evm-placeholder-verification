@@ -1,6 +1,8 @@
 from web3_test import do_placeholder_verification_test_via_transact, base_path, do_placeholder_verification_test_via_transact_simple
 import sys
 
+from prepare_logs import create_logs_dir
+
 test_contract_name = 'TestPlaceholderVerifierMinaBase'
 test_contract_path = 'placeholder/test/public_api_placeholder_mina_base_component.sol'
 linked_libs_names = [
@@ -249,6 +251,7 @@ def init_test2():
 
 
 if __name__ == '__main__':
+    create_logs_dir(base_path + '/logs')
     if "1" in sys.argv:
         do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path,
                                                          linked_libs_names, init_test1)

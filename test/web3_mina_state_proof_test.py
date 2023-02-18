@@ -1,3 +1,4 @@
+from prepare_logs import create_logs_dir
 from web3_test import base_path, do_placeholder_verification_test_via_transact_simple
 
 test_contract_name = 'TestMinaStateProof'
@@ -146,5 +147,6 @@ def init_test1():
 
 
 if __name__ == '__main__':
+    create_logs_dir(base_path + '/logs')
     do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path,
                                                          linked_unified_addition_libs_names, init_test1)

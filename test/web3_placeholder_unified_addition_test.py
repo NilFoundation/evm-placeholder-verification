@@ -2,6 +2,8 @@ from web3_test import do_placeholder_verification_test_via_transact, base_path, 
 import json
 import sys
 
+from prepare_logs import create_logs_dir
+
 test_contract_name = 'TestPlaceholderVerifierUnifiedAddition'
 test_contract_path = 'placeholder/test/public_api_placeholder_unified_addition_component.sol'
 linked_libs_names = ["unified_addition_component_gen", "placeholder_verifier"]
@@ -60,6 +62,7 @@ def init_test3():
     )
 
 if __name__ == '__main__':
+    create_logs_dir(base_path + '/logs')
     if "1" in sys.argv:
         do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test1)
     if "2" in sys.argv:

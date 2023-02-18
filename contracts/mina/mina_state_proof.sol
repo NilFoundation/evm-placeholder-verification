@@ -28,7 +28,8 @@ import "../placeholder/init_vars.sol";
 
 import "../components/mina_base_split_gen.sol";
 import "../components/mina_scalar_split_gen.sol";
-import "../verifier.sol";
+
+import "../interfaces/verifier.sol";
 
 contract MinaStateProof is IVerifier{
     // event renamed to prevent conflicts with logging system
@@ -39,7 +40,7 @@ contract MinaStateProof is IVerifier{
         uint256 end;
     }
 
-    struct test_local_vars {
+    struct verifier_state {
         types.fri_params_type fri_params;
         uint256 proofs_num;
         uint256 ind;
@@ -52,7 +53,7 @@ contract MinaStateProof is IVerifier{
         types.arithmetization_params arithmetization_params;
     }
 
-    function init_vars(test_local_vars memory vars, uint256[] memory init_params, int256[][] memory columns_rotations) internal view {
+    function init_vars(verifier_state memory vars, uint256[] memory init_params, int256[][] memory columns_rotations) internal view {
         uint256 idx = 0;
         vars.fri_params.modulus = init_params[idx++];
         vars.fri_params.r = init_params[idx++];
@@ -102,7 +103,7 @@ contract MinaStateProof is IVerifier{
     }
     }
 
-    function allocate_all(test_local_vars memory vars, uint256 max_step, uint256 max_batch) internal view {
+    function allocate_all(verifier_state memory vars, uint256 max_step, uint256 max_batch) internal view {
         uint256 max_coset = 1 << (vars.fri_params.max_step - 1);
 
         vars.fri_params.s_indices = new uint256[](max_coset);
@@ -118,7 +119,7 @@ contract MinaStateProof is IVerifier{
         int256[][][] calldata columns_rotations) public returns (bool) {
         gas_usage memory gas_usage;
         gas_usage.start = gasleft();
-        test_local_vars memory vars;
+        verifier_state memory vars;
         uint256 max_step;
         uint256 max_batch;
 
