@@ -241,7 +241,6 @@ yarn.lock
 package-lock.json
 
 #temporary files
-contracts/profiling.sol
 *__pycache__* 
 *tx_calldata.txt
 **/addr
