@@ -197,7 +197,7 @@ library permutation_argument {
                     local_vars.zero_index = local_vars.idx2;
                 }
             }
-            
+
             local_vars.S_id_i = batched_lpc_verifier.get_z_i_j_from_proof_be(
                 blob,
                 proof_map.eval_proof_fixed_values_offset,
@@ -235,7 +235,7 @@ library permutation_argument {
                         local_vars.zero_index
                     )
                 );
-            } else if ( local_vars.idx1 <  local_vars.tmp1 + local_vars.tmp2 + local_vars.tmp3 ) {
+            } else if (local_vars.idx1 <  local_vars.tmp1 + local_vars.tmp2 + local_vars.tmp3) {
                 eval_permutations_at_challenge(
                     fri_params,
                     local_vars,
@@ -257,13 +257,13 @@ library permutation_argument {
         );
 
         local_vars.q_last_eval = batched_lpc_verifier.get_z_i_j_from_proof_be(
-            blob, 
+            blob,
             proof_map.eval_proof_fixed_values_offset,       // special selector 0
             ar_params.permutation_columns + ar_params.permutation_columns + ar_params.constant_columns + ar_params.selector_columns,
             0
         );
         local_vars.q_blind_eval = batched_lpc_verifier.get_z_i_j_from_proof_be(
-            blob, 
+            blob,
             proof_map.eval_proof_fixed_values_offset,       // special selector 1
             ar_params.permutation_columns + ar_params.permutation_columns + ar_params.constant_columns + ar_params.selector_columns + 1,
             0

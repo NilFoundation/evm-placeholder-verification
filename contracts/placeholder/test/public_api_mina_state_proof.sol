@@ -28,7 +28,7 @@ import "../init_vars.sol";
 import "../../components/mina_base_split_gen.sol";
 import "../../components/mina_scalar_split_gen.sol";
 
-contract TestMinaStateProof {
+contract TestPlaceholderVerifier {
     event gas_usage_emit(uint8 command, string function_name, uint256 gas_usage);
 
     struct test_local_vars {

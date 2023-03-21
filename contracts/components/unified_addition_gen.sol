@@ -24,7 +24,7 @@ import "../commitments/batched_lpc_verifier.sol";
 import "../logging.sol";
 import "../interfaces/gate_argument.sol";
 
-library unified_addition_component_gen {
+library unified_addition_component_gen is IGateArgument {
     uint256 constant GATES_N = 1;
 
     uint256 constant MODULUS_OFFSET = 0x0;

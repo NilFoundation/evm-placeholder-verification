@@ -45,7 +45,7 @@ import "./mina_scalar/mina_scalar_gate22.sol";
 import "../interfaces/gate_argument.sol";
 
 // TODO: name component
-library mina_split_gen {
+library mina_split_gen is IGateArgument {
     // TODO: specify constants
     uint256 constant GATES_N = 23;
 
@@ -60,7 +60,7 @@ library mina_split_gen {
         profiling.start_block("mina_scalar_split_gen::evaluate_gates_be");
 
         gate_params.witness_evaluations = new uint256[][](ar_params.witness_columns);
-        gate_params.offset = batched_lpc_verifier.skip_to_z(blob,  gate_params.eval_proof_witness_offset);
+        gate_params.offset = batched_lpc_verifier.skip_to_z(blob, gate_params.eval_proof_witness_offset);
         for (uint256 i = 0; i < ar_params.witness_columns; i++) {
             gate_params.witness_evaluations[i] = new uint256[](columns_rotations[i].length);
             for (uint256 j = 0; j < columns_rotations[i].length; j++) {
@@ -69,25 +69,25 @@ library mina_split_gen {
         }
 
         gate_params.selector_evaluations = new uint256[](GATES_N);
-        gate_params.offset = batched_lpc_verifier.skip_to_z(blob,  gate_params.eval_proof_selector_offset);
+        gate_params.offset = batched_lpc_verifier.skip_to_z(blob, gate_params.eval_proof_selector_offset);
         for (uint256 i = 0; i < GATES_N; i++) {
             gate_params.selector_evaluations[i] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(
-                blob, 
-                gate_params.offset, 
-                i + ar_params.permutation_columns + ar_params.permutation_columns + ar_params.constant_columns, 
+                blob,
+                gate_params.offset,
+                i + ar_params.permutation_columns + ar_params.permutation_columns + ar_params.constant_columns,
                 0
             );
         }
 
         gate_params.constant_evaluations = new uint256[][](ar_params.constant_columns);
-        gate_params.offset = batched_lpc_verifier.skip_to_z(blob,  gate_params.eval_proof_constant_offset);
+        gate_params.offset = batched_lpc_verifier.skip_to_z(blob, gate_params.eval_proof_constant_offset);
         for (uint256 i = 0; i < ar_params.constant_columns; i++) {
             gate_params.constant_evaluations[i] = new uint256[](columns_rotations[i].length);
             for (uint256 j = 0; j < columns_rotations[i].length; j++) {
                 gate_params.constant_evaluations[i][j] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(
-                    blob, 
-                    gate_params.offset, 
-                    i + ar_params.permutation_columns + ar_params.permutation_columns, 
+                    blob,
+                    gate_params.offset,
+                    i + ar_params.permutation_columns + ar_params.permutation_columns,
                     j
                 );
             }
@@ -100,13 +100,13 @@ library mina_split_gen {
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate2.evaluate_gate_be(gate_params);
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate3.evaluate_gate_be(gate_params);
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate4.evaluate_gate_be(gate_params);
-//       This contain gate4
-//        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate5
-//            .evaluate_gate_be(gate_params);
-//        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate6
-//            .evaluate_gate_be(gate_params);
-//        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate7
-//            .evaluate_gate_be(gate_params);
+        //       This contain gate4
+        //        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate5
+        //            .evaluate_gate_be(gate_params);
+        //        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate6
+        //            .evaluate_gate_be(gate_params);
+        //        (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate7
+        //            .evaluate_gate_be(gate_params);
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate8.evaluate_gate_be(gate_params);
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate9.evaluate_gate_be(gate_params);
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate10.evaluate_gate_be(gate_params);

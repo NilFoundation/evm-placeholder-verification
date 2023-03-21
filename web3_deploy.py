@@ -10,12 +10,14 @@ import shutil
 base_path = os.path.dirname(os.path.realpath(__file__))
 contracts_dir = base_path + '/contracts'
 
+
 def init_profiling():
     if "--nolog" in sys.argv:
         print("No logging!")
-        shutil.copyfile(contracts_dir+"/profiling_disabled.sol", contracts_dir+"/profiling.sol")
+        shutil.copyfile(contracts_dir + "/profiling_disabled.sol", contracts_dir + "/profiling.sol")
     else:
-        shutil.copyfile(contracts_dir+"/profiling_enabled.sol", contracts_dir+"/profiling.sol")
+        shutil.copyfile(contracts_dir + "/profiling_enabled.sol", contracts_dir + "/profiling.sol")
+
 
 def init_connection(url):
     w3 = Web3(Web3.HTTPProvider(url, request_kwargs={'timeout': 600}))
@@ -59,8 +61,8 @@ def deploy_link_libs(w3, compiled, contract_bytecode, linked_libs_names):
 
 if __name__ == '__main__':
     init_profiling()
-    contract_name = 'MinaStateProof'
-    contract_path = '/mina/mina_state_proof.sol'
+    contract_name = 'PlaceholderVerifier'
+    contract_path = '/verifier.sol'
 
     linked_gates_libs_names = [
         "mina_scalar_gate0",
@@ -132,20 +134,20 @@ if __name__ == '__main__':
     deploy_tx_receipt = w3.eth.wait_for_transaction_receipt(deploy_tx_hash)
     print("Deployment cost:", deploy_tx_receipt.gasUsed)
     print("contractAddress:", deploy_tx_receipt.contractAddress)
-    
-#    account_from = w3.eth.account.privateKeyToAccount(open('.private_key', 'r').read())
-#    deploy_tx_hash = test_contract.constructor().buildTransaction(
-#        {
-#            'from': account_from.address,
-#            'nonce': w3.eth.get_transaction_count(account_from.address),
-#        }
-#    )
-#    tx_create = w3.eth.account.sign_transaction(deploy_tx_hash, account_from.privateKey)
-#    tx_hash = w3.eth.send_raw_transaction(tx_create.rawTransaction)
-#    tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
 
-#    print("Deployment cost:", tx_receipt.gasUsed)
-#    print("contractAddress:", tx_receipt.contractAddress)
+    #    account_from = w3.eth.account.privateKeyToAccount(open('.private_key', 'r').read())
+    #    deploy_tx_hash = test_contract.constructor().buildTransaction(
+    #        {
+    #            'from': account_from.address,
+    #            'nonce': w3.eth.get_transaction_count(account_from.address),
+    #        }
+    #    )
+    #    tx_create = w3.eth.account.sign_transaction(deploy_tx_hash, account_from.privateKey)
+    #    tx_hash = w3.eth.send_raw_transaction(tx_create.rawTransaction)
+    #    tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+
+    #    print("Deployment cost:", tx_receipt.gasUsed)
+    #    print("contractAddress:", tx_receipt.contractAddress)
     print("abi:", abi)
     if args.address_output is not None:
         with open(args.address_output, 'w') as f:

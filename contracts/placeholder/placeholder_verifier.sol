@@ -96,11 +96,11 @@ library placeholder_verifier {
         for (uint256 i = 0; i < ar_params.witness_columns;) {
             local_vars.variable_values_evaluation_points[i] = new uint256[](common_data.columns_rotations[i].length);
             for (uint256 j = 0; j < common_data.columns_rotations[i].length;) {
-                if(common_data.columns_rotations[i][j] == 0){
+                if (common_data.columns_rotations[i][j] == 0) {
                     local_vars.variable_values_evaluation_points[i][j] = local_vars.challenge;
-                } else if(common_data.columns_rotations[i][j] == 1){
+                } else if (common_data.columns_rotations[i][j] == 1) {
                     local_vars.variable_values_evaluation_points[i][j] = challenge_omega;
-                } else if(common_data.columns_rotations[i][j] == -1) {
+                } else if (common_data.columns_rotations[i][j] == -1) {
                     local_vars.variable_values_evaluation_points[i][j] = challenge_inversed_omega;
                 } else {
                     // TODO: check properly if column_rotations will be not one of 0, +-1

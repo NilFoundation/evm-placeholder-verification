@@ -1,7 +1,7 @@
 from prepare_logs import create_logs_dir
 from web3_test import base_path, do_placeholder_verification_test_via_transact_simple
 
-test_contract_name = 'TestMinaStateProof'
+test_contract_name = 'TestPlaceholderVerifier'
 test_contract_path = 'placeholder/test/public_api_mina_state_proof.sol'
 
 linked_proofs_libs_names = []

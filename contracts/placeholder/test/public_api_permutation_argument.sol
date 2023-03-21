@@ -31,26 +31,27 @@ contract TestPermutationArgument {
         types.fri_params_type fri_params;
         types.placeholder_common_data common_data;
     }
+
     uint256[] public m_result;
 
     function eval_argument(
         bytes calldata blob,
-        // 0) modulus
-        // 1) r
-        // 2) max_degree
-        // 3) lambda
-        // 4) rows_amount
-        // 5) omega
-        // 6) D_omegas_size
-        //  [..., D_omegas_i, ...]
-        // 7 + D_omegas_size) q_size
-        //  [..., q_i, ...]
+    // 0) modulus
+    // 1) r
+    // 2) max_degree
+    // 3) lambda
+    // 4) rows_amount
+    // 5) omega
+    // 6) D_omegas_size
+    //  [..., D_omegas_i, ...]
+    // 7 + D_omegas_size) q_size
+    //  [..., q_i, ...]
         uint256[] calldata init_params,
         int256[][] calldata columns_rotations
     ) public {
         test_local_vars memory vars;
         (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser
-            .parse_be(blob, 0);
+        .parse_be(blob, 0);
         require(
             vars.proof_size == blob.length,
             "Proof length was detected incorrectly!"

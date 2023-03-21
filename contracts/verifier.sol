@@ -31,9 +31,9 @@ import "../components/mina_scalar_split_gen.sol";
 
 import "../interfaces/verifier.sol";
 
-contract MinaStateProof is IVerifier{
+contract PlaceholderVerifier is IVerifier {
     // event renamed to prevent conflicts with logging system
-    event mina_gas_usage_emit(uint256 gas_usage);
+    event gas_usage_emit(uint256 gas_usage);
 
     struct gas_usage {
         uint256 start;
@@ -41,13 +41,13 @@ contract MinaStateProof is IVerifier{
     }
 
     struct verifier_state {
-        types.fri_params_type fri_params;
         uint256 proofs_num;
-        uint256 ind;
-
-        types.placeholder_proof_map proof_map;
         uint256 proof_offset;
         uint256 proof_size;
+        uint256 ind;
+
+        types.fri_params_type fri_params;
+        types.placeholder_proof_map proof_map;
         types.transcript_data tr_state;
         types.placeholder_common_data common_data;
         types.arithmetization_params arithmetization_params;
@@ -116,34 +116,16 @@ contract MinaStateProof is IVerifier{
     }
 
     function verify(bytes calldata blob, uint256[][] calldata init_params,
-        int256[][][] calldata columns_rotations) public returns (bool) {
+        int256[][][] calldata columns_rotations, address gate_argument) public returns (bool) {
         gas_usage memory gas_usage;
         gas_usage.start = gasleft();
-        verifier_state memory vars;
-        uint256 max_step;
-        uint256 max_batch;
 
-        require(blob.length == init_params[0][1], "Proof is not correct!");
-
-        for (vars.ind = 0; vars.ind < 2;) {
-            init_vars(vars, init_params[vars.ind + 1], columns_rotations[vars.ind]);
-            if (vars.fri_params.max_step > max_step) max_step = vars.fri_params.max_step;
-            if (vars.fri_params.max_batch > max_step) max_batch = vars.fri_params.max_batch;
-        unchecked{vars.ind++;}
-        }
-        allocate_all(vars, max_step, max_batch);
-
-        // Map parser for each proof.
-        vars.proof_offset = 0;
-        (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser.parse_be(blob, vars.proof_offset);
-
-        require(vars.proof_size <= blob.length, "Proof is not correct!");
-        require(vars.proof_size == init_params[0][0], "Proof is not correct!");
-        init_vars(vars, init_params[1], columns_rotations[0]);
-        transcript.init_transcript(vars.tr_state, hex"");
+        init_vars.vars_t memory vars;
+        init_vars.init(blob, init_params, columns_rotations, vars);
 
         types.placeholder_local_variables memory local_vars;
-        // 3. append variable commitments to transcript
+
+        // 3. append witness commitments to transcript
         transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
 
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
@@ -152,6 +134,7 @@ contract MinaStateProof is IVerifier{
             vars.proof_map, vars.fri_params,
             vars.common_data, local_vars, vars.arithmetization_params);
         // 7. gate argument specific for circuit
+        // Wait for better times.
         types.gate_argument_local_vars memory gate_params;
         gate_params.modulus = vars.fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
@@ -159,43 +142,24 @@ contract MinaStateProof is IVerifier{
         gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
         gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
-        local_vars.gate_argument = mina_base_split_gen.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
-
-        require(placeholder_verifier.verify_proof_be(blob, vars.tr_state, vars.proof_map, vars.fri_params,
-            vars.common_data, local_vars, vars.arithmetization_params),
-            "Proof is not correct!");
-
-        vars.proof_offset += vars.proof_size;
-
-        (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser.parse_be(blob, vars.proof_offset);
-        require(vars.proof_size <= blob.length, "Proof is not correct!");
-        init_vars(vars, init_params[2], columns_rotations[1]);
-        transcript.init_transcript(vars.tr_state, hex"");
-
-        types.placeholder_local_variables memory local_vars_scalar;
-        // 3. append variable_values commitments to transcript
-        transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
-
-        // 4. prepare evaluaitons of the polynomials that are copy-constrained
-        // 5. permutation argument
-        local_vars_scalar.permutation_argument = permutation_argument.verify_eval_be(blob, vars.tr_state,
-            vars.proof_map, vars.fri_params,
-            vars.common_data, local_vars_scalar, vars.arithmetization_params);
-        // 7. gate argument specific for circuit
-        gate_params.modulus = vars.fri_params.modulus;
-        gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
-        gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_variable_values_offset;
-        gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
-        gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
-
-        local_vars_scalar.gate_argument = mina_split_gen.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
-
-        require( placeholder_verifier.verify_proof_be(
-            blob, vars.tr_state, vars.proof_map, vars.fri_params,
-            vars.common_data, local_vars_scalar, vars.arithmetization_params
-        ), "Proof is not correct");
+        IGateArgument gate_argument_component = IGateArgument(gate_argument_address);
+        local_vars.gate_argument = gate_argument_component.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
+        require(
+            placeholder_verifier.verify_proof_be(
+                blob,
+                vars.tr_state,
+                vars.proof_map,
+                vars.fri_params,
+                vars.common_data,
+                local_vars,
+                vars.arithmetization_params
+            ),
+            "Proof is not correct!"
+        );
 
         gas_usage.end = gasleft();
-        emit mina_gas_usage_emit(gas_usage.start - gas_usage.end);
+        emit gas_usage_emit(gas_usage.start - gas_usage.end);
+
+        return ret;
     }
 }

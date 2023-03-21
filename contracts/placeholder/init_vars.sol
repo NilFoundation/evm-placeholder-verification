@@ -34,7 +34,7 @@ library init_vars {
     }
 
     function init(bytes calldata blob, uint256[] calldata init_params,
-                       int256[][] calldata columns_rotations, vars_t memory vars) internal view {
+        int256[][] calldata columns_rotations, vars_t memory vars) internal view {
 
         (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser.parse_be(blob, 0);
         require(vars.proof_size == blob.length, "Proof is not correct!");
@@ -59,35 +59,39 @@ library init_vars {
         vars.fri_params.D_omegas = new uint256[](init_params[idx++]);
         for (i = 0; i < vars.fri_params.D_omegas.length;) {
             vars.fri_params.D_omegas[i] = init_params[idx];
-        unchecked{ i++; idx++;}
+        unchecked{i++;
+            idx++;}
         }
         vars.fri_params.q = new uint256[](init_params[idx++]);
         for (i = 0; i < vars.fri_params.q.length;) {
             vars.fri_params.q[i] = init_params[idx];
-        unchecked{ i++; idx++;}
+        unchecked{i++;
+            idx++;}
         }
 
         vars.fri_params.max_step = 0;
         vars.fri_params.step_list = new uint256[](init_params[idx++]);
         for (i = 0; i < vars.fri_params.step_list.length;) {
             vars.fri_params.step_list[i] = init_params[idx];
-            if(vars.fri_params.step_list[i] > vars.fri_params.max_step)
+            if (vars.fri_params.step_list[i] > vars.fri_params.max_step)
                 vars.fri_params.max_step = vars.fri_params.step_list[i];
-            unchecked{ i++; idx++;}
+        unchecked{i++;
+            idx++;}
         }
 
-        unchecked{
-            idx++; // arithmetization_params length;
-            vars.arithmetization_params.witness_columns = init_params[idx++];
-            vars.arithmetization_params.public_input_columns = init_params[idx++];
-            vars.arithmetization_params.constant_columns = init_params[idx++];
-            vars.arithmetization_params.selector_columns = init_params[idx++];
-            vars.arithmetization_params.permutation_columns = vars.arithmetization_params.witness_columns 
-                + vars.arithmetization_params.public_input_columns 
-                + vars.arithmetization_params.constant_columns;
-        }
+    unchecked{
+        idx++;
+        // arithmetization_params length;
+        vars.arithmetization_params.witness_columns = init_params[idx++];
+        vars.arithmetization_params.public_input_columns = init_params[idx++];
+        vars.arithmetization_params.constant_columns = init_params[idx++];
+        vars.arithmetization_params.selector_columns = init_params[idx++];
+        vars.arithmetization_params.permutation_columns = vars.arithmetization_params.witness_columns
+        + vars.arithmetization_params.public_input_columns
+        + vars.arithmetization_params.constant_columns;
+    }
 
-        unchecked{ max_coset = 1 << (vars.fri_params.max_step - 1);}
+    unchecked{max_coset = 1 << (vars.fri_params.max_step - 1);}
 
         vars.fri_params.s_indices = new uint256[](max_coset);
         vars.fri_params.correct_order_idx = new uint256[](max_coset);

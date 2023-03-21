@@ -135,7 +135,7 @@ library types {
         // Not actually part of the verification key, but we put it here to prevent stack depth errors
         uint256 zeta_pow_n;
     }
-    
+
     struct transcript_data {
         bytes32 current_challenge;
     }
@@ -158,9 +158,9 @@ library types {
         uint256[] q;
 
         //0xe0
-        uint256[]    s_indices;
+        uint256[] s_indices;
         //0x100
-        uint256[]    correct_order_idx;       // Ordered indices to pack ys to check merkle proofs
+        uint256[] correct_order_idx;       // Ordered indices to pack ys to check merkle proofs
         //0x120
         uint256[][] batched_U;
         //0x140
@@ -176,7 +176,7 @@ library types {
         //0x1c0
         uint256[] step_list;
         //0x1e0
-        uint256[]    s;                    // Coset indices
+        uint256[] s;                    // Coset indices
         //0x200
         uint256 i_fri_proof;    // It is useful for debugging
         //0x220
@@ -186,41 +186,41 @@ library types {
 
         // These are local variables for FRI. But it's useful to allocate memory once
         //0x260
-        bytes        b;
+        bytes b;
         //0x280
-        uint256[]    coeffs;                  // coeffs -- ancestor of ys
-        uint256[]    tmp_arr;
-        uint256[][]  evaluation_points;
-        uint256      z_offset;
-        uint256      prev_xi;
-        uint256[]    precomputed_eval1;
-        uint256[][]   precomputed_eval3_points;
-        uint256[9][]  precomputed_eval3_data;
-        uint256[]     precomputed_indices;
+        uint256[] coeffs;                  // coeffs -- ancestor of ys
+        uint256[] tmp_arr;
+        uint256[][] evaluation_points;
+        uint256 z_offset;
+        uint256 prev_xi;
+        uint256[] precomputed_eval1;
+        uint256[][] precomputed_eval3_points;
+        uint256[9][] precomputed_eval3_data;
+        uint256[] precomputed_indices;
     }
 
     struct fri_local_vars_type {
         // some internal variables used in assemblys
         // 0x0
-        uint256     s1;                                     // It's extremely important, it's the first field.
+        uint256 s1;                                     // It's extremely important, it's the first field.
         //0x20
-        uint256     x;                                      // challenge x value
+        uint256 x;                                      // challenge x value
         //0x40
-        uint256     alpha;                                   // alpha challenge
+        uint256 alpha;                                   // alpha challenge
         //0x60
-        uint256     coeffs_offset;                           // address of current coeffs array(fri_params.coeffs)
+        uint256 coeffs_offset;                           // address of current coeffs array(fri_params.coeffs)
         //0x80 
-        uint256     y_offset;                                // address of current y (offset in blob)
+        uint256 y_offset;                                // address of current y (offset in blob)
         //0xa0     
-        uint256     colinear_offset;                         // colinear_value_offset. Used only in colinear check
+        uint256 colinear_offset;                         // colinear_value_offset. Used only in colinear check
         //0xc0     
-        uint256     c1;                                      // fs1 coefficient.
+        uint256 c1;                                      // fs1 coefficient.
         //0xe0     
-        uint256     c2;                                      // fs2 coefficient.
+        uint256 c2;                                      // fs2 coefficient.
         //0x100
-        uint256     interpolant;                             // interpolant
+        uint256 interpolant;                             // interpolant
         //0x120
-        uint256     prev_coeffs_len;
+        uint256 prev_coeffs_len;
 
         // Fri proof fields
         uint256 final_poly_offset;                           // one for all rounds
@@ -297,10 +297,10 @@ library types {
         uint256 rows_amount;
         // 0x20
         uint256 omega;
-        int256[][] columns_rotations; 
+        int256[][] columns_rotations;
     }
 
-    struct placeholder_local_variables{
+    struct placeholder_local_variables {
         // 0x0
         uint256 len;
         // 0x20
@@ -361,7 +361,7 @@ library types {
         uint256 idx2;
     }
 
-    struct arithmetization_params{
+    struct arithmetization_params {
         uint256 witness_columns;
         uint256 public_input_columns;
         uint256 constant_columns;
@@ -407,7 +407,7 @@ library types {
         uint256 eval_proof_constant_offset;
     }
 
-    struct gate_argument_local_vars_updated{
+    struct gate_argument_local_vars_updated {
         // 0x0
         uint256 modulus;
         // 0x20
