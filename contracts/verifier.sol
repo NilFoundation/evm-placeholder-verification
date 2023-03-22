@@ -26,10 +26,8 @@ import "../placeholder/proof_map_parser.sol";
 import "../placeholder/placeholder_verifier.sol";
 import "../placeholder/init_vars.sol";
 
-import "../components/mina_base_split_gen.sol";
-import "../components/mina_scalar_split_gen.sol";
-
 import "../interfaces/verifier.sol";
+import "../interfaces/gate_argument.sol";
 
 contract PlaceholderVerifier is IVerifier {
     // event renamed to prevent conflicts with logging system
@@ -143,19 +141,13 @@ contract PlaceholderVerifier is IVerifier {
         gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
         IGateArgument gate_argument_component = IGateArgument(gate_argument);
-        local_vars.gate_argument = gate_argument_component.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
-        require(
-            placeholder_verifier.verify_proof_be(
-                blob,
-                vars.tr_state,
-                vars.proof_map,
-                vars.fri_params,
-                vars.common_data,
-                local_vars,
-                vars.arithmetization_params
-            ),
-            "Proof is not correct!"
-        );
+        local_vars.gate_argument = gate_argument_component.evaluate_gates_be(blob, gate_params,
+            vars.arithmetization_params, vars.common_data.columns_rotations);
+
+        bool ret = placeholder_verifier.verify_proof_be(blob, vars.tr_state,
+            vars.proof_map, vars.fri_params, vars.common_data, local_vars,
+            vars.arithmetization_params);
+        require(ret, "Proof is not correct!");
 
         gas_usage.end = gasleft();
         emit gas_usage_emit(gas_usage.start - gas_usage.end);
