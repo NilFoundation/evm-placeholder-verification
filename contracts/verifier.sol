@@ -142,7 +142,7 @@ contract PlaceholderVerifier is IVerifier {
         gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
         gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
 
-        IGateArgument gate_argument_component = IGateArgument(gate_argument_address);
+        IGateArgument gate_argument_component = IGateArgument(gate_argument);
         local_vars.gate_argument = gate_argument_component.evaluate_gates_be(blob, gate_params, vars.arithmetization_params, vars.common_data.columns_rotations);
         require(
             placeholder_verifier.verify_proof_be(
