@@ -3,7 +3,7 @@
 // Copyright (c) 2021 Mikhail Komarov <nemo@nil.foundation>
 // Copyright (c) 2021 Ilias Khairullin <ilias@nil.foundation>
 // Copyright (c) 2022 Aleksei Moskvin <alalmoskvin@nil.foundation>
-// Copyright (c) 2022 Elena Tatuzova <e.tatuzova@nil.foundation>
+// Copyright (c) 2022-2023 Elena Tatuzova <e.tatuzova@nil.foundation>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,59 +32,34 @@ library batched_lpc_verifier {
     function skip_proof_be(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 result_offset) {
         uint256 i;
-        // T_root
-        result_offset = basic_marshalling.skip_octet_vector_32_be_check(blob, offset);
+        uint256 len;
         // z
-        result_offset = basic_marshalling.skip_length(result_offset);
-        for (i = 0; i < 4;) {
+        (len, result_offset) = basic_marshalling.get_skip_length(blob, offset);
+        for( i = 0; i < len; ){
             result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be_check(blob, result_offset);
             unchecked{i++;}
         }
         // fri_proof
-        uint256 value_len;
-        (value_len, result_offset) = basic_marshalling.get_skip_length_check(blob, result_offset);
-
-        for (i = 0; i < value_len;) {
-            // TODO realized FRI::skip_proof_be checked better
-            result_offset = batched_fri_verifier.skip_proof_be(blob, result_offset);
-            unchecked{ i++; }
-        }
+        result_offset = batched_fri_verifier.skip_proof_be(blob, result_offset);
     }
 
-    function skip_vector_of_proofs_be(bytes calldata blob, uint256 offset)
-    internal pure returns (uint256 result_offset){
-        uint256 value_len;
-        uint256 i;
-        (value_len, result_offset) = basic_marshalling.get_skip_length(blob, offset);
-        for (i = 0; i < value_len;) {
-            result_offset = skip_proof_be(blob, result_offset);
-            unchecked{ i++; }
-        }
-    }
-
-    function skip_n_proofs_in_vector_be(bytes calldata blob, uint256 offset, uint256 n)
+    // Check proof data carefully.
+    // Load necessary offsets to fri params
+    function parse_proof_be(types.fri_params_type memory fri_params, bytes calldata blob, uint256 offset)
     internal pure returns (uint256 result_offset) {
-        uint256 value_len;
-        (value_len, result_offset) = basic_marshalling.get_skip_length(blob, offset);
-        for (uint256 i = 0; i < n; ) {
-            result_offset = skip_proof_be(blob, result_offset);
-            unchecked{ i++; }
-        }
-    }
-
-    function skip_to_first_fri_proof_be(bytes calldata blob, uint256 offset)
-    internal pure returns (uint256 result_offset) {
-        // T_root
-        result_offset = basic_marshalling.skip_octet_vector_32_be(offset);
+        uint256 len;
+        uint256 len2;
         // z
-        result_offset = basic_marshalling.skip_length(result_offset);
-        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, result_offset);
-        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, result_offset);
-        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, result_offset);
-        result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, result_offset);
-
+        (len, result_offset) = basic_marshalling.get_skip_length(blob, offset);
+        require(len == fri_params.batches_sizes.length);
+        for( uint256 i = 0; i < len; ){
+            require( basic_marshalling.get_length(blob, result_offset) == fri_params.batches_sizes[i]);
+            result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be_check(blob, result_offset);
+            unchecked{i++;}
+        }
         // fri_proof
-        result_offset = basic_marshalling.skip_length(result_offset);
+        fri_params.fri_proof_offset = result_offset;
+        result_offset = batched_fri_verifier.parse_proof_be(fri_params, blob, result_offset);
     }
 
     // Input is proof_map.eval_proof_combined_value_offset
@@ -134,16 +109,16 @@ library batched_lpc_verifier {
             blob, fv_offset, i, j
         );
     }
-/*    function get_z_i_j_from_proof_be(bytes calldata blob, uint256 offset, uint256 i, uint256 j)
+/*  function get_z_i_j_from_proof_be(bytes calldata blob, uint256 offset, uint256 i, uint256 j)
     internal pure returns (uint256 z_i_j) {
         // 0x28 (skip T_root)
         z_i_j = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(
             blob,
-            basic_marshalling.skip_octet_vector_32_be(offset),
+            offset,
             i,
             j);
-    }*/
-/*
+    }
+
     function get_z_i_j_ptr_from_proof_be(bytes calldata blob, uint256 offset, uint256 i, uint256 j)
     internal pure returns (uint256 z_i_j_ptr) {
         // 0x28 (skip T_root)
@@ -196,71 +171,6 @@ library batched_lpc_verifier {
         fv_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, fv_offset);
         n = basic_marshalling.get_length(blob, fv_offset);
     }
-    function get_fri_proof_n_be(bytes calldata blob, uint256 offset)
-    internal pure returns (uint256 n) {
-        uint256 i;
-        // T_root
-        offset = basic_marshalling.skip_octet_vector_32_be_check(blob, offset);
-        // z
-        offset = basic_marshalling.skip_length(offset);
-        for (i = 0; i < 4;) {
-            offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be_check(blob, offset);
-            unchecked{i++;}
-        }
-        // fri_proof
-        n = basic_marshalling.get_length(blob, offset);
-    }
-
-    function skip_proof_be_check(bytes calldata blob, uint256 offset)
-    internal pure returns (uint256 result_offset) {
-        uint256 i;
-        // T_root
-        result_offset = basic_marshalling.skip_octet_vector_32_be_check(blob, offset);
-        // z
-        result_offset = basic_marshalling.skip_length(result_offset);
-        for (i = 0; i < 4;) {
-            result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be_check(blob, result_offset);
-            unchecked{i++;}
-        }
-        // fri_proof
-        uint256 value_len;
-        (value_len, result_offset) = basic_marshalling.get_skip_length_check(blob, result_offset);
-
-        for (i = 0; i < value_len;) {
-            // TODO realized FRI::skip_proof_be checked better
-            result_offset = batched_fri_verifier.skip_proof_be(blob, result_offset);
-            unchecked{ i++; }
-        }
-    }
-
-    function skip_vector_of_proofs_be_check(bytes calldata blob, uint256 offset)
-    internal pure returns (uint256 result_offset) {
-        uint256 value_len;
-        uint256 i;
-        (value_len, result_offset) = basic_marshalling.get_skip_length_check(blob, offset);
-        for ( i = 0; i < value_len;) {
-            result_offset = skip_proof_be_check(blob, result_offset);
-            unchecked{ i++; }
-        }
-    }
-
-    function skip_n_proofs_in_vector_be_check(bytes calldata blob, uint256 offset, uint256 n)
-    internal pure returns (uint256 result_offset) {
-        uint256 value_len;
-        uint256 i;
-        (value_len, result_offset) = basic_marshalling.get_skip_length_check(blob, offset);
-        require(n <= value_len);
-        for (i = 0; i < n;) {
-            result_offset = skip_proof_be_check(blob, result_offset);
-            unchecked{ i++; }
-        }
-    }
-
-    function skip_to_z(bytes calldata blob, uint256 offset)
-    internal pure returns (uint256 result_offset) {
-        // T_root
-        result_offset = basic_marshalling.skip_octet_vector_32_be(offset);
-    }
 
     function get_z_i_j_from_proof_be_check(bytes calldata blob, uint256 offset, uint256 i, uint256 j)
     internal pure returns (uint256 z_i_j) {
@@ -278,31 +188,235 @@ library batched_lpc_verifier {
             basic_marshalling.skip_octet_vector_32_be_check(blob, offset), i, j);
     }
 
+    function eval_points_eq(uint256[] memory p1, uint256[] memory p2 )
+    internal pure returns(bool eq){
+        eq = true;
+        if (p1.length != p2.length) return false;
+        for(uint256 i = 0; i < p1.length;){
+            if(p1.length != p2.length) return false;
+            unchecked{i++;}
+        }
+    }
+
+    // Use this hack for lpc test(!)
+    // Call this function only after fri_params is completely initialized by parse* functions.
+    function extract_merkle_roots(bytes calldata blob, types.fri_params_type memory fri_params) 
+    internal pure returns (uint256[] memory roots){
+        return batched_fri_verifier.extract_merkle_roots(blob, fri_params);
+    }
+
+    function calculate_2points_interpolation(uint256[] memory xi, uint256[2] memory z, uint256 modulus)
+    internal pure returns(uint256[2] memory U){
+        require( xi.length == 2 );
+        U[0] = addmod(mulmod(z[0], xi[1], modulus),modulus - mulmod(z[1], xi[0], modulus), modulus);
+        U[1] = addmod(z[1], modulus - z[0], modulus);
+    }
+
+//  coeffs for zs on each degree can be precomputed if necessary
+    function calculate_3points_interpolation(uint256[] memory xi, uint256[3] memory z, uint256 modulus)
+    internal pure returns(uint256[3] memory U){
+        require( xi.length == 3 );
+        z[0] = mulmod(z[0], addmod(xi[1], modulus - xi[2], modulus), modulus);
+        z[1] = mulmod(z[1], addmod(xi[2], modulus - xi[0], modulus), modulus);
+        z[2] = mulmod(z[2], addmod(xi[0], modulus - xi[1], modulus), modulus);
+
+        U[0] = mulmod(z[0], mulmod(xi[1], xi[2], modulus), modulus);
+        U[0] = addmod(U[0], mulmod(z[1], mulmod(xi[0], xi[2], modulus), modulus), modulus);
+        U[0] = addmod(U[0], mulmod(z[2], mulmod(xi[0], xi[1], modulus), modulus), modulus);
+
+        U[1] = modulus - mulmod(z[0], addmod(xi[1], xi[2], modulus), modulus);
+        U[1] = addmod(U[1], modulus - mulmod(z[1], addmod(xi[0], xi[2], modulus), modulus), modulus);
+        U[1] = addmod(U[1], modulus - mulmod(z[2], addmod(xi[0], xi[1], modulus), modulus), modulus);
+
+        U[2] = addmod(z[0], addmod(z[1], z[2], modulus), modulus);
+    }
+
     uint256 constant PRECOMPUTE_EVAL3_SIZE = 5;
-    function parse_verify_proof_be(bytes calldata blob,
+    function verify_proof_be(
+        bytes calldata blob,
         uint256 offset, 
+        uint256[] memory roots,
+        uint256[][][] memory evaluation_points,
         types.transcript_data memory tr_state, 
         types.fri_params_type memory fri_params)
     internal returns (bool result) {
-        profiling.start_block("LPC::parse_verify_proof_be");
-        uint256 ind;
-        uint256 combined_alpha = transcript.get_field_challenge(tr_state, fri_params.modulus);
+        uint256 ind = 0;
+        // Push all merkle roots to transcript
+        for( ind = 0; ind < fri_params.batches_num;){
+            transcript.update_transcript_b32(tr_state, bytes32(roots[ind]));
+            unchecked{ind++;}
+        }
+        fri_params.theta = transcript.get_field_challenge(tr_state, fri_params.modulus);
+        fri_params.eval_map = new uint256[](fri_params.poly_num);
+        fri_params.eval_points = new uint256[][](fri_params.poly_num);
 
-        fri_params.z_offset = basic_marshalling.skip_octet_vector_32_be(offset);
+        uint256 cur = 0;
+        fri_params.different_points = 0;
+        bool found = false;
+        uint256[] memory point;
+        uint256 k;
+        uint256 i;        
 
-        profiling.start_block("LPC::FRI");
-        offset = skip_to_first_fri_proof_be(blob, offset);
-        for (ind = 0; ind < fri_params.lambda;) {
-            fri_params.i_fri_proof = ind;  // for debug only
-            fri_params.prev_xi = 0;
-            if (!batched_fri_verifier.parse_verify_proof_be(blob, offset, tr_state, fri_params)) {
-                require(false, "FRI verification failed");
+        // Prepare evaluation map;
+        for( k = 0; k < fri_params.batches_num;){
+            for( i = 0; i < fri_params.batches_sizes[k]; ){
+                if( evaluation_points[k].length == 1 && i > 0){
+                    fri_params.eval_map[cur] = fri_params.eval_map[cur - 1];
+                } else {
+                    point = evaluation_points[k][i];
+                    // find this point
+                    found = false;
+                    for( ind = 0; ind < fri_params.different_points;){
+                        if( eval_points_eq(point, fri_params.eval_points[ind]) ){
+                            found = true;
+                            fri_params.eval_map[cur] = ind;
+                            break;
+                        }
+                        unchecked{ind++;}
+                    }
+                    if(!found) {
+                        fri_params.eval_points[fri_params.different_points] = point;
+                        fri_params.eval_map[cur] = fri_params.different_points;
+                        unchecked{
+                            fri_params.different_points++;
+                        }
+                    }   
+                }
+                unchecked{i++;cur++;}
+            }
+            unchecked{k++;}
+        }
+
+        fri_params.denominators = new uint256[][](fri_params.different_points);
+        fri_params.factors = new uint256[](fri_params.different_points);
+
+        // Prepare denominators
+        for( ind = 0; ind < fri_params.different_points;){
+            fri_params.denominators[ind] = new uint256[](fri_params.eval_points[ind].length + 1);
+            if( fri_params.eval_points[ind].length == 1 ){
+                fri_params.factors[ind] = 1;
+                fri_params.denominators[ind][0] = fri_params.modulus - fri_params.eval_points[ind][0];
+                fri_params.denominators[ind][1] = 1;
+            } else 
+            if( fri_params.eval_points[ind].length == 2 ){
+                // xi1 - xi0
+                fri_params.factors[ind] = 
+                    addmod(fri_params.eval_points[ind][1], fri_params.modulus - fri_params.eval_points[ind][0], fri_params.modulus);
+                fri_params.denominators[ind][2] = 1;
+
+                fri_params.denominators[ind][1] = 
+                    fri_params.modulus - addmod(fri_params.eval_points[ind][0], fri_params.eval_points[ind][1], fri_params.modulus);
+
+                fri_params.denominators[ind][0] = 
+                    mulmod(fri_params.eval_points[ind][0], fri_params.eval_points[ind][1], fri_params.modulus);
+                fri_params.denominators[ind][0] = mulmod(fri_params.denominators[ind][0], fri_params.factors[ind], fri_params.modulus);
+                fri_params.denominators[ind][1] = mulmod(fri_params.denominators[ind][1], fri_params.factors[ind], fri_params.modulus);
+                fri_params.denominators[ind][2] = mulmod(fri_params.denominators[ind][2], fri_params.factors[ind], fri_params.modulus);
+            } else 
+            if( fri_params.eval_points[ind].length == 3 ){
+                fri_params.factors[ind] = fri_params.modulus - 
+                    mulmod(
+                        mulmod(
+                            addmod(fri_params.eval_points[ind][0], fri_params.modulus - fri_params.eval_points[ind][1], fri_params.modulus),
+                            addmod(fri_params.eval_points[ind][1], fri_params.modulus - fri_params.eval_points[ind][2], fri_params.modulus),
+                            fri_params.modulus
+                        ),
+                        addmod(fri_params.eval_points[ind][2], fri_params.modulus - fri_params.eval_points[ind][0], fri_params.modulus),
+                        fri_params.modulus
+                    );
+                fri_params.denominators[ind][3] = 1;
+                fri_params.denominators[ind][2] =
+                    fri_params.modulus - addmod(
+                        fri_params.eval_points[ind][0], 
+                        addmod(fri_params.eval_points[ind][1],fri_params.eval_points[ind][2], fri_params.modulus), 
+                        fri_params.modulus
+                    );
+                fri_params.denominators[ind][1] = 
+                    addmod(
+                        mulmod(fri_params.eval_points[ind][0], fri_params.eval_points[ind][1], fri_params.modulus),
+                        addmod(
+                            mulmod(fri_params.eval_points[ind][0], fri_params.eval_points[ind][2], fri_params.modulus),
+                            mulmod(fri_params.eval_points[ind][1], fri_params.eval_points[ind][2], fri_params.modulus),
+                            fri_params.modulus
+                        ), 
+                        fri_params.modulus
+                    );
+                fri_params.denominators[ind][0] = 
+                    fri_params.modulus - mulmod(
+                        fri_params.eval_points[ind][0], 
+                        mulmod(fri_params.eval_points[ind][1],fri_params.eval_points[ind][2], fri_params.modulus), 
+                        fri_params.modulus
+                    );
+                fri_params.denominators[ind][0] = mulmod(fri_params.denominators[ind][0], fri_params.factors[ind], fri_params.modulus);
+                fri_params.denominators[ind][1] = mulmod(fri_params.denominators[ind][1], fri_params.factors[ind], fri_params.modulus);
+                fri_params.denominators[ind][2] = mulmod(fri_params.denominators[ind][2], fri_params.factors[ind], fri_params.modulus);
+                fri_params.denominators[ind][3] = mulmod(fri_params.denominators[ind][3], fri_params.factors[ind], fri_params.modulus);
+            } else {
                 return false;
             }
-            offset = batched_fri_verifier.skip_proof_be(blob, offset);
-            unchecked{ ind++; }
+            unchecked{ind++;}
         }
-        result = true;
-        profiling.end_block();
+
+        // Prepare combined U
+        fri_params.combined_U = new uint256[][](fri_params.different_points);
+        for( ind = 0; ind < fri_params.different_points;){
+            point = fri_params.eval_points[ind];
+            fri_params.combined_U[ind] = new uint256[](fri_params.eval_points[ind].length);
+            cur = 0;
+            fri_params.z_offset = basic_marshalling.skip_length(offset);
+            for( k = 0; k < fri_params.batches_num;){
+                fri_params.z_offset = basic_marshalling.skip_length(fri_params.z_offset);
+                for( i = 0; i < fri_params.batches_sizes[k];){                    
+                    polynomial.multiply_poly_on_coeff(
+                        fri_params.combined_U[ind], 
+                        fri_params.theta, 
+                        fri_params.modulus
+                    );
+                    if( fri_params.eval_map[cur] == ind ){
+                        if( point.length == 1 ){
+                            fri_params.combined_U[ind][0] = addmod(
+                                fri_params.combined_U[ind][0],
+                                basic_marshalling.get_i_uint256_from_vector(blob, fri_params.z_offset, 0), 
+                                fri_params.modulus
+                            );
+                        } else 
+                        if( point.length == 2 ){
+                            uint256[2] memory tmp;
+                            tmp[0] = basic_marshalling.get_i_uint256_from_vector(blob, fri_params.z_offset, 0);
+                            tmp[1] = basic_marshalling.get_i_uint256_from_vector(blob, fri_params.z_offset, 1);
+                            tmp = calculate_2points_interpolation(
+                                point, tmp, fri_params.modulus
+                            );
+                            fri_params.combined_U[ind][0] = addmod(fri_params.combined_U[ind][0], tmp[0], fri_params.modulus);
+                            fri_params.combined_U[ind][1] = addmod(fri_params.combined_U[ind][1], tmp[1], fri_params.modulus);
+                        } else 
+                        if( point.length == 3){
+                            uint256[3] memory tmp;
+                            tmp[0] = basic_marshalling.get_i_uint256_from_vector(blob, fri_params.z_offset, 0);
+                            tmp[1] = basic_marshalling.get_i_uint256_from_vector(blob, fri_params.z_offset, 1);
+                            tmp[2] = basic_marshalling.get_i_uint256_from_vector(blob, fri_params.z_offset, 2);
+                            tmp = calculate_3points_interpolation(
+                                point, tmp, fri_params.modulus
+                            );
+                            fri_params.combined_U[ind][0] = addmod(fri_params.combined_U[ind][0], tmp[0], fri_params.modulus);
+                            fri_params.combined_U[ind][1] = addmod(fri_params.combined_U[ind][1], tmp[1], fri_params.modulus);
+                            fri_params.combined_U[ind][2] = addmod(fri_params.combined_U[ind][2], tmp[2], fri_params.modulus);
+                        } else {
+                            return false;
+                        }
+                    } 
+                    fri_params.z_offset = basic_marshalling.skip_vector_of_uint256_be(blob, fri_params.z_offset);
+                    unchecked{i++;cur++;}
+                }
+                unchecked{k++;}
+            }
+            unchecked{ind++;}
+        }
+
+        if (!batched_fri_verifier.parse_verify_proof_be(blob, roots, tr_state, fri_params)) {
+            require(false, "FRI verification failed");
+            return false;
+        }
+        return true;
    }
-}
+} 

@@ -232,6 +232,20 @@ library merkle_verifier {
         }
         result = (verified_data == root);
     }
+    
+    function get_merkle_root_from_blob(bytes calldata blob, uint256 merkle_root_offset)
+    internal pure returns(uint256 root){
+        assembly {
+            root := calldataload(add(blob.offset, merkle_root_offset))
+        }
+    }
+
+    function get_merkle_root_from_proof(bytes calldata blob, uint256 merkle_proof_offset)
+    internal pure returns(uint256 root){
+        assembly {
+            root := calldataload(add(blob.offset, add(merkle_proof_offset, ROOT_OFFSET)))
+        }
+    }
 
     function parse_verify_merkle_proof_be(bytes calldata blob, uint256 offset, bytes32 verified_data)
     internal pure returns (bool result) {

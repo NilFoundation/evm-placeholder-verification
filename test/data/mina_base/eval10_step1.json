@@ -1,5 +1,5 @@
 {
-    "_test_name" : "Mina base test eval_rounds = 1, max_step = 1",
+    "_test_name" : "Mina base test eval_rounds = 10, max_step = 1",
     "log_file" : "logs/mina_base_eval10_step1.json",
     "omega": 21090803083255360924969619711782040241928172562822879037017685322859036642027,
     "D_omegas": [

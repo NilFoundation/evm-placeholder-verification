@@ -32,6 +32,13 @@ import "../logging.sol";
 library polynomial {
     uint256 constant LENGTH_OCTETS = 8;
 
+    function multiply_poly_on_coeff(uint256[] memory coeffs, uint256 mul, uint256 modulus)
+    internal pure{
+        for(uint256 i = 0; i < coeffs.length; i++){
+            coeffs[i] = mulmod(coeffs[i], mul, modulus);
+        }
+    }
+
     /*
       Computes the evaluation of a polynomial f(x) = sum(a_i * x^i) on the given point.
       The coefficients of the polynomial are given in
@@ -47,8 +54,8 @@ library polynomial {
             let cur_coefs := add(coeffs, mul(mload(coeffs), 0x20))
             for { } gt(cur_coefs, coeffs) {} {
                 result := addmod(mulmod(result, point, modulus),
-                                 mload(cur_coefs), // (i - 1) * 32
-                                 modulus)
+                                mload(cur_coefs), // (i - 1) * 32
+                                modulus)
                 cur_coefs := sub(cur_coefs, 0x20)
             }
         }
