@@ -75,7 +75,13 @@ if __name__ == '__main__':
     if "1" in sys.argv:
         do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path,
                                                          linked_libs_names, init_test1)
-    if "1" not in sys.argv:
+    if "2" in sys.argv:
+        do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path,
+                                                         linked_libs_names, init_test2)
+        
+    if "1" not in sys.argv and not "2" in sys.argv:
         do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path,
             linked_libs_names, init_test1)
+        do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path,
+                                                         linked_libs_names, init_test2)
         
