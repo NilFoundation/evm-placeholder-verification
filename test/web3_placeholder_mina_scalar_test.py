@@ -38,11 +38,8 @@ def load_params(default_paramsfile, paramsfile, prooffile):
     params['init_params'].append(parsed_json["lambda"])
     params['init_params'].append(parsed_json["rows_amount"])
     params['init_params'].append(parsed_json["omega"])
-    params['init_params'].append(parsed_json["max_batch"])
     params['init_params'].append(len(parsed_json["D_omegas"]))
     params['init_params'].extend(parsed_json["D_omegas"])
-    params['init_params'].append(len(parsed_json["q"]))
-    params['init_params'].extend(parsed_json["q"])
     params['init_params'].append(len(parsed_json["step_list"]))
     params['init_params'].extend(parsed_json["step_list"])
     params['init_params'].append((len(parsed_json["arithmetization_params"])))
@@ -69,23 +66,7 @@ def init_test1():
 def init_test2():
     params = load_params(
         base_path + "test/data/mina_scalar/default_params.json", 
-        base_path + "test/data/mina_scalar/eval1_step3_3_3_2_1.json", 
-        base_path + "test/data/mina_scalar/eval1_step3_3_3_2_1.data"
-    )
-    return params
-
-def init_test3():
-    params = load_params(
-        base_path + "test/data/mina_scalar/default_params.json", 
-        base_path + "test/data/mina_scalar/eval1_step1_3_3_3_1_1.json", 
-        base_path + "test/data/mina_scalar/eval1_step1_3_3_3_1_1.data"
-    )
-    return params
-
-def init_test4():
-    params = load_params(
-        base_path + "test/data/mina_scalar/default_params.json",
-        base_path + "test/data/mina_scalar/eval10_step1.json",
+        base_path + "test/data/mina_scalar/eval10_step1.json", 
         base_path + "test/data/mina_scalar/eval10_step1.data"
     )
     return params
@@ -95,21 +76,12 @@ if __name__ == '__main__':
         #   eval1_step1
         do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test1)
     if "2" in sys.argv:
-        #   eval1_step3_3_3_2_1
-        do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test2)
-    if "3" in sys.argv:
-        #   eval1_step1_3_3_3_1_1
-        do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test3)
-    if "4" in sys.argv:
         #   eval10_step1
-        do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test4)
+        do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test2)
 
-    if "1" not in sys.argv and "2" not in sys.argv and "3" not in sys.argv and "4" not in sys.argv:
+
+    if "1" not in sys.argv and "2" not in sys.argv:
         #   eval1_step1
         do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test1)
-        #   eval1_step3
-        do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test2)
-        #   eval1_step1_3_3_3_1_1
-        do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test3)
         #   eval10_step1
-        do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test4)
+        do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test2)

@@ -1,10 +1,10 @@
 
-
 // SPDX-License-Identifier: Apache-2.0.
 //---------------------------------------------------------------------------//
 // Copyright (c) 2022 Mikhail Komarov <nemo@nil.foundation>
 // Copyright (c) 2022 Ilias Khairullin <ilias@nil.foundation>
 // Copyright (c) 2022 Aleksei Moskvin <alalmoskvin@nil.foundation>
+// Copyright (c) 2023 Elena Tatuzova <e.tatuzova@nil.foundation>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -48,7 +48,6 @@ contract TestPlaceholderVerifierUnifiedAddition {
         uint256[] calldata init_params,
         int256[][] calldata columns_rotations
     ) public {
-        profiling.start_block("public_api_placeholder_unified_addition::component verify");
         init_vars.vars_t memory vars;
         init_vars.init(blob, init_params, columns_rotations, vars);
 
@@ -58,14 +57,13 @@ contract TestPlaceholderVerifierUnifiedAddition {
         transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
         // 4. prepare evaluaitons of the polynomials that are copy-constrained
         // 5. permutation argument
-        profiling.start_block("public_api_placeholder_unified_addition::component permutation argument");
         local_vars.permutation_argument = permutation_argument.verify_eval_be(blob, vars.tr_state,
             vars.proof_map, vars.fri_params,
-            vars.common_data, local_vars, vars.arithmetization_params);
-        profiling.end_block();
+            vars.common_data, local_vars, 
+            vars.arithmetization_params
+        );
 
         // 7. gate argument specific for circuit
-        profiling.start_block("public_api_placeholder_unified_addition::component gate argument");
         types.gate_argument_local_vars memory gate_params;
         gate_params.modulus = vars.fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
@@ -74,7 +72,6 @@ contract TestPlaceholderVerifierUnifiedAddition {
             blob, gate_params, vars.proof_map.eval_proof_combined_value_offset, 
             vars.arithmetization_params, vars.common_data.columns_rotations
         );
-        profiling.end_block();
 
         require(
             placeholder_verifier.verify_proof_be(
@@ -88,6 +85,5 @@ contract TestPlaceholderVerifierUnifiedAddition {
             ),
             "Proof is not correct!"
         );
-        profiling.end_block();
     }
 }

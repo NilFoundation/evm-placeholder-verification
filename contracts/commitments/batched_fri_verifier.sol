@@ -466,13 +466,16 @@ library batched_fri_verifier {
         }
     }
 
-    function parse_verify_proof_be(
+    function verify_proof_be(
         bytes calldata blob, 
         uint256[] memory roots,
         types.transcript_data memory tr_state,
         types.fri_params_type memory fri_params
     ) internal returns (bool result) {
         types.fri_local_vars_type memory local_vars;
+
+        // TODO strange bug. If we we exchange two next lines, then it will not work.
+        local_vars.alphas = new uint256[](fri_params.r);
         local_vars.b = new bytes(0x40 * fri_params.max_batch * fri_params.max_coset);
 
         uint256 offset;
@@ -480,13 +483,12 @@ library batched_fri_verifier {
         uint256 k;
         uint256 i;
 
-        uint256[] memory alphas = new uint256[](fri_params.r);
         offset = basic_marshalling.skip_length(fri_params.fri_proof_offset);
         offset = basic_marshalling.skip_length(offset);
         for( ind = 0; ind < fri_params.step_list.length;){
             transcript.update_transcript_b32_by_offset_calldata(tr_state, blob, offset);
             for( uint256 round = 0; round < fri_params.step_list[ind];){
-                alphas[local_vars.cur] = transcript.get_field_challenge(tr_state, fri_params.modulus);
+                local_vars.alphas[local_vars.cur] = transcript.get_field_challenge(tr_state, fri_params.modulus);
                 unchecked{ round++; local_vars.cur++;}
             }
             offset = basic_marshalling.skip_octet_vector_32_be(offset);
@@ -630,7 +632,7 @@ library batched_fri_verifier {
                             local_vars.values[j] = addmod(
                                 local_vars.values[j], 
                                 mulmod(
-                                    alphas[local_vars.cur],
+                                    local_vars.alphas[local_vars.cur],
                                     addmod(local_vars.f0, fri_params.modulus-local_vars.f1, fri_params.modulus), 
                                     fri_params.modulus
                                 ),
@@ -653,7 +655,7 @@ library batched_fri_verifier {
                             local_vars.values[j] = addmod(
                                 local_vars.values[j], 
                                 mulmod(
-                                    alphas[local_vars.cur],
+                                    local_vars.alphas[local_vars.cur],
                                     addmod(local_vars.f0, local_vars.f1, fri_params.modulus), 
                                     fri_params.modulus
                                 ),

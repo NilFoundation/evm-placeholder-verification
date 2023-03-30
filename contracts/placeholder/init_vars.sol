@@ -51,19 +51,11 @@ library init_vars {
 
         vars.common_data.rows_amount = init_params[idx++];
         vars.common_data.omega = init_params[idx++];
-        vars.fri_params.max_batch = init_params[idx++];
-        placeholder_proof_map_parser.init(vars.fri_params, vars.fri_params.max_batch);
-
         vars.common_data.columns_rotations = columns_rotations;
 
         vars.fri_params.D_omegas = new uint256[](init_params[idx++]);
         for (i = 0; i < vars.fri_params.D_omegas.length;) {
             vars.fri_params.D_omegas[i] = init_params[idx];
-        unchecked{ i++; idx++;}
-        }
-        vars.fri_params.q = new uint256[](init_params[idx++]);
-        for (i = 0; i < vars.fri_params.q.length;) {
-            vars.fri_params.q[i] = init_params[idx];
         unchecked{ i++; idx++;}
         }
 
@@ -89,12 +81,24 @@ library init_vars {
 
         unchecked{ max_coset = 1 << (vars.fri_params.max_step - 1);}
 
+        vars.fri_params.max_coset = max_coset;
         vars.fri_params.s_indices = new uint256[](max_coset);
         vars.fri_params.correct_order_idx = new uint256[](max_coset);
         vars.fri_params.tmp_arr = new uint256[](max_coset << 1);
         vars.fri_params.s = new uint256[](max_coset);
-        vars.fri_params.coeffs = new uint256[](max_coset << 1);
-        vars.fri_params.b = new bytes(vars.fri_params.max_batch << (vars.fri_params.max_step + 5));
-        vars.fri_params.precomputed_eval1 = new uint256[](5);
+        vars.fri_params.batches_num = 4;
+        vars.fri_params.batches_sizes = new uint256[](vars.fri_params.batches_num);
+        vars.fri_params.batches_sizes[0] = vars.arithmetization_params.witness_columns + vars.arithmetization_params.public_input_columns;        
+        vars.fri_params.batches_sizes[1] = 1;
+            // TODO We don't know T_polynomials size. 
+            // We'll extract it from proof in parse_be function 
+            //      and verify fri_proof.query_proof[i].initial_proof[2].values have 
+        vars.fri_params.batches_sizes[2] = 0; 
+        vars.fri_params.batches_sizes[3] = vars.arithmetization_params.permutation_columns 
+            + vars.arithmetization_params.permutation_columns
+            + vars.arithmetization_params.constant_columns 
+            + vars.arithmetization_params.selector_columns + 2;
+
+        batched_lpc_verifier.parse_proof_be(vars.fri_params, blob, vars.proof_map.eval_proof_combined_value_offset);
     }
 }

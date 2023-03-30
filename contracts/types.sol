@@ -141,15 +141,27 @@ library types {
     }
 
     struct fri_params_type {
+        // 0x0
         uint256 modulus;
+        // 0x20
         uint256 r;
+        // 0x40
         uint256 max_degree;
+        // 0x60
         uint256 lambda;
+        // 0x80
         uint256 omega;
+        // 0xa0
         uint256[] D_omegas;
-        uint256[] s_indices;
+        // 0xc0
         uint256[] correct_order_idx;       // Ordered indices to pack ys to check merkle proof
+        // 0xe0
         uint256[] step_list;
+        // 0x100
+        uint256[] q;
+
+        // 0x120
+        uint256[] s_indices;
         uint256[] s;                    // Coset indices
         uint256 max_step;       // variable for memory  initializing
         uint256 max_batch;      // variable for memory  initializing
@@ -158,11 +170,11 @@ library types {
         uint256[]    tmp_arr;
         uint256[][]  evaluation_points;
         uint256      z_offset;
+
         // New fields
         uint256       max_coset;
         uint256       batches_num;
         uint256[]     batches_sizes;
-        uint256       leaf_size;
         uint256       fri_proof_offset;         // fri_roots offset equals to fri_proof_offset + 0x20
         uint256       fri_final_poly_offset;
         uint256       fri_cur_query_offset;     // It'll be changed during verification process.
@@ -173,7 +185,7 @@ library types {
         uint256[][]   denominators;              // V polynomials for different evaluation points
         uint256[]     factors;
         uint256[]     eval_map;
-        uint256[][]   eval_points;
+        uint256[][]   unique_eval_points;
         uint256       different_points;
         uint256[]     ys;
         uint256[]     final_polynomial;         // It's loaded once while parsing fri proof
@@ -182,16 +194,28 @@ library types {
 
     struct fri_local_vars_type {
         bytes   b;
+        //0x0
         uint256 x_index;
+        //0x20
         uint256 x;
+        //0x40
         uint256 domain_size;
+        //0x60
         uint256 domain_size_mod;
+        //0x80
         uint256 newind;
+        //0xa0
         uint256 p_ind;
+        //0xc0
         uint256 y_ind;
+        //0xe0
         uint256 indices_size;
+        //0x100
         uint256 b_length;
+        //0x120
         uint256 query_id;
+        //0x140
+        uint256[]     alphas;
         uint256[] values;
         uint256[] tmp_values;
         uint256 coset_size;
@@ -215,23 +239,15 @@ library types {
         // 0x20
         uint256 v_perm_commitment_offset;
         // 0x40
-        uint256 input_perm_commitment_offset;
+        uint256 T_commitment_offset;
         // 0x60
-        uint256 value_perm_commitment_offset;
+        uint256 fixed_values_commitment_offset;
         // 0x80
-        uint256 v_l_perm_commitment_offset;
-        // 0xa0
-        uint256 T_commitments_offset;
-        // 0xc0
         uint256 eval_proof_offset;
-        // 0xe0
+        // 0xa0
         uint256 eval_proof_lagrange_0_offset;
-        // 0x100
+        // 0xc0
         uint256 eval_proof_combined_value_offset;
-        // 0x120
-        uint256 eval_proof_variable_values_offset;
-        // 0x140
-        uint256 eval_proof_lookups_offset;
     }
 
     struct placeholder_common_data {
@@ -259,7 +275,7 @@ library types {
         // 0xe0
         uint256 e;
         // 0x100
-        uint256[][] evaluation_points;
+        uint256[][][] evaluation_points;
         // 0x120
         uint256[] F;
         // 0x140
@@ -289,7 +305,7 @@ library types {
         // 0x2c0
         uint256 S_sigma_i;
         // 0x2e0
-        uint256[][] variable_values_evaluation_points;
+        uint256[] roots;
         // 0x300
         uint256 tmp1;
         // 0x320
@@ -300,6 +316,8 @@ library types {
         uint256 idx1;
         // 0x380
         uint256 idx2;
+        // 0x3a0
+        uint256 inversed_omega;
     }
 
     struct arithmetization_params{
@@ -334,5 +352,7 @@ library types {
         uint256[] selector_evaluations;
         // 0x120
         uint256[] public_input_evaluations;
+        // 0x140
+        uint256 offset;   
     }
 }
