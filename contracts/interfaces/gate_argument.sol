@@ -1,6 +1,6 @@
 pragma solidity >=0.8.4;
 
-import "../contracts/types.sol";
+import "../types.sol";
 
 interface IGateArgument {
     function evaluate_gates_be(

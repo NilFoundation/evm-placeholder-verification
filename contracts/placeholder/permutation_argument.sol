@@ -125,8 +125,7 @@ library permutation_argument {
         }
     }
 
-    function verify_eval_be(
-        bytes calldata blob,
+    function verify_eval_be(bytes calldata blob,
         types.transcript_data memory tr_state,
         types.placeholder_proof_map memory proof_map,
         types.fri_params_type memory fri_params,

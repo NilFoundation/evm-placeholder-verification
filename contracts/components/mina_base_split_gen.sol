@@ -30,11 +30,12 @@ import "./mina_base/mina_base_gate15.sol";
 import "./mina_base/mina_base_gate16.sol";
 import "./mina_base/mina_base_gate16_1.sol";
 
+import "../interfaces/gate_argument.sol";
+
 // TODO: name component
 library mina_base_split_gen {
     // TODO: specify constants
     uint256 constant GATES_N = 23;
-
 
     // TODO: columns_rotations could be hard-coded
     function evaluate_gates_be(
@@ -56,6 +57,7 @@ library mina_base_split_gen {
                 );
             }
         }
+
 
         gate_params.selector_evaluations = new uint256[](GATES_N);
         for (uint256 i = 0; i < GATES_N; i++) {
@@ -80,6 +82,7 @@ library mina_base_split_gen {
 
         gate_params.theta_acc = 1;
         gate_params.gates_evaluation = 0;
+
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate0.evaluate_gate_be(gate_params);
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate4.evaluate_gate_be(gate_params);
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate7.evaluate_gate_be(gate_params);
@@ -88,7 +91,6 @@ library mina_base_split_gen {
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate15.evaluate_gate_be(gate_params);
         (gate_params.gate_eval, gate_params.theta_acc) = mina_base_gate16.evaluate_gate_be(gate_params);
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_base_gate16_1.evaluate_gate_be(gate_params);
-
         gates_evaluation = gate_params.gates_evaluation;
         profiling.end_block();
     }

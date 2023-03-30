@@ -23,8 +23,8 @@ import "../../cryptography/transcript.sol";
 import "../proof_map_parser.sol";
 import "../placeholder_verifier.sol";
 import "../../logging.sol";
-import "../../gate_argument_interface.sol";
 import "../init_vars.sol";
+import "../../interfaces/gate_argument.sol";
 
 contract TestPlaceholderVerifierUniversal {
     event gas_usage_emit(uint8 command, string function_name, uint256 gas_usage);
@@ -44,7 +44,7 @@ contract TestPlaceholderVerifierUniversal {
     //  [..., q_i, ...]
         uint256[] calldata init_params,
         int256[][] calldata columns_rotations,
-        uint160    gate_argument_address
+        address gate_argument_address
     ) public {
         init_vars.vars_t memory vars;
         init_vars.init(blob, init_params, columns_rotations, vars);

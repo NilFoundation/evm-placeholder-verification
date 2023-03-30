@@ -32,6 +32,8 @@ import "./mina_scalar/gate16.sol";
 import "./mina_scalar/gate18.sol";
 import "./mina_scalar/gate22.sol";
 
+import "../interfaces/gate_argument.sol";
+
 // TODO: name component
 library mina_split_gen {
     // TODO: specify constants
@@ -44,9 +46,8 @@ library mina_split_gen {
         uint256 eval_proof_combined_value_offset,
         types.arithmetization_params memory ar_params,
         int256[][] calldata columns_rotations
-    ) internal returns (uint256 gates_evaluation) {
+    ) internal view returns (uint256 gates_evaluation) {
         // TODO: check witnesses number in proof
-        profiling.start_block("mina_scalar_split_gen::evaluate_gates_be");
 
         gate_params.witness_evaluations = new uint256[][](ar_params.witness_columns);
         for (uint256 i = 0; i < ar_params.witness_columns;) {
@@ -94,7 +95,5 @@ library mina_split_gen {
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate18.evaluate_gate_be(gate_params);
         (gate_params.gates_evaluation, gate_params.theta_acc) = mina_scalar_gate22.evaluate_gate_be(gate_params);
         gates_evaluation = gate_params.gates_evaluation;
-
-        profiling.end_block();
     }
 }
