@@ -44,8 +44,9 @@ contract TestPlaceholderVerifierUniversal {
     //  [..., q_i, ...]
         uint256[] calldata init_params,
         int256[][] calldata columns_rotations,
-        address gate_argument_address
+        uint160 gate_argument_addr
     ) public {
+        address gate_argument_address = address(gate_argument_addr);
         init_vars.vars_t memory vars;
         init_vars.init(blob, init_params, columns_rotations, vars);
 
@@ -84,6 +85,6 @@ contract TestPlaceholderVerifierUniversal {
                 vars.arithmetization_params
             ),
             "Proof is not correct!"
-        );
+        );   
     }
 }
