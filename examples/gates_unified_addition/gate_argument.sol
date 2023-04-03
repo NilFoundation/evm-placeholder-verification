@@ -183,7 +183,7 @@ contract gate_argument_split_gen {
             mstore(add(gate_params, GATE_EVAL_OFFSET),addmod(mload(add(gate_params, GATE_EVAL_OFFSET)),mulmod(mload(x1),theta_acc,modulus),modulus))
             theta_acc := mulmod(theta_acc,mload(add(gate_params, THETA_OFFSET)),modulus)
             mstore(x1, 0)
-        //1st
+            //1st
             mstore(x1,addmod(mload(x1),get_eval_i_by_rotation_idx(5,0,mload(x2)),modulus))
             mstore(x1,addmod(mload(x1),mulmod(x3,mulmod(get_eval_i_by_rotation_idx(8,0,mload(x2)),get_eval_i_by_rotation_idx(5,0,mload(x2)),modulus),modulus),modulus))
             mstore(x1,addmod(mload(x1),mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000,mulmod(x4,mulmod(get_eval_i_by_rotation_idx(8,0,mload(x2)),get_eval_i_by_rotation_idx(5,0,mload(x2)),modulus),modulus),modulus),modulus))

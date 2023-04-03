@@ -24,7 +24,7 @@ import "../commitments/batched_lpc_verifier.sol";
 import "../logging.sol";
 import "../interfaces/gate_argument.sol";
 
-library unified_addition_component_gen is IGateArgument {
+contract unified_addition_component_gen is IGateArgument {
     uint256 constant GATES_N = 1;
 
     uint256 constant MODULUS_OFFSET = 0x0;
@@ -42,7 +42,7 @@ library unified_addition_component_gen is IGateArgument {
         bytes calldata blob,
         types.gate_argument_local_vars memory gate_params,
         types.arithmetization_params memory ar_params
-    ) internal pure returns (uint256 gates_evaluation) {
+    ) external pure returns (uint256 gates_evaluation) {
         // TODO: check witnesses number in proof
 
         gate_params.offset = basic_marshalling.skip_length(

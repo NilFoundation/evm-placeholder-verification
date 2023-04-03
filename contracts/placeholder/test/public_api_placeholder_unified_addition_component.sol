@@ -28,9 +28,14 @@ import "../../logging.sol";
 import "../../profiling.sol";
 import "../../components/unified_addition_gen.sol";
 import "../init_vars.sol";
+import "../../interfaces/verifier.sol";
 
 contract TestPlaceholderVerifierUnifiedAddition {
-    event gas_usage_emit(uint8 command, string function_name, uint256 gas_usage);
+    address _verifier;
+
+    function initialize(address verifier) {
+        _verifier = verifier;
+    }
 
     function verify(
         bytes calldata blob,
@@ -46,51 +51,57 @@ contract TestPlaceholderVerifierUnifiedAddition {
     // 8 + D_omegas_size) q_size
     //  [..., q_i, ...]
         uint256[] calldata init_params,
-        int256[][] calldata columns_rotations
+        int256[][] calldata columns_rotations,
+        address gate_argument
     ) public {
-        profiling.start_block("public_api_placeholder_unified_addition::component verify");
-        init_vars.vars_t memory vars;
-        init_vars.init(blob, init_params, columns_rotations, vars);
-
-        types.placeholder_local_variables memory local_vars;
-
-        // 3. append witness commitments to transcript
-        transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
-
-        // 4. prepare evaluaitons of the polynomials that are copy-constrained
-        // 5. permutation argument
-        profiling.start_block("public_api_placeholder_unified_addition::component permutation argument");
-        local_vars.permutation_argument = permutation_argument.verify_eval_be(blob, vars.tr_state,
-            vars.proof_map, vars.fri_params,
-            vars.common_data, local_vars, vars.arithmetization_params);
-        profiling.end_block();
-
-        // 7. gate argument specific for circuit
-        profiling.start_block("public_api_placeholder_unified_addition::component gate argument");
-        types.gate_argument_local_vars memory gate_params;
-        gate_params.modulus = vars.fri_params.modulus;
-        gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
-        gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_variable_values_offset;
-        gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
-        gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
-
-        local_vars.gate_argument = unified_addition_component_gen.evaluate_gates_be(
-            blob, gate_params, vars.arithmetization_params
-        );
-        profiling.end_block();
-
+//        profiling.start_block("public_api_placeholder_unified_addition::component verify");
+//        init_vars.vars_t memory vars;
+//        init_vars.init(blob, init_params, columns_rotations, vars);
+//
+//        types.placeholder_local_variables memory local_vars;
+//
+//        // 3. append witness commitments to transcript
+//        transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
+//
+//        // 4. prepare evaluaitons of the polynomials that are copy-constrained
+//        // 5. permutation argument
+//        profiling.start_block("public_api_placeholder_unified_addition::component permutation argument");
+//        local_vars.permutation_argument = permutation_argument.verify_eval_be(blob, vars.tr_state,
+//            vars.proof_map, vars.fri_params,
+//            vars.common_data, local_vars, vars.arithmetization_params);
+//        profiling.end_block();
+//
+//        // 7. gate argument specific for circuit
+//        profiling.start_block("public_api_placeholder_unified_addition::component gate argument");
+//        types.gate_argument_local_vars memory gate_params;
+//        gate_params.modulus = vars.fri_params.modulus;
+//        gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
+//        gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_variable_values_offset;
+//        gate_params.eval_proof_selector_offset = vars.proof_map.eval_proof_fixed_values_offset;
+//        gate_params.eval_proof_constant_offset = vars.proof_map.eval_proof_fixed_values_offset;
+//
+//        IGateArgument gate_argument_component = IGateArgument(gate_argument);
+//        local_vars.gate_argument = unified_addition_component_gen.evaluate_gates_be(
+//            blob, gate_params, vars.arithmetization_params
+//        );
+//        profiling.end_block();
+//
+//        require(
+//            placeholder_verifier.verify_proof_be(
+//                blob,
+//                vars.tr_state,
+//                vars.proof_map,
+//                vars.fri_params,
+//                vars.common_data,
+//                local_vars,
+//                vars.arithmetization_params
+//            ),
+//            "Proof is not correct!"
+//        );
+//        profiling.end_block();
         require(
-            placeholder_verifier.verify_proof_be(
-                blob,
-                vars.tr_state,
-                vars.proof_map,
-                vars.fri_params,
-                vars.common_data,
-                local_vars,
-                vars.arithmetization_params
-            ),
-            "Proof is not correct!"
+            IVerifier(_verifier).verify(blob,init_params,columns_rotations,gate_argument),
+            "Proof is not correct"
         );
-        profiling.end_block();
     }
 }
