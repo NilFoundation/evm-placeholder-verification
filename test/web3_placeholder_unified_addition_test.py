@@ -6,7 +6,15 @@ from prepare_logs import create_logs_dir
 
 test_contract_name = 'TestPlaceholderVerifierUnifiedAddition'
 test_contract_path = 'placeholder/test/public_api_placeholder_unified_addition_component.sol'
-linked_libs_names = ["unified_addition_component_gen", "placeholder_verifier"]
+linked_libs_names = [""]
+
+placeholder_contract_name = 'PlaceholderVerifier'
+placeholder_contract_path = './verifier.sol'
+placeholder_libs_names = [""]
+
+gate_argument_contract_name = 'unified_addition_component_gen'
+gate_argument_contract_path = 'components/test/unified_addition_gen.sol'
+gate_argument_linked_libs = [""]
 
 def load_params(paramsfile, prooffile):
     jsonf = open(paramsfile);
@@ -55,22 +63,22 @@ def init_test2():
         base_path + '/test/data/unified_addition_proof2.data'
     )
 
-def init_test3():
-    return load_params(
-        base_path + '/test/data/unified_addition_lambda40_params.json',
-        base_path + '/test/data/unified_addition_lambda40.data'
-    )
 
 if __name__ == '__main__':
     create_logs_dir(base_path + '/logs')
     if "1" in sys.argv:
-        do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test1)
+        do_placeholder_verification_test_via_transact_simple(placeholder_contract_name, placeholder_contract_path,placeholder_libs_names,
+                                                             test_contract_name,test_contract_path, linked_libs_names,
+                                                             gate_argument_contract_name, gate_argument_contract_path, gate_argument_linked_libs, init_test1)
     if "2" in sys.argv:
-        do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test2)
-    if "3" in sys.argv:
-        do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test3)
-        
+        do_placeholder_verification_test_via_transact_simple(placeholder_contract_name, placeholder_contract_path, placeholder_libs_names,
+                                                             test_contract_name, test_contract_path, linked_libs_names,
+                                                             gate_argument_contract_name, gate_argument_contract_path, gate_argument_linked_libs,init_test2)
+
     if "1" not in sys.argv and "2" not in sys.argv and "3" not in sys.argv:
-        do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test1)
-        do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test2)
-        do_placeholder_verification_test_via_transact_simple(test_contract_name, test_contract_path, linked_libs_names, init_test3)
+        do_placeholder_verification_test_via_transact_simple(placeholder_contract_name, placeholder_contract_path, placeholder_libs_names,
+                                                             test_contract_name, test_contract_path, linked_libs_names,
+                                                             gate_argument_contract_name, gate_argument_contract_path, gate_argument_linked_libs,init_test1)
+        do_placeholder_verification_test_via_transact_simple(placeholder_contract_name, placeholder_contract_path, placeholder_libs_names,
+                                                             test_contract_name, test_contract_path, linked_libs_names,
+                                                             gate_argument_contract_name, gate_argument_contract_path, gate_argument_linked_libs,init_test2)
