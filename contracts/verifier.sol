@@ -114,7 +114,7 @@ contract PlaceholderVerifier is IVerifier {
     }
 
     function verify(bytes calldata blob, uint256[][] calldata init_params,
-        int256[][][] calldata columns_rotations, address gate_argument) public returns (bool) {
+        int256[][][] calldata columns_rotations, address gate_argument) external view returns (bool) {
         gas_usage memory gas_usage;
         gas_usage.start = gasleft();
 
@@ -144,14 +144,14 @@ contract PlaceholderVerifier is IVerifier {
         local_vars.gate_argument = gate_argument_component.evaluate_gates_be(blob, gate_params,
             vars.arithmetization_params, vars.common_data.columns_rotations);
 
-        bool ret = placeholder_verifier.verify_proof_be(blob, vars.tr_state,
+        if (!placeholder_verifier.verify_proof_be(blob, vars.tr_state,
             vars.proof_map, vars.fri_params, vars.common_data, local_vars,
-            vars.arithmetization_params);
-        require(ret, "Proof is not correct!");
+            vars.arithmetization_params))
+            return false;
 
         gas_usage.end = gasleft();
         emit gas_usage_emit(gas_usage.start - gas_usage.end);
 
-        return ret;
+        return true;
     }
 }

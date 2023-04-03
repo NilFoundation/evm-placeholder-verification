@@ -245,3 +245,6 @@ package-lock.json
 *tx_calldata.txt
 **/addr
 # End of https://www.toptal.com/developers/gitignore/api/solidity,soliditytruffle,node
+
+#ide
+.idea/
