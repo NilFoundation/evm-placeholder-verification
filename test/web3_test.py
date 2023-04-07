@@ -201,42 +201,37 @@ def deploy_placeholder_contract(
     print_tx_info(w3, run_tx_receipt, "Placeholder contract deploy", "initialize")
     return contract_inst
 
+def deploy_gate_argument(
+    gate_argument_contract_name, gate_argument_contract_path,  gate_argument_linked_libs_names,
+):
+    w3 = init_connection()
+    gate_arg_inst, gate_arg_addr = deploy_contract_and_linked_libs(
+        w3, gate_argument_contract_name, gate_argument_contract_path, gate_argument_linked_libs_names
+    )
+    return gate_arg_addr;
+
 
 def do_placeholder_verification_test_via_transact_simple(
     placeholder_contract_name, placeholder_contract_path,placeholder_libs_names,
     contract_name, contract_path, contract_linked_libs_names,
-    gate_argument_contract_name, gate_argument_contract_path,
-    gate_argument_linked_libs_names,
+    gate_argument_contract_name, gate_argument_contract_path,  gate_argument_linked_libs_names,
     init_test_params_func
 ):
     init_profiling()
     w3 = init_connection()
-    solcx.install_solc('0.8.17')
 
-    placeholder_inst = deploy_placeholder_contract(
+    contract_inst = deploy_placeholder_contract(
         placeholder_contract_name, placeholder_contract_path,placeholder_libs_names,
         contract_name, contract_path, contract_linked_libs_names,
     )
 
-    gate_arg_inst, gate_arg_addr = deploy_contract_and_linked_libs(w3,
-                                                                   gate_argument_contract_name,
-                                                                   gate_argument_contract_path,
-                                                                   gate_argument_linked_libs_names)
+    gate_arg_addr = deploy_gate_argument(
+        gate_argument_contract_name, gate_argument_contract_path, gate_argument_linked_libs_names
+    )
 
-
-    run_tx_hash = contract_inst.functions.initialize(placeholder_contract_deploy_addr).transact()
-    run_tx_receipt =  w3.eth.wait_for_transaction_receipt(run_tx_hash)
     params = init_test_params_func()
-    print_tx_info(w3, run_tx_receipt, params['_test_name'], "initialize")
 
-    run_tx_hash = contract_inst.functions.verify(
-        params['proof'],
-        params['init_params'],
-        params['columns_rotations'],
-        gate_arg_addr
-    ).transact()
-    run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
-    print_tx_info(w3, run_tx_receipt, params['_test_name'], "verify")
+    do_placeholder_verification_test_via_transact_fully_deployed(contract_inst, gate_arg_addr, params)
 
 
 def do_placeholder_verification_test_via_transact_deployed_contract(
@@ -248,10 +243,9 @@ def do_placeholder_verification_test_via_transact_deployed_contract(
     w3 = init_connection()
     solcx.install_solc('0.8.17')
 
-    gate_arg_inst, gate_arg_addr = deploy_contract_and_linked_libs(w3,
-                                                                   gate_argument_contract_name,
-                                                                   gate_argument_contract_path,
-                                                                   gate_argument_linked_libs_names)
+    gate_arg_inst, gate_arg_addr = deploy_contract_and_linked_libs(
+        w3, gate_argument_contract_name, gate_argument_contract_path, gate_argument_linked_libs_names
+    )
 
     params = init_test_params_func()
     run_tx_hash = contract_inst.functions.verify(
@@ -320,53 +314,20 @@ def do_placeholder_verification_test_via_transact(
     print_tx_info(w3, run_tx_receipt, params['_test_name'])
 
 
-def do_placeholder_verification_test_via_transact_with_external_gates(
-        test_contract_name,
-        test_contract_path,
-        linked_libs_names,
-        init_test_params_func
+def do_placeholder_verification_test_via_transact_fully_deployed(
+    contract_inst,
+    gate_arg_addr,
+    params
 ):
     init_profiling()
     w3 = init_connection()
+
     solcx.install_solc('0.8.17')
-    print(f'{contracts_dir}/{test_contract_path}')
-    compiled = solcx.compile_files(
-        [f'{contracts_dir}/{test_contract_path}'],
-        allow_paths=[f'{contracts_dir}/'],
-        output_values=['abi', 'bin'],
-        solc_version="0.8.17",
-        optimize=True,
-        optimize_runs=200)
-    compiled_test_contract_id, compiled_test_contract_interface = find_compiled_contract(
-        compiled, test_contract_name)
-    bytecode = compiled_test_contract_interface['bin']
-    abi = compiled_test_contract_interface['abi']
-    bytecode = deploy_link_libs(w3, compiled, bytecode, linked_libs_names)
-
-    test_contract = w3.eth.contract(abi=abi, bytecode=bytecode)
-    deploy_tx_hash = test_contract.constructor().transact()
-    deploy_tx_receipt = w3.eth.wait_for_transaction_receipt(deploy_tx_hash)
-    print("Deployment:", deploy_tx_receipt.gasUsed)
-
-    test_contract_inst = w3.eth.contract(
-        address=deploy_tx_receipt.contractAddress, abi=abi)
-    params = init_test_params_func()
-    print("address:", hex(params['gate_argument_address']))
-    run_tx_hash = test_contract_inst.functions.verify(
-        params['proof'], params['init_params'], params['columns_rotations'], params['gate_argument_address']
+    run_tx_hash = contract_inst.functions.verify(
+        params['proof'],
+        params['init_params'],
+        params['columns_rotations'],
+        gate_arg_addr
     ).transact()
     run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
-    print_tx_info(w3, run_tx_receipt, params['_test_name'])
-
-    if "--nolog" not in sys.argv:
-        if hasattr(test_contract_inst.events, "gas_usage_emit"):
-            logfilename = "logs/log.json"
-            if "log_file" in params.keys():
-                logfilename = params["log_file"]
-            logfilename = base_path + logfilename
-            print("Print log in ", logfilename)
-            print_profiling_log(test_contract_inst.events.gas_usage_emit.getLogs(), run_tx_receipt.gasUsed, logfilename)
-        else:
-            print("No logging events in solidity abi")
-    else:
-        print("Logging disabled")
+    print_tx_info(w3, run_tx_receipt, params['_test_name'], "verify")
