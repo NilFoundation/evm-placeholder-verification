@@ -135,133 +135,102 @@ library types {
         // Not actually part of the verification key, but we put it here to prevent stack depth errors
         uint256 zeta_pow_n;
     }
-
+    
     struct transcript_data {
         bytes32 current_challenge;
     }
 
     struct fri_params_type {
-        //0x00
+        // 0x0
         uint256 modulus;
-        //0x20
+        // 0x20
         uint256 r;
-        //0x40
+        // 0x40
         uint256 max_degree;
-        //0x60
+        // 0x60
         uint256 lambda;
-        //0x80
-        uint256 leaf_size;
-
-        //0xa0
+        // 0x80
+        uint256 omega;
+        // 0xa0
         uint256[] D_omegas;
-        //0xc0
+        // 0xc0
+        uint256[] correct_order_idx;       // Ordered indices to pack ys to check merkle proof
+        // 0xe0
+        uint256[] step_list;
+        // 0x100
         uint256[] q;
 
-        //0xe0
+        // 0x120
         uint256[] s_indices;
-        //0x100
-        uint256[] correct_order_idx;       // Ordered indices to pack ys to check merkle proofs
-        //0x120
-        uint256[][] batched_U;
-        //0x140
-        uint256[][] batched_V;
-
-        //0x160
-        bytes batched_fri_verified_data;
-        //0x180
-        uint256[] lpc_z;
-        //0x1a0
-        uint256 batched_U_len;
-
-        //0x1c0
-        uint256[] step_list;
-        //0x1e0
         uint256[] s;                    // Coset indices
-        //0x200
-        uint256 i_fri_proof;    // It is useful for debugging
-        //0x220
         uint256 max_step;       // variable for memory  initializing
-        //0x240
         uint256 max_batch;      // variable for memory  initializing
 
         // These are local variables for FRI. But it's useful to allocate memory once
-        //0x260
-        bytes b;
-        //0x280
-        uint256[] coeffs;                  // coeffs -- ancestor of ys
-        uint256[] tmp_arr;
-        uint256[][] evaluation_points;
-        uint256 z_offset;
-        uint256 prev_xi;
-        uint256[] precomputed_eval1;
-        uint256[][] precomputed_eval3_points;
-        uint256[9][] precomputed_eval3_data;
-        uint256[] precomputed_indices;
+        uint256[]    tmp_arr;
+        uint256[][]  evaluation_points;
+        uint256      z_offset;
+
+        // New fields
+        uint256       max_coset;
+        uint256       batches_num;
+        uint256[]     batches_sizes;
+        uint256       fri_proof_offset;         // fri_roots offset equals to fri_proof_offset + 0x20
+        uint256       fri_final_poly_offset;
+        uint256       fri_cur_query_offset;     // It'll be changed during verification process.
+                                                // It's set at the begining of the first query proof after parse functions running.
+        uint256       theta;
+        uint256       poly_num;
+        uint256[][]   combined_U;                // U polynomials for different evaluation points
+        uint256[][]   denominators;              // V polynomials for different evaluation points
+        uint256[]     factors;
+        uint256[]     eval_map;
+        uint256[][]   unique_eval_points;
+        uint256       different_points;
+        uint256[]     ys;
+        uint256[]     final_polynomial;         // It's loaded once while parsing fri proof
+        uint256[]     fri_roots;                // It should be bytes32
     }
 
     struct fri_local_vars_type {
-        // some internal variables used in assemblys
-        // 0x0
-        uint256 s1;                                     // It's extremely important, it's the first field.
-        //0x20
-        uint256 x;                                      // challenge x value
-        //0x40
-        uint256 alpha;                                   // alpha challenge
-        //0x60
-        uint256 coeffs_offset;                           // address of current coeffs array(fri_params.coeffs)
-        //0x80 
-        uint256 y_offset;                                // address of current y (offset in blob)
-        //0xa0     
-        uint256 colinear_offset;                         // colinear_value_offset. Used only in colinear check
-        //0xc0     
-        uint256 c1;                                      // fs1 coefficient.
-        //0xe0     
-        uint256 c2;                                      // fs2 coefficient.
-        //0x100
-        uint256 interpolant;                             // interpolant
-        //0x120
-        uint256 prev_coeffs_len;
-
-        // Fri proof fields
-        uint256 final_poly_offset;                           // one for all rounds
-        uint256 values_offset;                               // one for all rounds
-
-        // Fri round proof fields (for step)
-        uint256 round_proof_offset;                      // current round proof offset. It's round_proof.p offset too.
-        uint256 round_proof_T_root_offset;               // prepared for transcript.
-        uint256 round_proof_colinear_path_offset;        // current round proof colinear_path offset.
-        uint256 round_proof_colinear_path_T_root_offset; // current round proof colinear_path offset.
-        uint256 round_proof_values_offset;               // offset item in fri_proof.values structure for current round proof
-        uint256 round_proof_colinear_value;              // It is the value. Not offset
-        uint256 i_step;                                  // current step
-        uint256 r_step;                                  // rounds in step                                     
-        uint256 b_length;                                // length of bytes for merkle verifier input
-
-        // Fri params for one round (in step)
+        bytes   b;
+        //0x0
         uint256 x_index;
-        uint256 domain_size;                             // domain size
+        //0x20
+        uint256 x;
+        //0x40
+        uint256 domain_size;
+        //0x60
         uint256 domain_size_mod;
-        uint256 omega;                                   // domain generator
-        uint256 global_round_index;                      // current FRI round
-        uint256 i_round;                                 // current round in step
-
-        // Some internal variables
-        uint256 p_ind;          // ??
-        uint256 y_ind;                   // ?
-        uint256 p_offset;
-        uint256 polynomial_vector_size;
-        uint256 y_size;
-        uint256 colinear_path_offset;
-        // Variables for colinear check. Sorry! There are a so many of them.
-        uint256 indices_size;
-        uint256 ind;
+        //0x80
         uint256 newind;
-        uint256 mul;
-        // Useful previous round values.
-        // uint256 prev_p_offset;
-        uint256 prev_polynomial_vector_size;
-        uint256 prev_step;
-        uint256 coeffs_len;
+        //0xa0
+        uint256 p_ind;
+        //0xc0
+        uint256 y_ind;
+        //0xe0
+        uint256 indices_size;
+        //0x100
+        uint256 b_length;
+        //0x120
+        uint256 query_id;
+        //0x140
+        uint256[]     alphas;
+        uint256[] values;
+        uint256[] tmp_values;
+        uint256 coset_size;
+        uint256 offset;
+        uint256 root;
+        uint256 fri_root;
+        uint256 s;
+        uint256 step;
+        uint256 round;
+        uint256[] point;
+        uint256 cur;
+        uint256 interpolant;
+        uint256 f0;
+        uint256 f1;
+        uint256 factor;
     }
 
     struct placeholder_proof_map {
@@ -270,37 +239,25 @@ library types {
         // 0x20
         uint256 v_perm_commitment_offset;
         // 0x40
-        uint256 input_perm_commitment_offset;
+        uint256 T_commitment_offset;
         // 0x60
-        uint256 value_perm_commitment_offset;
+        uint256 fixed_values_commitment_offset;
         // 0x80
-        uint256 v_l_perm_commitment_offset;
-        // 0xa0
-        uint256 T_commitments_offset;
-        // 0xc0
         uint256 eval_proof_offset;
-        // 0xe0
+        // 0xa0
         uint256 eval_proof_lagrange_0_offset;
-        // 0x100
-        uint256 eval_proof_fixed_values_offset;
-        // 0x120
-        uint256 eval_proof_variable_values_offset;
-        // 0x140
-        uint256 eval_proof_permutation_offset;
-        // 0x160
-        uint256 eval_proof_quotient_offset;
-        // 0x180
-        uint256 eval_proof_lookups_offset;
+        // 0xc0
+        uint256 eval_proof_combined_value_offset;
     }
 
     struct placeholder_common_data {
         uint256 rows_amount;
         // 0x20
         uint256 omega;
-        int256[][] columns_rotations;
+        int256[][] columns_rotations; 
     }
 
-    struct placeholder_local_variables {
+    struct placeholder_local_variables{
         // 0x0
         uint256 len;
         // 0x20
@@ -318,7 +275,7 @@ library types {
         // 0xe0
         uint256 e;
         // 0x100
-        uint256[][] evaluation_points;
+        uint256[][][] evaluation_points;
         // 0x120
         uint256[] F;
         // 0x140
@@ -348,7 +305,7 @@ library types {
         // 0x2c0
         uint256 S_sigma_i;
         // 0x2e0
-        uint256[][] variable_values_evaluation_points;
+        uint256[] roots;
         // 0x300
         uint256 tmp1;
         // 0x320
@@ -359,9 +316,11 @@ library types {
         uint256 idx1;
         // 0x380
         uint256 idx2;
+        // 0x3a0
+        uint256 inversed_omega;
     }
 
-    struct arithmetization_params {
+    struct arithmetization_params{
         uint256 witness_columns;
         uint256 public_input_columns;
         uint256 constant_columns;
@@ -382,63 +341,18 @@ library types {
         // 0x60
         uint256 gate_eval;
         // 0x80
-        uint256[] witness_evaluations_offsets;
-        // 0xa0
-        uint256[] selector_evaluations;
-        // 0xe0
-        uint256 eval_proof_witness_offset;
-        // 0xc0
-        uint256 eval_proof_selector_offset;
-        // 0x100
         uint256 gates_evaluation;
-        // 0x120
-        uint256 theta_acc;
-        // 0x140
-        uint256 selector_evaluations_offset;
-        // 0x160
-        uint256 offset;
-        // 0x180
-        uint256[][] witness_evaluations;
-        // 0x1a0
-        uint256[][] constant_evaluations;
-        // 0x1c0
-        uint256[][] public_input_evaluations;
-        // 0x1e0
-        uint256 eval_proof_constant_offset;
-    }
-
-    struct gate_argument_local_vars_updated {
-        // 0x0
-        uint256 modulus;
-        // 0x20
-        uint256 theta;
-        // 0x40
-        uint256 constraint_eval;
-        // 0x60
-        uint256 gate_eval;
-        // 0x80
-        uint256[] witness_evaluations_offsets;
         // 0xa0
-        uint256[] selector_evaluations;
-        // 0xc0
-        uint256 eval_proof_witness_offset;
-        // 0xe0
-        uint256 eval_proof_selector_offset;
-        // 0x100
-        uint256 gates_evaluation;
-        // 0x120
         uint256 theta_acc;
-        // 0x140
-        uint256 selector_evaluations_offset;
-        // 0x160
-        uint256 offset;
-        // 0x180
+        // 0xc0
         uint256[][] witness_evaluations;
-        // 0x1a0
-        uint256[][] constant_evaluations;
-        // 0x1c0
-        uint256[][] public_input_evaluations;
-        // 0x1e0
-        uint256 eval_proof_constant_offset;
+        // 0xe0
+        uint256[] constant_evaluations;
+        // 0x100
+        uint256[] selector_evaluations;
+        // 0x120
+        uint256[] public_input_evaluations;
+        // 0x140
+        uint256 offset;   
     }
 }

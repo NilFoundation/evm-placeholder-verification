@@ -230,8 +230,25 @@ library merkle_verifier {
         assembly {
             root := calldataload(add(blob.offset, add(offset, ROOT_OFFSET)))
         }
-//        require(false, logging.uint2decstr(depth));
         result = (verified_data == root);
+    }
+    
+    // We store merkle root as an octet vector. At first length==0x20 is stored.
+    // We should skip it.
+    // TODO: this function should return bytes32
+    function get_merkle_root_from_blob(bytes calldata blob, uint256 merkle_root_offset)
+    internal pure returns(uint256 root){
+        assembly {
+            root := calldataload(add(blob.offset, add(merkle_root_offset, 0x8)))
+        }
+    }
+
+    // TODO: This function should return bytes32
+    function get_merkle_root_from_proof(bytes calldata blob, uint256 merkle_proof_offset)
+    internal pure returns(uint256 root){
+        assembly {
+            root := calldataload(add(blob.offset, add(merkle_proof_offset, ROOT_OFFSET)))
+        }
     }
 
     function parse_verify_merkle_proof_be(bytes calldata blob, uint256 offset, bytes32 verified_data)

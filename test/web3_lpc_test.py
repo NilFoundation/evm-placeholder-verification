@@ -7,6 +7,7 @@ from pathlib import Path
 from web3_test import find_compiled_contract, print_tx_info
 import sys
 import shutil
+import json
 
 w3 = Web3(Web3.HTTPProvider('http://127.0.0.1:8545'))
 w3.middleware_onion.inject(geth_poa_middleware, layer=0)
@@ -24,208 +25,92 @@ def init_profiling():
     else:
         shutil.copyfile(contracts_dir+"/profiling_enabled.sol", contracts_dir+"/profiling.sol")
 
+def load_params(proof_file, params_file):
+    jsonf = open(params_file);
+    parsed_json = json.load(jsonf);
+    jsonf.close()
+    
+    params = dict()
+
+    params['init_params'] = []
+    params['init_params'].append(parsed_json["modulus"])
+    params['init_params'].append(parsed_json["r"])
+    params['init_params'].append(parsed_json["max_degree"])
+    params['init_params'].append(parsed_json["lambda"])
+    params['init_params'].append(parsed_json["omega"])
+    params['init_params'].append(len(parsed_json["D_omegas"]))
+    params['init_params'].extend(parsed_json["D_omegas"])
+    params['init_params'].append(len(parsed_json["step_list"]))
+    params['init_params'].extend(parsed_json["step_list"])
+    params['init_params'].append(len(parsed_json["batches_sizes"]))
+    params['init_params'].extend(parsed_json["batches_sizes"])
+
+    params['evaluation_points'] = parsed_json["evaluation_points"];
+
+    f = open(proof_file)
+    params["proof"] = f.read()
+    f.close()
+
+    if 'log_file' in parsed_json.keys() :
+        params['log_file'] = parsed_json['log_file'];
+    else:
+        params['log_file'] = "lpc.log";
+
+    return params
+
 def init_basic_test():
     params = dict()
+    params = load_params(
+        base_path + "test/data/lpc_tests/lpc_basic_test.data",
+        base_path + "test/data/lpc_tests/lpc_basic_test.json"
+    )
     params['_test_name'] = "Lpc basic verification test"
-    f = open(base_path + '/test/data/lpc_basic_test.txt')
-    params["proof"] = f.read()
-    f.close()
-    params['init_transcript'] = '0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
-
-    params['init_params'] = []
-    params['init_params'].append(
-        52435875175126190479447740508185965837690552500527637822603658699938581184513)  # modulus
-    params['init_params'].append(3)  # r
-    params['init_params'].append(15)  # max_degree
-    params['init_params'].append(1)  # leaf_size
-    params['init_params'].append(2)  # lambda
-
-    D_omegas = [
-        14788168760825820622209131888203028446852016562542525606630160374691593895118,
-        23674694431658770659612952115660802947967373701506253797663184111817857449850,
-        3465144826073652318776269530687742778270252468765361963008
-    ]
-
-    params['init_params'].append(len(D_omegas))
-    params['init_params'].extend(D_omegas)  # Domain
-
-    q = []
-    q.append(0)
-    q.append(0)
-    q.append(1)
-    params['init_params'].append(len(q))
-    params['init_params'].extend(q)  # q
-
-    step_list = [];
-    step_list.append(1);
-    step_list.append(1);
-    step_list.append(1);
-    params['init_params'].append(len(step_list))
-    params['init_params'].extend(step_list)  # step_list
-
-    params['init_params'].append(
-        26217937587563095239723870254092982918845276250263818911301829349969290592257)  # const 1/2
-
-    params['evaluation_points'] = [[7, ], ]
-
     return params
-
-
-def init_batched_test():
-    params = dict()
-    params['_test_name'] = "Lpc batched verification test"
-    f = open(base_path + 'test/data/lpc_batched_basic_test.txt')
-    params["proof"] = f.read()
-    f.close()
-    params['init_transcript'] = '0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
-
-    params['init_params'] = []
-    params['init_params'].append(
-        52435875175126190479447740508185965837690552500527637822603658699938581184513)  # modulus
-    params['init_params'].append(3)  # r
-    params['init_params'].append(15)  # max_degree
-    params['init_params'].append(2)  # leaf_size
-    params['init_params'].append(2)  # lambda
-
-    D_omegas = [
-        14788168760825820622209131888203028446852016562542525606630160374691593895118,
-        23674694431658770659612952115660802947967373701506253797663184111817857449850,
-        3465144826073652318776269530687742778270252468765361963008
-    ]
-
-    params['init_params'].append(len(D_omegas))
-    params['init_params'].extend(D_omegas)  # Domain
-
-    q = []
-    q.append(0)
-    q.append(0)
-    q.append(1)
-    params['init_params'].append(len(q))
-    params['init_params'].extend(q)  # q
-
-    step_list = [];
-    step_list.append(1);
-    step_list.append(1);
-    step_list.append(1);
-    params['init_params'].append(len(step_list))
-    params['init_params'].extend(step_list)  # step_list
-
-    params['init_params'].append(
-        26217937587563095239723870254092982918845276250263818911301829349969290592257)  # const 1/2
-
-    params['evaluation_points'] = [[7, ], [7, ]]
-
-    return params
-
 
 def init_skipping_layers_test():
     params = dict()
-    params['_test_name'] = "Lpc verification skipping layers test (case 1)"
-    test_path = Path(base_path + 'test/data/lpc_skipping_layers_test.txt')
-    if not test_path.is_file():
-        print("Non-existing test file")
-        return
-    f = open(test_path)
-    params["proof"] = f.read()
-    f.close()
-
-    params['init_transcript'] = '0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
-
-    params['init_params'] = []
-    params['init_params'].append(
-        52435875175126190479447740508185965837690552500527637822603658699938581184513)  # modulus
-    params['init_params'].append(10)  # r
-    params['init_params'].append(2047)  # max_degree
-    params['init_params'].append(1)  # leaf_size
-    params['init_params'].append(2)  # lambda
-
-    D_omegas = [
-        49307615728544765012166121802278658070711169839041683575071795236746050763237,
-        22781213702924172180523978385542388841346373992886390990881355510284839737428,
-        4214636447306890335450803789410475782380792963881561516561680164772024173390,
-        36007022166693598376559747923784822035233416720563672082740011604939309541707,
-        47309214877430199588914062438791732591241783999377560080318349803002842391998,
-        31519469946562159605140591558550197856588417350474800936898404023113662197331,
-        36581797046584068049060372878520385032448812009597153775348195406694427778894,
-        14788168760825820622209131888203028446852016562542525606630160374691593895118,
-        23674694431658770659612952115660802947967373701506253797663184111817857449850,
-        3465144826073652318776269530687742778270252468765361963008
-    ]
-    params['init_params'].append(len(D_omegas))
-    params['init_params'].extend(D_omegas)
-
-    q = []
-    q.append(0)
-    q.append(0)
-    q.append(1)
-    params['init_params'].append(len(q))
-    params['init_params'].extend(q)
-
-    step_list = [];
-    step_list.append(2);
-    step_list.append(1);
-    step_list.append(1);
-    step_list.append(1);
-    step_list.append(4);
-    step_list.append(1);
-    params['init_params'].append(len(step_list))
-    params['init_params'].extend(step_list)  # step_list
-
-    params['evaluation_points'] = [[7, ]]
-
+    params = load_params(
+        base_path + "test/data/lpc_tests/lpc_skipping_layers_test.data",
+        base_path + "test/data/lpc_tests/lpc_skipping_layers_test.json"
+    )
+    params['_test_name'] = "Lpc skipping layers verification test"
     return params
 
-
-def init_smaller_r_test():
+def init_batches_num_3_test():
     params = dict()
-    params['_test_name'] = "Lpc smaller r verification test"
-    f = open(base_path + 'test/data/lpc_smaller_r_test.txt')
-    params["proof"] = f.read()
-    f.close()
-    params['init_transcript'] = '0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
-
-    params['init_params'] = []
-    params['init_params'].append(
-        52435875175126190479447740508185965837690552500527637822603658699938581184513)  # modulus
-    params['init_params'].append(4)  # r - smaller by 2
-    params['init_params'].append(127)  # max_degree
-    params['init_params'].append(1)  # leaf_size
-    params['init_params'].append(2)  # lambda
-
-    D_omegas = [
-        47309214877430199588914062438791732591241783999377560080318349803002842391998,
-        31519469946562159605140591558550197856588417350474800936898404023113662197331,
-        36581797046584068049060372878520385032448812009597153775348195406694427778894,
-        14788168760825820622209131888203028446852016562542525606630160374691593895118,
-        23674694431658770659612952115660802947967373701506253797663184111817857449850,
-        3465144826073652318776269530687742778270252468765361963008,
-    ]
-
-    params['init_params'].append(len(D_omegas))
-    params['init_params'].extend(D_omegas)  # Domain
-
-    q = []
-    q.append(0)
-    q.append(0)
-    q.append(1)
-    params['init_params'].append(len(q))
-    params['init_params'].extend(q)  # q
-
-    step_list = [];
-    step_list.append(1);
-    step_list.append(1);
-    step_list.append(1);
-    step_list.append(1);
-    params['init_params'].append(len(step_list))
-    params['init_params'].extend(step_list)  # step_list
-
-    params['init_params'].append(
-        26217937587563095239723870254092982918845276250263818911301829349969290592257)  # const 1/2
-
-    params['evaluation_points'] = [[7, ], ]
-
+    params = load_params(
+        base_path + "test/data/lpc_tests/lpc_batches_num_3_test.data",
+        base_path + "test/data/lpc_tests/lpc_batches_num_3_test.json"
+    )
+    params['_test_name'] = "Lpc batches_num=3 verification test"
     return params
 
+def init_eval_points_test():
+    params = dict()
+    params = load_params(
+        base_path + "test/data/lpc_tests/lpc_eval_points_test.data",
+        base_path + "test/data/lpc_tests/lpc_eval_points_test.json"
+    )
+    params['_test_name'] = "Lpc different evaluation points verification test"
+    return params
+
+def init_eval_point2_test():
+    params = dict()
+    params = load_params(
+        base_path + "test/data/lpc_tests/lpc_eval_point2_test.data",
+        base_path + "test/data/lpc_tests/lpc_eval_point2_test.json"
+    )
+    params['_test_name'] = "Lpc evaluation point 2 verification test"
+    return params
+
+def init_eval_point3_test():
+    params = dict()
+    params = load_params(
+        base_path + "test/data/lpc_tests/lpc_eval_point3_test.data",
+        base_path + "test/data/lpc_tests/lpc_eval_point3_test.json"
+    )
+    params['_test_name'] = "Lpc evaluation point 3 verification test"
+    return params
 
 if __name__ == '__main__':
     solcx.install_solc('0.8.12')
@@ -249,62 +134,76 @@ if __name__ == '__main__':
     contract_inst = w3.eth.contract(address=deploy_tx_receipt.contractAddress, abi=abi)
 
     if "1" in sys.argv:
-        print("Basic test")
         params = init_basic_test()
         run_tx_hash = contract_inst.functions.batched_verify(
-            params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
+            params['proof'],  params['init_params'], params['evaluation_points']
+        ).transact()
         run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
         print_tx_info(w3, run_tx_receipt, params['_test_name'])
-
     if "2" in sys.argv:
-        print("Skipping layers test")
         params = init_skipping_layers_test()
         run_tx_hash = contract_inst.functions.batched_verify(
-            params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
+            params['proof'], params['init_params'], params['evaluation_points']).transact()
         run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
         print_tx_info(w3, run_tx_receipt, params['_test_name'])
-
     if "3" in sys.argv:
-        print("Batched test")
-        params = init_batched_test()
+        params = init_batches_num_3_test()
         run_tx_hash = contract_inst.functions.batched_verify(
-            params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
+            params['proof'], params['init_params'], params['evaluation_points']).transact()
         run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
         print_tx_info(w3, run_tx_receipt, params['_test_name'])
-
     if "4" in sys.argv:
-        print("Smaller r test")
-        params = init_smaller_r_test()
+        params = init_eval_points_test()
         run_tx_hash = contract_inst.functions.batched_verify(
-            params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
+            params['proof'], params['init_params'], params['evaluation_points']).transact()
+        run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
+        print_tx_info(w3, run_tx_receipt, params['_test_name'])
+    if "5" in sys.argv:
+        params = init_eval_point2_test()
+        run_tx_hash = contract_inst.functions.batched_verify(
+            params['proof'], params['init_params'], params['evaluation_points']).transact()
+        run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
+        print_tx_info(w3, run_tx_receipt, params['_test_name'])
+    if "6" in sys.argv:
+        params = init_eval_point3_test()
+        run_tx_hash = contract_inst.functions.batched_verify(
+            params['proof'], params['init_params'], params['evaluation_points']).transact()
         run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
         print_tx_info(w3, run_tx_receipt, params['_test_name'])
 
-    if "1" not in sys.argv and "2" not in sys.argv and "3" not in sys.argv and "4" not in sys.argv:
-        print("Basic test")
+    if "1" not in sys.argv and "2" not in sys.argv and "3" not in sys.argv and "4" not in sys.argv and "5" not in sys.argv and "6" not in sys.argv:
         params = init_basic_test()
         run_tx_hash = contract_inst.functions.batched_verify(
-            params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
+            params['proof'],  params['init_params'], params['evaluation_points']).transact()
         run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
         print_tx_info(w3, run_tx_receipt, params['_test_name'])
-
-        print("Skipping layers test")
+        
         params = init_skipping_layers_test()
         run_tx_hash = contract_inst.functions.batched_verify(
-            params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
+            params['proof'],  params['init_params'], params['evaluation_points']).transact()
         run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
         print_tx_info(w3, run_tx_receipt, params['_test_name'])
 
-        print("Batched test")
-        params = init_batched_test()
+        params = init_batches_num_3_test()
         run_tx_hash = contract_inst.functions.batched_verify(
-            params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
+            params['proof'],  params['init_params'], params['evaluation_points']).transact()
         run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
         print_tx_info(w3, run_tx_receipt, params['_test_name'])
 
-        print("Smaller r test")
-        params = init_smaller_r_test()
+        params = init_eval_points_test()
         run_tx_hash = contract_inst.functions.batched_verify(
-            params['proof'], params['init_transcript'], params['init_params'], params['evaluation_points']).transact()
+            params['proof'], params['init_params'], params['evaluation_points']).transact()
+        run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
+        print_tx_info(w3, run_tx_receipt, params['_test_name'])
+
+        params = init_eval_point2_test()
+        run_tx_hash = contract_inst.functions.batched_verify(
+            params['proof'], params['init_params'], params['evaluation_points']).transact()
+        run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
+        print_tx_info(w3, run_tx_receipt, params['_test_name'])
+
+        params = init_eval_point3_test()
+        run_tx_hash = contract_inst.functions.batched_verify(
+            params['proof'], params['init_params'], params['evaluation_points']).transact()
         run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
         print_tx_info(w3, run_tx_receipt, params['_test_name'])

@@ -44,10 +44,10 @@ def write_tx_calldata(w3, tx_receipt, ofname='tx_calldata.txt'):
         f.write(w3.eth.get_transaction(tx_receipt.transactionHash).input)
 
 
-def print_tx_info(w3, tx_receipt, tx_name):
-    print(tx_name)
-    print(tx_receipt.transactionHash.hex())
-    print('gasUsed =', tx_receipt.gasUsed)
+def print_tx_info(w3, tx_receipt, tx_name, function_name = ""):
+    print(tx_name, ":", function_name)
+    print(f"\t{tx_receipt.transactionHash.hex()}")
+    print("\tgasUsed = ", tx_receipt.gasUsed)
     write_tx_calldata(w3, tx_receipt)
 
 
@@ -57,7 +57,7 @@ def deploy_link_libs(w3, compiled, test_contract_bytecode, linked_libs_names):
         compiled_lib_id, component_lib = find_compiled_contract(compiled, lib_name)
         component_lib_bytecode = component_lib['bin']
         component_lib_abi = component_lib['abi']
-        print(f'Lib {lib_name} bytecode size:', len(component_lib_bytecode) // 2)
+        print(f'\tLib {lib_name} bytecode size:', len(component_lib_bytecode) // 2)
         contract_lib = w3.eth.contract(
             abi=component_lib_abi, bytecode=component_lib_bytecode)
         deploy_lib_tx_hash = contract_lib.constructor().transact()
@@ -66,7 +66,7 @@ def deploy_link_libs(w3, compiled, test_contract_bytecode, linked_libs_names):
             linked_bytecode,
             {compiled_lib_id: deploy_lib_tx_receipt.contractAddress},
             solc_version="0.8.17")
-    print('Bytecode size:', len(linked_bytecode) // 2)
+    print('\tBytecode size:', len(linked_bytecode) // 2)
     return linked_bytecode
 
 
@@ -157,7 +157,8 @@ def print_profiling_log(logs, totalGas, filename):
 
 
 def deploy_contract_and_linked_libs(w3, contract_name, contract_path, linked_libs):
-    print(f'{contracts_dir}/{contract_path}')
+    print(f"Deploy contract {contract_name}");
+    print(f"\tFilename = {contracts_dir}/{contract_path}")
     compiled = solcx.compile_files(
         [f'{contracts_dir}/{contract_path}'],
         allow_paths=[f'{contracts_dir}/'],
@@ -166,7 +167,7 @@ def deploy_contract_and_linked_libs(w3, contract_name, contract_path, linked_lib
         optimize=True,
         optimize_runs=200)
     compiled_test_contract_id, compiled_test_contract_interface = find_compiled_contract(
-        compiled, contract_path)
+        compiled, contract_name)
     bytecode = compiled_test_contract_interface['bin']
     abi = compiled_test_contract_interface['abi']
     bytecode = deploy_link_libs(w3, compiled, bytecode, linked_libs)
@@ -174,7 +175,7 @@ def deploy_contract_and_linked_libs(w3, contract_name, contract_path, linked_lib
     test_contract = w3.eth.contract(abi=abi, bytecode=bytecode)
     deploy_tx_hash = test_contract.constructor().transact()
     deploy_tx_receipt = w3.eth.wait_for_transaction_receipt(deploy_tx_hash)
-    print("Deployment:", deploy_tx_receipt.gasUsed)
+    print("\tDeployment:", deploy_tx_receipt.gasUsed)
 
     contract_inst = w3.eth.contract(
         address=deploy_tx_receipt.contractAddress, abi=abi)
@@ -193,11 +194,11 @@ def do_placeholder_verification_test_via_transact_simple(placeholder_contract_na
 
 
     placeholder_contract_inst,placeholder_contract_deploy_addr = deploy_contract_and_linked_libs(w3,
-                                                                          placeholder_contract_name,
-                                                                          placeholder_contract_path,
-                                                                          placeholder_libs_names)
-
-
+        placeholder_contract_name,
+        placeholder_contract_path,
+        placeholder_libs_names
+    )
+ 
     contract_inst, contract_deploy_addr = deploy_contract_and_linked_libs(w3,
                                                                           contract_name,
                                                                           contract_path,
@@ -209,34 +210,32 @@ def do_placeholder_verification_test_via_transact_simple(placeholder_contract_na
                                                                    gate_argument_linked_libs_names)
 
 
-    run_tx_hash = contract_inst.function.initialize(placeholder_contract_deploy_addr).transact()
+    run_tx_hash = contract_inst.functions.initialize(placeholder_contract_deploy_addr).transact()
     run_tx_receipt =  w3.eth.wait_for_transaction_receipt(run_tx_hash)
-    print_tx_info(w3, run_tx_receipt, params['_test_name'])
-
-
     params = init_test_params_func()
+    print_tx_info(w3, run_tx_receipt, params['_test_name'], "initialize")
 
     run_tx_hash = contract_inst.functions.verify(
         params['proof'],
         params['init_params'],
         params['columns_rotations'],
-        gate_arg_addr).transact()
-
+        gate_arg_addr
+    ).transact()
     run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
-    print_tx_info(w3, run_tx_receipt, params['_test_name'])
+    print_tx_info(w3, run_tx_receipt, params['_test_name'], "verify")
 
-    if "--nolog" not in sys.argv:
-        if hasattr(contract_inst.events, "gas_usage_emit"):
-            logfilename = "logs/log.json"
-            if "log_file" in params.keys():
-                logfilename = params["log_file"]
-            logfilename = base_path + logfilename
-            print("Print log in ", logfilename)
-            print_profiling_log(contract_inst.events.gas_usage_emit.getLogs(), run_tx_receipt.gasUsed, logfilename)
-        else:
-            print("No logging events in solidity abi")
-    else:
-        print("Logging disabled")
+#    if "--nolog" not in sys.argv:
+#        if hasattr(contract_inst.events, "gas_usage_emit"):
+#            logfilename = "logs/log.json"
+#            if "log_file" in params.keys():
+#                logfilename = params["log_file"]
+#            logfilename = base_path + logfilename
+#            print("Print log in ", logfilename)
+#            print_profiling_log(contract_inst.events.gas_usage_emit.getLogs(), run_tx_receipt.gasUsed, logfilename)
+#        else:
+#            print("No logging events in solidity abi")
+#    else:
+#        print("Logging disabled")
 
 
 def do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path,
