@@ -182,27 +182,41 @@ def deploy_contract_and_linked_libs(w3, contract_name, contract_path, linked_lib
 
     return contract_inst, deploy_tx_receipt.contractAddress
 
+def deploy_placeholder_contract(
+    placeholder_contract_name, placeholder_contract_path,placeholder_libs_names,
+    contract_name, contract_path, contract_linked_libs_names,
+):
+    w3 = init_connection()
 
-def do_placeholder_verification_test_via_transact_simple(placeholder_contract_name, placeholder_contract_path,placeholder_libs_names,
-                                                         contract_name, contract_path, contract_linked_libs_names,
-                                                         gate_argument_contract_name, gate_argument_contract_path,
-                                                         gate_argument_linked_libs_names,
-                                                         init_test_params_func):
+    placeholder_contract_inst,placeholder_contract_deploy_addr = deploy_contract_and_linked_libs(
+        w3, placeholder_contract_name,  placeholder_contract_path, placeholder_libs_names
+    )
+ 
+    contract_inst, contract_deploy_addr = deploy_contract_and_linked_libs(
+        w3, contract_name, contract_path, contract_linked_libs_names
+    )
+
+    run_tx_hash = contract_inst.functions.initialize(placeholder_contract_deploy_addr).transact()
+    run_tx_receipt =  w3.eth.wait_for_transaction_receipt(run_tx_hash)
+    print_tx_info(w3, run_tx_receipt, "Placeholder contract deploy", "initialize")
+    return contract_inst
+
+
+def do_placeholder_verification_test_via_transact_simple(
+    placeholder_contract_name, placeholder_contract_path,placeholder_libs_names,
+    contract_name, contract_path, contract_linked_libs_names,
+    gate_argument_contract_name, gate_argument_contract_path,
+    gate_argument_linked_libs_names,
+    init_test_params_func
+):
     init_profiling()
     w3 = init_connection()
     solcx.install_solc('0.8.17')
 
-
-    placeholder_contract_inst,placeholder_contract_deploy_addr = deploy_contract_and_linked_libs(w3,
-        placeholder_contract_name,
-        placeholder_contract_path,
-        placeholder_libs_names
+    placeholder_inst = deploy_placeholder_contract(
+        placeholder_contract_name, placeholder_contract_path,placeholder_libs_names,
+        contract_name, contract_path, contract_linked_libs_names,
     )
- 
-    contract_inst, contract_deploy_addr = deploy_contract_and_linked_libs(w3,
-                                                                          contract_name,
-                                                                          contract_path,
-                                                                          contract_linked_libs_names)
 
     gate_arg_inst, gate_arg_addr = deploy_contract_and_linked_libs(w3,
                                                                    gate_argument_contract_name,
@@ -224,23 +238,36 @@ def do_placeholder_verification_test_via_transact_simple(placeholder_contract_na
     run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
     print_tx_info(w3, run_tx_receipt, params['_test_name'], "verify")
 
-#    if "--nolog" not in sys.argv:
-#        if hasattr(contract_inst.events, "gas_usage_emit"):
-#            logfilename = "logs/log.json"
-#            if "log_file" in params.keys():
-#                logfilename = params["log_file"]
-#            logfilename = base_path + logfilename
-#            print("Print log in ", logfilename)
-#            print_profiling_log(contract_inst.events.gas_usage_emit.getLogs(), run_tx_receipt.gasUsed, logfilename)
-#        else:
-#            print("No logging events in solidity abi")
-#    else:
-#        print("Logging disabled")
 
+def do_placeholder_verification_test_via_transact_deployed_contract(
+    contract_inst,
+    gate_argument_contract_name, gate_argument_contract_path, gate_argument_linked_libs_names,
+    init_test_params_func
+):
+    init_profiling()
+    w3 = init_connection()
+    solcx.install_solc('0.8.17')
 
-def do_placeholder_verification_test_via_transact(test_contract_name, test_contract_path,
-                                                  linked_gates_entry_libs_names,
-                                                  linked_gates_libs_names, init_test_params_func):
+    gate_arg_inst, gate_arg_addr = deploy_contract_and_linked_libs(w3,
+                                                                   gate_argument_contract_name,
+                                                                   gate_argument_contract_path,
+                                                                   gate_argument_linked_libs_names)
+
+    params = init_test_params_func()
+    run_tx_hash = contract_inst.functions.verify(
+        params['proof'],
+        params['init_params'],
+        params['columns_rotations'],
+        gate_arg_addr
+    ).transact()
+    run_tx_receipt = w3.eth.wait_for_transaction_receipt(run_tx_hash)
+    print_tx_info(w3, run_tx_receipt, params['_test_name'], "verify")
+
+def do_placeholder_verification_test_via_transact(
+    test_contract_name, test_contract_path,
+    linked_gates_entry_libs_names,
+    linked_gates_libs_names, init_test_params_func
+):
     """
     linked_gates_entry_libs_names - first external lib level
     linked_gates_libs_names - second external lib level (external for 1st level)
