@@ -29,7 +29,7 @@ import "../placeholder/init_vars.sol";
 import "../interfaces/verifier.sol";
 import "../interfaces/gate_argument.sol";
 
-contract PlaceholderVerifier is IVerifier {
+contract PlaceholderVerifier is IPlaceholderVerifier {
     // event renamed to prevent conflicts with logging system
     event gas_usage_emit(uint256 gas_usage);
 
