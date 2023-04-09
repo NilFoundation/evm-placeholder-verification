@@ -24,7 +24,7 @@ import "../cryptography/transcript.sol";
 
 import "../placeholder/proof_map_parser.sol";
 import "../placeholder/placeholder_verifier.sol";
-import "../placeholder/init_vars.sol";
+import "../placeholder/verifier_state.sol";
 
 import "../interfaces/verifier.sol";
 import "../interfaces/gate_argument.sol";
@@ -38,70 +38,8 @@ contract PlaceholderVerifier is IPlaceholderVerifier {
         uint256 end;
     }
 
-    struct verifier_state {
-        uint256 proofs_num;
-        uint256 proof_offset;
-        uint256 proof_size;
-        uint256 ind;
-
-        types.fri_params_type fri_params;
-        types.placeholder_proof_map proof_map;
-        types.transcript_data tr_state;
-        types.placeholder_common_data common_data;
-        types.arithmetization_params arithmetization_params;
-    }
-
-    function init_vars(verifier_state memory vars, uint256[] memory init_params, int256[][] memory columns_rotations) internal view {
-        uint256 idx = 0;
-        vars.fri_params.modulus = init_params[idx++];
-        vars.fri_params.r = init_params[idx++];
-        vars.fri_params.max_degree = init_params[idx++];
-        vars.fri_params.lambda = init_params[idx++];
-
-        vars.common_data.rows_amount = init_params[idx++];
-        vars.common_data.omega = init_params[idx++];
-        vars.fri_params.max_batch = init_params[idx++];
-        placeholder_proof_map_parser.init(vars.fri_params, vars.fri_params.max_batch);
-
-        vars.common_data.columns_rotations = columns_rotations;
-
-        vars.fri_params.D_omegas = new uint256[](init_params[idx++]);
-        for (uint256 i = 0; i < vars.fri_params.D_omegas.length;) {
-            vars.fri_params.D_omegas[i] = init_params[idx];
-        unchecked{i++;
-            idx++;}
-        }
-        vars.fri_params.q = new uint256[](init_params[idx++]);
-        for (uint256 i = 0; i < vars.fri_params.q.length;) {
-            vars.fri_params.q[i] = init_params[idx];
-        unchecked{i++;
-            idx++;}
-        }
-
-        vars.fri_params.step_list = new uint256[](init_params[idx++]);
-        vars.fri_params.max_step = 0;
-        for (uint256 i = 0; i < vars.fri_params.step_list.length;) {
-            vars.fri_params.step_list[i] = init_params[idx];
-            if (vars.fri_params.step_list[i] > vars.fri_params.max_step)
-                vars.fri_params.max_step = vars.fri_params.step_list[i];
-        unchecked{i++;
-            idx++;}
-        }
-
-    unchecked{
-        idx++;
-        // arithmetization_params length;
-        vars.arithmetization_params.witness_columns = init_params[idx++];
-        vars.arithmetization_params.public_input_columns = init_params[idx++];
-        vars.arithmetization_params.constant_columns = init_params[idx++];
-        vars.arithmetization_params.selector_columns = init_params[idx++];
-        vars.arithmetization_params.permutation_columns = vars.arithmetization_params.witness_columns
-        + vars.arithmetization_params.public_input_columns
-        + vars.arithmetization_params.constant_columns;
-    }
-    }
-
-    function allocate_all(verifier_state memory vars, uint256 max_step, uint256 max_batch) internal view {
+    function allocate_all(verifier_config.config_type memory vars, uint256 max_step, uint256
+        max_batch) internal view {
         uint256 max_coset = 1 << (vars.fri_params.max_step - 1);
 
         vars.fri_params.s_indices = new uint256[](max_coset);
@@ -118,10 +56,10 @@ contract PlaceholderVerifier is IPlaceholderVerifier {
         gas_usage memory gas_usage;
         gas_usage.start = gasleft();
 
-        init_vars.vars_t memory vars;
-        init_vars.init(blob, init_params, columns_rotations, vars);
+        verifier_config.config_type memory vars;
+        verifier_config.init(blob, init_params, columns_rotations, vars);
 
-        types.placeholder_local_variables memory local_vars;
+        types.placeholder_state_type memory local_vars;
 
         // 3. append witness commitments to transcript
         transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
@@ -133,7 +71,7 @@ contract PlaceholderVerifier is IPlaceholderVerifier {
             vars.common_data, local_vars, vars.arithmetization_params);
         // 7. gate argument specific for circuit
         // Wait for better times.
-        types.gate_argument_local_vars memory gate_params;
+        types.gate_argument_state_type memory gate_params;
         gate_params.modulus = vars.fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
         gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_variable_values_offset;

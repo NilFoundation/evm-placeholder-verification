@@ -26,7 +26,7 @@ contract TestPermutationArgument {
     struct test_local_vars {
         types.placeholder_proof_map proof_map;
         uint256 proof_size;
-        types.placeholder_local_variables local_vars;
+        types.placeholder_state_type local_vars;
         types.transcript_data tr_state;
         types.fri_params_type fri_params;
         types.placeholder_common_data common_data;

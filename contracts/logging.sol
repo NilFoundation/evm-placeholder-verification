@@ -18,15 +18,15 @@
 pragma solidity >=0.8.4;
 
 library logging {
-    uint8 constant START_BLOCK_COMMAND_CODE=0;
-    uint8 constant END_BLOCK_COMMAND_CODE=1;
-    uint8 constant LOG_MESSAGE_CODE=2;
+    uint8 constant START_BLOCK_COMMAND_CODE = 0;
+    uint8 constant END_BLOCK_COMMAND_CODE = 1;
+    uint8 constant LOG_MESSAGE_CODE = 2;
 
     event gas_usage_emit(uint8 command, string function_name, uint256 gas_usage);
 
     function uint2decstr(uint256 _i)
-        internal pure returns (string memory _uintAsString)
-    { 
+    internal pure returns (string memory _uintAsString)
+    {
         if (_i == 0) {
             return "0";
         }
@@ -62,8 +62,9 @@ library logging {
         while (i != 0) {
             uint256 curr = (i & mask);
             bstr[--k] = curr > 9
-                ? bytes1(uint8(55 + curr))
-                : bytes1(uint8(48 + curr)); // 55 = 65 - 10
+            ? bytes1(uint8(55 + curr))
+            : bytes1(uint8(48 + curr));
+            // 55 = 65 - 10
             i = i >> 4;
         }
         return string(bstr);
@@ -72,7 +73,7 @@ library logging {
     function memory_chunk256_to_hexstr(bytes memory blob, uint256 offset) internal pure returns (string memory){
         uint256 logvar;
         assembly {
-            logvar:=mload(add(blob, offset))
+            logvar := mload(add(blob, offset))
         }
         return logging.uint2hexstr(logvar);
     }

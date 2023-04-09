@@ -59,13 +59,12 @@ library placeholder_verifier {
     uint256 constant WITNESS_EVALUATION_POINTS_OFFSET = 0x2e0;
     uint256 constant STATUS_OFFSET = 0x3a0;
 
-    function verify_proof_be(
-        bytes calldata blob,
+    function verify_proof_be(bytes calldata blob,
         types.transcript_data memory tr_state,
         types.placeholder_proof_map memory proof_map,
         types.fri_params_type memory fri_params,
         types.placeholder_common_data memory common_data,
-        types.placeholder_local_variables memory local_vars,
+        types.placeholder_state_type memory local_vars,
         types.arithmetization_params memory ar_params
     ) external returns (bool result) {
         profiling.start_block("PV::verify_proof_be");

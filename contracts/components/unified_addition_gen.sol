@@ -40,7 +40,7 @@ library unified_addition_component_gen is IGateArgument {
     // TODO: columns_rotations could be hard-coded
     function evaluate_gates_be(
         bytes calldata blob,
-        types.gate_argument_local_vars memory gate_params,
+        types.gate_argument_state_type memory gate_params,
         types.arithmetization_params memory ar_params
     ) internal pure returns (uint256 gates_evaluation) {
         // TODO: check witnesses number in proof

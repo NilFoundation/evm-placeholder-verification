@@ -23,18 +23,22 @@ import "../cryptography/transcript.sol";
 import "./proof_map_parser.sol";
 import "../logging.sol";
 
-library init_vars {
-    struct vars_t {
+library verifier_config {
+    struct config_type {
+        uint256 proofs_num;
+        uint256 proof_offset;
+        uint256 proof_size;
+        uint256 idx;
+
         types.fri_params_type fri_params;
         types.placeholder_proof_map proof_map;
-        uint256 proof_size;
         types.transcript_data tr_state;
         types.placeholder_common_data common_data;
         types.arithmetization_params arithmetization_params;
     }
 
     function init(bytes calldata blob, uint256[] calldata init_params,
-        int256[][] calldata columns_rotations, vars_t memory vars) internal view {
+        int256[][] calldata columns_rotations, config_type memory vars) internal view {
 
         (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser.parse_be(blob, 0);
         require(vars.proof_size == blob.length, "Proof is not correct!");

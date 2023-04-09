@@ -199,7 +199,7 @@ library types {
         uint256[] precomputed_indices;
     }
 
-    struct fri_local_vars_type {
+    struct fri_state_type {
         // some internal variables used in assemblys
         // 0x0
         uint256 s1;                                     // It's extremely important, it's the first field.
@@ -300,7 +300,7 @@ library types {
         int256[][] columns_rotations;
     }
 
-    struct placeholder_local_variables {
+    struct placeholder_state_type {
         // 0x0
         uint256 len;
         // 0x20
@@ -372,7 +372,7 @@ library types {
         uint256 permutation_columns;
     }
 
-    struct gate_argument_local_vars {
+    struct gate_argument_state_type {
         // 0x0
         uint256 modulus;
         // 0x20
@@ -407,7 +407,7 @@ library types {
         uint256 eval_proof_constant_offset;
     }
 
-    struct gate_argument_local_vars_updated {
+    struct gate_argument_state_type_updated {
         // 0x0
         uint256 modulus;
         // 0x20

@@ -32,8 +32,8 @@ library batched_fri_verifier {
     uint256 constant FRI_PARAMS_BYTES_B_OFFSET = 0x260;
     uint256 constant FRI_PARAMS_COEFFS_OFFSET = 0x280;
 
-    uint256 constant S1_OFFSET = 0x00;                                      
-    uint256 constant X_OFFSET = 0x20;                                      
+    uint256 constant S1_OFFSET = 0x00;
+    uint256 constant X_OFFSET = 0x20;
     uint256 constant ALPHA_OFFSET = 0x40;                                   // alpha challenge
     uint256 constant COEFFS_OFFSET = 0x60;
     uint256 constant Y_OFFSET = 0x80;
@@ -98,7 +98,7 @@ library batched_fri_verifier {
         result_offset = merkle_verifier.skip_merkle_proof_be(blob, offset);
         // round_proof.T_root
         result_offset = basic_marshalling.skip_octet_vector_32_be(result_offset);
-    }    
+    }
 
     //use this function only for preparing data for transcript
     function skip_to_round_proof_T_root_be(bytes calldata blob, uint256 offset)
@@ -150,7 +150,7 @@ library batched_fri_verifier {
     // Get number of round proofs in FRI-proof. 
     // Offset is set at the begining of FRI-proof.
     function get_round_proofs_n_be(bytes calldata blob, uint256 offset)
-    internal pure returns (uint256 n){
+    internal pure returns (uint256 n) {
         // round_proofs
         n = basic_marshalling.get_length(blob, offset);
     }
@@ -187,18 +187,17 @@ library batched_fri_verifier {
 
     // if x_index is index of x, then paired_index is index of -x
     function get_paired_index(uint256 x_index, uint256 domain_size)
-    internal pure returns(uint256 result ){
+    internal pure returns(uint256 result) {
         unchecked{ result = (x_index + (domain_size >> 1)) & (domain_size - 1); }
     }
 
-    function calculate_s(
-        types.fri_params_type memory fri_params,
-        types.fri_local_vars_type memory local_vars) internal view{
+    function calculate_s(types.fri_params_type memory fri_params,
+        types.fri_state_type memory local_vars) internal view {
 
         unchecked{ local_vars.indices_size = 1 << (local_vars.r_step - 1); } // TODO to roud_local_vars
         fri_params.s[0] = local_vars.x;
         if( local_vars.indices_size > 1){
-            uint256 base_index = local_vars.domain_size >> 2; 
+            uint256 base_index = local_vars.domain_size >> 2;
             uint256 prev_half_size = 1;
             uint256 i = 1;
             uint256 j;
@@ -219,7 +218,7 @@ library batched_fri_verifier {
     }
 
     // calculate indices for coset S = {s\in D| s^(2^fri_step) == x_next}
-    function get_folded_index(uint256 x_index, uint256 fri_step, uint256 domain_size_mod) 
+    function get_folded_index(uint256 x_index, uint256 fri_step, uint256 domain_size_mod)
     internal pure returns(uint256 result){
         unchecked{result = x_index & (domain_size_mod >> fri_step);}
     }
@@ -227,9 +226,9 @@ library batched_fri_verifier {
     // Reorder data from values. 
     // local_vars: values_offset, fri_step, domain_size, i_step, y_j_offset,
     function prepare_leaf_data(
-        bytes calldata blob, 
+        bytes calldata blob,
         types.fri_params_type memory fri_params,
-        types.fri_local_vars_type memory local_vars )
+        types.fri_state_type memory local_vars )
     internal  pure
     {
         // Check length parameters correctness
@@ -244,10 +243,10 @@ library batched_fri_verifier {
         uint256 prev_half_size;
         uint256 i;
         uint256 j;
-        
+
         if( local_vars.indices_size > 1){
             unchecked{
-                base_index = local_vars.domain_size >> 2; 
+                base_index = local_vars.domain_size >> 2;
                 prev_half_size = 1;
                 i = 1;
                 local_vars.newind = fri_params.D_omegas.length - 1;
@@ -301,28 +300,28 @@ library batched_fri_verifier {
                 if(fri_params.s_indices[local_vars.newind] == fri_params.tmp_arr[local_vars.y_ind]){
                     assembly{
                         mstore(
-                            add(mload(add(fri_params, FRI_PARAMS_BYTES_B_OFFSET)),first_offset), 
+                            add(mload(add(fri_params, FRI_PARAMS_BYTES_B_OFFSET)),first_offset),
                             calldataload(add(blob.offset, y_offset))
                         )
                         mstore(
-                            add(mload(add(fri_params, FRI_PARAMS_BYTES_B_OFFSET)),add(first_offset, 0x20)), 
+                            add(mload(add(fri_params, FRI_PARAMS_BYTES_B_OFFSET)),add(first_offset, 0x20)),
                             calldataload(add(blob.offset, add(y_offset, 0x20)))
                         )
                     }
                 } else {
                     assembly{
                         mstore(
-                            add(mload(add(fri_params, FRI_PARAMS_BYTES_B_OFFSET)),first_offset), 
+                            add(mload(add(fri_params, FRI_PARAMS_BYTES_B_OFFSET)),first_offset),
                             calldataload(add(blob.offset, add(y_offset, 0x20)))
                         )
                         mstore(
-                            add(mload(add(fri_params, FRI_PARAMS_BYTES_B_OFFSET)),add(first_offset, 0x20)), 
+                            add(mload(add(fri_params, FRI_PARAMS_BYTES_B_OFFSET)),add(first_offset, 0x20)),
                             calldataload(add(blob.offset, y_offset))
                         )
                     }
                 }
-                unchecked{ 
-                    local_vars.y_ind++; 
+                unchecked{
+                    local_vars.y_ind++;
                     first_offset += 0x40;
                 }
             }
@@ -343,10 +342,12 @@ library batched_fri_verifier {
             unchecked{ i++; }
         }
         // values
-        result_offset = basic_marshalling.skip_v_of_vectors_of_vectors_of_uint256_be(blob, result_offset);        
+        result_offset = basic_marshalling.skip_v_of_vectors_of_vectors_of_uint256_be(blob, result_offset);
     }
 
-    function init_local_vars(bytes calldata blob, uint256 offset, types.fri_params_type memory  fri_params, types.fri_local_vars_type memory local_vars)
+    function init_local_vars(bytes calldata blob, uint256 offset,
+        types.fri_params_type memory fri_params,
+        types.fri_state_type memory local_vars)
     internal pure {
         // Fri proof fields
         local_vars.final_poly_offset = skip_to_final_poly(blob, offset);  // one for all rounds
@@ -375,10 +376,12 @@ library batched_fri_verifier {
 
         assembly{
             mstore(add(local_vars, COEFFS_OFFSET), add(mload(add(fri_params, FRI_PARAMS_COEFFS_OFFSET)), 0x20))
-        }    
+        }
     }
 
-    function step_local_vars(bytes calldata blob, uint256 offset, types.fri_params_type memory  fri_params, types.fri_local_vars_type memory local_vars)
+    function step_local_vars(bytes calldata blob, uint256 offset,
+        types.fri_params_type memory  fri_params,
+        types.fri_state_type memory local_vars)
     internal pure {
         // Save useful data from previous step
         local_vars.y_offset = local_vars.round_proof_values_offset + 0x10;
@@ -388,15 +391,15 @@ library batched_fri_verifier {
 
         // Fri round proof fields (for step)
         // move to next round proof
-        local_vars.round_proof_offset = skip_round_proof_be(blob, local_vars.round_proof_offset); 
+        local_vars.round_proof_offset = skip_round_proof_be(blob, local_vars.round_proof_offset);
         // move to next T_root
-        local_vars.round_proof_T_root_offset = skip_to_round_proof_T_root_be(blob, local_vars.round_proof_offset); 
+        local_vars.round_proof_T_root_offset = skip_to_round_proof_T_root_be(blob, local_vars.round_proof_offset);
         // move to next colinear path
-        local_vars.round_proof_colinear_path_offset = skip_to_round_proof_colinear_path(blob, local_vars.round_proof_offset);  
+        local_vars.round_proof_colinear_path_offset = skip_to_round_proof_colinear_path(blob, local_vars.round_proof_offset);
         // current round proof colinear_path root offset for transcript
-        local_vars.round_proof_colinear_path_T_root_offset = skip_to_round_proof_colinear_path_T_root_be(blob, local_vars.round_proof_offset);  
+        local_vars.round_proof_colinear_path_T_root_offset = skip_to_round_proof_colinear_path_T_root_be(blob, local_vars.round_proof_offset);
         // offset item in fri_proof.values structure for current round proof
-        local_vars.round_proof_values_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, local_vars.round_proof_values_offset);    
+        local_vars.round_proof_values_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be(blob, local_vars.round_proof_values_offset);
         //round_proof_colinear_value;  // It is the value. Not offset. Have to be computed
         unchecked{local_vars.i_step++;}                                                 // current step
         local_vars.r_step = fri_params.step_list[local_vars.i_step];           // current step
@@ -409,7 +412,9 @@ library batched_fri_verifier {
         unchecked{local_vars.y_size = (1 <<(local_vars.r_step - 1));}
     }
 
-    function round_local_vars(bytes calldata blob, uint256 offset, types.fri_params_type memory  fri_params, types.fri_local_vars_type memory local_vars)
+    function round_local_vars(bytes calldata blob, uint256 offset,
+        types.fri_params_type memory  fri_params,
+        types.fri_state_type memory local_vars)
     internal pure {
         unchecked{
             local_vars.domain_size >>=1;
@@ -434,34 +439,33 @@ library batched_fri_verifier {
         }
     }
 
-    function get_y_from_blob(bytes calldata blob, uint256 p_offset, uint256 y_ind) 
+    function get_y_from_blob(bytes calldata blob, uint256 p_offset, uint256 y_ind)
     internal pure returns( uint256 result ){
         result = basic_marshalling.get_uint256_be(blob, p_offset + (y_ind << 5) + 0x8 );
     }
 
-    function get_evaluated_y_from_blob(
-        bytes calldata blob, 
-        types.fri_params_type memory fri_params, 
-        types.fri_local_vars_type memory local_vars, 
-        uint256 p_offset, 
+    function get_evaluated_y_from_blob(bytes calldata blob,
+        types.fri_params_type memory fri_params,
+        types.fri_state_type memory local_vars,
+        uint256 p_offset,
         uint256 p_ind,
         uint256 y_ind
     )
     internal view returns( uint256 result ){
         if( y_ind&1 == 0){
             result = y_to_y0_for_first_step(
-                fri_params.tmp_arr[y_ind>>1], 
-                get_y_from_blob(blob, p_offset, y_ind), 
-                fri_params.batched_U[p_ind], 
-                fri_params.batched_V[p_ind], 
+                fri_params.tmp_arr[y_ind>>1],
+                get_y_from_blob(blob, p_offset, y_ind),
+                fri_params.batched_U[p_ind],
+                fri_params.batched_V[p_ind],
                 fri_params.modulus
             );
         } else {
             result = y_to_y0_for_first_step(
-                fri_params.modulus - fri_params.tmp_arr[y_ind>>1], 
-                get_y_from_blob(blob, p_offset, y_ind), 
-                fri_params.batched_U[p_ind], 
-                fri_params.batched_V[p_ind], 
+                fri_params.modulus - fri_params.tmp_arr[y_ind>>1],
+                get_y_from_blob(blob, p_offset, y_ind),
+                fri_params.batched_U[p_ind],
+                fri_params.batched_V[p_ind],
                 fri_params.modulus
             );
         }
@@ -469,8 +473,8 @@ library batched_fri_verifier {
 
     function calculate_one_round_step_coeffs(
         types.transcript_data memory tr_state,
-        types.fri_params_type memory fri_params, 
-        types.fri_local_vars_type memory local_vars
+        types.fri_params_type memory fri_params,
+        types.fri_state_type memory local_vars
     ) internal pure{
         local_vars.alpha = transcript.get_field_challenge(tr_state, fri_params.modulus);
         local_vars.s1 = local_vars.x;
@@ -505,8 +509,8 @@ library batched_fri_verifier {
     }
 
     function calculate_first_round_in_step_coeffs(
-        types.fri_params_type memory fri_params, 
-        types.fri_local_vars_type memory local_vars
+        types.fri_params_type memory fri_params,
+        types.fri_state_type memory local_vars
     ) internal pure{
         for( local_vars.y_ind = 0; local_vars.y_ind < local_vars.y_size;){
             local_vars.s1 = fri_params.s[local_vars.y_ind];
@@ -546,8 +550,8 @@ library batched_fri_verifier {
     }
 
     function calculate_middle_round_coeffs(
-        types.fri_params_type memory fri_params, 
-        types.fri_local_vars_type memory local_vars
+        types.fri_params_type memory fri_params,
+        types.fri_state_type memory local_vars
     )internal pure{
         assembly{
             mstore(
@@ -570,9 +574,9 @@ library batched_fri_verifier {
     }
 
     function calculate_final_round_coeffs(
-        types.fri_params_type memory fri_params, 
-        types.fri_local_vars_type memory local_vars
-    )internal pure{
+        types.fri_params_type memory fri_params,
+        types.fri_state_type memory local_vars
+    ) internal pure {
         local_vars.s1 = local_vars.x;
         assembly{
             mstore(
@@ -595,12 +599,12 @@ library batched_fri_verifier {
     }
 
     function multiply_coeffs(
-        types.fri_params_type memory fri_params, 
-        types.fri_local_vars_type memory local_vars
+        types.fri_params_type memory fri_params,
+        types.fri_state_type memory local_vars
     ) internal pure{
         for( local_vars.ind = 0; local_vars.ind < local_vars.mul;){
             assembly{
-                mstore(mload(add(local_vars, COEFFS_OFFSET)), 
+                mstore(mload(add(local_vars, COEFFS_OFFSET)),
                     mulmod(
                         mload(mload(add(local_vars, COEFFS_OFFSET))),
                         mload(add(local_vars,C1_OFFSET)),
@@ -610,12 +614,12 @@ library batched_fri_verifier {
                 mstore(add(local_vars, COEFFS_OFFSET), add(mload(add(local_vars, COEFFS_OFFSET)),0x20))
             }
             unchecked{
-                local_vars.ind++; 
+                local_vars.ind++;
             }
         }
         for( local_vars.ind = 0; local_vars.ind < local_vars.mul;){
             assembly{
-                mstore(mload(add(local_vars, COEFFS_OFFSET)), 
+                mstore(mload(add(local_vars, COEFFS_OFFSET)),
                     mulmod(
                         mload(mload(add(local_vars, COEFFS_OFFSET))),
                         mload(add(local_vars,C2_OFFSET)),
@@ -625,15 +629,15 @@ library batched_fri_verifier {
                 mstore(add(local_vars, COEFFS_OFFSET), add(mload(add(local_vars, COEFFS_OFFSET)),0x20))
             }
             unchecked{
-                local_vars.ind++; 
+                local_vars.ind++;
             }
         }
     }
 
     function one_round_step_colinear_check(
         bytes calldata blob,
-        types.fri_params_type memory fri_params, 
-        types.fri_local_vars_type memory local_vars
+        types.fri_params_type memory fri_params,
+        types.fri_state_type memory local_vars
     ) internal pure returns(bool b) {
         b = true;
         uint256 c;
@@ -671,8 +675,8 @@ library batched_fri_verifier {
 
     function multiple_rounds_step_colinear_check(
         bytes calldata blob,
-        types.fri_params_type memory fri_params, 
-        types.fri_local_vars_type memory local_vars
+        types.fri_params_type memory fri_params,
+        types.fri_state_type memory local_vars
     ) internal pure returns(bool b) {
         b = true;
         uint256 c;
@@ -681,7 +685,7 @@ library batched_fri_verifier {
             local_vars.interpolant = 0;
             assembly{
                 mstore(add(local_vars, COEFFS_OFFSET), add(mload(add(fri_params, FRI_PARAMS_COEFFS_OFFSET)), 0x20))
-            }    
+            }
             for( local_vars.y_ind = 0; local_vars.y_ind < local_vars.prev_coeffs_len; ) {
                 assembly{
                     mstore(add(local_vars, INTERPOLANT_OFFSET), addmod(
@@ -714,10 +718,10 @@ library batched_fri_verifier {
         }
         assembly{
             mstore(add(local_vars, COEFFS_OFFSET), add(mload(add(fri_params, FRI_PARAMS_COEFFS_OFFSET)), 0x20))
-        }    
+        }
     }
 
- 
+
 /*
     precomputed
         0 -- V(x)
@@ -742,8 +746,8 @@ library batched_fri_verifier {
 */
     function one_round_first_step_eval3_colinear_check(
         bytes calldata blob,
-        types.fri_params_type memory fri_params, 
-        types.fri_local_vars_type memory local_vars,
+        types.fri_params_type memory fri_params,
+        types.fri_state_type memory local_vars,
         uint256 []memory xi
     ) internal view returns(bool b){
         uint256[9] memory precomputed;
@@ -759,7 +763,7 @@ library batched_fri_verifier {
                     fri_params.precomputed_eval3_points[local_vars.ind][3] = 1;
                 }
                 precomputed = fri_params.precomputed_eval3_data[local_vars.ind];
-                
+
                 input[0] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(blob, fri_params.z_offset, local_vars.p_ind, 0); // z0
                 input[1] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(blob, fri_params.z_offset, local_vars.p_ind, 1); // z1
                 input[2] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(blob, fri_params.z_offset, local_vars.p_ind, 2); // z2
@@ -774,7 +778,7 @@ library batched_fri_verifier {
                 return commitment_calc.eval3_colinear_check(precomputed, input, fri_params.modulus);
 
                 break;
-            } 
+            }
         unchecked{local_vars.ind++;}
         }
     }
@@ -787,7 +791,7 @@ library batched_fri_verifier {
         4 -- c10
         5 -- c11
         6 -- xi1 - xi0
-    input    
+    input
         0 -- z0
         1 -- z1
         2 -- c0
@@ -799,8 +803,8 @@ library batched_fri_verifier {
     */
     function one_round_first_step_eval2_colinear_check(
         bytes calldata blob,
-        types.fri_params_type memory fri_params, 
-        types.fri_local_vars_type memory local_vars,
+        types.fri_params_type memory fri_params,
+        types.fri_state_type memory local_vars,
         uint256 []memory xi
     ) internal view returns(bool b){
         uint256[7] memory precomputed = commitment_calc.eval2_precompute(fri_params.tmp_arr[0], xi[0], xi[1], fri_params.modulus);
@@ -815,7 +819,7 @@ library batched_fri_verifier {
             mstore(add(input, 0xc0), calldataload(add(blob.offset, mload(add(local_vars, COLINEAR_OFFSET)))))
         }
         input[7] = local_vars.x; // It's x for the next step
-        
+
         return commitment_calc.eval2_colinear_check(precomputed, input, fri_params.modulus);
     }
 
@@ -832,19 +836,19 @@ library batched_fri_verifier {
         We store precomputed data only for previous evalutaion point.
         But it makes this calculation much more efficient.
     */
-    uint256 constant EVAL1_Z_OFFSET = 0x20;                                      
-    uint256 constant EVAL1_XI0_OFFSET = 0x40;                                      
-    uint256 constant EVAL1_XI1_OFFSET = 0x60;                                      
-    uint256 constant EVAL1_XI0_XI1_OFFSET = 0x80;                                      
-    uint256 constant EVAL1_C_OFFSET = 0xa0;                                      
+    uint256 constant EVAL1_Z_OFFSET = 0x20;
+    uint256 constant EVAL1_XI0_OFFSET = 0x40;
+    uint256 constant EVAL1_XI1_OFFSET = 0x60;
+    uint256 constant EVAL1_XI0_XI1_OFFSET = 0x80;
+    uint256 constant EVAL1_C_OFFSET = 0xa0;
     function one_round_first_step_eval1_colinear_check(
         bytes calldata blob,
-        types.fri_params_type memory fri_params, 
-        types.fri_local_vars_type memory local_vars,
+        types.fri_params_type memory fri_params,
+        types.fri_state_type memory local_vars,
         uint256 xi
     ) internal pure returns(bool b){
         uint256[] memory tmp = fri_params.precomputed_eval1;
-        tmp[0] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(blob, fri_params.z_offset, local_vars.p_ind, 0);        
+        tmp[0] = basic_marshalling.get_i_j_uint256_from_vector_of_vectors(blob, fri_params.z_offset, local_vars.p_ind, 0);
         // store -z
         assembly{
             mstore(add(tmp, EVAL1_Z_OFFSET), sub(mload(fri_params), mload(add(tmp, EVAL1_Z_OFFSET))))
@@ -856,7 +860,7 @@ library batched_fri_verifier {
                 xi := sub(mload(fri_params), xi)    //xi = -xi
             }
             tmp[1] = fri_params.tmp_arr[0];         //tmp[1] = s0
-            assembly{           
+            assembly{
                 let modulus := mload(fri_params)
 
                 mstore(add(tmp, EVAL1_XI1_OFFSET), sub(modulus, mload(add(tmp, EVAL1_XI0_OFFSET)))) // -s0
@@ -872,12 +876,12 @@ library batched_fri_verifier {
                     modulus
                 ))
             }
-        }  
+        }
         assembly{
             let modulus := mload(fri_params)
             mstore(add(local_vars,INTERPOLANT_OFFSET), addmod(
                 // (y-z)*(-s0-xi)
-                mulmod(                                   
+                mulmod(
                     mload(mload(add(local_vars, COEFFS_OFFSET))),
                     mulmod(
                         addmod(
@@ -902,11 +906,11 @@ library batched_fri_verifier {
             ))
             mstore(add(tmp, EVAL1_C_OFFSET), mulmod(
                 mulmod(
-                    mload(add(local_vars, X_OFFSET)), 
-                    calldataload(add(blob.offset, mload(add(local_vars, COLINEAR_OFFSET)))), 
+                    mload(add(local_vars, X_OFFSET)),
+                    calldataload(add(blob.offset, mload(add(local_vars, COLINEAR_OFFSET)))),
                     modulus
-                ), 
-                mload(add(tmp, EVAL1_XI0_XI1_OFFSET)), 
+                ),
+                mload(add(tmp, EVAL1_XI0_XI1_OFFSET)),
                 modulus
             ))
             mstore(add(tmp, EVAL1_C_OFFSET), addmod(mload(add(tmp, EVAL1_C_OFFSET)), mload(add(tmp, EVAL1_C_OFFSET)), modulus))
@@ -920,8 +924,8 @@ library batched_fri_verifier {
 
     function one_round_first_step_colinear_check_updated(
         bytes calldata blob,
-        types.fri_params_type memory fri_params, 
-        types.fri_local_vars_type memory local_vars
+        types.fri_params_type memory fri_params,
+        types.fri_state_type memory local_vars
     ) internal view returns(bool b) {
         b = true;
         uint256 c;
@@ -950,8 +954,8 @@ library batched_fri_verifier {
 
     function multiple_rounds_first_step_colinear_check(
         bytes calldata blob,
-        types.fri_params_type memory fri_params, 
-        types.fri_local_vars_type memory local_vars
+        types.fri_params_type memory fri_params,
+        types.fri_state_type memory local_vars
     ) internal view returns(bool b) {
         b = true;
         uint256 c;
@@ -960,17 +964,17 @@ library batched_fri_verifier {
         for( local_vars.p_ind = 0; local_vars.p_ind < fri_params.leaf_size;){
             local_vars.interpolant = 0;
             for( local_vars.y_ind = 0; local_vars.y_ind < local_vars.prev_coeffs_len; ) {
-                local_vars.interpolant = field.fadd( 
-                    local_vars.interpolant, 
+                local_vars.interpolant = field.fadd(
+                    local_vars.interpolant,
                     field.fmul(
-                        fri_params.coeffs[local_vars.y_ind], 
+                        fri_params.coeffs[local_vars.y_ind],
                         get_evaluated_y_from_blob(blob, fri_params, local_vars, local_vars.y_offset, local_vars.p_ind, local_vars.y_ind),
                         fri_params.modulus
                     ),
                     fri_params.modulus
                 );
                 unchecked{ local_vars.y_ind++;}
-            } 
+            }
             assembly{
                 c := calldataload(add(blob.offset, mload(add(local_vars, COLINEAR_OFFSET))))
                 c := mulmod(mload(add(local_vars, X_OFFSET)), c, mload(fri_params))
@@ -992,7 +996,7 @@ library batched_fri_verifier {
         uint256 offset,
         types.transcript_data memory tr_state,
         types.fri_params_type memory fri_params,
-        types.fri_local_vars_type memory local_vars
+        types.fri_state_type memory local_vars
     ) internal view{
         local_vars.alpha = transcript.get_field_challenge(tr_state, fri_params.modulus);
 
@@ -1025,8 +1029,8 @@ library batched_fri_verifier {
     }
 
     function parse_verify_proof_be(
-        bytes calldata blob, 
-        uint256 offset, 
+        bytes calldata blob,
+        uint256 offset,
         types.transcript_data memory tr_state,
         types.fri_params_type memory fri_params
     ) internal returns (bool result) {
@@ -1037,7 +1041,7 @@ library batched_fri_verifier {
         //require(fri_params.leaf_size <= fri_params.batched_U.length, "Leaf size is not equal to U length!");
         //require(fri_params.leaf_size <= fri_params.batched_V.length, "Leaf size is not equal to V length!");
 
-        types.fri_local_vars_type memory local_vars;
+        types.fri_state_type memory local_vars;
         init_local_vars(blob, offset, fri_params, local_vars);
         transcript.update_transcript_b32_by_offset_calldata(tr_state, blob, local_vars.round_proof_T_root_offset);
         local_vars.x_index = transcript.get_integral_challenge_be(tr_state, 8) & local_vars.domain_size_mod;
@@ -1053,7 +1057,7 @@ library batched_fri_verifier {
         // Prepare values.p
         // Check values length.
         require(
-            basic_marshalling.get_length(blob, local_vars.values_offset) == 
+            basic_marshalling.get_length(blob, local_vars.values_offset) ==
             fri_params.step_list.length, "Unsufficient polynomial values data in proofs"
         );
 
@@ -1084,8 +1088,8 @@ library batched_fri_verifier {
 
             // 3. Update transcript
             transcript.update_transcript_b32_by_offset_calldata(
-                tr_state, 
-                blob, 
+                tr_state,
+                blob,
                 local_vars.round_proof_colinear_path_T_root_offset
             );
 
@@ -1115,8 +1119,8 @@ library batched_fri_verifier {
             // 6. Prepare leaf data for the next round
             prepare_leaf_data(blob, fri_params, local_vars);
             if (!merkle_verifier.parse_verify_merkle_proof_bytes_be(
-                blob, 
-                local_vars.colinear_path_offset, 
+                blob,
+                local_vars.colinear_path_offset,
                 fri_params.b, local_vars.b_length)
             ) {
                 //require(false, "Round_proof.colinear_path verifier failes");

@@ -27,7 +27,7 @@ import "../placeholder_verifier.sol";
 import "../../logging.sol";
 import "../../profiling.sol";
 import "../../components/unified_addition_gen.sol";
-import "../init_vars.sol";
+import "../verifier_state.sol";
 
 contract TestPlaceholderVerifierUnifiedAddition {
     event gas_usage_emit(uint8 command, string function_name, uint256 gas_usage);
@@ -49,10 +49,10 @@ contract TestPlaceholderVerifierUnifiedAddition {
         int256[][] calldata columns_rotations
     ) public {
         profiling.start_block("public_api_placeholder_unified_addition::component verify");
-        init_vars.vars_t memory vars;
-        init_vars.init(blob, init_params, columns_rotations, vars);
+        verifier_config.config_type memory vars;
+        verifier_config.init(blob, init_params, columns_rotations, vars);
 
-        types.placeholder_local_variables memory local_vars;
+        types.placeholder_state_type memory local_vars;
 
         // 3. append witness commitments to transcript
         transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
@@ -67,7 +67,7 @@ contract TestPlaceholderVerifierUnifiedAddition {
 
         // 7. gate argument specific for circuit
         profiling.start_block("public_api_placeholder_unified_addition::component gate argument");
-        types.gate_argument_local_vars memory gate_params;
+        types.gate_argument_state_type memory gate_params;
         gate_params.modulus = vars.fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
         gate_params.eval_proof_witness_offset = vars.proof_map.eval_proof_variable_values_offset;
