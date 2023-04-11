@@ -145,7 +145,7 @@ contract PlaceholderVerifier is IVerifier {
             vars.common_data, local_vars, vars.arithmetization_params);
 
         // 7. gate argument specific for circuit
-        types.gate_argument_local_vars memory gate_params;
+        types.gate_argument_params memory gate_params;
         gate_params.modulus = vars.fri_params.modulus;
         gate_params.theta = transcript.get_field_challenge(vars.tr_state, vars.fri_params.modulus);
 

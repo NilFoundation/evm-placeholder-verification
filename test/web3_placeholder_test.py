@@ -152,7 +152,7 @@ if __name__ == '__main__':
     if "4" in sys.argv:
         mina_base_test();
 
-    if "1" not in sys.argv and "2" not in sys.argv and not "3" in sys.argv:
+    if "1" not in sys.argv and "2" not in sys.argv and not "3" in sys.argv and not "4" in sys.argv:
         unified_addition_test();
         mina_scalar_test();
         merkle_tree_poseidon_test();

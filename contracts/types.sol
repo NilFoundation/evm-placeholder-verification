@@ -331,28 +331,11 @@ library types {
         uint256 permutation_columns;
     }
 
-    struct gate_argument_local_vars {
+    // parameters are sent to gate argument
+    struct gate_argument_params {
         // 0x0
         uint256 modulus;
         // 0x20
         uint256 theta;
-        // 0x40
-        uint256 constraint_eval;
-        // 0x60
-        uint256 gate_eval;
-        // 0x80
-        uint256 gates_evaluation;
-        // 0xa0
-        uint256 theta_acc;
-        // 0xc0
-        uint256[][] witness_evaluations;
-        // 0xe0
-        uint256[] constant_evaluations;
-        // 0x100
-        uint256[] selector_evaluations;
-        // 0x120
-        uint256[] public_input_evaluations;
-        // 0x140
-        uint256 offset;   
     }
 }

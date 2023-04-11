@@ -137,7 +137,7 @@ if __name__ == '__main__':
     if "4" in sys.argv:
         mina_base_test(contract_inst);
 
-    if "1" not in sys.argv and "2" not in sys.argv and not "3" in sys.argv:
+    if "1" not in sys.argv and "2" not in sys.argv and not "3" in sys.argv and not "4" in sys.argv:
         unified_addition_test(contract_inst);
         mina_scalar_test(contract_inst);
         merkle_tree_poseidon_test(contract_inst);
