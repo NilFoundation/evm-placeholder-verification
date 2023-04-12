@@ -18,7 +18,10 @@ def load_params(paramsfile, prooffile):
     jsonf.close();
 
     params = dict()
-    params['_test_name'] = parsed_json['_test_name']
+    if( '_test_name' not in parsed_json ):
+        parsed_json['_test_name'] = prooffile
+    else:
+        params['_test_name'] = parsed_json['_test_name']
 
     params['init_params'] = []
     params['init_params'].append(parsed_json["modulus"])
@@ -40,8 +43,10 @@ def load_params(paramsfile, prooffile):
     params["proof"] = f.read()
     f.close()
 
-    params['log_file'] = parsed_json['log_file'];
-
+    if('log_file' in parsed_json):
+        params['log_file'] = parsed_json['log_file']
+    else:
+        params['log_file'] = "deploy_verifier_test.log"
     return params
 
 def init_test1():

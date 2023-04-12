@@ -198,7 +198,7 @@ def deploy_placeholder_contract(
 
     run_tx_hash = contract_inst.functions.initialize(placeholder_contract_deploy_addr).transact()
     run_tx_receipt =  w3.eth.wait_for_transaction_receipt(run_tx_hash)
-    print_tx_info(w3, run_tx_receipt, "Placeholder contract deploy", "initialize")
+    print_tx_info(w3, run_tx_receipt, "Placeholder contract: ", "initialize")
     return contract_inst
 
 def deploy_gate_argument(
