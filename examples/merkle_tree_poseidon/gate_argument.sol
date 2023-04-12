@@ -26,15 +26,10 @@ import "../../contracts/commitments/batched_lpc_verifier.sol";
 import "../../contracts/interfaces/gate_argument.sol";
 
 import "./gate0.sol";
-import "./gate1.sol";
 import "./gate2.sol";
-import "./gate3.sol";
 import "./gate4.sol";
-import "./gate5.sol";
 import "./gate6.sol";
-import "./gate7.sol";
 import "./gate8.sol";
-import "./gate9.sol";
 import "./gate10.sol";
 
 
@@ -94,15 +89,10 @@ contract gate_argument_split_gen  is IGateArgument{
         local_vars.gates_evaluation = 0;
 
 		(local_vars.gates_evaluation, local_vars.theta_acc) = gate0.evaluate_gate_be(gate_params, local_vars);
-		(local_vars.gates_evaluation, local_vars.theta_acc) = gate1.evaluate_gate_be(gate_params, local_vars);
 		(local_vars.gates_evaluation, local_vars.theta_acc) = gate2.evaluate_gate_be(gate_params, local_vars);
-		(local_vars.gates_evaluation, local_vars.theta_acc) = gate3.evaluate_gate_be(gate_params, local_vars);
 		(local_vars.gates_evaluation, local_vars.theta_acc) = gate4.evaluate_gate_be(gate_params, local_vars);
-		(local_vars.gates_evaluation, local_vars.theta_acc) = gate5.evaluate_gate_be(gate_params, local_vars);
 		(local_vars.gates_evaluation, local_vars.theta_acc) = gate6.evaluate_gate_be(gate_params, local_vars);
-		(local_vars.gates_evaluation, local_vars.theta_acc) = gate7.evaluate_gate_be(gate_params, local_vars);
 		(local_vars.gates_evaluation, local_vars.theta_acc) = gate8.evaluate_gate_be(gate_params, local_vars);
-		(local_vars.gates_evaluation, local_vars.theta_acc) = gate9.evaluate_gate_be(gate_params, local_vars);
 		(local_vars.gates_evaluation, local_vars.theta_acc) = gate10.evaluate_gate_be(gate_params, local_vars);
 
 
