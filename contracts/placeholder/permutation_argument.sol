@@ -63,7 +63,7 @@ library permutation_argument {
 
     function eval_permutations_at_challenge(
         types.fri_params_type memory fri_params,
-        types.placeholder_local_variables memory local_vars,
+        types.placeholder_state_type memory local_vars,
         uint256 column_polynomials_values_i
     ) internal pure {
         assembly {
@@ -130,7 +130,7 @@ library permutation_argument {
         types.placeholder_proof_map memory proof_map,
         types.fri_params_type memory fri_params,
         types.placeholder_common_data memory common_data,
-        types.placeholder_local_variables memory local_vars,
+        types.placeholder_state_type memory local_vars,
         types.arithmetization_params memory ar_params
     ) internal pure returns (uint256[] memory F) {
         // 1. Get beta, gamma

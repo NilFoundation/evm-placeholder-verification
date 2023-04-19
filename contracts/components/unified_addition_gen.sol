@@ -62,7 +62,6 @@ contract unified_addition_component_gen is IGateArgument{
         int256[][] memory columns_rotations
     ) external pure returns (uint256 gates_evaluation) {
         local_vars_type memory local_vars;
-
         local_vars.witness_evaluations = new uint256[][](ar_params.witness_columns);
         for (uint256 i = 0; i < ar_params.witness_columns; i++) {
             local_vars.witness_evaluations[i] = new uint256[](columns_rotations[i].length);

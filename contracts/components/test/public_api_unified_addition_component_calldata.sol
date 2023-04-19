@@ -38,7 +38,7 @@ contract TestUnifiedAdditionComponent {
             proof_size == blob.length,
             "Proof length was detected incorrectly!"
         );
-        types.gate_argument_local_vars memory gate_params;
+        types.gate_argument_state_type memory gate_params;
         gate_params.modulus = modulus;
         gate_params.theta = theta;
         gate_params.eval_proof_witness_offset = proof_map

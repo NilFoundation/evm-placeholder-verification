@@ -211,7 +211,7 @@ library batched_fri_verifier {
   
     function calculate_s(
         types.fri_params_type memory fri_params,
-        types.fri_local_vars_type memory local_vars) internal view{
+        types.fri_state_type memory local_vars) internal pure{
 
         fri_params.s[0] = local_vars.x;
         if( local_vars.coset_size > 1){
@@ -240,7 +240,7 @@ library batched_fri_verifier {
         uint256 offset,
         uint256 k,                                              // current batch index
         types.fri_params_type memory fri_params,
-        types.fri_local_vars_type memory local_vars
+        types.fri_state_type memory local_vars
     ) internal pure {
         uint256 base_index;
         uint256 prev_half_size;
@@ -349,7 +349,7 @@ library batched_fri_verifier {
         bytes calldata blob,
         uint256 offset,                                         // round proof offset
         types.fri_params_type memory fri_params,
-        types.fri_local_vars_type memory local_vars
+        types.fri_state_type memory local_vars
     ) internal pure {
         uint256 base_index;
         uint256 prev_half_size;
@@ -455,7 +455,7 @@ library batched_fri_verifier {
         }
     }
 
-    function load_values( bytes calldata blob, uint256 offset, types.fri_local_vars_type memory local_vars )
+    function load_values( bytes calldata blob, uint256 offset, types.fri_state_type memory local_vars )
     internal pure{
         uint256 len;
         (len, offset) = basic_marshalling.get_skip_length(blob, offset);
@@ -472,7 +472,7 @@ library batched_fri_verifier {
         types.transcript_data memory tr_state,
         types.fri_params_type memory fri_params
     ) internal view returns (bool result) {
-        types.fri_local_vars_type memory local_vars;
+        types.fri_state_type memory local_vars;
 
         // TODO strange bug. If we we exchange two next lines, then it will not work.
         local_vars.alphas = new uint256[](fri_params.r);

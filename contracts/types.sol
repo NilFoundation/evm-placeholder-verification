@@ -192,7 +192,7 @@ library types {
         uint256[]     fri_roots;                // It should be bytes32
     }
 
-    struct fri_local_vars_type {
+    struct fri_state_type {
         bytes   b;
         //0x0
         uint256 x_index;
@@ -257,7 +257,7 @@ library types {
         int256[][] columns_rotations; 
     }
 
-    struct placeholder_local_variables{
+    struct placeholder_state_type {
         // 0x0
         uint256 len;
         // 0x20

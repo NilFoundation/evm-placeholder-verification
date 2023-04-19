@@ -114,8 +114,6 @@ contract PlaceholderVerifier is IVerifier {
         int256[][] calldata columns_rotations, 
         address gate_argument
     ) public view returns (bool) {
-//        gas_usage memory gas_usage;
-//        gas_usage.start = gasleft();
         verifier_state memory vars;
         init_vars(vars, init_params, columns_rotations);
         transcript.init_transcript(vars.tr_state, hex"");
@@ -124,7 +122,7 @@ contract PlaceholderVerifier is IVerifier {
         if(vars.proof_size != blob.length) return false;
         batched_lpc_verifier.parse_proof_be(vars.fri_params, blob, vars.proof_map.eval_proof_combined_value_offset);
 
-        types.placeholder_local_variables memory local_vars;
+        types.placeholder_state_type memory local_vars;
 
         // 3. append witness commitments to transcript
         transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
