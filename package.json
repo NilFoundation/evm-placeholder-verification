@@ -33,8 +33,5 @@
     "/contracts/**/*.sol",
     "/build/contracts/*.json",
     "!/contracts/mocks/**/*"
-  ],
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  }
+  ]
 }
