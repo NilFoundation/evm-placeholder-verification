@@ -63,11 +63,15 @@ library batched_fri_verifier {
     }
 
     function parse_proof_be(types.fri_params_type memory fri_params, bytes calldata blob, uint256 offset)
-    internal pure returns (uint256 result_offset) {
+    internal pure returns (bool success, uint256 result_offset) {
+        success = true;
         // fri_roots
         uint256 value_len;
         (value_len, result_offset) = basic_marshalling.get_skip_length(blob, offset);
-        //require( value_len == fri_params.step_list.length );
+        if( value_len != fri_params.step_list.length ){
+            success = false;
+            return(success, result_offset);
+        }
         fri_params.fri_roots = new uint256[](value_len);
         for (uint256 i = 0; i < value_len;) {
             fri_params.fri_roots[i] = basic_marshalling.get_uint256_be(blob, basic_marshalling.skip_length(result_offset));
@@ -77,9 +81,11 @@ library batched_fri_verifier {
         // final_polynomial
         fri_params.fri_final_poly_offset = result_offset;
         (value_len, result_offset) = basic_marshalling.get_skip_length(blob, result_offset);
-        // check final polynomial degree
-        // TODO: Move final polynomial degree check somewhere else
-        //require( value_len <= (( 1 << (field.log2(fri_params.max_degree + 1) - fri_params.r + 1) ) ), "Too big final polynomial degree");
+
+        if( value_len > (( 1 << (field.log2(fri_params.max_degree + 1) - fri_params.r + 1) ) ) ){
+            success = false;
+            return(success, result_offset);
+        }
 
         fri_params.final_polynomial = new uint256[](value_len);
         for (uint256 i = 0; i < value_len;) {
@@ -91,9 +97,14 @@ library batched_fri_verifier {
         // query_proofs
         (value_len, result_offset) = basic_marshalling.get_skip_length(blob, result_offset);
         fri_params.fri_cur_query_offset = result_offset;
-        //require( value_len == fri_params.lambda );
+        if( value_len != fri_params.lambda ) {
+            success = false;
+            return(success, result_offset);
+        }
+
         for (uint256 i = 0; i < value_len;) {
-            result_offset = parse_query_proof_be(fri_params, blob, result_offset);
+            (success, result_offset) = parse_query_proof_be(fri_params, blob, result_offset);
+            if(!success) return(success, result_offset);
             unchecked{ i++; }
         }
     }
@@ -114,19 +125,28 @@ library batched_fri_verifier {
     }
 
     function parse_query_proof_be(types.fri_params_type memory fri_params, bytes calldata blob, uint256 offset)
-    internal pure returns (uint256 result_offset){
+    internal pure returns (bool success, uint256 result_offset){
+        success = true;
         uint256 value_len;
         (value_len, result_offset) = basic_marshalling.get_skip_length(blob, offset);
-        //require(value_len == fri_params.batches_sizes.length);
+        if( value_len != fri_params.batches_sizes.length ){
+            success = false;
+            return( success, result_offset);
+        }
 
         for(uint256 i = 0; i < value_len;){
-            result_offset = parse_initial_proof_be(fri_params, i, blob, result_offset);
+            (success, result_offset) = parse_initial_proof_be(fri_params, i, blob, result_offset);
+            if( !success ) return(success, result_offset );
             unchecked{ i++; }
         }
         (value_len, result_offset) = basic_marshalling.get_skip_length(blob, result_offset);
-        //require(value_len == fri_params.step_list.length);
+        if( value_len != fri_params.step_list.length){
+            success = false;
+            return( success, result_offset);
+        }
         for(uint256 i = 0; i < value_len;){
-            result_offset = parse_round_proof_be(fri_params, i, blob, result_offset);
+            (success, result_offset) = parse_round_proof_be(fri_params, i, blob, result_offset);
+            if( !success ) return(success, result_offset );
             unchecked{ i++; }
         }
     }
@@ -143,23 +163,29 @@ library batched_fri_verifier {
     }
 
     function parse_initial_proof_be(types.fri_params_type memory fri_params, uint256 i, bytes calldata blob, uint256 offset)
-    internal pure returns(uint256 result_offset){
+    internal pure returns(bool success, uint256 result_offset){
+        success = true;
         // p;
         result_offset = merkle_verifier.skip_merkle_proof_be(blob, offset);
         // polynomials num
         uint256 len;
         (len, result_offset) = basic_marshalling.get_skip_length(blob, result_offset);
-        //require(len == fri_params.batches_sizes[i]);
+        if( len != fri_params.batches_sizes[i] ) {
+            success = false;
+            return(success, result_offset);
+        }
         // coset_size
         (len, result_offset) = basic_marshalling.get_skip_length(blob, result_offset);
-        unchecked{
-        //    require(len == (1 << fri_params.step_list[0]));
+        if( len != (1 << fri_params.step_list[0]) ) {
+            success = false;
+            return(success, result_offset);
         }
         // values
         len = basic_marshalling.get_length(blob, result_offset);
         result_offset = basic_marshalling.skip_vector_of_uint256_be(blob, result_offset);
-        unchecked{
-        //    require(len == fri_params.batches_sizes[i] * (1 << fri_params.step_list[0]));
+        if(len != fri_params.batches_sizes[i] * (1 << fri_params.step_list[0])){
+            success = false;
+            return(success, result_offset);
         }
     }
 
@@ -172,14 +198,22 @@ library batched_fri_verifier {
     }
 
     function parse_round_proof_be(types.fri_params_type memory fri_params, uint256 i, bytes calldata blob, uint256 offset)
-    internal pure returns(uint256 result_offset){
+    internal pure returns(bool success, uint256 result_offset){
+        success = true;
         // p;
         result_offset = merkle_verifier.skip_merkle_proof_be(blob, offset);
         // y;
-        //if( i < fri_params.step_list.length - 1)
-        //    require(basic_marshalling.get_length(blob, result_offset) == (1 << fri_params.step_list[i+1]));
-        //else
-        //    require(basic_marshalling.get_length(blob, result_offset) == 2);
+        if( i < fri_params.step_list.length - 1){
+            if( basic_marshalling.get_length(blob, result_offset) != (1 << fri_params.step_list[i+1]) ){
+                success = false;
+                return(success, result_offset);
+            }
+        }else{
+            if( basic_marshalling.get_length(blob, result_offset) != 2 ){
+                success = false;
+                return( success, result_offset);
+            }
+        }
         result_offset = basic_marshalling.skip_vector_of_uint256_be(blob, result_offset);
     }
 

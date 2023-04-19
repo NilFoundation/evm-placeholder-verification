@@ -113,14 +113,15 @@ contract PlaceholderVerifier is IVerifier {
         uint256[] calldata init_params,
         int256[][] calldata columns_rotations, 
         address gate_argument
-    ) public view returns (bool) {
+    ) public view returns (bool result) {
         verifier_state memory vars;
         init_vars(vars, init_params, columns_rotations);
         transcript.init_transcript(vars.tr_state, hex"");
         
         (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser.parse_be(blob, 0);
         if(vars.proof_size != blob.length) return false;
-        batched_lpc_verifier.parse_proof_be(vars.fri_params, blob, vars.proof_map.eval_proof_combined_value_offset);
+        (result, )= batched_lpc_verifier.parse_proof_be(vars.fri_params, blob, vars.proof_map.eval_proof_combined_value_offset);
+        if( !result ) return false;
 
         types.placeholder_state_type memory local_vars;
 

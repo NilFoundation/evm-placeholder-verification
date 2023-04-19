@@ -47,17 +47,23 @@ library batched_lpc_verifier {
     // Check proof data carefully.
     // Load necessary offsets to fri params
     function parse_proof_be(types.fri_params_type memory fri_params, bytes calldata blob, uint256 offset)
-    internal pure returns (uint256 result_offset) {
+    internal pure returns (bool success, uint256 result_offset) {
+        success = true;
         uint256 len;
-        uint256 len2;
         // z
         (len, result_offset) = basic_marshalling.get_skip_length(blob, offset);
-//        require(len == fri_params.batches_sizes.length);
+        if( len != fri_params.batches_sizes.length ){
+            success = false;
+            return (success, result_offset);
+        }
         for( uint256 i = 0; i < len; ){
             if( fri_params.batches_sizes[i] == 0 ){
                 fri_params.batches_sizes[i] = basic_marshalling.get_length(blob, result_offset);
             } else {
-//                require( basic_marshalling.get_length(blob, result_offset) == fri_params.batches_sizes[i]);
+                if( basic_marshalling.get_length(blob, result_offset) != fri_params.batches_sizes[i]){
+                    success = false;
+                    return (success, result_offset);
+                }
             }
             fri_params.poly_num += fri_params.batches_sizes[i];
             result_offset = basic_marshalling.skip_vector_of_vectors_of_uint256_be_check(blob, result_offset);
@@ -65,7 +71,7 @@ library batched_lpc_verifier {
         }
         // fri_proof
         fri_params.fri_proof_offset = result_offset;
-        result_offset = batched_fri_verifier.parse_proof_be(fri_params, blob, result_offset);
+        (success, result_offset) = batched_fri_verifier.parse_proof_be(fri_params, blob, result_offset);
     }
 
     // Input is proof_map.eval_proof_combined_value_offset

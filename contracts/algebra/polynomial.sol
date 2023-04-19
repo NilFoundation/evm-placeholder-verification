@@ -259,13 +259,14 @@ library polynomial {
     }
 
     function interpolate(uint256[] memory x, uint256[] memory fx, uint256 modulus)
-    internal view returns (uint256[] memory) {
+    internal view returns (uint256[] memory result) {
         if (x.length == 1 && fx.length == 1) {
-            uint256[] memory result = new uint256[](1);
+            result = new uint256[](1);
             result[0] = fx[0];
             return result;
         } else if (x.length == 2) {
-            return interpolate_by_2_points(x, fx, modulus);
+            result = interpolate_by_2_points(x, fx, modulus);
+            return result;
         } else {
             require(false, "unsupported number of points for interpolation");
         }
@@ -307,21 +308,20 @@ library polynomial {
     }
 
     function interpolate(bytes calldata blob, uint256[] memory x, uint256 fx_offset, uint256 modulus)
-    internal view returns (uint256[] memory ) {
+    internal view returns (uint256[] memory result) {
         if (x.length == 1 && basic_marshalling.get_length(blob, fx_offset) == 1) {
-            uint256[] memory result = new uint256[](1);
+            result = new uint256[](1);
             result[0] = basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 0);
             return result;
         } else if (x.length == 2) {
-            return interpolate_by_2_points(blob, x, fx_offset, modulus);
+            result = interpolate_by_2_points(blob, x, fx_offset, modulus);
+            return result;
         } else if (x.length == 3) {
-            uint256[] memory y_div = new uint256[](3);
-
             uint256 y0 = field.fdiv(basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 0), field.fmul(field.fsub(x[0], x[1],modulus), field.fsub(x[0], x[2],modulus), modulus), modulus);
             uint256 y1 = field.fdiv(basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 1), field.fmul(field.fsub(x[1], x[0],modulus), field.fsub(x[1], x[2],modulus), modulus), modulus);
             uint256 y2 = field.fdiv(basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 2), field.fmul(field.fsub(x[2], x[0],modulus), field.fsub(x[2], x[1],modulus), modulus), modulus);
 
-            uint256[] memory result = new uint256[](3);
+            result = new uint256[](3);
             assembly {
                 let x1 := mulmod(y0, mulmod(mload(add(x, 0x40)), mload(add(x, 0x60)), modulus), modulus)
                 let x2 := mulmod(y1, mulmod(mload(add(x, 0x20)), mload(add(x, 0x60)), modulus), modulus)
