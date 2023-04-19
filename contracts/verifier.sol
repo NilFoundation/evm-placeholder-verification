@@ -30,14 +30,6 @@ import "./interfaces/verifier.sol";
 import "./interfaces/gate_argument.sol";
 
 contract PlaceholderVerifier is IVerifier {
-    // event renamed to prevent conflicts with logging system
-//    event gas_usage_emit(uint256 gas_usage);
-
-//    struct gas_usage {
-//        uint256 start;
-//        uint256 end;
-//    }
-
     struct verifier_state {
         uint256 proofs_num;
         uint256 proof_offset;
@@ -165,10 +157,7 @@ contract PlaceholderVerifier is IVerifier {
             vars.fri_params, vars.common_data, local_vars,
             vars.arithmetization_params))
             return false;
-/*
-        gas_usage.end = gasleft();
-        emit gas_usage_emit(gas_usage.start - gas_usage.end);
-*/
+            
         return true;
     }
 }

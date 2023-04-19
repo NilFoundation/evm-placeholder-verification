@@ -19,7 +19,6 @@
 pragma solidity >=0.8.4;
 
 import "../../contracts/types.sol";
-import "../../contracts/logging.sol";
 import "./gate_argument.sol";
 
 // TODO: name component

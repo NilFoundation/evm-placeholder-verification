@@ -23,9 +23,6 @@ import "../cryptography/transcript.sol";
 import "./permutation_argument.sol";
 import "../basic_marshalling.sol";
 import "../algebra/field.sol";
-import "../logging.sol";
-import "../profiling.sol";
-
 
 library placeholder_verifier {
     // TODO: check correctness all this const

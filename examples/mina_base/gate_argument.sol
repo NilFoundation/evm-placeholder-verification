@@ -18,7 +18,6 @@
 pragma solidity >=0.8.4;
 
 import "../../contracts/types.sol";
-import "../../contracts/profiling.sol";
 import "../../contracts/basic_marshalling.sol";
 import "../../contracts/commitments/batched_lpc_verifier.sol";
 import "./gate0.sol";
