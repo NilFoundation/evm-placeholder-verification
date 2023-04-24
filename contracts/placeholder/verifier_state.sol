@@ -23,18 +23,12 @@ import "../cryptography/transcript.sol";
 import "./proof_map_parser.sol";
 import "../logging.sol";
 
-<<<<<<< HEAD:contracts/placeholder/init_vars.sol
-library init_vars {
-    struct vars_t {
-        uint256 proof_size;
-=======
 library verifier_config {
     struct config_type {
         uint256 proofs_num;
         uint256 proof_offset;
         uint256 proof_size;
         uint256 idx;
->>>>>>> 0d5dda5c29e81c65fb685f1d1dc93eb33f8919ce:contracts/placeholder/verifier_state.sol
 
         types.fri_params_type fri_params;
         types.placeholder_proof_map proof_map;
