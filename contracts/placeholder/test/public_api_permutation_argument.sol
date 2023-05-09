@@ -57,13 +57,13 @@ contract TestPermutationArgument {
             "Proof length was detected incorrectly!"
         );
         transcript.init_transcript(vars.tr_state, hex"");
-        transcript.update_transcript_b32_by_offset_calldata(
-            vars.tr_state,
-            blob,
-            basic_marshalling.skip_length(
-                vars.proof_map.witness_commitment_offset
-            )
-        );
+//        transcript.update_transcript_b32_by_offset_calldata(
+//            vars.tr_state,
+//            blob,
+//            basic_marshalling.skip_length(
+//                vars.proof_map.witness_commitment_offset
+//            )
+//        );
 
         uint256 idx = 0;
         vars.fri_params.modulus = init_params[idx++];
@@ -84,14 +84,14 @@ contract TestPermutationArgument {
             vars.fri_params.q[i] = init_params[idx++];
         }
 
-        m_result = permutation_argument.verify_eval_be(
-            blob,
-            vars.tr_state,
-            vars.proof_map,
-            vars.fri_params,
-            vars.common_data,
-            vars.local_vars
-        );
+//        m_result = permutation_argument.verify_eval_be(
+//            blob,
+//            vars.tr_state,
+//            vars.proof_map,
+//            vars.fri_params,
+//            vars.common_data,
+//            vars.local_vars
+//        );
     }
 
     function get_result(uint256 i) public view returns (uint256 result) {

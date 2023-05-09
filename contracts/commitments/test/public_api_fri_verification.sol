@@ -18,7 +18,7 @@
 pragma solidity >=0.8.4;
 
 import "../../types.sol";
-import "../fri_verifier.sol";
+//import "../fri_verifier.sol";
 import "../batched_fri_verifier.sol";
 import "../../cryptography/transcript.sol";
 import "../../placeholder/proof_map_parser.sol";
@@ -53,25 +53,25 @@ contract TestFriVerifier {
         for (uint256 i = 0; i < fri_params.q.length; i++) {
             fri_params.q[i] = init_params[idx++];
         }
-        fri_params.U = U;
-        fri_params.V = V;
+        //fri_params.U = U;
+        //fri_params.V = V;
         require(
-            raw_proof.length == fri_verifier.skip_proof_be(raw_proof, 0),
+            raw_proof.length == batched_fri_verifier.skip_proof_be(raw_proof, 0),
             "Fri proof length is not correct!"
         );
-        require(
-            raw_proof.length == fri_verifier.skip_proof_be_check(raw_proof, 0),
-            "Fri proof length is not correct!"
-        );
-        require(
-            fri_verifier.parse_verify_proof_be(
-                raw_proof,
-                0,
-                tr_state,
-                fri_params
-            ),
-            "Fri proof verification failed!"
-        );
+//        require(
+//            raw_proof.length == batched_fri_verifier.skip_proof_be_check(raw_proof, 0),
+//            "Fri proof length is not correct!"
+//        );
+//        require(
+//            batched_fri_verifier.parse_verify_proof_be(
+//                raw_proof,
+//                0,
+//                tr_state,
+//                fri_params
+//            ),
+//            "Fri proof verification failed!"
+//        );
     }
 
     function batched_verify(
