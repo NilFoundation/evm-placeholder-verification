@@ -39,31 +39,82 @@ describe('LPC tests', function () {
             params.init_params.push(BigInt(named_params.batches_sizes[i].value))
         }
 
-        params.evaluation_points = [[[]]];
-        for (i in named_params.evaluation_points) {
-            params.init_params.push(BigInt(named_params.evaluation_points[i].value))
+        params.evaluation_points = [];
+        for (let i in named_params.evaluation_points) {
+            let ir = []
+            for (let j in i)
+            {
+                let ij = []
+                for(let k in j) {
+                    ij.push(BigInt(named_params.evaluation_points[i][j][k].value))
+                }
+                ir.push(ij)
+            }
+            params.evaluation_points.push(ir)
         }
         return params;
     }
 
-    function getVerifierParamsV2() {
-        let params = loadParamsFromFile(path.resolve(__dirname, "./data/lpc_tests/lpc_basic_test.json"));
-        console.log(params)
-        params['proof'] = fs.readFileSync(path.resolve(__dirname, "./data/lpc_tests/lpc_basic_test.data"), 'utf8');
-
+    function getVerifierParams(configPath, proofPath) {
+        let params = loadParamsFromFile(path.resolve(__dirname, configPath));
+        params['proof'] = fs.readFileSync(path.resolve(__dirname, proofPath), 'utf8');
         return params
     }
 
 
-    describe('T1', function () {
-        it("LPCT1 ", async function () {
+    it("Basic verification", async function () {
+         let configPath = "./data/lpc_tests/lpc_basic_test.json"
+         let proofPath = "./data/lpc_tests/lpc_basic_test.data"
+         let params = getVerifierParams(configPath,proofPath);
+         await deployments.fixture(['testLPCVerifierFixture']);
+         let lpcVerifier = await ethers.getContract('TestLpcVerifier');
+         await lpcVerifier.batched_verify(params['proof'], params['init_params'], params['evaluation_points'],{gasLimit: 30_500_000});
+    });
 
-            let params = getVerifierParamsV2();
-            console.log(params['init_params'])
-            console.log(params['evaluation_points'])
-//            await deployments.fixture(['testLPCVerifierFixture']);
-  //          let lpcVerifier = await ethers.getContract('TestLpcVerifier');
-//            await lpcVerifier.batched_verify(params['proof'], params['init_params'], params['evaluation_points']);
-        });
-    })
+
+    it("Skipping layers verification", async function () {
+        let configPath = "./data/lpc_tests/lpc_skipping_layers_test.json"
+        let proofPath = "./data/lpc_tests/lpc_skipping_layers_test.data"
+        let params = getVerifierParams(configPath,proofPath);
+        await deployments.fixture(['testLPCVerifierFixture']);
+        let lpcVerifier = await ethers.getContract('TestLpcVerifier');
+        await lpcVerifier.batched_verify(params['proof'], params['init_params'], params['evaluation_points'],{gasLimit: 30_500_000});
+    });
+
+    it("Batches_num=3 verification", async function () {
+        let configPath = "./data/lpc_tests/lpc_batches_num_3_test.json"
+        let proofPath = "./data/lpc_tests/lpc_batches_num_3_test.data"
+        let params = getVerifierParams(configPath,proofPath);
+        await deployments.fixture(['testLPCVerifierFixture']);
+        let lpcVerifier = await ethers.getContract('TestLpcVerifier');
+        await lpcVerifier.batched_verify(params['proof'], params['init_params'], params['evaluation_points'],{gasLimit: 30_500_000});
+    });
+
+    it("Evaluation points verification", async function () {
+        let configPath = "./data/lpc_tests/lpc_eval_points_test.json"
+        let proofPath = "./data/lpc_tests/lpc_eval_points_test.data"
+        let params = getVerifierParams(configPath,proofPath);
+        await deployments.fixture(['testLPCVerifierFixture']);
+        let lpcVerifier = await ethers.getContract('TestLpcVerifier');
+        await lpcVerifier.batched_verify(params['proof'], params['init_params'], params['evaluation_points'],{gasLimit: 30_500_000});
+    });
+
+    it("Evaluation point 2 verification", async function () {
+        let configPath = "./data/lpc_tests/lpc_eval_point2_test.json"
+        let proofPath = "./data/lpc_tests/lpc_eval_point2_test.data"
+        let params = getVerifierParams(configPath,proofPath);
+        await deployments.fixture(['testLPCVerifierFixture']);
+        let lpcVerifier = await ethers.getContract('TestLpcVerifier');
+        await lpcVerifier.batched_verify(params['proof'], params['init_params'], params['evaluation_points'],{gasLimit: 30_500_000});
+    });
+
+    it("Evaluation point 3 verification", async function () {
+        let configPath = "./data/lpc_tests/lpc_eval_point3_test.json"
+        let proofPath = "./data/lpc_tests/lpc_eval_point3_test.data"
+        let params = getVerifierParams(configPath,proofPath);
+        await deployments.fixture(['testLPCVerifierFixture']);
+        let lpcVerifier = await ethers.getContract('TestLpcVerifier');
+        await lpcVerifier.batched_verify(params['proof'], params['init_params'], params['evaluation_points'],{gasLimit: 30_500_000});
+    });
+
 })
