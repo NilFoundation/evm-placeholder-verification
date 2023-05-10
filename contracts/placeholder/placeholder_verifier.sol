@@ -19,7 +19,6 @@ pragma solidity >=0.8.4;
 
 import "../types.sol";
 import "../cryptography/transcript.sol";
-//import "../commitments/batched_lpc_verifier.sol";
 import "./permutation_argument.sol";
 import "../basic_marshalling.sol";
 import "../algebra/field.sol";

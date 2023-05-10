@@ -16,7 +16,7 @@ module.exports = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 1200,
+        runs: 200,
       },
     },
   },
@@ -38,4 +38,5 @@ module.exports = {
   etherscan: {
     apiKey: ETHERSCAN_KEY,
   },
+  allowUnlimitedContractSize: true,
 };
