@@ -69,7 +69,7 @@ describe('Proof Tests', function () {
         await testPlaceholderAPI.verify(params['proof'],params['init_params'], params['columns_rotations'],unifiedAdditionGate.address ,{gasLimit: 30_500_000});
     });
 
-    it("Merkle Tree Posidon", async function () {
+    it("Merkle Tree Poseidon", async function () {
         let configPath = "./data/merkle_tree_poseidon/circuit_params.json"
         let proofPath = "./data/merkle_tree_poseidon/proof.bin"
         let params = getVerifierParams(configPath,proofPath);
@@ -79,6 +79,30 @@ describe('Proof Tests', function () {
         let merkleTreePosidonGate = await ethers.getContract('MerkleTreePoseidonGate');
 
         await testPlaceholderAPI.verify(params['proof'],params['init_params'], params['columns_rotations'],merkleTreePosidonGate.address ,{gasLimit: 30_500_000});
+    });
+
+    it("Mina Base", async function () {
+        let configPath = "./data/mina_base/circuit_params.json"
+        let proofPath = "./data/mina_base/proof.bin"
+        let params = getVerifierParams(configPath,proofPath);
+        await deployments.fixture(['testPlaceholderAPIConsumerFixture', 'minaBaseGateFixture']);
+
+        let testPlaceholderAPI = await ethers.getContract('TestPlaceholderVerifier');
+        let minaBaseGate = await ethers.getContract('MinaBaseGate');
+
+        await testPlaceholderAPI.verify(params['proof'],params['init_params'], params['columns_rotations'],minaBaseGate.address ,{gasLimit: 30_500_000});
+    });
+
+    it("Mina Scalar", async function () {
+        let configPath = "./data/mina_scalar/circuit_params.json"
+        let proofPath = "./data/mina_scalar/proof.bin"
+        let params = getVerifierParams(configPath,proofPath);
+        await deployments.fixture(['testPlaceholderAPIConsumerFixture', 'minaScalarGateFixture']);
+
+        let testPlaceholderAPI = await ethers.getContract('TestPlaceholderVerifier');
+        let minaScalarGate = await ethers.getContract('MinaScalarGate');
+
+        await testPlaceholderAPI.verify(params['proof'],params['init_params'], params['columns_rotations'],minaScalarGate.address ,{gasLimit: 30_500_000});
     });
 
 })
