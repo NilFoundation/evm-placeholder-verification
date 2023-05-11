@@ -114,7 +114,7 @@ def init_eval_point3_test():
 
 if __name__ == '__main__':
     solcx.install_solc('0.8.12')
-    init_profiling()
+    #init_profiling()
     
     compiled = solcx.compile_files(
         [f'{contracts_dir}/commitments/test/public_api_lpc_verification.sol'],

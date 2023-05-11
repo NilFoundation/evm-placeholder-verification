@@ -48,6 +48,7 @@ def print_tx_info(w3, tx_receipt, tx_name, function_name = ""):
     print(tx_name, ":", function_name)
     print(f"\t{tx_receipt.transactionHash.hex()}")
     print("\tgasUsed = ", tx_receipt.gasUsed)
+    print(tx_receipt)
     write_tx_calldata(w3, tx_receipt)
 
 
