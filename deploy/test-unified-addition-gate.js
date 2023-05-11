@@ -19,7 +19,7 @@ module.exports = async function() {
         deployedLib[lib] = (await hre.deployments.get(lib)).address
     }
 
-    await deploy('unified_addition_component_gen', {
+    await deploy('UnifiedAdditionGate', {
         from: deployer,
         libraries : deployedLib,
         log : true,

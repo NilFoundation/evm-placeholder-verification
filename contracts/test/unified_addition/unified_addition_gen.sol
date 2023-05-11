@@ -18,13 +18,13 @@
 //---------------------------------------------------------------------------//
 pragma solidity >=0.8.4;
 
-import "../types.sol";
-import "../basic_marshalling.sol";
-import "../commitments/batched_lpc_verifier.sol";
-import "../logging.sol";
-import "../interfaces/gate_argument.sol";
+import "../../types.sol";
+import "../../basic_marshalling.sol";
+import "../../commitments/batched_lpc_verifier.sol";
+import "../../logging.sol";
+import "../../interfaces/gate_argument.sol";
 
-contract unified_addition_component_gen is IGateArgument{
+contract UnifiedAdditionGate is IGateArgument{
     uint256 constant GATES_N = 1;
 
     uint256 constant MODULUS_OFFSET = 0x0;

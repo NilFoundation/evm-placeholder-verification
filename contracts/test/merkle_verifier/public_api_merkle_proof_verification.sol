@@ -18,8 +18,9 @@
 pragma solidity >=0.8.4;
 
 import "../../types.sol";
-import "../merkle_verifier.sol";
+import "../../containers/merkle_verifier.sol";
 
+//TODO : Incomplete test cases?
 contract TestMerkleProofVerifier {
     bool m_result;
 

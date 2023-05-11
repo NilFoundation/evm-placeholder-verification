@@ -18,7 +18,7 @@
 pragma solidity >=0.8.4;
 
 import "../../types.sol";
-import "../batched_lpc_verifier.sol";
+import "../../commitments/batched_lpc_verifier.sol";
 import "../../cryptography/transcript.sol";
 
 contract TestLpcVerifier {

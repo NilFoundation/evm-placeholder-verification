@@ -65,7 +65,7 @@ describe('Proof Tests', function () {
         await deployments.fixture(['testPlaceholderAPIConsumerFixture', 'unifiedAdditionGateFixture']);
 
         let testPlaceholderAPI = await ethers.getContract('TestPlaceholderVerifier');
-        let unifiedAdditionGate = await ethers.getContract('unified_addition_component_gen');
+        let unifiedAdditionGate = await ethers.getContract('UnifiedAdditionGate');
         await testPlaceholderAPI.verify(params['proof'],params['init_params'], params['columns_rotations'],unifiedAdditionGate.address ,{gasLimit: 30_500_000});
     });
 
