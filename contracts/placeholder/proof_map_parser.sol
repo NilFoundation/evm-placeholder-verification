@@ -19,7 +19,6 @@
 pragma solidity >=0.8.4;
 
 import "../types.sol";
-import "../logging.sol";
 import "../commitments/batched_lpc_verifier.sol";
 import "../basic_marshalling.sol";
 

@@ -18,8 +18,6 @@
 //---------------------------------------------------------------------------//
 pragma solidity >=0.8.4;
 
-import "./logging.sol";
-
 library basic_marshalling {
     uint256 constant LENGTH_OCTETS = 8;
     // 256 - 8 * LENGTH_OCTETS

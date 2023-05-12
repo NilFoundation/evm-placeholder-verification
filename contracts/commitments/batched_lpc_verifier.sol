@@ -23,7 +23,6 @@ import "../types.sol";
 import "./batched_fri_verifier.sol";
 import "../algebra/polynomial.sol";
 import "../basic_marshalling.sol";
-import "../profiling.sol";
 
 library batched_lpc_verifier {
 

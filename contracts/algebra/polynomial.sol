@@ -21,7 +21,7 @@ pragma solidity >=0.8.4;
 
 import "./field.sol";
 import "../basic_marshalling.sol";
-import "../logging.sol";
+
 
 /**
  * @title Turbo Plonk polynomial evaluation

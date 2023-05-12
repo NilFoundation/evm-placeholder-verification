@@ -19,7 +19,6 @@
 pragma solidity >=0.8.4;
 
 import "./types.sol";
-//import "./logging.sol";
 import "./cryptography/transcript.sol";
 
 import "./placeholder/proof_map_parser.sol";

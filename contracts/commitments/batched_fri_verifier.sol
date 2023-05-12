@@ -24,8 +24,7 @@ import "../containers/merkle_verifier.sol";
 import "../cryptography/transcript.sol";
 import "../algebra/polynomial.sol";
 import "../basic_marshalling.sol";
-import "../logging.sol";
-import "../profiling.sol";
+
 
 library batched_fri_verifier {
     uint256 constant FRI_PARAMS_COEFFS_OFFSET = 0x280;

@@ -21,7 +21,6 @@ pragma solidity >=0.8.4;
 import "../../types.sol";
 import "../../basic_marshalling.sol";
 import "../../commitments/batched_lpc_verifier.sol";
-import "../../logging.sol";
 import "../../interfaces/gate_argument.sol";
 
 contract UnifiedAdditionGate is IGateArgument{

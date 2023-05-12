@@ -19,7 +19,6 @@
 pragma solidity >=0.8.4;
 
 import "../types.sol";
-import "../logging.sol";
 
 library merkle_verifier {
     // Merkle proof has the following structure:
