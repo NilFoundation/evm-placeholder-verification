@@ -42,16 +42,17 @@ describe('LPC tests', function () {
         params.evaluation_points = [];
         for (let i in named_params.evaluation_points) {
             let ir = []
-            for (let j in i)
+            for (let j in named_params.evaluation_points[i])
             {
                 let ij = []
-                for(let k in j) {
+                for(let k in named_params.evaluation_points[i][j]) {
                     ij.push(BigInt(named_params.evaluation_points[i][j][k].value))
                 }
                 ir.push(ij)
             }
             params.evaluation_points.push(ir)
         }
+        
         return params;
     }
 
@@ -60,7 +61,6 @@ describe('LPC tests', function () {
         params['proof'] = fs.readFileSync(path.resolve(__dirname, proofPath), 'utf8');
         return params
     }
-
 
     it("Basic verification", async function () {
          let configPath = "./data/lpc_tests/lpc_basic_test.json"
@@ -116,5 +116,4 @@ describe('LPC tests', function () {
         let lpcVerifier = await ethers.getContract('TestLpcVerifier');
         await lpcVerifier.batched_verify(params['proof'], params['init_params'], params['evaluation_points'],{gasLimit: 30_500_000});
     });
-
 })
