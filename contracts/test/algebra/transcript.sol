@@ -17,11 +17,9 @@
 //---------------------------------------------------------------------------//
 
 pragma solidity >=0.8.4;
-pragma experimental ABIEncoderV2;
 
-import "truffle/Assert.sol";
-import '../contracts/cryptography/transcript.sol';
-import '../contracts/algebra/bn254.sol';
+import '../../cryptography/transcript.sol';
+import '../../algebra/bn254.sol';
 
 contract TestTranscript {
     function test_transcript() public {
@@ -30,7 +28,7 @@ contract TestTranscript {
         types.transcript_data memory tr_state;
         transcript.init_transcript(tr_state, init_blob);
 
-        Assert.equal(tr_state.current_challenge, hex"f0ae86a6257e615bce8b0fe73794934deda00c13d58f80b466a9354e306c9eb0", "States are not equal");
+        require(tr_state.current_challenge == hex"f0ae86a6257e615bce8b0fe73794934deda00c13d58f80b466a9354e306c9eb0", "States are not equal");
 
         uint256[] memory ch_n1 = new uint256[](3);
         uint256 ch1 = transcript.get_field_challenge(tr_state, bn254_crypto.r_mod);
@@ -43,10 +41,10 @@ contract TestTranscript {
             7576039756886122119376570618873144488644512682503555904028346442798478224108
         ];
 
-        Assert.equal(ch1, 410520887291797743055529280205380884898232066603165141341545420025204569828, "Challenges are not equal");
-        Assert.equal(ch2, 6957757883002647951325110021322547143346349859370624486517662147347218797451, "Challenges are not equal");
+        require(ch1 == 410520887291797743055529280205380884898232066603165141341545420025204569828, "Challenges are not equal");
+        require(ch2 == 6957757883002647951325110021322547143346349859370624486517662147347218797451, "Challenges are not equal");
         for (uint256 i = 0; i < ch_n1.length; i++) {
-            Assert.equal(ch_n1[i], expected_ch_n1[i], "Challenges are not equal");
+            require(ch_n1[i]== expected_ch_n1[i], "Challenges are not equal");
         }
 
         transcript.update_transcript(tr_state, updated_blob);
@@ -60,9 +58,9 @@ contract TestTranscript {
         ];
 
         for (uint256 i = 0; i < ch_n2.length; i++) {
-            Assert.equal(ch_n2[i], expected_ch_n2[i], "Challenges are not equal");
+            require(ch_n2[i] == expected_ch_n2[i], "Challenges are not equal");
         }
 
-        Assert.equal(uint256(4329468119771583341), transcript.get_integral_challenge_be(tr_state, 8), "Challenges are not equal");
+        require(uint256(4329468119771583341)== transcript.get_integral_challenge_be(tr_state, 8), "Challenges are not equal");
     }
 }

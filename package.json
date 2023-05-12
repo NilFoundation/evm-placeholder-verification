@@ -1,6 +1,6 @@
 {
   "name": "@nilfoundation/evm-placeholder-verification",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "directories": {
     "src": "src",
     "test": "test"
