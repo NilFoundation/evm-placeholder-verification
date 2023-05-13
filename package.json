@@ -1,14 +1,6 @@
 {
   "name": "@nilfoundation/evm-placeholder-verification",
-  "version": "1.0.12",
-  "dependencies": {
-    "@truffle/hdwallet-provider": "^2.0.1",
-    "as-table": "1.0.55",
-    "bip39": "^3.0.4",
-    "eth-gas-reporter": "^0.2.24",
-    "ethereumjs-wallet": "^1.0.2",
-    "web3": "^1.7.0"
-  },
+  "version": "1.0.13",
   "directories": {
     "src": "src",
     "test": "test"
@@ -26,11 +18,26 @@
   "homepage": "https://github.com/nilfoundation/evm-placeholder-verification",
   "description": "=nil; Foundation's Placeholder Proof System In-EVM Verifier",
   "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "@nomiclabs/hardhat-ethers": "^2.2.2",
+    "@truffle/hdwallet-provider": "^2.0.1",
+    "as-table": "1.0.55",
+    "bip39": "^3.0.4",
+    "dotenv": "^16.0.3",
+    "eth-gas-reporter": "^0.2.24",
+    "ethereumjs-wallet": "^1.0.2",
+    "ethers": "^5.7.2",
+    "hardhat": "^2.14.0",
+    "hardhat-deploy": "^0.11.25",
+    "hardhat-deploy-ethers": "^0.4.0-next.1",
     "json5": "^2.2.1",
-    "solpp": "^0.11.5"
+    "lossless-json": "^2.0.9",
+    "solpp": "^0.11.5",
+    "web3": "^1.7.0"
   },
   "files": [
     "/contracts/**/*.sol",
+    "/contracts/test/**/*.sol",
     "/build/contracts/*.json",
     "!/contracts/mocks/**/*"
   ]

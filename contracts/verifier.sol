@@ -19,7 +19,6 @@
 pragma solidity >=0.8.4;
 
 import "./types.sol";
-//import "./logging.sol";
 import "./cryptography/transcript.sol";
 
 import "./placeholder/proof_map_parser.sol";
@@ -129,7 +128,7 @@ contract PlaceholderVerifier is IVerifier {
         transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
 
 
-        // 4. prepare evaluaitons of the polynomials that are copy-constrained
+        // 4. prepare evaluations of the polynomials that are copy-constrained
         // 5. permutation argument
         local_vars.permutation_argument = permutation_argument.verify_eval_be(blob, vars.tr_state,
             vars.proof_map, vars.fri_params,

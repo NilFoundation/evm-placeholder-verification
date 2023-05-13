@@ -19,14 +19,6 @@
 //---------------------------------------------------------------------------//
 pragma solidity >=0.8.4;
 
-//import "../../types.sol";
-//import "../../cryptography/transcript.sol";
-//import "../proof_map_parser.sol";
-//import "../placeholder_verifier.sol";
-//import "../../logging.sol";
-//import "../../profiling.sol";
-//import "../../components/unified_addition_gen.sol";
-//import "../init_vars.sol";
 import "../../interfaces/verifier.sol";
 
 contract TestPlaceholderVerifier {
