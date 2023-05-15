@@ -23,22 +23,6 @@ pragma solidity >=0.8.4;
  * @dev Provides some basic methods to compute bilinear pairings, construct group elements and misc numerical methods
  */
 library field {
-    // Perform a modular exponentiation. This method is ideal for small exponents (~64 bits or less), as
-    // it is cheaper than using the pow precompile
-    function pow_small(uint256 base, uint256 exponent, uint256 modulus)
-    internal pure returns (uint256 result) {
-        result = 1;
-        assembly {
-            for {let count := 1}
-            lt(count, add(exponent, 0x01))
-            {count := shl(1, count)} {
-                if and(exponent, count) {
-                    result := mulmod(result, base, modulus)
-                }
-                base := mulmod(base, base, modulus)
-            }
-        }
-    }
 
     /// @dev Modular inverse of a (mod p) using euclid.
     /// 'a' and 'p' must be co-prime.
@@ -64,12 +48,6 @@ library field {
         return uint256(t1);
     }
 
-    function fadd(uint256 a, uint256 b, uint256 modulus)
-    internal pure returns (uint256 result) {
-        assembly {
-            result := addmod(a, b, modulus)
-        }
-    }
 
     function fsub(uint256 a, uint256 b, uint256 modulus)
     internal pure returns (uint256 result) {
@@ -160,12 +138,6 @@ library field {
                 revert(0, 0)
             }
             res := mload(p)
-        }
-    }
-
-    function double(uint256 val, uint256 modulus) internal pure returns (uint256 result) {
-        assembly {
-            result := mulmod(2, val, modulus)
         }
     }
 }
