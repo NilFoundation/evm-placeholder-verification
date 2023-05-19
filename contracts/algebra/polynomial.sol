@@ -36,7 +36,7 @@ library polynomial {
     function multiply_poly_on_coeff(uint256[] memory coeffs, uint256 mul, uint256 modulus)
     internal pure{
         for(uint256 i = 0; i < coeffs.length; i++){
-            coeffs[i] = mulmod(coeffs[i], mul, modulus);
+            coeffs[i] = field.fmul(coeffs[i], mul, modulus);
         }
     }
 

@@ -51,6 +51,9 @@ library field {
     function fadd(uint256 a, uint256 b, uint256 modulus)
     public pure returns (uint256 result) {
         result = (a + b) % modulus;
+//        assembly {
+//            result := addmod(a, b, modulus)
+//        }
     }
 
 

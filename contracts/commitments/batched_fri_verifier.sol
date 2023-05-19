@@ -330,6 +330,7 @@ library batched_fri_verifier {
         }
 
         uint256 first_offset = 0x20;
+        uint256 word_size = 0x20;
         uint256 y_offset;
 
         offset = merkle_verifier.skip_merkle_proof_be(blob, offset);
@@ -343,29 +344,39 @@ library batched_fri_verifier {
                 // Prepare y-s
                 unchecked{ y_offset = offset + ( local_vars.newind << 6 ); }
 
+
                 // push y
                 if(fri_params.s_indices[local_vars.newind] == fri_params.tmp_arr[local_vars.y_ind]){
-                    assembly{
-                        mstore(
-                            add(mload(local_vars),first_offset), 
-                            calldataload(add(blob.offset, y_offset))
-                        )
-                        mstore(
-                            add(mload(local_vars),add(first_offset, 0x20)), 
-                            calldataload(add(blob.offset, add(y_offset, 0x20)))
-                        )
-                    }
+                    uint256 end_offset = y_offset;
+                    local_vars.x =  uint256(bytes32(blob[end_offset : end_offset + word_size]));
+                    end_offset = y_offset + 0x20;
+                    local_vars.domain_size = uint256(bytes32(blob[end_offset : end_offset + word_size]));
+//                    assembly{
+//                        mstore(
+//                            add(mload(local_vars),first_offset), //x
+//                            calldataload(add(blob.offset, y_offset))
+//                        )
+//                        mstore(
+//                            add(mload(local_vars),add(first_offset, 0x20)), // domain_size
+//                            calldataload(add(blob.offset, add(y_offset, 0x20)))
+//                        )
+//                    }
                 } else {
-                    assembly{
-                        mstore(
-                            add(mload(local_vars),first_offset), 
-                            calldataload(add(blob.offset, add(y_offset, 0x20)))
-                        )
-                        mstore(
-                            add(mload(local_vars),add(first_offset, 0x20)), 
-                            calldataload(add(blob.offset, y_offset))
-                        )
-                    }
+                    uint256 end_offset = y_offset;
+                    local_vars.domain_size = uint256(bytes32(blob[end_offset : end_offset + word_size]));
+                    end_offset = y_offset + 0x20;
+                    local_vars.x =  uint256(bytes32(blob[end_offset : end_offset + word_size]));
+
+//                    assembly{
+//                        mstore(
+//                            add(mload(local_vars),first_offset), //x
+//                            calldataload(add(blob.offset, add(y_offset, 0x20)))
+//                        )
+//                        mstore(
+//                            add(mload(local_vars),add(first_offset, 0x20)), //domain_size
+//                            calldataload(add(blob.offset, y_offset))
+//                        )
+//                    }
                 }
                 unchecked{ 
                     local_vars.y_ind++; 
