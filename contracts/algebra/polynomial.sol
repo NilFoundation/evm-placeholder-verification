@@ -19,8 +19,9 @@
 
 pragma solidity >=0.8.4;
 
-import "./field.sol";
+import {field} from "./field.sol";
 import "../basic_marshalling.sol";
+
 
 
 /**
@@ -50,15 +51,20 @@ library polynomial {
     function evaluate(uint256[] memory coeffs, uint256 point, uint256 modulus)
     internal pure returns (uint256) {
         uint256 result;
-        assembly {
-            let cur_coefs := add(coeffs, mul(mload(coeffs), 0x20))
-            for { } gt(cur_coefs, coeffs) {} {
-                result := addmod(mulmod(result, point, modulus),
-                                mload(cur_coefs), // (i - 1) * 32
-                                modulus)
-                cur_coefs := sub(cur_coefs, 0x20)
-            }
+        for (uint i=coeffs.length -1; i>=0 ; i--){
+            uint256 mul_m = field.fmul(result,point,modulus);
+            result = field.fadd(mul_m,coeffs[i],modulus);
         }
+//        assembly {
+//            let cur_coefs := add(coeffs, mul(mload(coeffs), 0x20)
+//            )
+//            for { } gt(cur_coefs, coeffs) {} {
+//                result := addmod(mulmod(result, point, modulus),
+//                                mload(cur_coefs), // (i - 1) * 32
+//                                modulus)
+//                cur_coefs := sub(cur_coefs, 0x20)
+//            }
+//        }
         return result;
     }
 }
