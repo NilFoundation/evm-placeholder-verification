@@ -177,4 +177,20 @@ library basic_marshalling {
         unchecked { result_offset = offset + LENGTH_OCTETS; }
         require(result_offset < blob.length);
     }
+
+    function write_bytes(bytes memory sink , uint256 start_offset, bytes memory src)
+    internal pure {
+        for(uint256 idx=0 ; idx < src.length ; ++idx) {
+            sink[start_offset + idx] = src[idx];
+        }
+    }
+
+    function to_bytes(uint256 x)
+    internal pure returns (bytes memory c) {
+        bytes32 b = bytes32(x);
+        c = new bytes(32);
+        for (uint i=0; i < 32; i++) {
+            c[i] = b[i];
+        }
+    }
 }
