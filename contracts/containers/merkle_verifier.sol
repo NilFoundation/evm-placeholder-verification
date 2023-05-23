@@ -37,9 +37,10 @@ library merkle_verifier {
     // [0:8] - co-path element position on the layer
     // [8:16] - co-path element hash value length (which is always 32 bytes in current implementation)
     // [16:48] - co-path element hash value
+    uint256 constant WORD_SIZE = 4;
     uint256 constant ROOT_OFFSET = 16;
-    uint256 constant DEPTH_OFFSET = 48;
-    uint256 constant LAYERS_OFFSET = 56;
+    uint256 constant DEPTH_OFFSET = 48/8;
+    uint256 constant LAYERS_OFFSET = 56/8;
     // only one co-element on each layer as arity is always 2
     // 8 + (number of co-path elements on the layer)
     // 8 + (co-path element position on the layer)
@@ -53,43 +54,52 @@ library merkle_verifier {
     // 256 - 8 * LENGTH_OCTETS
     uint256 constant LENGTH_RESTORING_SHIFT = 0xc0;
 
+    // TODO : Check if the offset returned should be bytes or bits?
+    // This has implications on all calling functions.
     function skip_merkle_proof_be(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 result_offset) {
         unchecked { result_offset = offset + LAYERS_OFFSET; }
-        assembly {
-            result_offset := add(
-                result_offset,
-                mul(
-                    LAYER_OCTETS,
-                    shr(
-                        LENGTH_RESTORING_SHIFT,
-                        calldataload(
-                            add(blob.offset, add(offset, DEPTH_OFFSET))
-                        )
-                    )
-                )
-            )
-        }
+
+        bytes memory read_offset = blob[DEPTH_OFFSET:DEPTH_OFFSET + WORD_SIZE];
+        uint256 read_offset_uint = uint256(bytes32(read_offset));
+        result_offset += ((read_offset_uint >> read_offset_uint) * LAYER_OCTETS );
+//        assembly {
+//            result_offset := add(
+//                result_offset,
+//                mul(
+//                    LAYER_OCTETS,
+//                    shr(
+//                        LENGTH_RESTORING_SHIFT,
+//                        calldataload(
+//                            add(blob.offset, add(offset, DEPTH_OFFSET))
+//                        )
+//                    )
+//                )
+//            )
+//        }
     }
 
     function skip_merkle_proof_be_check(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 result_offset) {
         unchecked { result_offset = offset + LAYERS_OFFSET; }
         require(result_offset < blob.length);
-        assembly {
-            result_offset := add(
-                result_offset,
-                mul(
-                    LAYER_OCTETS,
-                    shr(
-                        LENGTH_RESTORING_SHIFT,
-                        calldataload(
-                            add(blob.offset, add(offset, DEPTH_OFFSET))
-                        )
-                    )
-                )
-            )
-        }
+        bytes memory read_offset = blob[DEPTH_OFFSET:DEPTH_OFFSET + WORD_SIZE];
+        uint256 read_offset_uint = uint256(bytes32(read_offset));
+        result_offset += ((read_offset_uint >> LENGTH_RESTORING_SHIFT) * LAYER_OCTETS );
+//        assembly {
+//            result_offset := add(
+//                result_offset,
+//                mul(
+//                    LAYER_OCTETS,
+//                    shr(
+//                        LENGTH_RESTORING_SHIFT,
+//                        calldataload(
+//                            add(blob.offset, add(offset, DEPTH_OFFSET))
+//                        )
+//                    )
+//                )
+//            )
+//        }
         require(result_offset <= blob.length, "skip_merkle_proof_be");
     }
 
