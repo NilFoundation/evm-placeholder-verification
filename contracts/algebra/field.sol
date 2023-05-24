@@ -49,7 +49,7 @@ library field {
     }
 
     function fadd(uint256 a, uint256 b, uint256 modulus)
-    public pure returns (uint256 result) {
+    internal pure returns (uint256 result) {
         result = addmod(a, b, modulus);
 //        assembly {
 //            result := addmod(a, b, modulus)
@@ -58,7 +58,7 @@ library field {
 
 
     function fsub(uint256 a, uint256 b, uint256 modulus)
-    public pure returns (uint256 result) {
+    internal pure returns (uint256 result) {
         result =addmod(a , (modulus - b), modulus);
 //        assembly {
 //            result := addmod(a, sub(modulus, b), modulus)
@@ -66,7 +66,7 @@ library field {
     }
 
     function fmul(uint256 a, uint256 b, uint256 modulus)
-    public pure returns (uint256 result) {
+    internal pure returns (uint256 result) {
         result = mulmod(a, b, modulus);
 //        assembly {
 //            result := mulmod(a, b, modulus)
@@ -74,7 +74,7 @@ library field {
     }
 
     function fdiv(uint256 a, uint256 b, uint256 modulus)
-    public pure returns (uint256 result) {
+    internal pure returns (uint256 result) {
         uint256 b_inv = invmod(b, modulus);
         result  =mulmod(a, b_inv, modulus);
 //        assembly {
