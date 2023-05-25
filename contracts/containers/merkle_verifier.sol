@@ -38,31 +38,34 @@ library merkle_verifier {
     // [8:16] - co-path element hash value length (which is always 32 bytes in current implementation)
     // [16:48] - co-path element hash value
     uint256 constant WORD_SIZE = 32; //32 bytes,256 bits
-    uint256 constant ROOT_OFFSET = 16/8;
-    uint256 constant DEPTH_OFFSET = 48/8;
-    uint256 constant LAYERS_OFFSET = 56/8;
+    uint256 constant ROOT_OFFSET = 2; //16/8;
+    uint256 constant DEPTH_OFFSET = 6; //48/8;
+    uint256 constant LAYERS_OFFSET = 7; //56/8;
     // only one co-element on each layer as arity is always 2
     // 8 + (number of co-path elements on the layer)
     // 8 + (co-path element position on the layer)
     // 8 + (co-path element hash value length)
     // 32 (co-path element hash value)
-    uint256 constant LAYER_POSITION_OFFSET = 8/8;
-    uint256 constant LAYER_COPATH_HASH_OFFSET = 24/8;
-    uint256 constant LAYER_OCTETS = 56/8;
+    uint256 constant LAYER_POSITION_OFFSET = 1; //8/8;
+    uint256 constant LAYER_COPATH_HASH_OFFSET = 3; //24/8;
+    uint256 constant LAYER_OCTETS = 7; //56/8;
 
-    uint256 constant LENGTH_OCTETS = 8;
-    // 256 - 8 * LENGTH_OCTETS
+
     uint256 constant LENGTH_RESTORING_SHIFT = 0xc0;
 
-    // TODO : Check if the offset returned should be bytes or bits?
+    // TODO : Check if the offset input or output are they bits/bytes requiring conversion
+    // TODO : Check if all offset are byte aligned i.e multiples of 8.
     // This has implications on all calling functions.
     function skip_merkle_proof_be(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 result_offset) {
+        offset = offset/8;
         unchecked { result_offset = offset + LAYERS_OFFSET; }
 
-        bytes memory read_offset = blob[DEPTH_OFFSET:DEPTH_OFFSET + WORD_SIZE];
-        uint256 read_offset_uint = uint256(bytes32(read_offset));
-        result_offset += ((read_offset_uint >> read_offset_uint) * LAYER_OCTETS );
+        uint256 read_offset_st  = offset + DEPTH_OFFSET;
+        bytes memory read_bytes = blob[read_offset_st:read_offset_st + WORD_SIZE];
+        uint256 read_offset_uint = uint256(bytes32(read_bytes));
+        result_offset += ((read_offset_uint >> LENGTH_RESTORING_SHIFT) * LAYER_OCTETS );
+        result_offset = result_offset * 8;
 //        assembly {
 //            result_offset := add(
 //                result_offset,
@@ -83,9 +86,13 @@ library merkle_verifier {
     internal pure returns (uint256 result_offset) {
         unchecked { result_offset = offset + LAYERS_OFFSET; }
         require(result_offset < blob.length);
-        bytes memory read_offset = blob[DEPTH_OFFSET:DEPTH_OFFSET + WORD_SIZE];
+        offset = offset/8;
+        uint256 read_offset_st  = offset + DEPTH_OFFSET;
+
+        bytes memory read_offset = blob[read_offset_st:read_offset_st + WORD_SIZE];
         uint256 read_offset_uint = uint256(bytes32(read_offset));
         result_offset += ((read_offset_uint >> LENGTH_RESTORING_SHIFT) * LAYER_OCTETS );
+        result_offset = result_offset * 8;
 //        assembly {
 //            result_offset := add(
 //                result_offset,
@@ -127,8 +134,9 @@ library merkle_verifier {
         uint256 next_pos;
 
         for(uint256 cur_layer_idx=0; cur_layer_idx < depth -1 ; cur_layer_idx++ ){
-            uint256 offset = layer_offset + LAYER_POSITION_OFFSET;
-            pos = uint256(bytes32(blob[offset : offset + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+            uint256 layer_offset_st = layer_offset + LAYER_POSITION_OFFSET;
+            pos = uint256(bytes32(blob[layer_offset_st : layer_offset_st + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+
             uint256 next_pos_offset =  layer_offset + LAYER_POSITION_OFFSET + LAYER_OCTETS;
             next_pos = uint256(bytes32(blob[next_pos_offset: next_pos_offset + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
 
@@ -348,7 +356,7 @@ library merkle_verifier {
     function parse_verify_merkle_proof_bytes_be(bytes calldata blob, uint256 offset, bytes memory verified_data_bytes,
                                                 uint256 verified_data_bytes_len)
     internal pure returns (bool result) {
-        uint256 addition_offset =  uint256(bytes32(verified_data_bytes)) + 0x20;
+        uint256 addition_offset =  uint256(bytes32(verified_data_bytes)) + 0x20; // TODO : Length in bits?
         bytes32 verified_data = keccak256(abi.encodePacked(addition_offset,verified_data_bytes_len));
 //        assembly {
 //            verified_data := keccak256(add(verified_data_bytes, 0x20), verified_data_bytes_len)
