@@ -64,62 +64,89 @@ library permutation_argument {
         types.placeholder_state_type memory local_vars,
         uint256 column_polynomials_values_i
     ) internal pure {
+        uint256 modulus = fri_params.modulus;
+        uint256 gamma  =  local_vars.gamma;
+
+        // beta * S_id[i].evaluate(challenge)
+        uint256 beta_eval = mulmod(local_vars.beta,local_vars.S_id_i,modulus);
+
+        // beta * S_id[i].evaluate(challenge) + gamma
+        uint256 beta_eval_gamma = addmod(beta_eval,local_vars.gamma ,modulus);
+
+        // column_polynomials_values[i] + beta * S_id[i].evaluate(challenge) + gamma
+        uint256 beta_eval_g_poly = addmod(column_polynomials_values_i,beta_eval_gamma,modulus);
+
+        local_vars.g = mulmod(local_vars.g,beta_eval_g_poly,modulus);
+
+
+
+        // beta * S_sigma[i].evaluate(challenge)
+        uint256 beta_eval_h =  mulmod(local_vars.beta,local_vars.S_sigma_i,modulus);
+
+        // beta * S_sigma[i].evaluate(challenge) + gamma
+        uint256 beta_eval_h_gamma = addmod(beta_eval_h,local_vars.gamma ,modulus);
+
+        // column_polynomials_values[i] +  beta * S_sigma[i].evaluate(challenge) + gamma
+        uint256 beta_eval_h_poly = addmod(column_polynomials_values_i,beta_eval_h_gamma,modulus);
+
+        local_vars.h = mulmod(local_vars.h,beta_eval_h_poly , modulus);
+
         assembly {
-            let modulus := mload(fri_params)
-            mstore(
-                add(local_vars, G_OFFSET),
-                mulmod(
-                    mload(add(local_vars, G_OFFSET)),
-                    // column_polynomials_values[i] + beta * S_id[i].evaluate(challenge) + gamma
-                    addmod(
-                        // column_polynomials_values[i]
-                        column_polynomials_values_i,
-                        // beta * S_id[i].evaluate(challenge) + gamma
-                        addmod(
-                            // beta * S_id[i].evaluate(challenge)
-                            mulmod(
-                                // beta
-                                mload(add(local_vars, BETA_OFFSET)),
-                                // S_id[i].evaluate(challenge)
-                                mload(add(local_vars, S_ID_I_OFFSET)),
-                                modulus
-                            ),
-                            // gamma
-                            mload(add(local_vars, GAMMA_OFFSET)),
-                            modulus
-                        ),
-                        modulus
-                    ),
-                    modulus
-                )
-            )
-            mstore(
-                add(local_vars, H_OFFSET),
-                mulmod(
-                    mload(add(local_vars, H_OFFSET)),
-                    // column_polynomials_values[i] + beta * S_sigma[i].evaluate(challenge) + gamma
-                    addmod(
-                        // column_polynomials_values[i]
-                        column_polynomials_values_i,
-                        // beta * S_sigma[i].evaluate(challenge) + gamma
-                        addmod(
-                            // beta * S_sigma[i].evaluate(challenge)
-                            mulmod(
-                                // beta
-                                mload(add(local_vars, BETA_OFFSET)),
-                                // S_sigma[i].evaluate(challenge)
-                                mload(add(local_vars, S_SIGMA_I_OFFSET)),
-                                modulus
-                            ),
-                            // gamma
-                            mload(add(local_vars, GAMMA_OFFSET)),
-                            modulus
-                        ),
-                        modulus
-                    ),
-                    modulus
-                )
-            )
+//            let modulus := mload(fri_params)
+//            mstore(
+//                add(local_vars, G_OFFSET),
+//                mulmod(
+//                    mload(add(local_vars, G_OFFSET)),
+//                    // column_polynomials_values[i] + beta * S_id[i].evaluate(challenge) + gamma
+//                    addmod(
+//                        // column_polynomials_values[i]
+//                        column_polynomials_values_i,
+//                        // beta * S_id[i].evaluate(challenge) + gamma
+//                        addmod(
+//                            // beta * S_id[i].evaluate(challenge)
+//                            mulmod(
+//                                // beta
+//                                mload(add(local_vars, BETA_OFFSET)),
+//                                // S_id[i].evaluate(challenge)
+//                                mload(add(local_vars, S_ID_I_OFFSET)),
+//                                modulus
+//                            ),
+//                            // gamma
+//                            mload(add(local_vars, GAMMA_OFFSET)),
+//                            modulus
+//                        ),
+//                        modulus
+//                    ),
+//                    modulus
+//                )
+//            )
+//            mstore(
+//                add(local_vars, H_OFFSET),
+//                mulmod(
+//                    mload(add(local_vars, H_OFFSET)),
+//                    // column_polynomials_values[i] + beta * S_sigma[i].evaluate(challenge) + gamma
+//                    addmod(
+//                        // column_polynomials_values[i]
+//                        column_polynomials_values_i,
+//                        // beta * S_sigma[i].evaluate(challenge) + gamma
+//                        addmod(
+//                            // beta * S_sigma[i].evaluate(challenge)
+//                            mulmod(
+//                                // beta
+//                                mload(add(local_vars, BETA_OFFSET)),
+//                                // S_sigma[i].evaluate(challenge)
+//                                mload(add(local_vars, S_SIGMA_I_OFFSET)),
+//                                modulus
+//                            ),
+//                            // gamma
+//                            mload(add(local_vars, GAMMA_OFFSET)),
+//                            modulus
+//                        ),
+//                        modulus
+//                    ),
+//                    modulus
+//                )
+//            )
         }
     }
 
