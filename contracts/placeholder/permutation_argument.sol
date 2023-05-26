@@ -285,12 +285,14 @@ library permutation_argument {
         );
 
         uint256 modulus = fri_params.modulus;
+        {
         uint256 one_minus_perm_poly_v = addmod(1 , (modulus - local_vars.perm_polynomial_value), modulus);
 
         uint256 read_offset = proof_map.eval_proof_lagrange_0_offset;
         uint256 blob_data = uint256(bytes32(blob[read_offset : read_offset + WORD_SIZE]));
 
         F[0] = mulmod(blob_data,one_minus_perm_poly_v,modulus);
+        }
 
                 // blob[proof_map.eval_proof_lagrange_0_offset: proof_map.eval_proof_lagrange_0_offset + WORD_SIZE] +
                 //proof_map.eval_proof_lagrange_0_offset
@@ -329,25 +331,27 @@ library permutation_argument {
 //        }
 
         // - perm_polynomial_value * g
-        uint256 perm_poly_val_g=  modulus - mulmod(local_vars.perm_polynomial_value,local_vars.g, modulus);
-//
-//        // perm_polynomial_shifted_value * h
-        uint256 perm_poly_val_h =   mulmod(local_vars.perm_polynomial_shifted_value, local_vars.h, modulus);
-//
-//        // perm_polynomial_shifted_value * h - perm_polynomial_value * g
-        uint256 poly_h_min_g = addmod(perm_poly_val_h,perm_poly_val_g, modulus);
-//
-//        //-preprocessed_data.q_last.evaluate(challenge) - preprocessed_data.q_blind.evaluate(challenge)
-         uint256 mod_min_q_last_eval = modulus - local_vars.q_last_eval;
-         uint256 mod_min_q_blind_eval = modulus - local_vars.q_blind_eval;
-         uint256 pre_process_st_1 = addmod(mod_min_q_last_eval,mod_min_q_blind_eval,modulus);
-//
-//        // -preprocessed_data.q_last.evaluate(challenge) - preprocessed_data.q_blind.evaluate(challenge)
-//        uint256 pre_process_st_2 = addmod(1,pre_process_st_1,modulus );
+        {
+            uint256 perm_poly_val_g=  modulus - mulmod(local_vars.perm_polynomial_value,local_vars.g, modulus);
+    //
+    //        // perm_polynomial_shifted_value * h
+            uint256 perm_poly_val_h =   mulmod(local_vars.perm_polynomial_shifted_value, local_vars.h, modulus);
+    //
+    //        // perm_polynomial_shifted_value * h - perm_polynomial_value * g
+            uint256 poly_h_min_g = addmod(perm_poly_val_h,perm_poly_val_g, modulus);
+    //
+    //        //-preprocessed_data.q_last.evaluate(challenge) - preprocessed_data.q_blind.evaluate(challenge)
+             uint256 mod_min_q_last_eval = modulus - local_vars.q_last_eval;
+             uint256 mod_min_q_blind_eval = modulus - local_vars.q_blind_eval;
+             uint256 pre_process_st_1 = addmod(mod_min_q_last_eval,mod_min_q_blind_eval,modulus);
 
-        //TODO write bytes function
-        //F[32] = mulmod(pre_process_st_2,poly_h_min_g , modulus);
+    //
+            // -preprocessed_data.q_last.evaluate(challenge) - preprocessed_data.q_blind.evaluate(challenge)
+            uint256 pre_process_st_2 = addmod(1,pre_process_st_1,modulus );
 
+
+            F[1] = mulmod(pre_process_st_2,poly_h_min_g , modulus);
+        }
 
 
 
@@ -418,17 +422,19 @@ library permutation_argument {
 //                )
 //            )
 //        }
-
+        {
         //-perm_polynomial_value
         uint256 min_per_poly_val = modulus - local_vars.perm_polynomial_value;
 
         // perm_polynomial_value.squared()
-        uint256 perm_poly_sq = mulmod( local_vars.perm_polynomial_value, local_vars.perm_polynomial_value,modulus);
+        uint256 perm_poly_sq = mulmod(local_vars.perm_polynomial_value, local_vars.perm_polynomial_value,modulus);
 
         //
         uint256 poly_sq_minus_min_poly_val = addmod(perm_poly_sq,min_per_poly_val,modulus);
 
-        F[96] = mulmod(local_vars.q_last_eval,poly_sq_minus_min_poly_val, modulus);
+        F[2] = mulmod(local_vars.q_last_eval,poly_sq_minus_min_poly_val, modulus);
+
+        }
 
 //        assembly{
 //            //let modulus := mload(fri_params)
