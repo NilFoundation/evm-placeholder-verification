@@ -118,38 +118,40 @@ library field {
 
     function expmod_static(uint256 base, uint256 exponent, uint256 modulus)
     internal view returns (uint256 res) {
-        assembly {
-            let p := mload(0x40)
-            mstore(p, 0x20) // Length of Base.
-            mstore(add(p, 0x20), 0x20) // Length of Exponent.
-            mstore(add(p, 0x40), 0x20) // Length of Modulus.
-            mstore(add(p, 0x60), base) // Base.
-            mstore(add(p, 0x80), exponent) // Exponent.
-            mstore(add(p, 0xa0), modulus) // Modulus.
-        // Call modexp precompile.
-            if iszero(staticcall(gas(), 0x05, p, 0xc0, p, 0x20)) {
-                revert(0, 0)
-            }
-            res := mload(p)
-        }
+        //TODO check if you can do this in cairo
+//        assembly {
+//            let p := mload(0x40)
+//            mstore(p, 0x20) // Length of Base.
+//            mstore(add(p, 0x20), 0x20) // Length of Exponent.
+//            mstore(add(p, 0x40), 0x20) // Length of Modulus.
+//            mstore(add(p, 0x60), base) // Base.
+//            mstore(add(p, 0x80), exponent) // Exponent.
+//            mstore(add(p, 0xa0), modulus) // Modulus.
+//        // Call modexp precompile.
+//            if iszero(staticcall(gas(), 0x05, p, 0xc0, p, 0x20)) {
+//                revert(0, 0)
+//            }
+//            res := mload(p)
+//        }
     }
 
     function inverse_static(uint256 val, uint256 modulus)
     internal view returns (uint256 res) {
         //        return expmod_static(val, modulus - 2, modulus); // code below similar to this call
-        assembly {
-            let p := mload(0x40)
-            mstore(p, 0x20) // Length of Base.
-            mstore(add(p, 0x20), 0x20) // Length of Exponent.
-            mstore(add(p, 0x40), 0x20) // Length of Modulus.
-            mstore(add(p, 0x60), val) // Base.
-            mstore(add(p, 0x80), sub(modulus, 0x02)) // Exponent.
-            mstore(add(p, 0xa0), modulus) // Modulus.
-        // Call modexp precompile.
-            if iszero(staticcall(gas(), 0x05, p, 0xc0, p, 0x20)) {
-                revert(0, 0)
-            }
-            res := mload(p)
-        }
+        //TODO : Check cairo implementation
+//        assembly {
+//            let p := mload(0x40)
+//            mstore(p, 0x20) // Length of Base.
+//            mstore(add(p, 0x20), 0x20) // Length of Exponent.
+//            mstore(add(p, 0x40), 0x20) // Length of Modulus.
+//            mstore(add(p, 0x60), val) // Base.
+//            mstore(add(p, 0x80), sub(modulus, 0x02)) // Exponent.
+//            mstore(add(p, 0xa0), modulus) // Modulus.
+//        // Call modexp precompile.
+//            if iszero(staticcall(gas(), 0x05, p, 0xc0, p, 0x20)) {
+//                revert(0, 0)
+//            }
+//            res := mload(p)
+//        }
     }
 }
