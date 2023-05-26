@@ -116,16 +116,27 @@ library placeholder_verifier {
                     // TODO check it!!!!
                     // TODO: check properly if column_rotations will be not one of 0, +-1
                     // local_vars.evaluation_points[0][i][j] = local_vars.challenge * omega ^ column_rotations[i][j]
-                    assembly{
-                        for{mstore(add(local_vars, E_OFFSET), mload(add(local_vars, CHALLENGE_OFFSET)))} gt(e,0) {e := shr(e, 1)} {
-                            if not(eq(and(e,1), 0)){
-                                mstore(add(local_vars, E_OFFSET),mulmod(mload(add(local_vars, E_OFFSET)), omega, mload(fri_params)))
-                            }
-                            if not(eq(e, 1)){
-                                omega := mulmod(omega,omega, mload(fri_params))
-                            }
+                    local_vars.e = local_vars.challenge ;
+                    while(e > 0){
+                        if ((e & 1) != 0){
+                            local_vars.e = mulmod(local_vars.e, omega, fri_params.modulus);
                         }
+                        if (e !=1) {
+                            omega = mulmod(omega,omega, fri_params.modulus);
+                        }
+                        e = e >> 1;
                     }
+
+//                    assembly{
+//                        for{mstore(add(local_vars, E_OFFSET), mload(add(local_vars, CHALLENGE_OFFSET)))} gt(e,0) {e := shr(e, 1)} {
+//                            if not(eq(and(e,1), 0)){
+//                                mstore(add(local_vars, E_OFFSET),mulmod(mload(add(local_vars, E_OFFSET)), omega, mload(fri_params)))
+//                            }
+//                            if not(eq(e, 1)){
+//                                omega := mulmod(omega,omega, mload(fri_params))
+//                            }
+//                        }
+//                    }
                     local_vars.evaluation_points[0][i][j] = local_vars.e;
                 }
             unchecked{j++;}
@@ -175,16 +186,27 @@ library placeholder_verifier {
                     // TODO check it!!!!
                     // TODO: check properly if column_rotations will be not one of 0, +-1
                     // local_vars.evaluation_points[0][i][j] = local_vars.challenge * omega ^ column_rotations[i][j]
-                    assembly{
-                        for{mstore(add(local_vars, E_OFFSET), mload(add(local_vars, CHALLENGE_OFFSET)))} gt(e,0) {e := shr(e, 1)} {
-                            if not(eq(and(e,1), 0)){
-                                mstore(add(local_vars, E_OFFSET),mulmod(mload(add(local_vars, E_OFFSET)), omega, mload(fri_params)))
-                            }
-                            if not(eq(e, 1)){
-                                omega := mulmod(omega,omega, mload(fri_params))
-                            }
+                    local_vars.e = local_vars.challenge;
+                    while(e > 0) {
+                        if (e & 1 !=0) {
+                            local_vars.e = mulmod(local_vars.e, omega, fri_params.modulus);
                         }
+                        if (e !=1){
+                            omega = mulmod(omega, omega, fri_params.modulus);
+                        }
+                        e = e >> 1;
                     }
+
+//                    assembly{
+//                        for{mstore(add(local_vars, E_OFFSET), mload(add(local_vars, CHALLENGE_OFFSET)))} gt(e,0) {e := shr(e, 1)} {
+//                            if not(eq(and(e,1), 0)){
+//                                mstore(add(local_vars, E_OFFSET),mulmod(mload(add(local_vars, E_OFFSET)), omega, mload(fri_params)))
+//                            }
+//                            if not(eq(e, 1)){
+//                                omega := mulmod(omega,omega, mload(fri_params))
+//                            }
+//                        }
+//                    }
                     local_vars.evaluation_points[0][eval_point_ind][j] = local_vars.e;
                 }
                 unchecked{j++;}
