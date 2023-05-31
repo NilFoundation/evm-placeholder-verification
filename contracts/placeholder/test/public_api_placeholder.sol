@@ -44,7 +44,7 @@ contract TestPlaceholderVerifier {
        uint256[] calldata init_params,
        int256[][] calldata columns_rotations,
        address gate_argument
-    ) public view{
+    ) public{
         require(
             IVerifier(_verifier).verify(blob,init_params,columns_rotations,gate_argument),
             "Proof is not correct"
