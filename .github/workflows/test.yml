@@ -34,4 +34,3 @@ jobs:
           npx hardhat test     
           npx hardhat node&
           npx hardhat deploy
-          npx hardhat verify
