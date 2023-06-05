@@ -81,21 +81,6 @@ describe('Proof Tests', function () {
         await testPlaceholderAPI.verify(params['proof'],params['init_params'], params['columns_rotations'], params['public_input'],unifiedAdditionGate.address ,{gasLimit: 30_500_000});
     });
 
-    it("Merkle Tree Poseidon", async function () {
-        let configPath = "./data/merkle_tree_poseidon/circuit_params.json"
-        let proofPath = "./data/merkle_tree_poseidon/proof.bin"
-        let publicInputPath = "./data/merkle_tree_poseidon/public_input.json";
-        let params = getVerifierParams(configPath, proofPath,  publicInputPath);
-        await deployments.fixture(['testPlaceholderAPIConsumerFixture', 'merkleTreePoseidonGateFixture', 'placeholderVerifierFixture']);
-
-        let testPlaceholderAPI = await ethers.getContract('TestPlaceholderVerifier');
-        let merkleTreePosidonGate = await ethers.getContract('MerkleTreePoseidonGate');
-        let placeholderVerifier = await ethers.getContract('PlaceholderVerifier');
-
-        await testPlaceholderAPI.initialize(placeholderVerifier.address);
-        await testPlaceholderAPI.verify(params['proof'],params['init_params'], params['columns_rotations'], params['public_input'], merkleTreePosidonGate.address ,{gasLimit: 30_500_000});
-    });
-
     it("Mina Base", async function () {
         let configPath = "./data/mina_base/circuit_params.json"
         let proofPath = "./data/mina_base/proof.bin"

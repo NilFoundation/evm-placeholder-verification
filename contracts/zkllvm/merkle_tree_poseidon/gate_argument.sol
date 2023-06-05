@@ -19,10 +19,10 @@
 //---------------------------------------------------------------------------//
 pragma solidity >=0.8.4;
 
-import "../../types.sol";
-import "../../basic_marshalling.sol";
-import "../../commitments/batched_lpc_verifier.sol";
-import "../../interfaces/gate_argument.sol";
+import "../../../contracts/types.sol";
+import "../../../contracts/basic_marshalling.sol";
+import "../../../contracts/commitments/batched_lpc_verifier.sol";
+import "../../../contracts/interfaces/gate_argument.sol";
 
 import "./gate0.sol";
 import "./gate2.sol";
@@ -32,7 +32,7 @@ import "./gate8.sol";
 import "./gate10.sol";
 
 
-contract MerkleTreePoseidonGate is IGateArgument{
+contract merkle_tree_poseidon_gate_argument_split_gen  is IGateArgument{
     uint256 constant GATES_N = 11;
 
     struct local_vars_type{

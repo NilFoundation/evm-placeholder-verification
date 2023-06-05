@@ -49,6 +49,34 @@ npx hardhat deploy  --network localhost
 
 Hardhat re-uses old deployments, to force re-deploy add the `--reset` flag above
 
+## ZKLLVM output check
+
+Place folder with ZKLLVM output to `contracts/zkllvm` directory.
+
+Deploy contracts
+```
+npx hardhat deploy
+```
+
+Verify all folders from `contracts/zkllvm` director
+```
+npx hardhat verify
+```
+
+Verify one folder from `contracts/zkllvm` directory
+```
+npx hardhat verify-one folder-name
+```
+
+ZKLLVM outpu folder format
+```
+* proof.bin -- placeholder proof file
+* circuit_params.json -- parameters JSON file
+* public_input.json -- public input JSON file
+* linked_libs_list.json -- list of external libraries, have to be deployed for gate argument computation.
+* gate_argument.sol, gate0.sol, ... gateN.sol -- solidity files with gate argument computation
+```
+
 ## Community
 
 Issue reports are preferred to be done with Github Issues in here: https://github.com/NilFoundation/evm-placeholder-verification/issues.
