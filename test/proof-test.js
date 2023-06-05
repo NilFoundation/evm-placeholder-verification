@@ -62,10 +62,13 @@ describe('Proof Tests', function () {
         let configPath = "./data/unified_addition/lambda2.json"
         let proofPath = "./data/unified_addition/lambda2.data"
         let params = getVerifierParams(configPath,proofPath);
-        await deployments.fixture(['testPlaceholderAPIConsumerFixture', 'unifiedAdditionGateFixture']);
+        await deployments.fixture(['testPlaceholderAPIConsumerFixture', 'unifiedAdditionGateFixture', 'placeholderVerifierFixture']);
 
         let testPlaceholderAPI = await ethers.getContract('TestPlaceholderVerifier');
         let unifiedAdditionGate = await ethers.getContract('UnifiedAdditionGate');
+        let placeholderVerifier = await ethers.getContract('PlaceholderVerifier');
+
+        await testPlaceholderAPI.initialize(placeholderVerifier.address);
         await testPlaceholderAPI.verify(params['proof'],params['init_params'], params['columns_rotations'],unifiedAdditionGate.address ,{gasLimit: 30_500_000});
     });
 
@@ -73,11 +76,13 @@ describe('Proof Tests', function () {
         let configPath = "./data/merkle_tree_poseidon/circuit_params.json"
         let proofPath = "./data/merkle_tree_poseidon/proof.bin"
         let params = getVerifierParams(configPath,proofPath);
-        await deployments.fixture(['testPlaceholderAPIConsumerFixture', 'merkleTreePoseidonGateFixture']);
+        await deployments.fixture(['testPlaceholderAPIConsumerFixture', 'merkleTreePoseidonGateFixture', 'placeholderVerifierFixture']);
 
         let testPlaceholderAPI = await ethers.getContract('TestPlaceholderVerifier');
         let merkleTreePosidonGate = await ethers.getContract('MerkleTreePoseidonGate');
+        let placeholderVerifier = await ethers.getContract('PlaceholderVerifier');
 
+        await testPlaceholderAPI.initialize(placeholderVerifier.address);
         await testPlaceholderAPI.verify(params['proof'],params['init_params'], params['columns_rotations'],merkleTreePosidonGate.address ,{gasLimit: 30_500_000});
     });
 
@@ -85,11 +90,13 @@ describe('Proof Tests', function () {
         let configPath = "./data/mina_base/circuit_params.json"
         let proofPath = "./data/mina_base/proof.bin"
         let params = getVerifierParams(configPath,proofPath);
-        await deployments.fixture(['testPlaceholderAPIConsumerFixture', 'minaBaseGateFixture']);
+        await deployments.fixture(['testPlaceholderAPIConsumerFixture', 'minaBaseGateFixture', 'placeholderVerifierFixture']);
 
         let testPlaceholderAPI = await ethers.getContract('TestPlaceholderVerifier');
         let minaBaseGate = await ethers.getContract('MinaBaseGate');
+        let placeholderVerifier = await ethers.getContract('PlaceholderVerifier');
 
+        await testPlaceholderAPI.initialize(placeholderVerifier.address);
         await testPlaceholderAPI.verify(params['proof'],params['init_params'], params['columns_rotations'],minaBaseGate.address ,{gasLimit: 30_500_000});
     });
 
@@ -97,11 +104,13 @@ describe('Proof Tests', function () {
         let configPath = "./data/mina_scalar/circuit_params.json"
         let proofPath = "./data/mina_scalar/proof.bin"
         let params = getVerifierParams(configPath,proofPath);
-        await deployments.fixture(['testPlaceholderAPIConsumerFixture', 'minaScalarGateFixture']);
+        await deployments.fixture(['testPlaceholderAPIConsumerFixture', 'minaScalarGateFixture', 'placeholderVerifierFixture']);
 
         let testPlaceholderAPI = await ethers.getContract('TestPlaceholderVerifier');
         let minaScalarGate = await ethers.getContract('MinaScalarGate');
+        let placeholderVerifier = await ethers.getContract('PlaceholderVerifier');
 
+        await testPlaceholderAPI.initialize(placeholderVerifier.address);
         await testPlaceholderAPI.verify(params['proof'],params['init_params'], params['columns_rotations'],minaScalarGate.address ,{gasLimit: 30_500_000});
     });
 
