@@ -20,7 +20,6 @@
 pragma solidity >=0.8.4;
 
 import "../../interfaces/verifier.sol";
-import "hardhat/console.sol";
 
 contract TestPlaceholderVerifier {
     address _verifier;
@@ -47,9 +46,7 @@ contract TestPlaceholderVerifier {
         uint256[] calldata public_input,
         address gate_argument
     ) public{
-//        uint256 gas = gasleft();
         bool b = IVerifier(_verifier).verify(blob,init_params,columns_rotations,public_input,gate_argument); 
-//        console.log("        Gas usage:", gas - gasleft());
         require(
             b,
             "Proof is not correct"
