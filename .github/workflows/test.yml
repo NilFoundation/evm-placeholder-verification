@@ -32,3 +32,4 @@ jobs:
         run: |
           set -eo pipefail
           npx hardhat test     
+          npx hardhat verify
