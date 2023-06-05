@@ -68,7 +68,7 @@ Verify one folder from `contracts/zkllvm` directory
 npx hardhat verify-one folder-name
 ```
 
-ZKLLVM outpu folder format
+ZKLLVM output folder format
 ```
 * proof.bin -- placeholder proof file
 * circuit_params.json -- parameters JSON file
