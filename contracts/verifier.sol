@@ -111,6 +111,7 @@ contract PlaceholderVerifier is IVerifier {
         bytes calldata blob, 
         uint256[] calldata init_params,
         int256[][] calldata columns_rotations, 
+        uint256[] calldata public_input,
         address gate_argument
     ) public view returns (bool result) {
         verifier_state memory vars;

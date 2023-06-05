@@ -42,11 +42,26 @@ function loadParamsFromFile(jsonFile) {
     return params;
 }
 
-function getVerifierParams(configPath, proofPath) {
-    let params = loadParamsFromFile(configPath);
-    params['proof'] = fs.readFileSync(proofPath, 'utf8');
+function loadPublicInput(public_input_path){
+    if(fs.existsSync(public_input_path)){
+        let json_file_content = losslessJSON.parse(fs.readFileSync(public_input_path, 'utf8'));
+        let result = [];
+        for(let i in json_file_content){
+            result.push(BigInt(json_file_content[i]));
+        }
+        return result;
+    } else 
+        return [];
+}
+
+function getVerifierParams(configPath, proofPath, publicInputPath) {
+    let public_input = loadPublicInput(path.resolve(__dirname, publicInputPath));
+    let params = loadParamsFromFile(path.resolve(__dirname, configPath));
+    params['proof'] = fs.readFileSync(path.resolve(__dirname, proofPath), 'utf8');
+    params['public_input'] = public_input;
     return params
 }
+
 
 function get_subfolders(dir) {
     const files = fs.readdirSync(dir, { withFileTypes: true });
@@ -60,38 +75,39 @@ function get_subfolders(dir) {
     return result;
 }
 
-task("verify-zkllvm")
+task("verify")
     .setAction(async (hre) => {
         console.log("Verify all zkllvm proofs");
-        let path = "./contracts/zkllvm/";
-        let tests = get_subfolders(path);
+        let zkllvm_path = "../contracts/zkllvm/";
+        let tests = get_subfolders(path.resolve(__dirname, zkllvm_path));
         await deployments.fixture(['testPlaceholderAPIConsumerFixture', 'ZKLLVMFixture', 'placeholderVerifierFixture']);
 
         for(const k in tests){
             let test = tests[k];
-            let configPath = path + test + "/circuit_params.json";
-            let proofPath = path + test + "/proof.bin";
+            let configPath = zkllvm_path + test + "/circuit_params.json";
+            let proofPath = zkllvm_path + test + "/proof.bin";
+            let publicInputPath = zkllvm_path + test + "/public_input.json";
             console.log("Verify :",test);
             
-            let params = getVerifierParams(configPath,proofPath);
+            let params = getVerifierParams(configPath,proofPath, publicInputPath);
 
             let testPlaceholderAPI = await ethers.getContract('TestPlaceholderVerifier');
             let placeholderVerifier = await ethers.getContract('PlaceholderVerifier');
             let gatesContract = await ethers.getContract(test + '_gate_argument_split_gen');
             await testPlaceholderAPI.initialize(placeholderVerifier.address);
-            await testPlaceholderAPI.verify(params['proof'],params['init_params'], params['columns_rotations'], gatesContract.address ,{gasLimit: 30_500_000});
+            await testPlaceholderAPI.verify(params['proof'],params['init_params'], params['columns_rotations'], params['public_input'], gatesContract.address ,{gasLimit: 30_500_000});
         }
 });
 
-task("verify-zkllvm-proof", "Verify zkllvm proof")
+task("verify-one", "Verify zkllvm proof")
     .addParam("test")
     .setAction(async (test, hre) => {
         console.log("Verify :",test.test);
-        path = "./contracts/zkllvm/"+test.test+"/";
-
-        let configPath = path + "circuit_params.json";
-        let proofPath = path + "proof.bin";
-        let params = getVerifierParams(configPath,proofPath);
+        let zkllvm_path = "../contracts/zkllvm/"+test.test+"/";
+        let configPath = zkllvm_path + "circuit_params.json";
+        let proofPath = zkllvm_path + "proof.bin";
+        let publicInputPath = zkllvm_path + "public_input.json";
+        let params = getVerifierParams(configPath,proofPath, publicInputPath);
         await deployments.fixture(['testPlaceholderAPIConsumerFixture', 'ZKLLVMFixture', 'placeholderVerifierFixture']);
 
         let testPlaceholderAPI = await ethers.getContract('TestPlaceholderVerifier');
@@ -99,5 +115,9 @@ task("verify-zkllvm-proof", "Verify zkllvm proof")
         let gatesContract = await ethers.getContract(test.test + '_gate_argument_split_gen');
        
         await testPlaceholderAPI.initialize(placeholderVerifier.address);
-        await testPlaceholderAPI.verify(params['proof'],params['init_params'], params['columns_rotations'], gatesContract.address ,{gasLimit: 30_500_000});
+        await testPlaceholderAPI.verify(
+            params['proof'],params['init_params'], params['columns_rotations'],
+            params['public_input'], gatesContract.address,
+            {gasLimit: 30_500_000}
+        );
 });
