@@ -215,7 +215,7 @@ library types {
         //0x120
         uint256 query_id;
         //0x140
-        uint256[]     alphas;
+        uint256[] alphas;
         uint256[] values;
         uint256[] tmp_values;
         uint256 coset_size;

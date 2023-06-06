@@ -49,6 +49,153 @@ npx hardhat deploy  --network localhost
 
 Hardhat re-uses old deployments, to force re-deploy add the `--reset` flag above
 
+
+# Warp Instructions
+
+Clone the warp transpiler repository
+```
+git clone git@github.com:NethermindEth/warp.git
+cd warp
+```
+
+## Launch the test network
+
+Check if this is the right docker file contents (not commited to develop on warp yet)
+
+```
+version: '3.8'
+
+services:
+  warp:
+    image: nethermind/warp:v2.5.1
+    links:
+      - devnet
+    volumes:
+      - .:/dapp
+    environment:
+      - STARKNET_NETWORK=alpha-goerli
+      - STARKNET_WALLET=starkware.starknet.wallets.open_zeppelin.OpenZeppelinAccount
+      - STARKNET_GATEWAY_URL=http://devnet:5050
+      - STARKNET_FEEDER_GATEWAY_URL=http://devnet:5050
+    entrypoint: tail -F anything
+
+  devnet:
+    image: shardlabs/starknet-devnet:0.4.4-seed0
+    ports:
+      - '5050:5050'
+```
+
+Bring up docker containers
+
+```
+docker-compose up
+```
+
+## Bash into docker
+Find the container id and bash into the warp container.
+
+```shell
+➜  warp git:(develop) ✗ docker ps -a
+CONTAINER ID   IMAGE                                   COMMAND                  CREATED        STATUS                    PORTS                                       NAMES
+9f156f579a4e   nethermind/warp:v2.5.1                  "tail -F anything"       24 hours ago   Up 24 seconds                                                         warp2-warp-1
+69c639ee81e8   shardlabs/starknet-devnet:0.4.4-seed0   "starknet-devnet --h…"   24 hours ago   Up 24 seconds             0.0.0.0:5050->5050/tcp, :::5050->5050/tcp   warp2-devnet-1
+➜  warp2 git:(develop) ✗ docker exec -it 9f156f579a4e /bin/bash
+```
+
+All interactions here on are carried out in the docker environment.
+
+### Create an account
+
+You need to create an account and fund it and deploy it before being able to deploy contracts/test.
+
+```
+starknet new_account --feeder_gateway_url http://devnet:5050 --gateway_url http://devnet:5050
+```
+
+Add some tokens to your address.
+```
+curl http://devnet:5050/mint -H "Content-Type: application/json" -d '{"amount": 1000000000000000000, "address": "<account-address>"}'
+```
+
+Deploy the account
+
+```
+starknet deploy_account --feeder_gateway_url http://devnet:5050 --gateway_url http://devnet:5050
+```
+
+If you get a below error
+
+```
+Error: 
+BadRequest: HTTP error ocurred. Status: 500. 
+Text: {"code":"StarknetErrorCode.UNINITIALIZED_CONTRACT","message":"Requested contract 
+address 0x7b66ab9b86126568a44856c1a548977b11ad67f18c760b02d83e9ed14bca134 is not deployed."}
+```
+
+This could happen if your account was not funded. Try re-funding and re-deploying but this needs
+a force flag.
+
+```
+starknet deploy_account --feeder_gateway_url http://devnet:5050 --gateway_url http://devnet:5050 --force
+```
+
+
+## Transpiling/Compiling/Deploying
+
+## Transpiling contracts
+
+```
+warp transpile exampleContracts/ERC20.sol
+```
+
+Transpilation outputs to `warp_output/exampleContracts/ERC20.sol/` or similar directories based on
+your contract name.
+
+## Compile
+
+```
+root@9f156f579a4e:/dapp# warp compile warp_output/exampleContracts/ERC20.sol/WARP.cairo
+Running starknet compile with cairoPath /usr/src/warp-stable
+starknet-compile output written to warp_output/exampleContracts/ERC20.sol/WARP_compiled.json
+```
+
+Compilation outputs a json file
+
+### Deploy
+
+Deployment on testnet is done via the following two steps
+
+1. Create a class hash
+```
+ starknet declare --contract WARP_compiled.json --feeder_gateway_url http://devnet:5050 --gateway_url http://devnet:5050
+```
+
+2. Deploy
+```
+starknet deploy --class_hash 0x5c341f52e9284d3a3925440ce43d1a825962d26e82731997cd3b3aedec81b3f  --gateway_url http://devnet:5050  --feeder_gateway_url http://devnet:5050
+```
+
+### Invoking/Calling contracts
+
+Invoking contracts involves state changes (working assumption)
+
+```
+starknet invoke --address 0x077487db16639d5c4a0c66f66ccda78a54ebaed04d9dd4b4f4d87d0adfd49d5b \
+--abi warp_output/exampleContracts/TestWarp.sol/TestWarp_abi.json \
+--function fmul_51a017f7 --inputs 10 0 10 0 10 0 --feeder_gateway_url http://devnet:5050 --gateway_url http://devnet:5050
+```
+
+
+Calling contracts does not involve state changes(working assumption)
+```
+starknet call --address 0x01f54865c30ee9b8f7f0b841b45990772ef04ca479592aa7073b3dd518cf2754 --abi \
+warp_output/exampleContracts/TestWarp.sol/TestWarp_abi.json \
+--function fmul_51a017f7 --inputs 10 0 10 0 3 0 --feeder_gateway_url http://devnet:5050 --gateway_url http://devnet:5050
+```
+
+
+
+
 ## Community
 
 Issue reports are preferred to be done with Github Issues in here: https://github.com/NilFoundation/evm-placeholder-verification/issues.

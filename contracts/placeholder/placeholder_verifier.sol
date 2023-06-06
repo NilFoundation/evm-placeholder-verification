@@ -116,16 +116,27 @@ library placeholder_verifier {
                     // TODO check it!!!!
                     // TODO: check properly if column_rotations will be not one of 0, +-1
                     // local_vars.evaluation_points[0][i][j] = local_vars.challenge * omega ^ column_rotations[i][j]
-                    assembly{
-                        for{mstore(add(local_vars, E_OFFSET), mload(add(local_vars, CHALLENGE_OFFSET)))} gt(e,0) {e := shr(e, 1)} {
-                            if not(eq(and(e,1), 0)){
-                                mstore(add(local_vars, E_OFFSET),mulmod(mload(add(local_vars, E_OFFSET)), omega, mload(fri_params)))
-                            }
-                            if not(eq(e, 1)){
-                                omega := mulmod(omega,omega, mload(fri_params))
-                            }
+                    local_vars.e = local_vars.challenge ;
+                    while(e > 0){
+                        if ((e & 1) != 0){
+                            local_vars.e = mulmod(local_vars.e, omega, fri_params.modulus);
                         }
+                        if (e !=1) {
+                            omega = mulmod(omega,omega, fri_params.modulus);
+                        }
+                        e = e >> 1;
                     }
+
+//                    assembly{
+//                        for{mstore(add(local_vars, E_OFFSET), mload(add(local_vars, CHALLENGE_OFFSET)))} gt(e,0) {e := shr(e, 1)} {
+//                            if not(eq(and(e,1), 0)){
+//                                mstore(add(local_vars, E_OFFSET),mulmod(mload(add(local_vars, E_OFFSET)), omega, mload(fri_params)))
+//                            }
+//                            if not(eq(e, 1)){
+//                                omega := mulmod(omega,omega, mload(fri_params))
+//                            }
+//                        }
+//                    }
                     local_vars.evaluation_points[0][i][j] = local_vars.e;
                 }
             unchecked{j++;}
@@ -175,16 +186,27 @@ library placeholder_verifier {
                     // TODO check it!!!!
                     // TODO: check properly if column_rotations will be not one of 0, +-1
                     // local_vars.evaluation_points[0][i][j] = local_vars.challenge * omega ^ column_rotations[i][j]
-                    assembly{
-                        for{mstore(add(local_vars, E_OFFSET), mload(add(local_vars, CHALLENGE_OFFSET)))} gt(e,0) {e := shr(e, 1)} {
-                            if not(eq(and(e,1), 0)){
-                                mstore(add(local_vars, E_OFFSET),mulmod(mload(add(local_vars, E_OFFSET)), omega, mload(fri_params)))
-                            }
-                            if not(eq(e, 1)){
-                                omega := mulmod(omega,omega, mload(fri_params))
-                            }
+                    local_vars.e = local_vars.challenge;
+                    while(e > 0) {
+                        if (e & 1 !=0) {
+                            local_vars.e = mulmod(local_vars.e, omega, fri_params.modulus);
                         }
+                        if (e !=1){
+                            omega = mulmod(omega, omega, fri_params.modulus);
+                        }
+                        e = e >> 1;
                     }
+
+//                    assembly{
+//                        for{mstore(add(local_vars, E_OFFSET), mload(add(local_vars, CHALLENGE_OFFSET)))} gt(e,0) {e := shr(e, 1)} {
+//                            if not(eq(and(e,1), 0)){
+//                                mstore(add(local_vars, E_OFFSET),mulmod(mload(add(local_vars, E_OFFSET)), omega, mload(fri_params)))
+//                            }
+//                            if not(eq(e, 1)){
+//                                omega := mulmod(omega,omega, mload(fri_params))
+//                            }
+//                        }
+//                    }
                     local_vars.evaluation_points[0][eval_point_ind][j] = local_vars.e;
                 }
                 unchecked{j++;}
@@ -239,68 +261,68 @@ library placeholder_verifier {
         for (uint256 i = 0; i < local_vars.len; i++) {
             local_vars.zero_index = batched_lpc_verifier.get_quotient_z_i_j_from_proof_be(blob, proof_map.eval_proof_combined_value_offset, i, 0);
             local_vars.e = field.expmod_static(local_vars.challenge, (fri_params.max_degree + 1) * i, fri_params.modulus);
-            //local_vars.zero_index = field.fmul(local_vars.zero_index, local_vars.e, fri_params.modulus);
+            local_vars.zero_index = field.fmul(local_vars.zero_index, local_vars.e, fri_params.modulus);
             //local_vars.T_consolidated  = field.fadd(local_vars.T_consolidated, local_vars.zero_index, fri_params.modulus);
-            assembly {
-                mstore(
-                    // local_vars.zero_index
-                    add(local_vars, ZERO_INDEX_OFFSET),
-                    // local_vars.zero_index * local_vars.e
-                    mulmod(
-                        // local_vars.zero_index
-                        mload(add(local_vars, ZERO_INDEX_OFFSET)),
-                        // local_vars.e
-                        mload(add(local_vars, E_OFFSET)),
-                        // modulus
-                        mload(fri_params)
-                    )
-                )
-                mstore(
-                    // local_vars.T_consolidated
-                    add(local_vars, T_CONSOLIDATED_OFFSET),
-                    // local_vars.T_consolidated + local_vars.zero_index
-                    addmod(
-                        // local_vars.T_consolidated
-                        mload(add(local_vars, T_CONSOLIDATED_OFFSET)),
-                        // local_vars.zero_index
-                        mload(add(local_vars, ZERO_INDEX_OFFSET)),
-                        // modulus
-                        mload(fri_params)
-                    )
-                )
-            }
+//            assembly {
+//                mstore(
+//                    // local_vars.zero_index
+//                    add(local_vars, ZERO_INDEX_OFFSET),
+//                    // local_vars.zero_index * local_vars.e
+//                    mulmod(
+//                        // local_vars.zero_index
+//                        mload(add(local_vars, ZERO_INDEX_OFFSET)),
+//                        // local_vars.e
+//                        mload(add(local_vars, E_OFFSET)),
+//                        // modulus
+//                        mload(fri_params)
+//                    )
+//                )
+//                mstore(
+//                    // local_vars.T_consolidated
+//                    add(local_vars, T_CONSOLIDATED_OFFSET),
+//                    // local_vars.T_consolidated + local_vars.zero_index
+//                    addmod(
+//                        // local_vars.T_consolidated
+//                        mload(add(local_vars, T_CONSOLIDATED_OFFSET)),
+//                        // local_vars.zero_index
+//                        mload(add(local_vars, ZERO_INDEX_OFFSET)),
+//                        // modulus
+//                        mload(fri_params)
+//                    )
+//                )
+//            }
         }
         local_vars.Z_at_challenge = field.expmod_static(local_vars.challenge, common_data.rows_amount, fri_params.modulus);
-        //local_vars.Z_at_challenge = field.fsub(local_vars.Z_at_challenge, 1, fri_params.modulus);
-        //local_vars.Z_at_challenge = field.fmul(local_vars.Z_at_challenge, local_vars.T_consolidated, fri_params.modulus);
-        assembly {
-            mstore(
-                // local_vars.Z_at_challenge
-                add(local_vars, Z_AT_CHALLENGE_OFFSET),
-                // local_vars.Z_at_challenge - 1
-                addmod(
-                    // Z_at_challenge
-                    mload(add(local_vars, Z_AT_CHALLENGE_OFFSET)),
-                    // -1
-                    sub(mload(fri_params), 1),
-                    // modulus
-                    mload(fri_params)
-                )
-            )
-            mstore(
-                // local_vars.Z_at_challenge
-                add(local_vars, Z_AT_CHALLENGE_OFFSET),
-                // Z_at_challenge * T_consolidated
-                mulmod(
-                    // Z_at_challenge
-                    mload(add(local_vars, Z_AT_CHALLENGE_OFFSET)),
-                    // T_consolidated
-                    mload(add(local_vars, T_CONSOLIDATED_OFFSET)),
-                    // modulus
-                    mload(fri_params)
-                )
-            )
-        }
+        local_vars.Z_at_challenge = field.fsub(local_vars.Z_at_challenge, 1, fri_params.modulus);
+        local_vars.Z_at_challenge = field.fmul(local_vars.Z_at_challenge, local_vars.T_consolidated, fri_params.modulus);
+//        assembly {
+//            mstore(
+//                // local_vars.Z_at_challenge
+//                add(local_vars, Z_AT_CHALLENGE_OFFSET),
+//                // local_vars.Z_at_challenge - 1
+//                addmod(
+//                    // Z_at_challenge
+//                    mload(add(local_vars, Z_AT_CHALLENGE_OFFSET)),
+//                    // -1
+//                    sub(mload(fri_params), 1),
+//                    // modulus
+//                    mload(fri_params)
+//                )
+//            )
+//            mstore(
+//                // local_vars.Z_at_challenge
+//                add(local_vars, Z_AT_CHALLENGE_OFFSET),
+//                // Z_at_challenge * T_consolidated
+//                mulmod(
+//                    // Z_at_challenge
+//                    mload(add(local_vars, Z_AT_CHALLENGE_OFFSET)),
+//                    // T_consolidated
+//                    mload(add(local_vars, T_CONSOLIDATED_OFFSET)),
+//                    // modulus
+//                    mload(fri_params)
+//                )
+//            )
+//        }
         if (local_vars.F_consolidated != local_vars.Z_at_challenge) {
             return false;
         }

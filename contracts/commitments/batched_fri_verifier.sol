@@ -39,6 +39,7 @@ library batched_fri_verifier {
     uint256 constant C2_OFFSET = 0xe0;                                      // coefficient2_offset
     uint256 constant INTERPOLANT_OFFSET = 0x100;
     uint256 constant PREV_COEFFS_LEN_OFFSET = 0x120;
+    uint256 constant WORD_SIZE = 4;
 
     uint256 constant m = 2;
 
@@ -268,6 +269,9 @@ library batched_fri_verifier {
         }
     }
 
+
+
+
     function prepare_initial_leaf_data(
         bytes calldata blob,
         uint256 offset,
@@ -329,7 +333,8 @@ library batched_fri_verifier {
             unchecked{ i++; }
         }
 
-        uint256 first_offset = 0x20;
+        uint256 first_offset = 4;
+
         uint256 y_offset;
 
         offset = merkle_verifier.skip_merkle_proof_be(blob, offset);
@@ -345,31 +350,39 @@ library batched_fri_verifier {
 
                 // push y
                 if(fri_params.s_indices[local_vars.newind] == fri_params.tmp_arr[local_vars.y_ind]){
-                    assembly{
-                        mstore(
-                            add(mload(local_vars),first_offset), 
-                            calldataload(add(blob.offset, y_offset))
-                        )
-                        mstore(
-                            add(mload(local_vars),add(first_offset, 0x20)), 
-                            calldataload(add(blob.offset, add(y_offset, 0x20)))
-                        )
-                    }
+                    bytes memory data_to_copy = blob[y_offset: y_offset + WORD_SIZE];
+                    basic_marshalling.write_bytes(local_vars.b , first_offset, data_to_copy);
+//                    assembly{
+//                        mstore(
+//                            add(mload(local_vars),first_offset),
+//                            calldataload(add(blob.offset, y_offset))
+//                        )
+                     data_to_copy = blob[y_offset + WORD_SIZE : y_offset + WORD_SIZE + WORD_SIZE];
+                     basic_marshalling.write_bytes(local_vars.b , first_offset + WORD_SIZE, data_to_copy);
+//                        mstore(
+//                            add(mload(local_vars),add(first_offset, 0x20)),
+//                            calldataload(add(blob.offset, add(y_offset, 0x20)))
+//                        )
+//                    }
                 } else {
-                    assembly{
-                        mstore(
-                            add(mload(local_vars),first_offset), 
-                            calldataload(add(blob.offset, add(y_offset, 0x20)))
-                        )
-                        mstore(
-                            add(mload(local_vars),add(first_offset, 0x20)), 
-                            calldataload(add(blob.offset, y_offset))
-                        )
-                    }
+                    bytes memory data_to_copy = blob[y_offset + WORD_SIZE : y_offset + WORD_SIZE + WORD_SIZE];
+                    basic_marshalling.write_bytes(local_vars.b , first_offset, data_to_copy);
+//                    assembly{
+//                        mstore(
+//                            add(mload(local_vars),first_offset),
+//                            calldataload(add(blob.offset, add(y_offset, 0x20)))
+//                        )
+                    data_to_copy = blob[y_offset:y_offset + WORD_SIZE];
+                    basic_marshalling.write_bytes(local_vars.b , first_offset + WORD_SIZE, data_to_copy);
+//                        mstore(
+//                            add(mload(local_vars),add(first_offset, 0x20)),
+//                            calldataload(add(blob.offset, y_offset))
+//                        )
+//                    }
                 }
                 unchecked{ 
                     local_vars.y_ind++; 
-                    first_offset += 0x40;
+                    first_offset += 8;
                 }
             }
             unchecked{ offset += (1<<(fri_params.step_list[0]+5)); local_vars.p_ind++; }
@@ -438,8 +451,8 @@ library batched_fri_verifier {
             unchecked{ i++; }
         }
 
-        uint256 y;
-        offset = 0x20;
+        bytes memory y;
+        offset = 4;
         for(local_vars.y_ind = 0; local_vars.y_ind < local_vars.indices_size;){
             local_vars.newind = fri_params.correct_order_idx[local_vars.y_ind];
             // Check leaf size
@@ -447,35 +460,39 @@ library batched_fri_verifier {
 
             // push y
             if(fri_params.s_indices[local_vars.newind] == fri_params.tmp_arr[local_vars.y_ind]){
-                y = local_vars.values[local_vars.newind<<1];
-                assembly{
-                    mstore(
-                        add(mload(local_vars), offset), y
-                    )
-                }
-                y = local_vars.values[(local_vars.newind<<1)+1];
-                assembly{
-                    mstore(
-                        add(mload(local_vars),add(offset, 0x20)), y
-                    )
-                }
+                y = basic_marshalling.to_bytes(local_vars.values[local_vars.newind<<1]);
+                basic_marshalling.write_bytes(local_vars.b,offset,y);
+//                assembly{
+//                    mstore(
+//                        add(mload(local_vars), offset), y
+//                    )
+//                }
+                  y = basic_marshalling.to_bytes(local_vars.values[(local_vars.newind<<1)+1]);
+                  basic_marshalling.write_bytes(local_vars.b, offset + WORD_SIZE, y);
+//                assembly{
+//                    mstore(
+//                        add(mload(local_vars),add(offset, 0x20)), y
+//                    )
+//                }
             } else {
-                y = local_vars.values[(local_vars.newind<<1)+1];
-                assembly{
-                    mstore(
-                        add(mload(local_vars), offset), y
-                    )
-                }
-                y = local_vars.values[local_vars.newind<<1];
-                assembly{
-                    mstore(
-                        add(mload(local_vars),add(offset, 0x20)), y
-                    )
-                }
+                  y = basic_marshalling.to_bytes(local_vars.values[(local_vars.newind<<1)+1]);
+                  basic_marshalling.write_bytes(local_vars.b, offset,y);
+//                assembly{
+//                    mstore(
+//                        add(mload(local_vars), offset), y
+//                    )
+//                }
+                 y = basic_marshalling.to_bytes(local_vars.values[local_vars.newind<<1]);
+                basic_marshalling.write_bytes(local_vars.b, offset + WORD_SIZE,y);
+//                assembly{
+//                    mstore(
+//                        add(mload(local_vars),add(offset, 0x20)), y
+//                    )
+//                }
             }
             unchecked{ 
                 local_vars.y_ind++; 
-                offset += 0x40;
+                offset += (WORD_SIZE * 2);
             }
         }
     }

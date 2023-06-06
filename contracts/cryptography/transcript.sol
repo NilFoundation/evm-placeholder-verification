@@ -25,6 +25,7 @@ import "../types.sol";
  * @dev Generates Plonk random challenges
  */
 library transcript {
+    uint256 constant WORD_SIZE = 4;
     function init_transcript(types.transcript_data memory self, bytes memory init_blob)
     internal pure {
         self.current_challenge = keccak256(init_blob);
@@ -42,18 +43,6 @@ library transcript {
         );
     }
 
-    function update_transcript_b32_by_offset(types.transcript_data memory self, bytes memory blob, uint256 offset)
-    internal pure {
-        require(offset < blob.length, "update_transcript_b32_by_offset: offset < blob.length");
-        require(32 <= blob.length - offset, "update_transcript_b32_by_offset: 32 <= blob.length - offset");
-
-        bytes32 blob32;
-        assembly {
-            blob32 := mload(add(add(blob, 0x20), offset))
-        }
-        update_transcript_b32(self, blob32);
-    }
-
     function update_transcript_b32_by_offset_calldata(types.transcript_data memory self, bytes calldata blob,
                                                       uint256 offset)
     internal pure {
@@ -61,9 +50,11 @@ library transcript {
         require(32 <= blob.length - offset, "update_transcript_b32_by_offset: 32 <= blob.length - offset");
 
         bytes32 blob32;
-        assembly {
-            blob32 := calldataload(add(blob.offset, offset))
-        }
+        offset = (offset/8);
+        blob32 = bytes32(blob[offset : offset + WORD_SIZE]);
+//        assembly {
+//            blob32 := calldataload(add(blob.offset, offset))
+//        }
         update_transcript_b32(self, blob32);
     }
 
