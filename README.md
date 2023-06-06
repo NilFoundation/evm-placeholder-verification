@@ -175,7 +175,23 @@ Deployment on testnet is done via the following two steps
 starknet deploy --class_hash 0x5c341f52e9284d3a3925440ce43d1a825962d26e82731997cd3b3aedec81b3f  --gateway_url http://devnet:5050  --feeder_gateway_url http://devnet:5050
 ```
 
+### Invoking/Calling contracts
 
+Invoking contracts involves state changes (working assumption)
+
+```
+starknet invoke --address 0x077487db16639d5c4a0c66f66ccda78a54ebaed04d9dd4b4f4d87d0adfd49d5b \
+--abi warp_output/exampleContracts/TestWarp.sol/TestWarp_abi.json \
+--function fmul_51a017f7 --inputs 10 0 10 0 10 0 --feeder_gateway_url http://devnet:5050 --gateway_url http://devnet:5050
+```
+
+
+Calling contracts does not involve state changes(working assumption)
+```
+starknet call --address 0x01f54865c30ee9b8f7f0b841b45990772ef04ca479592aa7073b3dd518cf2754 --abi \
+warp_output/exampleContracts/TestWarp.sol/TestWarp_abi.json \
+--function fmul_51a017f7 --inputs 10 0 10 0 3 0 --feeder_gateway_url http://devnet:5050 --gateway_url http://devnet:5050
+```
 
 
 
