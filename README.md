@@ -51,30 +51,30 @@ Hardhat re-uses old deployments, to force re-deploy add the `--reset` flag above
 
 ## ZKLLVM output check
 
-Place folder with ZKLLVM output to `contracts/zkllvm` directory.
+Place folder with ZKLLVM circuit transpilation output to `contracts/zkllvm` directory.
 
-Deploy contracts
-```
-npx hardhat deploy
-```
-
-Verify all folders from `contracts/zkllvm` director
-```
-npx hardhat verify
-```
-
-Verify one folder from `contracts/zkllvm` directory
-```
-npx hardhat verify-one folder-name
-```
-
-ZKLLVM output folder format
+ZKLLVM circuit transpilation output folder format
 ```
 * proof.bin -- placeholder proof file
 * circuit_params.json -- parameters JSON file
 * public_input.json -- public input JSON file
 * linked_libs_list.json -- list of external libraries, have to be deployed for gate argument computation.
 * gate_argument.sol, gate0.sol, ... gateN.sol -- solidity files with gate argument computation
+```
+
+Deploy contracts
+```
+npx hardhat deploy
+```
+
+Verify one folder from `contracts/zkllvm` directory
+```
+npx hardhat verify-circuit-proof folder-name
+```
+
+Verify all folders from `contracts/zkllvm` director
+```
+npx hardhat verify-circuit-proof-all
 ```
 
 ## Community

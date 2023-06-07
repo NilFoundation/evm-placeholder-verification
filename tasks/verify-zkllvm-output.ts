@@ -75,7 +75,7 @@ function get_subfolders(dir) {
     return result;
 }
 
-task("verify")
+task("verify-circuit-proof-all")
     .setAction(async (hre) => {
         console.log("Verify all zkllvm proofs");
         let zkllvm_path = "../contracts/zkllvm/";
@@ -99,7 +99,7 @@ task("verify")
         }
 });
 
-task("verify-one", "Verify zkllvm proof")
+task("verify-circuit-proof", "Verify zkllvm proof")
     .addParam("test")
     .setAction(async (test, hre) => {
         console.log("Verify :",test.test);
