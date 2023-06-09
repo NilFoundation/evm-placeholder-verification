@@ -7,7 +7,7 @@ module.exports = async function() {
     const {deployer, tokenOwner} = await getNamedAccounts();
 
     let libs = [
-        "placeholder_verifier",
+        "ProofVerifier",
     ]
 
     let deployedLib = {}

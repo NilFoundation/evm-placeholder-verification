@@ -24,7 +24,7 @@ import "./cryptography/transcript.sol";
 import "./placeholder/proof_map_parser.sol";
 import "./placeholder/permutation_argument.sol";
 
-import "./placeholder/placeholder_verifier.sol";
+import "./placeholder/verifier.sol";
 import "./interfaces/verifier.sol";
 import "./interfaces/gate_argument.sol";
 
@@ -148,7 +148,7 @@ contract PlaceholderVerifier is IVerifier {
             vars.common_data.columns_rotations
         );
 
-        if (!placeholder_verifier.verify_proof_be(
+        if (!ProofVerifier.verify_proof_be(
             blob, 
             vars.tr_state,
             vars.proof_map, 

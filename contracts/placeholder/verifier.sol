@@ -23,7 +23,7 @@ import "./permutation_argument.sol";
 import "../basic_marshalling.sol";
 import "../algebra/field.sol";
 
-library placeholder_verifier {
+library ProofVerifier {
     // TODO: check correctness all this const
     uint256 constant f_parts = 9;
 
@@ -79,7 +79,7 @@ library placeholder_verifier {
         local_vars.inversed_omega = field.inverse_static(common_data.omega, fri_params.modulus);
         uint256 challenge_omega = field.fmul(local_vars.challenge, common_data.omega, fri_params.modulus);
         uint256 challenge_inversed_omega = field.fmul(local_vars.challenge, local_vars.inversed_omega, fri_params.modulus);
-        
+
         // TODO this should be bytes32
         local_vars.roots = new uint256[](fri_params.batches_num);
         local_vars.roots[0] = merkle_verifier.get_merkle_root_from_blob(blob, proof_map.variable_values_commitment_offset);
@@ -147,7 +147,7 @@ library placeholder_verifier {
             local_vars.evaluation_points[3][i] = challenge_point;
             unchecked{i++;}
         }
-        
+
         // constant columns and selector columns may be rotated
         for( uint256 i = 0; i < ar_params.constant_columns + ar_params.selector_columns; ){
             uint256 eval_point_ind = i + (ar_params.permutation_columns << 1);
@@ -193,7 +193,7 @@ library placeholder_verifier {
         }
 
         //  q_last and q_blind
-        for (uint256 i = (ar_params.permutation_columns << 1) + ar_params.constant_columns + ar_params.selector_columns; 
+        for (uint256 i = (ar_params.permutation_columns << 1) + ar_params.constant_columns + ar_params.selector_columns;
             i < fri_params.batches_sizes[3];
         ) {
             local_vars.evaluation_points[3][i] = challenge_point;
@@ -204,7 +204,7 @@ library placeholder_verifier {
             blob,
             proof_map.eval_proof_combined_value_offset,
             local_vars.roots,
-            local_vars.evaluation_points,  
+            local_vars.evaluation_points,
             tr_state,
             fri_params
         )){
