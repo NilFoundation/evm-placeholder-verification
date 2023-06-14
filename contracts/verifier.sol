@@ -20,6 +20,7 @@ pragma solidity >=0.8.4;
 
 import "./types.sol";
 import "./cryptography/transcript.sol";
+import "./algebra/field.sol";
 
 import "./placeholder/proof_map_parser.sol";
 import "./placeholder/permutation_argument.sol";
@@ -27,6 +28,8 @@ import "./placeholder/permutation_argument.sol";
 import "./placeholder/placeholder_verifier.sol";
 import "./interfaces/verifier.sol";
 import "./interfaces/gate_argument.sol";
+
+import "hardhat/console.sol";
 
 contract PlaceholderVerifier is IVerifier {
     struct verifier_state {
@@ -107,6 +110,23 @@ contract PlaceholderVerifier is IVerifier {
             + vars.arithmetization_params.selector_columns + 2;
     }
 
+    function check_public_input(verifier_state memory vars, uint256[] calldata public_input, bytes calldata blob) internal view {
+        uint256 xi = basic_marshalling.get_uint256_be(blob, vars.proof_map.eval_proof_offset);
+        uint256 gas = gasleft();
+        uint256 result = 1;
+
+        result = field.pow_small(xi, vars.common_data.rows_amount, vars.fri_params.modulus);
+        result = addmod(result, vars.fri_params.modulus - 1, vars.fri_params.modulus);
+        result = mulmod(
+            result, 
+            field.inverse_static(addmod(xi, vars.fri_params.modulus - 1,vars.fri_params.modulus), vars.fri_params.modulus), 
+            vars.fri_params.modulus
+        );
+        result = mulmod(result, field.inverse_static(vars.common_data.rows_amount, vars.fri_params.modulus), vars.fri_params.modulus);
+        require(result == basic_marshalling.get_uint256_be(blob, vars.proof_map.eval_proof_lagrange_0_offset));
+        console.log("Gas used for public input check: ", gas - gasleft());
+    }
+
     function verify(
         bytes calldata blob, 
         uint256[] calldata init_params,
@@ -128,6 +148,8 @@ contract PlaceholderVerifier is IVerifier {
         // 3. append witness commitments to transcript
         transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
 
+        // 2. check public input
+        check_public_input(vars, public_input, blob);
 
         // 4. prepare evaluations of the polynomials that are copy-constrained
         // 5. permutation argument
