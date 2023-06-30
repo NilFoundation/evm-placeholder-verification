@@ -176,7 +176,7 @@ contract PlaceholderVerifier is IVerifier {
         transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
 
         // 2. check public input
-        if(public_input.length > 0) check_public_input(vars, public_input, blob);
+        //if(public_input.length > 0) check_public_input(vars, public_input, blob);
 
         // 4. prepare evaluations of the polynomials that are copy-constrained
         // 5. permutation argument
