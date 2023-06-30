@@ -47,7 +47,6 @@ library merkle_tree_poseidon_gate6{
             let modulus := mload(gate_params)
             let theta := mload(add(gate_params, THETA_OFFSET))
 
-            mstore(add(local_vars, GATE_EVAL_OFFSET), 0)
 
             function get_witness_i_by_rotation_idx(idx, rot_idx, ptr) -> result {
                 result := mload(
@@ -62,13 +61,11 @@ library merkle_tree_poseidon_gate6{
                 result := mload(add(add(mload(add(ptr, SELECTOR_EVALUATIONS_OFFSET)), 0x20), mul(0x20, idx)))
             }
 
-			//Gate6
 			mstore(add(local_vars, GATE_EVAL_OFFSET), 0)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(3,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x25642daf8a81d610b6a646410a64b19f403c42cb8be86733e1431140986386fe
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
+			terms:=mulmod(0x25642daf8a81d610b6a646410a64b19f403c42cb8be86733e1431140986386fe,get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
@@ -76,8 +73,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x7b55f6050c5b78c81d29b095fcf55dbf3d93bb6ae6857e50278a679df3af934
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
+			terms:=mulmod(0x7b55f6050c5b78c81d29b095fcf55dbf3d93bb6ae6857e50278a679df3af934,get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
@@ -85,8 +81,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2d484fdf643cf7ff9b2a31b585fc9ac2a1233f549a628a5931b192e6193012c
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
+			terms:=mulmod(0x2d484fdf643cf7ff9b2a31b585fc9ac2a1233f549a628a5931b192e6193012c,get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
@@ -94,15 +89,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2a86e064415dec6c8df737d86b1499810cc798bfa396ae72191de52e1b15aee8
+			terms:=0x3009386b52e5055b6bf772a071193b84285e68e8c1c6d04bf9eb3e04ec7c1416
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(4,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x3611a838f43caeddf4ef867c503054417aae305760a767dd747585f94b40c5bf
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
+			terms:=mulmod(0x3611a838f43caeddf4ef867c503054417aae305760a767dd747585f94b40c5bf,get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
@@ -110,8 +104,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x1f67666943d65692e897b2c52b37a67ef131727cd42a9b9d7a92d598c95dba72
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
+			terms:=mulmod(0x1f67666943d65692e897b2c52b37a67ef131727cd42a9b9d7a92d598c95dba72,get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
@@ -119,8 +112,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2b1c6524d1e8e51dcdee9be61180d9270927bb1363e9d68364b055783c4d1964
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
+			terms:=mulmod(0x2b1c6524d1e8e51dcdee9be61180d9270927bb1363e9d68364b055783c4d1964,get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
@@ -128,15 +120,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x252414a163b2aea1302daf1411a95d580b5b5abe407724dad781ee674caf419d
+			terms:=0x2f5ef53c118f839d17420d324b653d32e3d2c07eecdd7cbbc0da152db7fb0ea
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(5,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x28babbca8497809a56a6f3e209de7e74cdf3c327c7f37e8763ae1fc9e9109836
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
+			terms:=mulmod(0x28babbca8497809a56a6f3e209de7e74cdf3c327c7f37e8763ae1fc9e9109836,get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
@@ -144,8 +135,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x356d9c23e5e62e83040ea4fe9944da08c669ca8e81f47139c3efafcd3d3beca
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
+			terms:=mulmod(0x356d9c23e5e62e83040ea4fe9944da08c669ca8e81f47139c3efafcd3d3beca,get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
@@ -153,8 +143,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x30e04108a2b549c4857ed07f484fc8c6f6a77299f927ccf4bc7af17f551eeb5
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
+			terms:=mulmod(0x30e04108a2b549c4857ed07f484fc8c6f6a77299f927ccf4bc7af17f551eeb5,get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
@@ -162,15 +151,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2040b8c77bb565db6513dac171bd9f1b773cb6901f234e1b786e226bc311343e
+			terms:=0x229efeb32c10f2782fc83a94205c8f58eef3df9ec21e4c02616e6082ce7fe370
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(6,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x25642daf8a81d610b6a646410a64b19f403c42cb8be86733e1431140986386fe
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
+			terms:=mulmod(0x25642daf8a81d610b6a646410a64b19f403c42cb8be86733e1431140986386fe,get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
@@ -178,8 +166,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x7b55f6050c5b78c81d29b095fcf55dbf3d93bb6ae6857e50278a679df3af934
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
+			terms:=mulmod(0x7b55f6050c5b78c81d29b095fcf55dbf3d93bb6ae6857e50278a679df3af934,get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
@@ -187,8 +174,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2d484fdf643cf7ff9b2a31b585fc9ac2a1233f549a628a5931b192e6193012c
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
+			terms:=mulmod(0x2d484fdf643cf7ff9b2a31b585fc9ac2a1233f549a628a5931b192e6193012c,get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
@@ -196,15 +182,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0xbe756d6aa913ae5f79ba644619c57de4e3f606f3ac9647ffe394d3cbcb150f3
+			terms:=0x2dc1e7a4d1380f8daf853e1b18bca7646fea0920c2bec67d1b4bc765a06f3adc
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(7,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x3611a838f43caeddf4ef867c503054417aae305760a767dd747585f94b40c5bf
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
+			terms:=mulmod(0x3611a838f43caeddf4ef867c503054417aae305760a767dd747585f94b40c5bf,get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
@@ -212,8 +197,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x1f67666943d65692e897b2c52b37a67ef131727cd42a9b9d7a92d598c95dba72
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
+			terms:=mulmod(0x1f67666943d65692e897b2c52b37a67ef131727cd42a9b9d7a92d598c95dba72,get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
@@ -221,8 +205,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2b1c6524d1e8e51dcdee9be61180d9270927bb1363e9d68364b055783c4d1964
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
+			terms:=mulmod(0x2b1c6524d1e8e51dcdee9be61180d9270927bb1363e9d68364b055783c4d1964,get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
@@ -230,15 +213,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x36bf94a3c50fd6f0668bfa2f3ae4196add96e6bb34be0e6a25c056e8cd170063
+			terms:=0xf487f3f3e34f9f69dc8cd7db38afe8278ccfd1f8b4443f3de453ce31424130f
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(8,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x28babbca8497809a56a6f3e209de7e74cdf3c327c7f37e8763ae1fc9e9109836
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
+			terms:=mulmod(0x28babbca8497809a56a6f3e209de7e74cdf3c327c7f37e8763ae1fc9e9109836,get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
@@ -246,8 +228,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x356d9c23e5e62e83040ea4fe9944da08c669ca8e81f47139c3efafcd3d3beca
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
+			terms:=mulmod(0x356d9c23e5e62e83040ea4fe9944da08c669ca8e81f47139c3efafcd3d3beca,get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
@@ -255,8 +236,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x30e04108a2b549c4857ed07f484fc8c6f6a77299f927ccf4bc7af17f551eeb5
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
+			terms:=mulmod(0x30e04108a2b549c4857ed07f484fc8c6f6a77299f927ccf4bc7af17f551eeb5,get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
@@ -264,15 +244,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x1c131a28f4c733362bc326dc1a1c1d09f52911bf780b0a19a091c30bcc90a43a
+			terms:=0x2204c7fe4851b1df6097e6a9ed69a391eaa3ab9f175e0ade523f3a97290a5012
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(9,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x25642daf8a81d610b6a646410a64b19f403c42cb8be86733e1431140986386fe
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
+			terms:=mulmod(0x25642daf8a81d610b6a646410a64b19f403c42cb8be86733e1431140986386fe,get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
@@ -280,8 +259,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x7b55f6050c5b78c81d29b095fcf55dbf3d93bb6ae6857e50278a679df3af934
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
+			terms:=mulmod(0x7b55f6050c5b78c81d29b095fcf55dbf3d93bb6ae6857e50278a679df3af934,get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
@@ -289,8 +267,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2d484fdf643cf7ff9b2a31b585fc9ac2a1233f549a628a5931b192e6193012c
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
+			terms:=mulmod(0x2d484fdf643cf7ff9b2a31b585fc9ac2a1233f549a628a5931b192e6193012c,get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
@@ -298,15 +275,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x27ad2a8b1b92c8f5f4e19b093be11472e1770236e4a6cfb6330e01f48198dcb4
+			terms:=0x10211bd7fa4d88bf9b169c38beaadaaa20ac02ea76bf1ea90db4ffcee0fb6ad9
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(10,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x3611a838f43caeddf4ef867c503054417aae305760a767dd747585f94b40c5bf
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
+			terms:=mulmod(0x3611a838f43caeddf4ef867c503054417aae305760a767dd747585f94b40c5bf,get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
@@ -314,8 +290,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x1f67666943d65692e897b2c52b37a67ef131727cd42a9b9d7a92d598c95dba72
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
+			terms:=mulmod(0x1f67666943d65692e897b2c52b37a67ef131727cd42a9b9d7a92d598c95dba72,get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
@@ -323,8 +298,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2b1c6524d1e8e51dcdee9be61180d9270927bb1363e9d68364b055783c4d1964
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
+			terms:=mulmod(0x2b1c6524d1e8e51dcdee9be61180d9270927bb1363e9d68364b055783c4d1964,get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
@@ -332,15 +306,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x359a8fd833172b0dc715769221d8c48aea919094bf168cb4e5b49354d74f3171
+			terms:=0xe4d49a3bceded12c90225aca726f32656f4cf07758d01febcb7cba7b81b5dd6
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(11,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x28babbca8497809a56a6f3e209de7e74cdf3c327c7f37e8763ae1fc9e9109836
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
+			terms:=mulmod(0x28babbca8497809a56a6f3e209de7e74cdf3c327c7f37e8763ae1fc9e9109836,get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
@@ -348,8 +321,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x356d9c23e5e62e83040ea4fe9944da08c669ca8e81f47139c3efafcd3d3beca
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
+			terms:=mulmod(0x356d9c23e5e62e83040ea4fe9944da08c669ca8e81f47139c3efafcd3d3beca,get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
@@ -357,8 +329,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x30e04108a2b549c4857ed07f484fc8c6f6a77299f927ccf4bc7af17f551eeb5
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
+			terms:=mulmod(0x30e04108a2b549c4857ed07f484fc8c6f6a77299f927ccf4bc7af17f551eeb5,get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
@@ -366,15 +337,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0xb7d0675b913ca7ef7044497026b070d679f5c89cd9dd7896ea822a7aee0a5d4
+			terms:=0x21c35fcc27bec49772485abc19d53d198c01d89ac14bc17e9aca36cafce61f12
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(12,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x25642daf8a81d610b6a646410a64b19f403c42cb8be86733e1431140986386fe
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
+			terms:=mulmod(0x25642daf8a81d610b6a646410a64b19f403c42cb8be86733e1431140986386fe,get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
@@ -382,8 +352,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x7b55f6050c5b78c81d29b095fcf55dbf3d93bb6ae6857e50278a679df3af934
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
+			terms:=mulmod(0x7b55f6050c5b78c81d29b095fcf55dbf3d93bb6ae6857e50278a679df3af934,get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
@@ -391,8 +360,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2d484fdf643cf7ff9b2a31b585fc9ac2a1233f549a628a5931b192e6193012c
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
+			terms:=mulmod(0x2d484fdf643cf7ff9b2a31b585fc9ac2a1233f549a628a5931b192e6193012c,get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
@@ -400,15 +368,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x9d0e9b0736fa4cca5934089ece2dbd200eb78132a131ae6eca072b13ab9c13
+			terms:=0x33710ee97bdafd73ad5cd26c06ceceac3d17fc0aaaee3666cf2360d5cf252bcf
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(13,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x3611a838f43caeddf4ef867c503054417aae305760a767dd747585f94b40c5bf
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
+			terms:=mulmod(0x3611a838f43caeddf4ef867c503054417aae305760a767dd747585f94b40c5bf,get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
@@ -416,8 +383,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x1f67666943d65692e897b2c52b37a67ef131727cd42a9b9d7a92d598c95dba72
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
+			terms:=mulmod(0x1f67666943d65692e897b2c52b37a67ef131727cd42a9b9d7a92d598c95dba72,get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
@@ -425,8 +391,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2b1c6524d1e8e51dcdee9be61180d9270927bb1363e9d68364b055783c4d1964
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
+			terms:=mulmod(0x2b1c6524d1e8e51dcdee9be61180d9270927bb1363e9d68364b055783c4d1964,get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
@@ -434,15 +399,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x381c680afc063e315fd7b9a4d6af15bbd730d31153e52374fa8a9e967a96b211
+			terms:=0x8738cc8c5c95a126b5cb08a1a218585c0beaecbf5cc0c202a130e1d7aad9c73
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(14,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x28babbca8497809a56a6f3e209de7e74cdf3c327c7f37e8763ae1fc9e9109836
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
+			terms:=mulmod(0x28babbca8497809a56a6f3e209de7e74cdf3c327c7f37e8763ae1fc9e9109836,get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
@@ -450,8 +414,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x356d9c23e5e62e83040ea4fe9944da08c669ca8e81f47139c3efafcd3d3beca
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
+			terms:=mulmod(0x356d9c23e5e62e83040ea4fe9944da08c669ca8e81f47139c3efafcd3d3beca,get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
@@ -459,8 +422,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x30e04108a2b549c4857ed07f484fc8c6f6a77299f927ccf4bc7af17f551eeb5
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
+			terms:=mulmod(0x30e04108a2b549c4857ed07f484fc8c6f6a77299f927ccf4bc7af17f551eeb5,get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
@@ -468,15 +430,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x3bfa0e038ee78dc8c2914af5f60404fa6fd65e1b68980b632e3f7ed624e8578b
+			terms:=0xde75113dffb75a9bfea170dde9a8041d9aaf4f7315707c01690b67757a3d0bd
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(0,1, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x25642daf8a81d610b6a646410a64b19f403c42cb8be86733e1431140986386fe
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
+			terms:=mulmod(0x25642daf8a81d610b6a646410a64b19f403c42cb8be86733e1431140986386fe,get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
@@ -484,8 +445,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x7b55f6050c5b78c81d29b095fcf55dbf3d93bb6ae6857e50278a679df3af934
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
+			terms:=mulmod(0x7b55f6050c5b78c81d29b095fcf55dbf3d93bb6ae6857e50278a679df3af934,get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
@@ -493,8 +453,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2d484fdf643cf7ff9b2a31b585fc9ac2a1233f549a628a5931b192e6193012c
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
+			terms:=mulmod(0x2d484fdf643cf7ff9b2a31b585fc9ac2a1233f549a628a5931b192e6193012c,get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
@@ -502,15 +461,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x341f7b714c1f638fd8eef527bd3afdbc05aee95abec8b5149c2e69985da9a740
+			terms:=0xced10834452cebcf0df0cf6ce4f8fc885cf875ff12732c58c5a68c0089886b3
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(1,1, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x3611a838f43caeddf4ef867c503054417aae305760a767dd747585f94b40c5bf
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
+			terms:=mulmod(0x3611a838f43caeddf4ef867c503054417aae305760a767dd747585f94b40c5bf,get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
@@ -518,8 +476,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x1f67666943d65692e897b2c52b37a67ef131727cd42a9b9d7a92d598c95dba72
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
+			terms:=mulmod(0x1f67666943d65692e897b2c52b37a67ef131727cd42a9b9d7a92d598c95dba72,get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
@@ -527,8 +484,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2b1c6524d1e8e51dcdee9be61180d9270927bb1363e9d68364b055783c4d1964
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
+			terms:=mulmod(0x2b1c6524d1e8e51dcdee9be61180d9270927bb1363e9d68364b055783c4d1964,get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
@@ -536,15 +492,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x19487877026753fdf4536d2f1886d44a225992457174b1257b94e15ca2645791
+			terms:=0xa9bb658ec7c98b39f805ce21273f3f2f5259db645e66049405e6354d245b875
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(2,1, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x28babbca8497809a56a6f3e209de7e74cdf3c327c7f37e8763ae1fc9e9109836
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
+			terms:=mulmod(0x28babbca8497809a56a6f3e209de7e74cdf3c327c7f37e8763ae1fc9e9109836,get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
@@ -552,8 +507,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x356d9c23e5e62e83040ea4fe9944da08c669ca8e81f47139c3efafcd3d3beca
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
+			terms:=mulmod(0x356d9c23e5e62e83040ea4fe9944da08c669ca8e81f47139c3efafcd3d3beca,get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
@@ -561,8 +515,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x30e04108a2b549c4857ed07f484fc8c6f6a77299f927ccf4bc7af17f551eeb5
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
+			terms:=mulmod(0x30e04108a2b549c4857ed07f484fc8c6f6a77299f927ccf4bc7af17f551eeb5,get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
@@ -570,20 +523,17 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x702ace72c6faa37d0106422cccea5ac0637d4c5cae038b32927a9d9aa205a8e
+			terms:=0x333772e36eb7e2acdee8b1aa4b64db7aba1a1101469f45e982b310304a824ca8
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, GATE_EVAL_OFFSET),mulmod(mload(add(local_vars, GATE_EVAL_OFFSET)),get_selector_i(6,local_vars),modulus))
 			gates_evaluation := addmod(gates_evaluation,mload(add(local_vars, GATE_EVAL_OFFSET)),modulus)
-
-			//Gate7
 			mstore(add(local_vars, GATE_EVAL_OFFSET), 0)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(3,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x25642daf8a81d610b6a646410a64b19f403c42cb8be86733e1431140986386fe
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
+			terms:=mulmod(0x25642daf8a81d610b6a646410a64b19f403c42cb8be86733e1431140986386fe,get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
@@ -591,8 +541,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x7b55f6050c5b78c81d29b095fcf55dbf3d93bb6ae6857e50278a679df3af934
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
+			terms:=mulmod(0x7b55f6050c5b78c81d29b095fcf55dbf3d93bb6ae6857e50278a679df3af934,get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
@@ -600,8 +549,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2d484fdf643cf7ff9b2a31b585fc9ac2a1233f549a628a5931b192e6193012c
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
+			terms:=mulmod(0x2d484fdf643cf7ff9b2a31b585fc9ac2a1233f549a628a5931b192e6193012c,get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
@@ -609,15 +557,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x7f42fc47bf3b73745c7cf1835318d0707f696da7ceb8686b064748482ade923
+			terms:=0x22103342cc8bf7fc52d7b43b7546a60cd88d4ae331d9325ad3a2e5596f33cff2
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(4,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x3611a838f43caeddf4ef867c503054417aae305760a767dd747585f94b40c5bf
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
+			terms:=mulmod(0x3611a838f43caeddf4ef867c503054417aae305760a767dd747585f94b40c5bf,get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
@@ -625,8 +572,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x1f67666943d65692e897b2c52b37a67ef131727cd42a9b9d7a92d598c95dba72
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
+			terms:=mulmod(0x1f67666943d65692e897b2c52b37a67ef131727cd42a9b9d7a92d598c95dba72,get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
@@ -634,8 +580,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2b1c6524d1e8e51dcdee9be61180d9270927bb1363e9d68364b055783c4d1964
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
+			terms:=mulmod(0x2b1c6524d1e8e51dcdee9be61180d9270927bb1363e9d68364b055783c4d1964,get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
@@ -643,15 +588,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x1391a8223e2837e5fd6612b63c28b8a6e0dad0b99a1c166c430aa790ace4b1e5
+			terms:=0x12d9c33d1650ed92897261e2d40d340d01e2da78ec9ba48b9bbbc529118fcb03
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(5,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x28babbca8497809a56a6f3e209de7e74cdf3c327c7f37e8763ae1fc9e9109836
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
+			terms:=mulmod(0x28babbca8497809a56a6f3e209de7e74cdf3c327c7f37e8763ae1fc9e9109836,get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
@@ -659,8 +603,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(0,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x356d9c23e5e62e83040ea4fe9944da08c669ca8e81f47139c3efafcd3d3beca
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
+			terms:=mulmod(0x356d9c23e5e62e83040ea4fe9944da08c669ca8e81f47139c3efafcd3d3beca,get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
@@ -668,8 +611,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(1,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x30e04108a2b549c4857ed07f484fc8c6f6a77299f927ccf4bc7af17f551eeb5
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
+			terms:=mulmod(0x30e04108a2b549c4857ed07f484fc8c6f6a77299f927ccf4bc7af17f551eeb5,get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
@@ -677,15 +619,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(2,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2e2c57e4d9d038910af91192771a66e3145dcd5e37ea1f9f407bbb0943ba7b0e
+			terms:=0x2ee1ceb24904e5d71dbefd731c2cb83afcedf5c09e3bd0c1012d36d1b8616964
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(6,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x25642daf8a81d610b6a646410a64b19f403c42cb8be86733e1431140986386fe
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
+			terms:=mulmod(0x25642daf8a81d610b6a646410a64b19f403c42cb8be86733e1431140986386fe,get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
@@ -693,8 +634,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x7b55f6050c5b78c81d29b095fcf55dbf3d93bb6ae6857e50278a679df3af934
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
+			terms:=mulmod(0x7b55f6050c5b78c81d29b095fcf55dbf3d93bb6ae6857e50278a679df3af934,get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
@@ -702,8 +642,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2d484fdf643cf7ff9b2a31b585fc9ac2a1233f549a628a5931b192e6193012c
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
+			terms:=mulmod(0x2d484fdf643cf7ff9b2a31b585fc9ac2a1233f549a628a5931b192e6193012c,get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
@@ -711,15 +650,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x36494d7c1450ba044e1bb76965316419f767311e13c6e48941eb52365e458212
+			terms:=0x3d8bf6bfe16dffe2bcb345d797161c8eb214ff39d21fd52c668edd71aec0bac3
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(7,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x3611a838f43caeddf4ef867c503054417aae305760a767dd747585f94b40c5bf
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
+			terms:=mulmod(0x3611a838f43caeddf4ef867c503054417aae305760a767dd747585f94b40c5bf,get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
@@ -727,8 +665,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x1f67666943d65692e897b2c52b37a67ef131727cd42a9b9d7a92d598c95dba72
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
+			terms:=mulmod(0x1f67666943d65692e897b2c52b37a67ef131727cd42a9b9d7a92d598c95dba72,get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
@@ -736,8 +673,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2b1c6524d1e8e51dcdee9be61180d9270927bb1363e9d68364b055783c4d1964
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
+			terms:=mulmod(0x2b1c6524d1e8e51dcdee9be61180d9270927bb1363e9d68364b055783c4d1964,get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
@@ -745,15 +681,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2a2af6ae9b377a89c057c3208892bc9c9fc47ee44cf79575e236511f53afb523
+			terms:=0x1b57ad420634d570122a17a5a67982b70b8df3802bed743a94afefe58f000061
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(8,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x28babbca8497809a56a6f3e209de7e74cdf3c327c7f37e8763ae1fc9e9109836
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
+			terms:=mulmod(0x28babbca8497809a56a6f3e209de7e74cdf3c327c7f37e8763ae1fc9e9109836,get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
@@ -761,8 +696,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(3,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x356d9c23e5e62e83040ea4fe9944da08c669ca8e81f47139c3efafcd3d3beca
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
+			terms:=mulmod(0x356d9c23e5e62e83040ea4fe9944da08c669ca8e81f47139c3efafcd3d3beca,get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
@@ -770,8 +704,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(4,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x30e04108a2b549c4857ed07f484fc8c6f6a77299f927ccf4bc7af17f551eeb5
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
+			terms:=mulmod(0x30e04108a2b549c4857ed07f484fc8c6f6a77299f927ccf4bc7af17f551eeb5,get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
@@ -779,15 +712,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(5,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0xbd8024035c315dcf9c14ec73afaa39374aa56a9570fe65a769a005e00826edd
+			terms:=0x1fa2e4f11ca609de7ba539b0081c7c5c36c4b8bedf2392c621e65ed1b8cd6293
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(9,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x25642daf8a81d610b6a646410a64b19f403c42cb8be86733e1431140986386fe
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
+			terms:=mulmod(0x25642daf8a81d610b6a646410a64b19f403c42cb8be86733e1431140986386fe,get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
@@ -795,8 +727,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x7b55f6050c5b78c81d29b095fcf55dbf3d93bb6ae6857e50278a679df3af934
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
+			terms:=mulmod(0x7b55f6050c5b78c81d29b095fcf55dbf3d93bb6ae6857e50278a679df3af934,get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
@@ -804,8 +735,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2d484fdf643cf7ff9b2a31b585fc9ac2a1233f549a628a5931b192e6193012c
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
+			terms:=mulmod(0x2d484fdf643cf7ff9b2a31b585fc9ac2a1233f549a628a5931b192e6193012c,get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
@@ -813,15 +743,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x18d0ed18cef8848bce810dabc3cc479e8d6b7b5612a5172cb8c7ca7a37e97a03
+			terms:=0x1a3cd81d336c1390f0dc4a1be36ce40463fa86218bf75669d010b71167d206fe
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(10,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x3611a838f43caeddf4ef867c503054417aae305760a767dd747585f94b40c5bf
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
+			terms:=mulmod(0x3611a838f43caeddf4ef867c503054417aae305760a767dd747585f94b40c5bf,get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
@@ -829,8 +758,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x1f67666943d65692e897b2c52b37a67ef131727cd42a9b9d7a92d598c95dba72
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
+			terms:=mulmod(0x1f67666943d65692e897b2c52b37a67ef131727cd42a9b9d7a92d598c95dba72,get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
@@ -838,8 +766,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2b1c6524d1e8e51dcdee9be61180d9270927bb1363e9d68364b055783c4d1964
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
+			terms:=mulmod(0x2b1c6524d1e8e51dcdee9be61180d9270927bb1363e9d68364b055783c4d1964,get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
@@ -847,15 +774,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x3acdc07a21473f83e6c3c858c28909eed8df07c1dd701802033bad05960bd69a
+			terms:=0x620c1dd2dd4f64bd9a25af10e8a6f633aa809f073b3192b7c35227c77b67d48
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(11,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x28babbca8497809a56a6f3e209de7e74cdf3c327c7f37e8763ae1fc9e9109836
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
+			terms:=mulmod(0x28babbca8497809a56a6f3e209de7e74cdf3c327c7f37e8763ae1fc9e9109836,get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
@@ -863,8 +789,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(6,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x356d9c23e5e62e83040ea4fe9944da08c669ca8e81f47139c3efafcd3d3beca
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
+			terms:=mulmod(0x356d9c23e5e62e83040ea4fe9944da08c669ca8e81f47139c3efafcd3d3beca,get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
@@ -872,8 +797,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(7,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x30e04108a2b549c4857ed07f484fc8c6f6a77299f927ccf4bc7af17f551eeb5
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
+			terms:=mulmod(0x30e04108a2b549c4857ed07f484fc8c6f6a77299f927ccf4bc7af17f551eeb5,get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
@@ -881,15 +805,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(8,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2a31bea1351b45bd4be815c5afe4bb98d5229fe2959fc510402276dc7ad2c29
+			terms:=0x364f72a77ac27536f73a4eb1a1479ee4dc52895163b0403b9f9d7dde03205600
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(12,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x25642daf8a81d610b6a646410a64b19f403c42cb8be86733e1431140986386fe
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
+			terms:=mulmod(0x25642daf8a81d610b6a646410a64b19f403c42cb8be86733e1431140986386fe,get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
@@ -897,8 +820,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x7b55f6050c5b78c81d29b095fcf55dbf3d93bb6ae6857e50278a679df3af934
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
+			terms:=mulmod(0x7b55f6050c5b78c81d29b095fcf55dbf3d93bb6ae6857e50278a679df3af934,get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
@@ -906,8 +828,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2d484fdf643cf7ff9b2a31b585fc9ac2a1233f549a628a5931b192e6193012c
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
+			terms:=mulmod(0x2d484fdf643cf7ff9b2a31b585fc9ac2a1233f549a628a5931b192e6193012c,get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
@@ -915,15 +836,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x31713e7384ad3aeb2bdfb80e0f4d56f36985d1c2ec53b17ec12fd4eee2c2470f
+			terms:=0x21319dc8b28618e824b59706322550ad29be49c295d73827d36b554263a85f5b
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(13,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x3611a838f43caeddf4ef867c503054417aae305760a767dd747585f94b40c5bf
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
+			terms:=mulmod(0x3611a838f43caeddf4ef867c503054417aae305760a767dd747585f94b40c5bf,get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
@@ -931,8 +851,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x1f67666943d65692e897b2c52b37a67ef131727cd42a9b9d7a92d598c95dba72
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
+			terms:=mulmod(0x1f67666943d65692e897b2c52b37a67ef131727cd42a9b9d7a92d598c95dba72,get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
@@ -940,8 +859,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2b1c6524d1e8e51dcdee9be61180d9270927bb1363e9d68364b055783c4d1964
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
+			terms:=mulmod(0x2b1c6524d1e8e51dcdee9be61180d9270927bb1363e9d68364b055783c4d1964,get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
@@ -949,15 +867,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x3ea6e379a158f9a2abcfbae60744d9744487e9c10e67aa3ec912adae2f5610e7
+			terms:=0x42f7648d85f11f71d9c05a1ca49e7249a6edc2e0608e4a5b52fe78964605e40
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(14,0, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x28babbca8497809a56a6f3e209de7e74cdf3c327c7f37e8763ae1fc9e9109836
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
+			terms:=mulmod(0x28babbca8497809a56a6f3e209de7e74cdf3c327c7f37e8763ae1fc9e9109836,get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
@@ -965,8 +882,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(9,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x356d9c23e5e62e83040ea4fe9944da08c669ca8e81f47139c3efafcd3d3beca
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
+			terms:=mulmod(0x356d9c23e5e62e83040ea4fe9944da08c669ca8e81f47139c3efafcd3d3beca,get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
@@ -974,8 +890,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(10,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x30e04108a2b549c4857ed07f484fc8c6f6a77299f927ccf4bc7af17f551eeb5
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
+			terms:=mulmod(0x30e04108a2b549c4857ed07f484fc8c6f6a77299f927ccf4bc7af17f551eeb5,get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
@@ -983,15 +898,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(11,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x12241111a135a2111b40e8763bca1ede065c1ea827408256bb8be4f03cee606
+			terms:=0x12158a0c85263036b36aebe404b8e633ab66439493bb4bd8611df7e584d502
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(0,1, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x25642daf8a81d610b6a646410a64b19f403c42cb8be86733e1431140986386fe
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
+			terms:=mulmod(0x25642daf8a81d610b6a646410a64b19f403c42cb8be86733e1431140986386fe,get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
@@ -999,8 +913,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x7b55f6050c5b78c81d29b095fcf55dbf3d93bb6ae6857e50278a679df3af934
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
+			terms:=mulmod(0x7b55f6050c5b78c81d29b095fcf55dbf3d93bb6ae6857e50278a679df3af934,get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
@@ -1008,8 +921,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2d484fdf643cf7ff9b2a31b585fc9ac2a1233f549a628a5931b192e6193012c
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
+			terms:=mulmod(0x2d484fdf643cf7ff9b2a31b585fc9ac2a1233f549a628a5931b192e6193012c,get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
@@ -1017,15 +929,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x1c96e38ff646d7c4d97899172b6e8e92e62d05151c58a03ca035ce3dc1caa8fa
+			terms:=0x9205e75645e4e6bdd7b6b575350f9975702ec52346c56c9e71e6daab2f19a34
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(1,1, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x3611a838f43caeddf4ef867c503054417aae305760a767dd747585f94b40c5bf
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
+			terms:=mulmod(0x3611a838f43caeddf4ef867c503054417aae305760a767dd747585f94b40c5bf,get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
@@ -1033,8 +944,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x1f67666943d65692e897b2c52b37a67ef131727cd42a9b9d7a92d598c95dba72
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
+			terms:=mulmod(0x1f67666943d65692e897b2c52b37a67ef131727cd42a9b9d7a92d598c95dba72,get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
@@ -1042,8 +952,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x2b1c6524d1e8e51dcdee9be61180d9270927bb1363e9d68364b055783c4d1964
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
+			terms:=mulmod(0x2b1c6524d1e8e51dcdee9be61180d9270927bb1363e9d68364b055783c4d1964,get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
@@ -1051,15 +960,14 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x193254d37c814153a415b41e290fb77fedb62587313297784a10e339682b3f66
+			terms:=0x2e616724c0b6328034c4f9cda98263357cfd0deec832e4e3a3b0cb5dbe6ce2f5
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET), 0)
 			terms:=get_witness_i_by_rotation_idx(2,1, local_vars)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x28babbca8497809a56a6f3e209de7e74cdf3c327c7f37e8763ae1fc9e9109836
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
+			terms:=mulmod(0x28babbca8497809a56a6f3e209de7e74cdf3c327c7f37e8763ae1fc9e9109836,get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
@@ -1067,8 +975,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(12,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x356d9c23e5e62e83040ea4fe9944da08c669ca8e81f47139c3efafcd3d3beca
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
+			terms:=mulmod(0x356d9c23e5e62e83040ea4fe9944da08c669ca8e81f47139c3efafcd3d3beca,get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
@@ -1076,8 +983,7 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(13,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x30e04108a2b549c4857ed07f484fc8c6f6a77299f927ccf4bc7af17f551eeb5
-			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
+			terms:=mulmod(0x30e04108a2b549c4857ed07f484fc8c6f6a77299f927ccf4bc7af17f551eeb5,get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
@@ -1085,13 +991,12 @@ library merkle_tree_poseidon_gate6{
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			terms:=mulmod(terms, get_witness_i_by_rotation_idx(14,0, local_vars), modulus)
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
-			terms:=0x12ddf98cf99b2a741f989252e011f16716204e87f8aa2b64e3d6dd2b208d10ab
+			terms:=0x2eff4de3cf9b8a27e94c10328a3c51ecc5f1ebbf43e056f0db91b1a7192fd3e8
 			mstore(add(local_vars, CONSTRAINT_EVAL_OFFSET),addmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),terms,modulus))
 			mstore(add(local_vars, GATE_EVAL_OFFSET),addmod(mload(add(local_vars, GATE_EVAL_OFFSET)),mulmod(mload(add(local_vars, CONSTRAINT_EVAL_OFFSET)),theta_acc,modulus),modulus))
 			theta_acc := mulmod(theta_acc, theta, modulus)
 			mstore(add(local_vars, GATE_EVAL_OFFSET),mulmod(mload(add(local_vars, GATE_EVAL_OFFSET)),get_selector_i(7,local_vars),modulus))
 			gates_evaluation := addmod(gates_evaluation,mload(add(local_vars, GATE_EVAL_OFFSET)),modulus)
-
 
         }
     }

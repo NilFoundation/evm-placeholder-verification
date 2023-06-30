@@ -37,7 +37,7 @@ module.exports = async function() {
             from: deployer,
             libraries : deployedLib,
             log : true,
-        })
+        });
     }
 }
 

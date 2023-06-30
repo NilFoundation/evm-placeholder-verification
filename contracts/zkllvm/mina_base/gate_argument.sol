@@ -25,15 +25,19 @@ import "../../../contracts/commitments/batched_lpc_verifier.sol";
 import "../../../contracts/interfaces/gate_argument.sol";
 
 import "./gate0.sol";
-import "./gate4.sol";
-import "./gate6.sol";
-import "./gate8.sol";
-import "./gate10.sol";
-import "./gate12.sol";
+import "./gate3.sol";
+import "./gate5.sol";
+import "./gate7.sol";
+import "./gate9.sol";
+import "./gate11.sol";
+import "./gate15_0.sol";
+import "./gate15_1.sol";
+import "./gate16_0.sol";
+import "./gate16_1.sol";
 
 
-contract merkle_tree_poseidon_gate_argument_split_gen  is IGateArgument{
-    uint256 constant GATES_N = 13;
+contract mina_base_gate_argument_split_gen  is IGateArgument{
+    uint256 constant GATES_N = 22;
 
     struct local_vars_type{
         // 0x0
@@ -48,6 +52,8 @@ contract merkle_tree_poseidon_gate_argument_split_gen  is IGateArgument{
 		//0x80
 		uint256[][] witness_evaluations;
 		//a0
+		uint256[] constant_evaluations;
+		//c0
 		uint256[] selector_evaluations;
 
     }
@@ -75,6 +81,15 @@ contract merkle_tree_poseidon_gate_argument_split_gen  is IGateArgument{
             unchecked{i++;}
         }
 
+        local_vars.constant_evaluations = new uint256[](ar_params.constant_columns);
+        for (uint256 i = 0; i < ar_params.constant_columns;) {
+            local_vars.constant_evaluations[i] = batched_lpc_verifier.get_fixed_values_z_i_j_from_proof_be(
+                blob, eval_proof_combined_value_offset, ar_params.permutation_columns + ar_params.permutation_columns + i, 0
+            );
+ 
+            unchecked{i++;}
+        }
+
         local_vars.selector_evaluations = new uint256[](ar_params.selector_columns);
         for (uint256 i = 0; i < ar_params.selector_columns;) {
             local_vars.selector_evaluations[i] = batched_lpc_verifier.get_fixed_values_z_i_j_from_proof_be(
@@ -87,12 +102,16 @@ contract merkle_tree_poseidon_gate_argument_split_gen  is IGateArgument{
         local_vars.theta_acc = 1;
         local_vars.gates_evaluation = 0;
 
-		(local_vars.gates_evaluation, local_vars.theta_acc) = merkle_tree_poseidon_gate0.evaluate_gate_be(gate_params, local_vars);
-		(local_vars.gates_evaluation, local_vars.theta_acc) = merkle_tree_poseidon_gate4.evaluate_gate_be(gate_params, local_vars);
-		(local_vars.gates_evaluation, local_vars.theta_acc) = merkle_tree_poseidon_gate6.evaluate_gate_be(gate_params, local_vars);
-		(local_vars.gates_evaluation, local_vars.theta_acc) = merkle_tree_poseidon_gate8.evaluate_gate_be(gate_params, local_vars);
-		(local_vars.gates_evaluation, local_vars.theta_acc) = merkle_tree_poseidon_gate10.evaluate_gate_be(gate_params, local_vars);
-		(local_vars.gates_evaluation, local_vars.theta_acc) = merkle_tree_poseidon_gate12.evaluate_gate_be(gate_params, local_vars);
+		(local_vars.gates_evaluation, local_vars.theta_acc) = mina_base_gate0.evaluate_gate_be(gate_params, local_vars);
+		(local_vars.gates_evaluation, local_vars.theta_acc) = mina_base_gate3.evaluate_gate_be(gate_params, local_vars);
+		(local_vars.gates_evaluation, local_vars.theta_acc) = mina_base_gate5.evaluate_gate_be(gate_params, local_vars);
+		(local_vars.gates_evaluation, local_vars.theta_acc) = mina_base_gate7.evaluate_gate_be(gate_params, local_vars);
+		(local_vars.gates_evaluation, local_vars.theta_acc) = mina_base_gate9.evaluate_gate_be(gate_params, local_vars);
+		(local_vars.gates_evaluation, local_vars.theta_acc) = mina_base_gate11.evaluate_gate_be(gate_params, local_vars);
+		(local_vars.gate_eval, local_vars.theta_acc) = mina_base_gate15_0.evaluate_gate_be(gate_params, local_vars);
+		(local_vars.gates_evaluation, local_vars.theta_acc) = mina_base_gate15_1.evaluate_gate_be(gate_params, local_vars);
+		(local_vars.gate_eval, local_vars.theta_acc) = mina_base_gate16_0.evaluate_gate_be(gate_params, local_vars);
+		(local_vars.gates_evaluation, local_vars.theta_acc) = mina_base_gate16_1.evaluate_gate_be(gate_params, local_vars);
 
 
         gates_evaluation = local_vars.gates_evaluation;

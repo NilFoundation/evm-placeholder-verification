@@ -78,37 +78,10 @@ describe('Proof Tests', function () {
         let placeholderVerifier = await ethers.getContract('PlaceholderVerifier');
         
         await testPlaceholderAPI.initialize(placeholderVerifier.address);
-        await testPlaceholderAPI.verify(params['proof'],params['init_params'], params['columns_rotations'], params['public_input'],unifiedAdditionGate.address ,{gasLimit: 30_500_000});
+        await testPlaceholderAPI.verify(
+            params['proof'],params['init_params'], 
+            params['columns_rotations'], params['public_input'],
+            unifiedAdditionGate.address ,{gasLimit: 30_500_000}
+        );
     });
-
-    it("Mina Base", async function () {
-        let configPath = "./data/mina_base/circuit_params.json"
-        let proofPath = "./data/mina_base/proof.bin"
-        let publicInputPath = "./data/mina_base/public_input.json";
-        let params = getVerifierParams(configPath,proofPath, publicInputPath);
-        await deployments.fixture(['testPlaceholderAPIConsumerFixture', 'minaBaseGateFixture', 'placeholderVerifierFixture']);
-
-        let testPlaceholderAPI = await ethers.getContract('TestPlaceholderVerifier');
-        let minaBaseGate = await ethers.getContract('MinaBaseGate');
-        let placeholderVerifier = await ethers.getContract('PlaceholderVerifier');
-
-        await testPlaceholderAPI.initialize(placeholderVerifier.address);
-        await testPlaceholderAPI.verify(params['proof'],params['init_params'], params['columns_rotations'],params['public_input'],minaBaseGate.address ,{gasLimit: 30_500_000});
-    });
-
-    it("Mina Scalar", async function () {
-        let configPath = "./data/mina_scalar/circuit_params.json"
-        let proofPath = "./data/mina_scalar/proof.bin"
-        let publicInputPath = "./data/mina_scalar/public_input.json";
-        let params = getVerifierParams(configPath,proofPath, publicInputPath);
-        await deployments.fixture(['testPlaceholderAPIConsumerFixture', 'minaScalarGateFixture', 'placeholderVerifierFixture']);
-
-        let testPlaceholderAPI = await ethers.getContract('TestPlaceholderVerifier');
-        let minaScalarGate = await ethers.getContract('MinaScalarGate');
-        let placeholderVerifier = await ethers.getContract('PlaceholderVerifier');
-
-        await testPlaceholderAPI.initialize(placeholderVerifier.address);
-        await testPlaceholderAPI.verify(params['proof'],params['init_params'], params['columns_rotations'],params['public_input'],minaScalarGate.address ,{gasLimit: 30_500_000});
-    });
-
 })

@@ -24,12 +24,11 @@ import "./algebra/field.sol";
 
 import "./placeholder/proof_map_parser.sol";
 import "./placeholder/permutation_argument.sol";
+import "./commitments/batched_lpc_verifier.sol";
 
 import "./placeholder/placeholder_verifier.sol";
 import "./interfaces/verifier.sol";
 import "./interfaces/gate_argument.sol";
-
-import "hardhat/console.sol";
 
 contract PlaceholderVerifier is IVerifier {
     struct verifier_state {
@@ -112,19 +111,47 @@ contract PlaceholderVerifier is IVerifier {
 
     function check_public_input(verifier_state memory vars, uint256[] calldata public_input, bytes calldata blob) internal view {
         uint256 xi = basic_marshalling.get_uint256_be(blob, vars.proof_map.eval_proof_offset);
-        uint256 gas = gasleft();
-        uint256 result = 1;
+        uint256 result = 0;
+        uint256 Omega = 1;
 
-        result = field.pow_small(xi, vars.common_data.rows_amount, vars.fri_params.modulus);
-        result = addmod(result, vars.fri_params.modulus - 1, vars.fri_params.modulus);
+        for(uint256 i = 0; i < public_input.length;){
+            if( public_input[i] != 0){
+                uint256 L = mulmod(
+                    Omega,
+                    field.inverse_static(
+                        addmod(xi, vars.fri_params.modulus - Omega, vars.fri_params.modulus),
+                        vars.fri_params.modulus
+                    ),
+                    vars.fri_params.modulus
+                );
+                    
+                result = addmod(
+                    result, 
+                    mulmod(
+                        public_input[i],
+                        L,
+                        vars.fri_params.modulus
+                    ), 
+                    vars.fri_params.modulus
+                );
+            }
+            Omega = mulmod(Omega, vars.common_data.omega, vars.fri_params.modulus);
+            unchecked{i++;}
+        }
         result = mulmod(
             result, 
-            field.inverse_static(addmod(xi, vars.fri_params.modulus - 1,vars.fri_params.modulus), vars.fri_params.modulus), 
+            addmod(field.pow_small(xi, vars.common_data.rows_amount, vars.fri_params.modulus), vars.fri_params.modulus - 1, vars.fri_params.modulus), 
             vars.fri_params.modulus
         );
         result = mulmod(result, field.inverse_static(vars.common_data.rows_amount, vars.fri_params.modulus), vars.fri_params.modulus);
-        require(result == basic_marshalling.get_uint256_be(blob, vars.proof_map.eval_proof_lagrange_0_offset));
-        console.log("Gas used for public input check: ", gas - gasleft());
+
+        // Input is proof_map.eval_proof_combined_value_offset
+        require( result == batched_lpc_verifier.get_variable_values_z_i_j_from_proof_be(
+            blob, 
+            vars.proof_map.eval_proof_combined_value_offset, 
+            vars.arithmetization_params.witness_columns, 
+            0
+        ));
     }
 
     function verify(
@@ -149,7 +176,7 @@ contract PlaceholderVerifier is IVerifier {
         transcript.update_transcript_b32_by_offset_calldata(vars.tr_state, blob, basic_marshalling.skip_length(vars.proof_map.variable_values_commitment_offset));
 
         // 2. check public input
-        check_public_input(vars, public_input, blob);
+        if(public_input.length > 0) check_public_input(vars, public_input, blob);
 
         // 4. prepare evaluations of the polynomials that are copy-constrained
         // 5. permutation argument
@@ -178,7 +205,6 @@ contract PlaceholderVerifier is IVerifier {
             vars.fri_params, vars.common_data, local_vars,
             vars.arithmetization_params))
             return false;
-            
         return true;
     }
 }
