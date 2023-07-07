@@ -22,6 +22,9 @@
 //---------------------------------------------------------------------------//
 pragma solidity >=0.8.4;
 
+uint256 constant ROWS_ROTATION = 2;
+uint256 constant COLS_ROTATION = 3;
+
 /**
  * @title Bn254 elliptic curve crypto
  * @dev Provides some basic methods to compute bilinear pairings, construct group elements and misc numerical methods
@@ -660,7 +663,7 @@ library types {
         uint256 rows_amount;
         // 0x20
         uint256 omega;
-        int256[][] columns_rotations; 
+        int256[ROWS_ROTATION][COLS_ROTATION] columns_rotations;
     }
 
     struct placeholder_state_type {
@@ -2238,7 +2241,7 @@ interface IGateArgument {
         uint256 eval_proof_combined_value_offset,
         types.gate_argument_params memory gate_params,
         types.arithmetization_params memory ar_params,
-        int256[][] calldata columns_rotations
+        int256[ROWS_ROTATION][COLS_ROTATION] calldata columns_rotations
     ) external pure returns (uint256 gates_evaluation);
 }
 
@@ -3045,7 +3048,7 @@ interface IVerifier {
     function verify(
         bytes calldata blob, 
         uint256[]  calldata init_params,
-        int256[][] calldata columns_rotations, 
+        int256[ROWS_ROTATION][COLS_ROTATION] calldata columns_rotations,
         address gate_argument
     ) external view returns (bool);
 }
@@ -3072,7 +3075,7 @@ contract PlaceholderVerifier is IVerifier {
     function init_vars(
         verifier_state memory vars, 
         uint256[] memory init_params, 
-        int256[][] memory columns_rotations
+        int256[ROWS_ROTATION][COLS_ROTATION] memory columns_rotations
     ) internal pure {
         uint256 idx;
         uint256 max_coset;
@@ -3137,7 +3140,7 @@ contract PlaceholderVerifier is IVerifier {
     function verify(
         bytes calldata blob, 
         uint256[] calldata init_params,
-        int256[][] calldata columns_rotations, 
+        int256[ROWS_ROTATION][COLS_ROTATION] calldata columns_rotations,
         address gate_argument
     ) public view returns (bool result) {
         verifier_state memory vars;
