@@ -25,7 +25,7 @@ pragma solidity >=0.8.4;
 uint256 constant ROWS_ROTATION = 2;
 uint256 constant COLS_ROTATION = 3;
 
-    function getBytes32(bytes calldata input, uint256 r1)  internal returns (bytes32) {
+    function getBytes32(bytes calldata input, uint256 r1) pure returns (bytes32) {
         //return bytes32(input[r1 : r1 + 8]);
         bytes32 dummy;
         return dummy;
@@ -817,7 +817,7 @@ library merkle_verifier {
 
         uint256 read_offset_st  = offset + DEPTH_OFFSET;
         //bytes memory read_bytes = blob[read_offset_st:read_offset_st + WORD_SIZE];
-        bytes32 memory read_bytes = getBytes32(blob,read_offset_st);
+        bytes32 read_bytes = getBytes32(blob,read_offset_st);
         uint256 read_offset_uint = uint256(read_bytes);
         result_offset += ((read_offset_uint >> LENGTH_RESTORING_SHIFT) * LAYER_OCTETS );
         result_offset = result_offset * 8;
@@ -845,7 +845,7 @@ library merkle_verifier {
         uint256 read_offset_st  = offset + DEPTH_OFFSET;
 
         //bytes memory read_offset = blob[read_offset_st:read_offset_st + WORD_SIZE];
-        bytes32 memory read_offset = getBytes32(blob,read_offset_st);
+        bytes32 read_offset = getBytes32(blob,read_offset_st);
         uint256 read_offset_uint = uint256(read_offset);
         result_offset += ((read_offset_uint >> LENGTH_RESTORING_SHIFT) * LAYER_OCTETS );
         result_offset = result_offset * 8;
@@ -894,7 +894,7 @@ library merkle_verifier {
         for(uint256 cur_layer_idx=0; cur_layer_idx < depth -1 ; cur_layer_idx++ ){
             uint256 layer_offset_st = layer_offset + LAYER_POSITION_OFFSET;
             //pos = uint256(bytes32(blob[layer_offset_st : layer_offset_st + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
-            pos = uint256(getBytes32(blob,layer_offset_st) >> LENGTH_RESTORING_SHIFT;
+            pos = uint256(getBytes32(blob,layer_offset_st)) >> LENGTH_RESTORING_SHIFT;
 
             uint256 next_pos_offset =  layer_offset + LAYER_POSITION_OFFSET + LAYER_OCTETS;
             //next_pos = uint256(bytes32(blob[next_pos_offset: next_pos_offset + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
@@ -1538,30 +1538,37 @@ library batched_fri_verifier {
 
                 // push y
                 if(fri_params.s_indices[local_vars.newind] == fri_params.tmp_arr[local_vars.y_ind]){
-                    bytes memory data_to_copy = blob[y_offset: y_offset + WORD_SIZE];
-                    basic_marshalling.write_bytes(local_vars.b , first_offset, data_to_copy);
+                    //bytes memory data_to_copy = blob[y_offset: y_offset + WORD_SIZE];
+                    //HG TODO
+//                    bytes32 data_to_copy = getBytes32(blob,y_offset);
+//                    basic_marshalling.write_bytes(local_vars.b , first_offset, data_to_copy);
 //                    assembly{
 //                        mstore(
 //                            add(mload(local_vars),first_offset),
 //                            calldataload(add(blob.offset, y_offset))
 //                        )
-                     data_to_copy = blob[y_offset + WORD_SIZE : y_offset + WORD_SIZE + WORD_SIZE];
-                     basic_marshalling.write_bytes(local_vars.b , first_offset + WORD_SIZE, data_to_copy);
+
+                    //HG TODO
+//                     data_to_copy = blob[y_offset + WORD_SIZE : y_offset + WORD_SIZE + WORD_SIZE];
+//                     basic_marshalling.write_bytes(local_vars.b , first_offset + WORD_SIZE, data_to_copy);
 //                        mstore(
 //                            add(mload(local_vars),add(first_offset, 0x20)),
 //                            calldataload(add(blob.offset, add(y_offset, 0x20)))
 //                        )
 //                    }
                 } else {
-                    bytes memory data_to_copy = blob[y_offset + WORD_SIZE : y_offset + WORD_SIZE + WORD_SIZE];
-                    basic_marshalling.write_bytes(local_vars.b , first_offset, data_to_copy);
+                    //bytes memory data_to_copy = blob[y_offset + WORD_SIZE : y_offset + WORD_SIZE + WORD_SIZE];
+                    //HG TODO
+//                    bytes memory data_to_copy = getBytes32(blob,y_offset + WORD_SIZE : y_offset + WORD_SIZE + WORD_SIZE];
+//                    basic_marshalling.write_bytes(local_vars.b , first_offset, data_to_copy);
 //                    assembly{
 //                        mstore(
 //                            add(mload(local_vars),first_offset),
 //                            calldataload(add(blob.offset, add(y_offset, 0x20)))
 //                        )
-                    data_to_copy = blob[y_offset:y_offset + WORD_SIZE];
-                    basic_marshalling.write_bytes(local_vars.b , first_offset + WORD_SIZE, data_to_copy);
+                      //HG TODO
+//                    data_to_copy = blob[y_offset:y_offset + WORD_SIZE];
+//                    basic_marshalling.write_bytes(local_vars.b , first_offset + WORD_SIZE, data_to_copy);
 //                        mstore(
 //                            add(mload(local_vars),add(first_offset, 0x20)),
 //                            calldataload(add(blob.offset, y_offset))
