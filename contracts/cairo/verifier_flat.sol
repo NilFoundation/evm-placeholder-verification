@@ -25,6 +25,13 @@ pragma solidity >=0.8.4;
 uint256 constant ROWS_ROTATION = 2;
 uint256 constant COLS_ROTATION = 3;
 
+    function getBytes32(bytes calldata input, uint256 r1)  internal returns (bytes32) {
+        //return bytes32(input[r1 : r1 + 8]);
+        bytes32 dummy;
+        return dummy;
+    }
+
+
 /**
  * @title Bn254 elliptic curve crypto
  * @dev Provides some basic methods to compute bilinear pairings, construct group elements and misc numerical methods
@@ -191,9 +198,11 @@ library basic_marshalling {
     function skip_vector_of_uint256_be(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 result_offset) {
 
+        //Dev note - Bytes re-write
         uint256 offset_by = offset/8;
         uint256 offset_shr_mul = (WORD_SIZE * 8) *
-                                 uint256(bytes32(blob[offset_by: offset_by + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+                                  uint256(getBytes32(blob,offset_by)) >> LENGTH_RESTORING_SHIFT;
+                                 //uint256(bytes32(blob[offset_by: offset_by + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
 
         result_offset = offset_shr_mul + offset; // Returning still in bits.
 
@@ -219,7 +228,9 @@ library basic_marshalling {
         unchecked { result_offset = offset + LENGTH_OCTETS; }
         uint256 n;
         uint256 offset_by = offset/8;
-        n = uint256(bytes32(blob[offset : offset_by + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+        //Dev note - Bytes re-write
+        n = uint256(getBytes32(blob,offset_by)) >> LENGTH_RESTORING_SHIFT;
+        //n = uint256(bytes32(blob[offset : offset_by + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
 //        assembly {
 //            n := shr(
 //                LENGTH_RESTORING_SHIFT,
@@ -240,7 +251,9 @@ library basic_marshalling {
     function get_length(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 result_length){
           uint256 offset_by = offset/8;
-          result_length = uint256(bytes32(blob[offset_by : offset_by + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+          //dev note bytes re-write
+          result_length = uint256(getBytes32(blob,offset_by)) >> LENGTH_RESTORING_SHIFT;
+          //result_length = uint256(bytes32(blob[offset_by : offset_by + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
 //        assembly {
 //            result_length := shr(LENGTH_RESTORING_SHIFT, calldataload(add(blob.offset, offset)))
 //        }
@@ -249,7 +262,9 @@ library basic_marshalling {
     function get_skip_length(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 result_length, uint256 result_offset){
          uint256 offset_by = offset/8;
-        result_length = uint256(bytes32(blob[offset_by : offset_by + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+        //dev note bytes re-write
+        result_length = uint256(getBytes32(blob,offset_by)) >> LENGTH_RESTORING_SHIFT;
+        //result_length = uint256(bytes32(blob[offset_by : offset_by + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
 
 //        assembly {
 //            result_length := shr(LENGTH_RESTORING_SHIFT, calldataload(add(blob.offset, offset)))
@@ -262,8 +277,9 @@ library basic_marshalling {
         uint256 mul_by = (i * 0x20)/8;
         uint256 offset_plus_len_octets_by = (offset + LENGTH_OCTETS)/8;
         uint256 offset_st_by = offset_plus_len_octets_by + mul_by;
-
-        result = uint256(bytes32(blob[offset_st_by : offset_st_by + WORD_SIZE]));
+        //dev note bytes re-write
+        result = uint256(getBytes32(blob,offset_st_by));
+        //result = uint256(bytes32(blob[offset_st_by : offset_st_by + WORD_SIZE]));
 
 //        assembly {
 //            result := calldataload(add(blob.offset, add(add(offset, LENGTH_OCTETS), mul(i, 0x20))))
@@ -284,7 +300,9 @@ library basic_marshalling {
     function get_uint256_be(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 result) {
          uint256 offset_by = offset/8;
-         result = uint256(bytes32(blob[offset_by : offset_by + WORD_SIZE]));
+        //dev note bytes re-write
+         result = uint256(getBytes32(blob,offset_by));
+        //result = uint256(bytes32(blob[offset_by : offset_by + WORD_SIZE]));
 //        assembly {
 //            result := calldataload(add(blob.offset, offset))
 //        }
@@ -311,7 +329,9 @@ library basic_marshalling {
     internal pure returns (uint256 result_offset) {
 
         uint256 offset_by = offset/8;
-        uint256 offset_shr_mul  = 0x20 * uint256(bytes32(blob[offset_by : offset_by + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+        //dev note bytes re-write
+        //uint256 offset_shr_mul  = 0x20 * uint256(bytes32(blob[offset_by : offset_by + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+        uint256 offset_shr_mul  = 0x20 * uint256(getBytes32(blob,offset_by)) >> LENGTH_RESTORING_SHIFT;
         result_offset = offset + offset_shr_mul + LENGTH_OCTETS;
 
 //        assembly {
@@ -338,7 +358,8 @@ library basic_marshalling {
         require(result_offset <= blob.length);
         uint256 n;
         uint256 offset_by = offset/8;
-        n = uint256(bytes32(blob[offset_by: offset_by + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+        n = uint256(getBytes32(blob,offset_by)) >> LENGTH_RESTORING_SHIFT;
+        //n = uint256(bytes32(blob[offset_by: offset_by + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
 
 //        assembly {
 //            n := shr(
@@ -795,8 +816,9 @@ library merkle_verifier {
         unchecked { result_offset = offset + LAYERS_OFFSET; }
 
         uint256 read_offset_st  = offset + DEPTH_OFFSET;
-        bytes memory read_bytes = blob[read_offset_st:read_offset_st + WORD_SIZE];
-        uint256 read_offset_uint = uint256(bytes32(read_bytes));
+        //bytes memory read_bytes = blob[read_offset_st:read_offset_st + WORD_SIZE];
+        bytes32 memory read_bytes = getBytes32(blob,read_offset_st);
+        uint256 read_offset_uint = uint256(read_bytes);
         result_offset += ((read_offset_uint >> LENGTH_RESTORING_SHIFT) * LAYER_OCTETS );
         result_offset = result_offset * 8;
 //        assembly {
@@ -822,8 +844,9 @@ library merkle_verifier {
         offset = offset/8;
         uint256 read_offset_st  = offset + DEPTH_OFFSET;
 
-        bytes memory read_offset = blob[read_offset_st:read_offset_st + WORD_SIZE];
-        uint256 read_offset_uint = uint256(bytes32(read_offset));
+        //bytes memory read_offset = blob[read_offset_st:read_offset_st + WORD_SIZE];
+        bytes32 memory read_offset = getBytes32(blob,read_offset_st);
+        uint256 read_offset_uint = uint256(read_offset);
         result_offset += ((read_offset_uint >> LENGTH_RESTORING_SHIFT) * LAYER_OCTETS );
         result_offset = result_offset * 8;
 //        assembly {
@@ -852,10 +875,12 @@ library merkle_verifier {
 //        uint256 x = 0;
 //        uint256 depth;
         uint256 depth_offset_bytes = (offset/8) + DEPTH_OFFSET;
-        uint256 depth = uint256(bytes32(blob[depth_offset_bytes : depth_offset_bytes+  WORD_SIZE])) >> LENGTH_RESTORING_SHIFT ;
+        //uint256 depth = uint256(bytes32(blob[depth_offset_bytes : depth_offset_bytes+  WORD_SIZE])) >> LENGTH_RESTORING_SHIFT ;
+        uint256 depth = uint256(getBytes32(blob,depth_offset_bytes)) >> LENGTH_RESTORING_SHIFT ;
 
         uint256 layer_pos_offset_bytes = (offset/8) + LAYERS_OFFSET + LAYER_POSITION_OFFSET;
-        uint256 pos = uint256(bytes32(blob[layer_pos_offset_bytes : layer_pos_offset_bytes+  WORD_SIZE])) >> LENGTH_RESTORING_SHIFT ;
+        //uint256 pos = uint256(bytes32(blob[layer_pos_offset_bytes : layer_pos_offset_bytes+  WORD_SIZE])) >> LENGTH_RESTORING_SHIFT ;
+        uint256 pos = uint256(getBytes32(blob,layer_pos_offset_bytes)) >> LENGTH_RESTORING_SHIFT ;
         bytes32[2] memory leafNodes;
         if (pos == 0) {
             leafNodes[1] = verified_data;
@@ -868,14 +893,17 @@ library merkle_verifier {
 
         for(uint256 cur_layer_idx=0; cur_layer_idx < depth -1 ; cur_layer_idx++ ){
             uint256 layer_offset_st = layer_offset + LAYER_POSITION_OFFSET;
-            pos = uint256(bytes32(blob[layer_offset_st : layer_offset_st + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+            //pos = uint256(bytes32(blob[layer_offset_st : layer_offset_st + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+            pos = uint256(getBytes32(blob,layer_offset_st) >> LENGTH_RESTORING_SHIFT;
 
             uint256 next_pos_offset =  layer_offset + LAYER_POSITION_OFFSET + LAYER_OCTETS;
-            next_pos = uint256(bytes32(blob[next_pos_offset: next_pos_offset + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+            //next_pos = uint256(bytes32(blob[next_pos_offset: next_pos_offset + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+            next_pos = uint256(getBytes32(blob,next_pos_offset)) >> LENGTH_RESTORING_SHIFT;
 
             if (pos==0){
                 uint256 start_offset = layer_offset + LAYER_COPATH_HASH_OFFSET;
-                leafNodes[0] = bytes32(blob[start_offset : start_offset + WORD_SIZE]);
+                //leafNodes[0] = bytes32(blob[start_offset : start_offset + WORD_SIZE]);
+                leafNodes[0] = getBytes32(blob,start_offset);
 
                 if(next_pos==0){
                     leafNodes[1] = getKeccak256LeafNodes(leafNodes);
@@ -884,7 +912,8 @@ library merkle_verifier {
                 }
             } else if (pos ==1) {
                 uint256 start_offset = layer_offset + LAYER_COPATH_HASH_OFFSET;
-                leafNodes[1] = bytes32(blob[start_offset : start_offset + WORD_SIZE]);
+                //leafNodes[1] = bytes32(blob[start_offset : start_offset + WORD_SIZE]);
+                leafNodes[1] = getBytes32(blob,start_offset);
 
                 if(next_pos==0){
                     leafNodes[1] = getKeccak256LeafNodes(leafNodes);
@@ -895,22 +924,26 @@ library merkle_verifier {
             layer_offset = layer_offset + LAYER_OCTETS;
         }
         uint256 start_offset = layer_offset + LAYER_POSITION_OFFSET ;
-        pos = uint256(bytes32(blob[start_offset : start_offset + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+        //pos = uint256(bytes32(blob[start_offset : start_offset + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+        pos = uint256(getBytes32(blob,start_offset)) >> LENGTH_RESTORING_SHIFT;
 
         if (pos == 0){
             uint256 _offset = layer_offset + LAYER_COPATH_HASH_OFFSET;
-            leafNodes[0] = bytes32(blob[_offset : _offset + WORD_SIZE]);
+            //leafNodes[0] = bytes32(blob[_offset : _offset + WORD_SIZE]);
+            leafNodes[0] = getBytes32(blob,_offset);
             verified_data = getKeccak256LeafNodes(leafNodes);
 
         } else if (pos ==1){
             uint256 _offset = layer_offset + LAYER_COPATH_HASH_OFFSET;
-            leafNodes[1] = bytes32(blob[_offset : _offset + WORD_SIZE]);
+            //leafNodes[1] = bytes32(blob[_offset : _offset + WORD_SIZE]);
+            leafNodes[1] = getBytes32(blob,_offset);
             verified_data = getKeccak256LeafNodes(leafNodes);
         }
 
         bytes32 root;
         uint256 _root_offset = (offset/8) + ROOT_OFFSET;
-        root = bytes32(blob[_root_offset : _root_offset + WORD_SIZE]);
+        //root = bytes32(blob[_root_offset : _root_offset + WORD_SIZE]);
+        root = getBytes32(blob,_root_offset);
         result = (verified_data == root);
 
 
@@ -1055,7 +1088,8 @@ library merkle_verifier {
     function get_merkle_root_from_blob(bytes calldata blob, uint256 merkle_root_offset)
     internal pure returns(uint256 root){
          uint256 merkle_proof_offset_bytes = (merkle_root_offset/8) + 1;
-         root = uint256(bytes32(blob[merkle_proof_offset_bytes : merkle_proof_offset_bytes + WORD_SIZE]));
+         //root = uint256(bytes32(blob[merkle_proof_offset_bytes : merkle_proof_offset_bytes + WORD_SIZE]));
+         root = uint256(getBytes32(blob,merkle_proof_offset_bytes));
 //        assembly {
 //            root := calldataload(add(blob.offset, add(merkle_root_offset, 0x8)))
 //        }
@@ -1065,7 +1099,8 @@ library merkle_verifier {
     function get_merkle_root_from_proof(bytes calldata blob, uint256 merkle_proof_offset)
     internal pure returns(uint256 root){
         uint256 merkle_proof_offset_bytes = (merkle_proof_offset/8) + ROOT_OFFSET;
-        root = uint256(bytes32(blob[merkle_proof_offset_bytes : merkle_proof_offset_bytes + WORD_SIZE]));
+        //root = uint256(bytes32(blob[merkle_proof_offset_bytes : merkle_proof_offset_bytes + WORD_SIZE]));
+        root = uint256(getBytes32(blob,merkle_proof_offset_bytes));
 //        assembly {
 //            root := calldataload(add(blob.offset, add(merkle_proof_offset, ROOT_OFFSET)))
 //        }
@@ -1135,7 +1170,8 @@ library transcript {
 
         bytes32 blob32;
         offset = (offset/8);
-        blob32 = bytes32(blob[offset : offset + WORD_SIZE]);
+        //blob32 = bytes32(blob[offset : offset + WORD_SIZE]);
+        blob32 = getBytes32(blob,offset);
 //        assembly {
 //            blob32 := calldataload(add(blob.offset, offset))
 //        }
@@ -2515,7 +2551,8 @@ library permutation_argument {
         uint256 one_minus_perm_poly_v = addmod(1 , (modulus - local_vars.perm_polynomial_value), modulus);
 
         uint256 read_offset = proof_map.eval_proof_lagrange_0_offset;
-        uint256 blob_data = uint256(bytes32(blob[read_offset : read_offset + WORD_SIZE]));
+        //uint256 blob_data = uint256(bytes32(blob[read_offset : read_offset + WORD_SIZE]));
+        uint256 blob_data = uint256(getBytes32(blob,read_offset));
 
         F[0] = mulmod(blob_data,one_minus_perm_poly_v,modulus);
         }
