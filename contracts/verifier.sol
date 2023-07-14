@@ -124,7 +124,6 @@ contract PlaceholderVerifier is IVerifier {
         if(vars.proof_size != blob.length) return false;
         (result, )= batched_lpc_verifier.parse_proof_be(vars.fri_params, blob, vars.proof_map.eval_proof_combined_value_offset);
         if( !result ) return false;
-        require(false, "All proofs parsed");
 
         types.placeholder_state_type memory local_vars;
 
