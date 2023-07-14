@@ -161,6 +161,7 @@ contract PlaceholderVerifier is IVerifier {
             return false;
         }
             
+        console.log("Proof checked well");
         return true;
     }
 }
