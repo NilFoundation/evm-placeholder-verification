@@ -115,6 +115,7 @@ contract PlaceholderVerifier is IVerifier {
         int256[][] calldata columns_rotations, 
         address gate_argument
     ) public view returns (bool result) {
+        require(false, "All verifcations failed");
         console.log("Started verification");
         verifier_state memory vars;
         init_vars(vars, init_params, columns_rotations);
