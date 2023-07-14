@@ -305,8 +305,6 @@ library ProofVerifier {
            require(false, "Final check");
            return false;
         }
-        require(false, "Finished successfully");
-
         return true;
     }
 }
