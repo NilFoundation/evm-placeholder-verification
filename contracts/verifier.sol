@@ -153,8 +153,10 @@ contract PlaceholderVerifier is IVerifier {
             vars.tr_state,
             vars.proof_map, 
             vars.fri_params, vars.common_data, local_vars,
-            vars.arithmetization_params))
+            vars.arithmetization_params)){
+            require(false, "Proof verification failed");
             return false;
+        }
             
         return true;
     }
