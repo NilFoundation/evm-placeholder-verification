@@ -28,6 +28,8 @@ import "./placeholder/verifier.sol";
 import "./interfaces/verifier.sol";
 import "./interfaces/gate_argument.sol";
 
+import "hardhat/console.sol";
+
 contract PlaceholderVerifier is IVerifier {
     struct verifier_state {
         uint256 proofs_num;
@@ -113,6 +115,7 @@ contract PlaceholderVerifier is IVerifier {
         int256[][] calldata columns_rotations, 
         address gate_argument
     ) public view returns (bool result) {
+        console.log("Started verification");
         verifier_state memory vars;
         init_vars(vars, init_params, columns_rotations);
         transcript.init_transcript(vars.tr_state, hex"");
