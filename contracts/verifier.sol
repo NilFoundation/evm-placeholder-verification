@@ -115,7 +115,6 @@ contract PlaceholderVerifier is IVerifier {
         int256[][] calldata columns_rotations, 
         address gate_argument
     ) public view returns (bool result) {
-        require(false, "All verifcations failed");
         console.log("Started verification");
         verifier_state memory vars;
         init_vars(vars, init_params, columns_rotations);
@@ -125,6 +124,7 @@ contract PlaceholderVerifier is IVerifier {
         if(vars.proof_size != blob.length) return false;
         (result, )= batched_lpc_verifier.parse_proof_be(vars.fri_params, blob, vars.proof_map.eval_proof_combined_value_offset);
         if( !result ) return false;
+        require(false, "All proofs parsed");
 
         types.placeholder_state_type memory local_vars;
 
