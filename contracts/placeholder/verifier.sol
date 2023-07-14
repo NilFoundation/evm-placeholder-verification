@@ -63,6 +63,7 @@ library ProofVerifier {
         types.placeholder_state_type memory local_vars,
         types.arithmetization_params memory ar_params
     ) external view returns (bool result) {
+        require(false, "Internal library call");
         // 8. alphas computations
         local_vars.alphas = new uint256[](f_parts);
         transcript.get_field_challenges(tr_state, local_vars.alphas, fri_params.modulus);
