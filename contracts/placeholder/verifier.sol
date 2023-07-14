@@ -302,7 +302,7 @@ library ProofVerifier {
             )
         }
         if (local_vars.F_consolidated != local_vars.Z_at_challenge) {
-           require(false, "Final check");
+           require(false, "F");
            return false;
         }
         return true;
