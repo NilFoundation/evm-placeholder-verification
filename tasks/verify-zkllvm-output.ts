@@ -42,12 +42,114 @@ function loadParamsFromFile(jsonFile) {
     return params;
 }
 
+function loadFieldElement(element){
+    let result = [];
+    if( element.isLosslessNumber ){
+        result.push(BigInt(element));
+    } else if ( typeof(element) == 'string' ){
+        result.push(BigInt(element));
+    } else {
+        for(let i in element){
+            let e  = loadFieldElement(element[i]);
+            for(let j in e) result.push(e[j]);
+        }
+    }
+    return result;
+}
+
+function loadCurveElement(element){
+    let result = [];
+    if( element.isLosslessNumber ){
+        result.push(BigInt(element));
+    } else if ( typeof(element) == 'string' ){
+        result.push(BigInt(element));
+    } else {
+        for(let i in element){
+            let e  = loadFieldElement(element[i]);
+            for(let j in e) result.push(e[j]);
+        }
+    }
+    return result;
+}
+
+function loadIntegerElement(public_input){
+    let modulus = BigInt(28948022309329048855892746252171976963363056481941560715954676764349967630337);
+
+    let result = [];
+    let i = parseInt(public_input);
+    if( i < 0 ) {
+        result.push(modulus - BigInt(i));
+    } else {
+        result.push(BigInt(i));
+    }
+    return result;
+}
+
+function loadStringElement(public_input){
+    let modulus = BigInt(28948022309329048855892746252171976963363056481941560715954676764349967630337);
+
+    let result = [];
+    for(let i in public_input){
+        let c = public_input.charCodeAt(i);
+        result.push(BigInt(c));
+    }
+    return result;
+}
+
+
+function loadArray(public_input){
+    let result = [];
+
+    for(let i in public_input){
+        let e  = loadFieldElement(public_input[i]);
+        for(let j in e) result.push(e[j]);
+    }
+    return result;
+}
+
+function loadVector(public_input){
+    let result = [];
+
+    for(let i in public_input){
+        let e  = loadFieldElement(public_input[i]);
+        for(let j in e) {
+            result.push(e[j]);
+        }
+    }
+    return result;
+}
+
 function loadPublicInput(public_input_path){
     if(fs.existsSync(public_input_path)){
-        let json_file_content = losslessJSON.parse(fs.readFileSync(public_input_path, 'utf8'));
+        let public_input  = losslessJSON.parse(fs.readFileSync(public_input_path, 'utf8'));
         let result = [];
-        for(let i in json_file_content){
-            result.push(BigInt(json_file_content[i]));
+//        for(let i in json_file_content){
+//            result.push(BigInt(json_file_content[i]));
+//        }
+        for(let i in public_input){
+            let field = public_input[i];
+            for(let k in field){
+                let element;
+                if( k == 'field' ){
+                    element = loadFieldElement(field[k]);
+                }
+                if( k == 'curve' ){
+                    element = loadCurveElement(field[k]);
+                }
+                if( k == 'int' ){
+                    element = loadIntegerElement(field[k]);
+                }
+                if( k == 'string' ){
+                    element = loadStringElement(field[k]);
+                }
+                if( k == 'array'){
+                    element = loadArray(field[k]);
+                }
+                if( k == 'vector'){
+                    element = loadVector(field[k]);
+                }
+                for(let e in element) result.push(element[e]);
+            }
         }
         return result;
     } else 
