@@ -121,9 +121,15 @@ contract PlaceholderVerifier is IVerifier {
         transcript.init_transcript(vars.tr_state, hex"");
         
         (vars.proof_map, vars.proof_size) = placeholder_proof_map_parser.parse_be(blob, 0);
-        if(vars.proof_size != blob.length) return false;
+        if(vars.proof_size != blob.length){
+            console.log("Proof size is not equal to blob length");
+            return false;
+        }
         (result, )= batched_lpc_verifier.parse_proof_be(vars.fri_params, blob, vars.proof_map.eval_proof_combined_value_offset);
-        if( !result ) return false;
+        if( !result ) {
+            console.log("Proof is not parsed well");
+            return false;
+        }
 
         console.log("Proof parsed well");
         types.placeholder_state_type memory local_vars;
