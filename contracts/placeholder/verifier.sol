@@ -208,6 +208,7 @@ library ProofVerifier {
             tr_state,
             fri_params
         )){
+            require(false, "L");
             return false;
         }
 
@@ -302,7 +303,6 @@ library ProofVerifier {
             )
         }
         if (local_vars.F_consolidated != local_vars.Z_at_challenge) {
-           require(false, "F");
            return false;
         }
         return true;
