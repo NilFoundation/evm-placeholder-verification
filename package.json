@@ -29,7 +29,7 @@
     "ethers": "^5.7.2",
     "hardhat": "^2.14.0",
     "hardhat-deploy": "^0.11.25",
-    "hardhat-deploy-ethers": "^0.4.0-next.1",
+    "hardhat-deploy-ethers": "0.4.0-next.1",
     "json5": "^2.2.1",
     "lossless-json": "^2.0.9",
     "solpp": "^0.11.5",
