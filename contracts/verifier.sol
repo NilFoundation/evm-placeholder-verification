@@ -125,6 +125,7 @@ contract PlaceholderVerifier is IVerifier {
         (result, )= batched_lpc_verifier.parse_proof_be(vars.fri_params, blob, vars.proof_map.eval_proof_combined_value_offset);
         if( !result ) return false;
 
+        console.log("Proof parsed well");
         types.placeholder_state_type memory local_vars;
 
         // 3. append witness commitments to transcript
