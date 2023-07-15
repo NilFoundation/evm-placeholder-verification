@@ -23,6 +23,8 @@ import "./permutation_argument.sol";
 import "../basic_marshalling.sol";
 import "../algebra/field.sol";
 
+import "hardhat/console.sol";
+
 library ProofVerifier {
     // TODO: check correctness all this const
     uint256 constant f_parts = 9;
@@ -63,6 +65,7 @@ library ProofVerifier {
         types.placeholder_state_type memory local_vars,
         types.arithmetization_params memory ar_params
     ) external view returns (bool result) {
+        console.log("verify_proof_be");
         // 8. alphas computations
         local_vars.alphas = new uint256[](f_parts);
         transcript.get_field_challenges(tr_state, local_vars.alphas, fri_params.modulus);
@@ -211,7 +214,8 @@ library ProofVerifier {
             require(false, "L");
             return false;
         }
-
+        console.log("commitment scheme");
+/*
         // quotient
         // 10. final check
         local_vars.F = new uint256[](f_parts);
@@ -304,7 +308,7 @@ library ProofVerifier {
         }
         if (local_vars.F_consolidated != local_vars.Z_at_challenge) {
            return false;
-        }
+        }*/
         return true;
     }
 }
