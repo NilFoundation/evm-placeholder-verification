@@ -69,7 +69,7 @@ npx hardhat deploy
 
 Verify one folder from `contracts/zkllvm` directory
 ```
-npx hardhat verify-circuit-proof folder-name
+npx hardhat verify-circuit-proof --test folder-name
 ```
 
 Verify all folders from `contracts/zkllvm` director
