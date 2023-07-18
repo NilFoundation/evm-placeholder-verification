@@ -4,6 +4,7 @@ require("@nomiclabs/hardhat-ethers");
 require("hardhat-deploy");
 require('hardhat-deploy-ethers')
 
+import './tasks/verify-zkllvm-output'
 
 const SEPOLIA_PRIVATE_KEY="SEPOLIA_PRIVATE_KEY"
 const SEPOLIA_ALCHEMY_KEY="SEPOLIA_ALCHEMY_KEY"

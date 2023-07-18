@@ -28,8 +28,6 @@ contract TestPlaceholderVerifier {
         _verifier = verifier;
     }
 
-    function verify(
-        bytes calldata blob,
     // 0) modulus
     // 1) r
     // 2) max_degree
@@ -41,12 +39,16 @@ contract TestPlaceholderVerifier {
     //  [..., D_omegas_i, ...]
     // 8 + D_omegas_size) q_size
     //  [..., q_i, ...]
-       uint256[] calldata init_params,
-       int256[][] calldata columns_rotations,
-       address gate_argument
+    function verify(
+        bytes calldata blob,
+        uint256[] calldata init_params,
+        int256[][] calldata columns_rotations,
+        uint256[] calldata public_input,
+        address gate_argument
     ) public{
+        bool b = IVerifier(_verifier).verify(blob,init_params,columns_rotations,public_input,gate_argument); 
         require(
-            IVerifier(_verifier).verify(blob,init_params,columns_rotations,gate_argument),
+            b,
             "Proof is not correct"
         );
     }

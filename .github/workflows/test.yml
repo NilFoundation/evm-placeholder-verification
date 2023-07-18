@@ -32,3 +32,5 @@ jobs:
         run: |
           set -eo pipefail
           npx hardhat test     
+          npx hardhat deploy
+          npx hardhat verify-circuit-proof-all
