@@ -224,4 +224,10 @@ library basic_marshalling {
             c[i] = b[i];
         }
     }
+
+    function getBytes32(bytes calldata input, uint256 r1) pure returns (bytes32) {
+        //return bytes32(input[r1 : r1 + 8]);
+        bytes32 dummy;
+        return dummy;
+    }
 }
