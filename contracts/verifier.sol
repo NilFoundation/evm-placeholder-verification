@@ -28,6 +28,9 @@ import "./placeholder/placeholder_verifier.sol";
 import "./interfaces/verifier.sol";
 import "./interfaces/gate_argument.sol";
 
+uint256 constant ROWS_ROTATION = 2;
+uint256 constant COLS_ROTATION = 3;
+
 contract PlaceholderVerifier is IVerifier {
     struct verifier_state {
         uint256 proofs_num;
@@ -45,7 +48,7 @@ contract PlaceholderVerifier is IVerifier {
     function init_vars(
         verifier_state memory vars, 
         uint256[] memory init_params, 
-        int256[][] memory columns_rotations
+        int256[2][3] memory columns_rotations
     ) internal pure {
         uint256 idx;
         uint256 max_coset;
@@ -110,7 +113,7 @@ contract PlaceholderVerifier is IVerifier {
     function verify(
         bytes calldata blob, 
         uint256[] calldata init_params,
-        int256[][] calldata columns_rotations, 
+        int256[2][3] calldata columns_rotations,
         address gate_argument
     ) public view returns (bool result) {
         verifier_state memory vars;

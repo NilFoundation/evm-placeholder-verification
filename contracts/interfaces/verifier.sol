@@ -20,7 +20,7 @@ interface IVerifier {
     function verify(
         bytes calldata blob, 
         uint256[]  calldata init_params,
-        int256[][] calldata columns_rotations, 
+        int256[2][3] calldata columns_rotations,
         address gate_argument
     ) external view returns (bool);
 }

@@ -38,6 +38,9 @@ library types {
     // TODO: add external_coset_generator() method to compute this
     uint256 constant coset_generator7 = 0x000000000000000000000000000000000000000000000000000000000000000c;
 
+    uint256 constant ROWS_ROTATION = 2;
+    uint256 constant COLS_ROTATION = 3;
+
     struct g1_point {
         uint256 x;
         uint256 y;
@@ -254,7 +257,7 @@ library types {
         uint256 rows_amount;
         // 0x20
         uint256 omega;
-        int256[][] columns_rotations; 
+        int256[ROWS_ROTATION][COLS_ROTATION] columns_rotations;
     }
 
     struct placeholder_state_type {
