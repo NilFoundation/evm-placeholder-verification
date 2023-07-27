@@ -20,6 +20,12 @@ pragma solidity >=0.8.4;
 
 import "../types.sol";
 
+    function getBytes32(bytes calldata input, uint256 r1) pure returns (bytes32) {
+        //return bytes32(input[r1 : r1 + 8]);
+        bytes32 dummy;
+        return dummy;
+    }
+
 library merkle_verifier {
     // Merkle proof has the following structure:
     // [0:8] - leaf index
@@ -119,10 +125,10 @@ library merkle_verifier {
 //        uint256 x = 0;
 //        uint256 depth;
         uint256 depth_offset_bytes = (offset/8) + DEPTH_OFFSET;
-        uint256 depth = uint256(bytes32(blob[depth_offset_bytes : depth_offset_bytes+  WORD_SIZE])) >> LENGTH_RESTORING_SHIFT ;
+        uint256 depth = uint256(getBytes32(blob,depth_offset_bytes)) >> LENGTH_RESTORING_SHIFT ;
 
         uint256 layer_pos_offset_bytes = (offset/8) + LAYERS_OFFSET + LAYER_POSITION_OFFSET;
-        uint256 pos = uint256(bytes32(blob[layer_pos_offset_bytes : layer_pos_offset_bytes+  WORD_SIZE])) >> LENGTH_RESTORING_SHIFT ;
+        uint256 pos = uint256(getBytes32(blob,layer_pos_offset_bytes)) >> LENGTH_RESTORING_SHIFT ;
         bytes32[2] memory leafNodes;
         if (pos == 0) {
             leafNodes[1] = verified_data;
@@ -134,15 +140,15 @@ library merkle_verifier {
         uint256 next_pos;
 
         for(uint256 cur_layer_idx=0; cur_layer_idx < depth -1 ; cur_layer_idx++ ){
-            uint256 layer_offset_st = layer_offset + LAYER_POSITION_OFFSET;
-            pos = uint256(bytes32(blob[layer_offset_st : layer_offset_st + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+            //uint256 layer_offset_st = layer_offset + LAYER_POSITION_OFFSET;
+            pos = uint256(getBytes32(blob,layer_offset + LAYER_POSITION_OFFSET)) >> LENGTH_RESTORING_SHIFT;
 
             uint256 next_pos_offset =  layer_offset + LAYER_POSITION_OFFSET + LAYER_OCTETS;
-            next_pos = uint256(bytes32(blob[next_pos_offset: next_pos_offset + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+            next_pos = uint256(getBytes32(blob,next_pos_offset)) >> LENGTH_RESTORING_SHIFT;
 
             if (pos==0){
                 uint256 start_offset = layer_offset + LAYER_COPATH_HASH_OFFSET;
-                leafNodes[0] = bytes32(blob[start_offset : start_offset + WORD_SIZE]);
+                leafNodes[0] = getBytes32(blob,start_offset);
 
                 if(next_pos==0){
                     leafNodes[1] = getKeccak256LeafNodes(leafNodes);
@@ -151,7 +157,7 @@ library merkle_verifier {
                 }
             } else if (pos ==1) {
                 uint256 start_offset = layer_offset + LAYER_COPATH_HASH_OFFSET;
-                leafNodes[1] = bytes32(blob[start_offset : start_offset + WORD_SIZE]);
+                leafNodes[1] = getBytes32(blob,start_offset);
 
                 if(next_pos==0){
                     leafNodes[1] = getKeccak256LeafNodes(leafNodes);
@@ -162,22 +168,22 @@ library merkle_verifier {
             layer_offset = layer_offset + LAYER_OCTETS;
         }
         uint256 start_offset = layer_offset + LAYER_POSITION_OFFSET ;
-        pos = uint256(bytes32(blob[start_offset : start_offset + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+        pos = uint256(getBytes32(blob,start_offset)) >> LENGTH_RESTORING_SHIFT;
 
         if (pos == 0){
             uint256 _offset = layer_offset + LAYER_COPATH_HASH_OFFSET;
-            leafNodes[0] = bytes32(blob[_offset : _offset + WORD_SIZE]);
+            leafNodes[0] = getBytes32(blob,_offset);
             verified_data = getKeccak256LeafNodes(leafNodes);
 
         } else if (pos ==1){
             uint256 _offset = layer_offset + LAYER_COPATH_HASH_OFFSET;
-            leafNodes[1] = bytes32(blob[_offset : _offset + WORD_SIZE]);
+            leafNodes[1] = getBytes32(blob,_offset);
             verified_data = getKeccak256LeafNodes(leafNodes);
         }
 
         bytes32 root;
         uint256 _root_offset = (offset/8) + ROOT_OFFSET;
-        root = bytes32(blob[_root_offset : _root_offset + WORD_SIZE]);
+        root = getBytes32(blob,_root_offset);
         result = (verified_data == root);
 
 
@@ -322,7 +328,7 @@ library merkle_verifier {
     function get_merkle_root_from_blob(bytes calldata blob, uint256 merkle_root_offset)
     internal pure returns(uint256 root){
          uint256 merkle_proof_offset_bytes = (merkle_root_offset/8) + 1;
-         root = uint256(bytes32(blob[merkle_proof_offset_bytes : merkle_proof_offset_bytes + WORD_SIZE]));
+         root = uint256(getBytes32(blob,merkle_proof_offset_bytes));
 //        assembly {
 //            root := calldataload(add(blob.offset, add(merkle_root_offset, 0x8)))
 //        }
@@ -332,7 +338,7 @@ library merkle_verifier {
     function get_merkle_root_from_proof(bytes calldata blob, uint256 merkle_proof_offset)
     internal pure returns(uint256 root){
         uint256 merkle_proof_offset_bytes = (merkle_proof_offset/8) + ROOT_OFFSET;
-        root = uint256(bytes32(blob[merkle_proof_offset_bytes : merkle_proof_offset_bytes + WORD_SIZE]));
+        root = uint256(getBytes32(blob,merkle_proof_offset_bytes));
 //        assembly {
 //            root := calldataload(add(blob.offset, add(merkle_proof_offset, ROOT_OFFSET)))
 //        }

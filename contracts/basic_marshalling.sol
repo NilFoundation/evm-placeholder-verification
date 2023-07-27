@@ -44,7 +44,7 @@ library basic_marshalling {
 
         uint256 offset_by = offset/8;
         uint256 offset_shr_mul = (WORD_SIZE * 8) *
-                                 uint256(bytes32(blob[offset_by: offset_by + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+                                 uint256(getBytes32(blob,offset_by)) >> LENGTH_RESTORING_SHIFT;
 
         result_offset = offset_shr_mul + offset; // Returning still in bits.
 
@@ -70,7 +70,7 @@ library basic_marshalling {
         unchecked { result_offset = offset + LENGTH_OCTETS; }
         uint256 n;
         uint256 offset_by = offset/8;
-        n = uint256(bytes32(blob[offset : offset_by + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+        n = uint256(getBytes32(blob,offset)) >> LENGTH_RESTORING_SHIFT;
 //        assembly {
 //            n := shr(
 //                LENGTH_RESTORING_SHIFT,
@@ -91,7 +91,7 @@ library basic_marshalling {
     function get_length(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 result_length){
           uint256 offset_by = offset/8;
-          result_length = uint256(bytes32(blob[offset_by : offset_by + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+          result_length = uint256(getBytes32(blob,offset_by)) >> LENGTH_RESTORING_SHIFT;
 //        assembly {
 //            result_length := shr(LENGTH_RESTORING_SHIFT, calldataload(add(blob.offset, offset)))
 //        }
@@ -100,7 +100,7 @@ library basic_marshalling {
     function get_skip_length(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 result_length, uint256 result_offset){
          uint256 offset_by = offset/8;
-        result_length = uint256(bytes32(blob[offset_by : offset_by + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+        result_length = uint256(getBytes32(blob,offset_by)) >> LENGTH_RESTORING_SHIFT;
 
 //        assembly {
 //            result_length := shr(LENGTH_RESTORING_SHIFT, calldataload(add(blob.offset, offset)))
@@ -114,7 +114,7 @@ library basic_marshalling {
         uint256 offset_plus_len_octets_by = (offset + LENGTH_OCTETS)/8;
         uint256 offset_st_by = offset_plus_len_octets_by + mul_by;
 
-        result = uint256(bytes32(blob[offset_st_by : offset_st_by + WORD_SIZE]));
+        result = uint256(getBytes32(blob,offset_st_by));
 
 //        assembly {
 //            result := calldataload(add(blob.offset, add(add(offset, LENGTH_OCTETS), mul(i, 0x20))))
@@ -135,7 +135,7 @@ library basic_marshalling {
     function get_uint256_be(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 result) {
          uint256 offset_by = offset/8;
-         result = uint256(bytes32(blob[offset_by : offset_by + WORD_SIZE]));
+         result = uint256(getBytes32(blob,offset_by));
 //        assembly {
 //            result := calldataload(add(blob.offset, offset))
 //        }
@@ -162,7 +162,7 @@ library basic_marshalling {
     internal pure returns (uint256 result_offset) {
 
         uint256 offset_by = offset/8;
-        uint256 offset_shr_mul  = 0x20 * uint256(bytes32(blob[offset_by : offset_by + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+        uint256 offset_shr_mul  = 0x20 * uint256(getBytes32(blob,offset_by)) >> LENGTH_RESTORING_SHIFT;
         result_offset = offset + offset_shr_mul + LENGTH_OCTETS;
 
 //        assembly {
@@ -189,7 +189,7 @@ library basic_marshalling {
         require(result_offset <= blob.length);
         uint256 n;
         uint256 offset_by = offset/8;
-        n = uint256(bytes32(blob[offset_by: offset_by + WORD_SIZE])) >> LENGTH_RESTORING_SHIFT;
+        n = uint256(getBytes32(blob,offset_by)) >> LENGTH_RESTORING_SHIFT;
 
 //        assembly {
 //            n := shr(
@@ -225,7 +225,7 @@ library basic_marshalling {
         }
     }
 
-    function getBytes32(bytes calldata input, uint256 r1) pure returns (bytes32) {
+    function getBytes32(bytes calldata input, uint256 r1) pure public returns (bytes32) {
         //return bytes32(input[r1 : r1 + 8]);
         bytes32 dummy;
         return dummy;
