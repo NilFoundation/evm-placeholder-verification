@@ -61,6 +61,12 @@ library permutation_argument {
 
     uint256 constant WORD_SIZE = 4;
 
+    function getBytes32(bytes calldata input, uint256 r1) pure internal returns (bytes32) {
+        //return bytes32(input[r1 : r1 + 8]);
+        bytes32 dummy;
+        return dummy;
+    }
+
 
     function eval_permutations_at_challenge(
         types.fri_params_type memory fri_params,
@@ -289,7 +295,7 @@ library permutation_argument {
         uint256 one_minus_perm_poly_v = addmod(1 , (modulus - local_vars.perm_polynomial_value), modulus);
 
         uint256 read_offset = proof_map.eval_proof_lagrange_0_offset;
-        uint256 blob_data = uint256(bytes32(blob[read_offset : read_offset + WORD_SIZE]));
+        uint256 blob_data = uint256(getBytes32(blob,read_offset));
 
         F[0] = mulmod(blob_data,one_minus_perm_poly_v,modulus);
         }

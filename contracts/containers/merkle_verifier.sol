@@ -72,8 +72,8 @@ library merkle_verifier {
         unchecked { result_offset = offset + LAYERS_OFFSET; }
 
         uint256 read_offset_st  = offset + DEPTH_OFFSET;
-        bytes memory read_bytes = blob[read_offset_st:read_offset_st + WORD_SIZE];
-        uint256 read_offset_uint = uint256(bytes32(read_bytes));
+        //bytes memory read_bytes = getBytes32(blob[read_offset_st:read_offset_st + WORD_SIZE];
+        uint256 read_offset_uint = uint256(getBytes32(blob,read_offset_st));
         result_offset += ((read_offset_uint >> LENGTH_RESTORING_SHIFT) * LAYER_OCTETS );
         result_offset = result_offset * 8;
 //        assembly {
@@ -99,8 +99,8 @@ library merkle_verifier {
         offset = offset/8;
         uint256 read_offset_st  = offset + DEPTH_OFFSET;
 
-        bytes memory read_offset = blob[read_offset_st:read_offset_st + WORD_SIZE];
-        uint256 read_offset_uint = uint256(bytes32(read_offset));
+        //bytes memory read_offset = blob[read_offset_st:read_offset_st + WORD_SIZE];
+        uint256 read_offset_uint = uint256(getBytes32(blob,read_offset_st));
         result_offset += ((read_offset_uint >> LENGTH_RESTORING_SHIFT) * LAYER_OCTETS );
         result_offset = result_offset * 8;
 //        assembly {

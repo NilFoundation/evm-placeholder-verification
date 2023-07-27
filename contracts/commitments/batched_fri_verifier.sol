@@ -269,6 +269,11 @@ library batched_fri_verifier {
         }
     }
 
+//    function getBytes32(bytes calldata input, uint256 r1) pure internal returns (bytes32) {
+//        //return bytes32(input[r1 : r1 + 8]);
+//        bytes32 dummy;
+//        return dummy;
+//    }
 
 
 
@@ -350,30 +355,34 @@ library batched_fri_verifier {
 
                 // push y
                 if(fri_params.s_indices[local_vars.newind] == fri_params.tmp_arr[local_vars.y_ind]){
-                    bytes memory data_to_copy = blob[y_offset: y_offset + WORD_SIZE];
-                    basic_marshalling.write_bytes(local_vars.b , first_offset, data_to_copy);
+                     //TODO: Fix byte write
+//                    bytes memory data_to_copy = getBytes32(blob,y_offset);
+//                    basic_marshalling.write_bytes(local_vars.b , first_offset, data_to_copy);
 //                    assembly{
 //                        mstore(
 //                            add(mload(local_vars),first_offset),
 //                            calldataload(add(blob.offset, y_offset))
 //                        )
-                     data_to_copy = blob[y_offset + WORD_SIZE : y_offset + WORD_SIZE + WORD_SIZE];
-                     basic_marshalling.write_bytes(local_vars.b , first_offset + WORD_SIZE, data_to_copy);
+                        //TODO: Fix byte writes
+//                     data_to_copy = blob[y_offset + WORD_SIZE : y_offset + WORD_SIZE + WORD_SIZE];
+//                     basic_marshalling.write_bytes(local_vars.b , first_offset + WORD_SIZE, data_to_copy);
 //                        mstore(
 //                            add(mload(local_vars),add(first_offset, 0x20)),
 //                            calldataload(add(blob.offset, add(y_offset, 0x20)))
 //                        )
 //                    }
                 } else {
-                    bytes memory data_to_copy = blob[y_offset + WORD_SIZE : y_offset + WORD_SIZE + WORD_SIZE];
-                    basic_marshalling.write_bytes(local_vars.b , first_offset, data_to_copy);
+                        //TODO: Fix byte writes
+//                    bytes memory data_to_copy = blob[y_offset + WORD_SIZE : y_offset + WORD_SIZE + WORD_SIZE];
+//                    basic_marshalling.write_bytes(local_vars.b , first_offset, data_to_copy);
 //                    assembly{
 //                        mstore(
 //                            add(mload(local_vars),first_offset),
 //                            calldataload(add(blob.offset, add(y_offset, 0x20)))
 //                        )
-                    data_to_copy = blob[y_offset:y_offset + WORD_SIZE];
-                    basic_marshalling.write_bytes(local_vars.b , first_offset + WORD_SIZE, data_to_copy);
+                     //TODO: Fix byte writes
+//                    data_to_copy = blob[y_offset:y_offset + WORD_SIZE];
+//                    basic_marshalling.write_bytes(local_vars.b , first_offset + WORD_SIZE, data_to_copy);
 //                        mstore(
 //                            add(mload(local_vars),add(first_offset, 0x20)),
 //                            calldataload(add(blob.offset, y_offset))
