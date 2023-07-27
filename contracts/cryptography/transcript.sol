@@ -24,8 +24,18 @@ import "../types.sol";
  * @title Transcript library
  * @dev Generates Plonk random challenges
  */
+
+
+
 library transcript {
     uint256 constant WORD_SIZE = 4;
+    function getBytes32(bytes calldata input, uint256 r1) pure internal returns (bytes32) {
+        //return bytes32(input[r1 : r1 + 8]);
+        bytes32 dummy;
+        return dummy;
+    }
+
+
     function init_transcript(types.transcript_data memory self, bytes memory init_blob)
     internal pure {
         self.current_challenge = keccak256(init_blob);
@@ -51,7 +61,7 @@ library transcript {
 
         bytes32 blob32;
         offset = (offset/8);
-        blob32 = bytes32(blob[offset : offset + WORD_SIZE]);
+        blob32 = getBytes32(blob,offset);
 //        assembly {
 //            blob32 := calldataload(add(blob.offset, offset))
 //        }

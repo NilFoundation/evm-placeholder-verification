@@ -20,13 +20,17 @@ pragma solidity >=0.8.4;
 
 import "../types.sol";
 
-    function getBytes32(bytes calldata input, uint256 r1) pure returns (bytes32) {
+
+library merkle_verifier {
+
+    function getBytes32(bytes calldata input, uint256 r1) pure internal returns (bytes32) {
         //return bytes32(input[r1 : r1 + 8]);
         bytes32 dummy;
         return dummy;
     }
 
-library merkle_verifier {
+
+
     // Merkle proof has the following structure:
     // [0:8] - leaf index
     // [8:16] - root length (which is always 32 bytes in current implementation)
