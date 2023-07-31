@@ -144,6 +144,10 @@ starknet deploy_account --feeder_gateway_url http://devnet:5050 --gateway_url ht
 
 ## Transpiling contracts
 
+Copy the `contracts/` directory from `evm-placeholder-verification` to `exampleContracts/` in warp.  Ex
+
+
+
 ```
 warp transpile exampleContracts/ERC20.sol
 ```
@@ -158,8 +162,10 @@ root@9f156f579a4e:/dapp# warp compile warp_output/exampleContracts/ERC20.sol/WAR
 Running starknet compile with cairoPath /usr/src/warp-stable
 starknet-compile output written to warp_output/exampleContracts/ERC20.sol/WARP_compiled.json
 ```
-
 Compilation outputs a json file
+
+To transpile the base verifier , copy the `contracts/` directory
+from `evm-placeholder-verification` to `exampleContracts/` in warp.
 
 ### Deploy
 
