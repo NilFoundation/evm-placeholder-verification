@@ -1,0 +1,53 @@
+name: release
+
+on:
+  pull_request_target:
+    types:
+      - closed
+    branches:
+      - master
+
+jobs:
+  release:
+    if: github.event.pull_request.merged == true
+    runs-on: [ ubuntu-22.04 ]
+    environment: prod
+    
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Set git user
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'bot@nil.foundation'
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3.6.0
+        with:
+          registry-url: 'https://registry.npmjs.org'
+          
+      - name: Update version in package.json
+        run: |
+          npm version patch -m "patch release %s"
+          git status
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          branch: ${{ github.event.pull_request.head.ref }}
+          tags: true
+
+      - name: Publish package on GPR
+        run: |
+          npm config set registry https://npm.pkg.github.com
+          npm set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
+          npm publish
+
+      # - name: Publish package on NPM
+      #   run: npm publish
+      #   env: 
+      #     NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
