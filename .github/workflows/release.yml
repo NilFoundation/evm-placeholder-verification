@@ -63,6 +63,7 @@ jobs:
           npm publish
 
       - name: Publish package on NPM
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
+        run: |
+          npm config set registry https://registry.npmjs.org
+          npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_AUTH_TOKEN }}
+          npm publish
