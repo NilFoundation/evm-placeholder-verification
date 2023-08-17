@@ -2,11 +2,6 @@ name: run-tests
 
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '.clang-format'
-      - '.gitignore'
-      - 'README.md'
 
 concurrency:
   group: ${{
