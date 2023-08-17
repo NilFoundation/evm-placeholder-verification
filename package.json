@@ -43,5 +43,8 @@
     "/contracts/test/**/*.sol",
     "/build/contracts/*.json",
     "!/contracts/mocks/**/*"
-  ]
+  ],
+  "dependencies": {
+    "hardhat-contract-sizer": "^2.10.0"
+  }
 }
