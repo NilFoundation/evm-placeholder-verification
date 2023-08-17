@@ -2,7 +2,8 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("@nomiclabs/hardhat-ethers");
 require("hardhat-deploy");
-require('hardhat-deploy-ethers')
+require('hardhat-deploy-ethers');
+require('hardhat-contract-sizer');
 
 import './tasks/verify-zkllvm-output'
 
