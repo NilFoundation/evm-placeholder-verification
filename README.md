@@ -29,12 +29,6 @@ npm i
 npx hardhat compile
 ```
 
-## Test
-```
-npx hardhat test #Execute tests
-REPORT_GAS=true npx hardhat test # Test with gas reporting
-```
-
 ## Deploy
 
 Launch a local-network using the following
@@ -49,32 +43,45 @@ npx hardhat deploy  --network localhost
 
 Hardhat re-uses old deployments, to force re-deploy add the `--reset` flag above
 
-## ZKLLVM output check
+## Verification of zkLLVM circtuit compiler output
 
-Place folder with ZKLLVM circuit transpilation output to `contracts/zkllvm` directory.
+zkLLVM compiler prepares circuits in form of instantiated contracts, which have to be deployed to the blockchain.
 
-ZKLLVM circuit transpilation output folder format
+Once you got zkLLVM output - put a circuit directory it under `contracts/zkllvm`. The folder should contain following files:
+
 ```
 * proof.bin -- placeholder proof file
-* circuit_params.json -- parameters JSON file
-* public_input.json -- public input JSON file
+* circuit_params.json -- parameters file in JSON format
+* public_input.json -- public input file in JSON format
 * linked_libs_list.json -- list of external libraries, have to be deployed for gate argument computation.
 * gate_argument.sol, gate0.sol, ... gateN.sol -- solidity files with gate argument computation
 ```
+
+If all the files are in place - you can deploy the circuit verifier to the blockchain and verify the proofs.
+You only need to deploy the verifier once, and then you can verify as many proofs as you want.
 
 Deploy contracts
 ```
 npx hardhat deploy
 ```
 
-Verify one folder from `contracts/zkllvm` directory
+If you've put the circuit under, let's say, `contracts/zkllvm/circuit-name` directory, you can verify the proofs with the following command:
 ```
-npx hardhat verify-circuit-proof --test folder-name
+npx hardhat verify-circuit-proof --test circuit-name
 ```
 
-Verify all folders from `contracts/zkllvm` director
+To verify all circuits from `contracts/zkllvm` directory:
 ```
 npx hardhat verify-circuit-proof-all
+```
+
+## Testing
+
+Tests are located in `test` directory. To run tests:
+
+```
+npx hardhat test #Execute tests
+REPORT_GAS=true npx hardhat test # Test with gas reporting
 ```
 
 ## Community
