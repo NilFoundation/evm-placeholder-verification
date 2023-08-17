@@ -1,15 +1,19 @@
 name: release
 
 on:
-  pull_request_target:
-    types:
-      - closed
-    branches:
-      - master
+  workflow_dispatch:
+    inputs:
+      release_type:
+        type: choice
+        description: Release type
+        options:
+        - major
+        - minor
+        - patch
+        default: patch
 
 jobs:
   release:
-    if: github.event.pull_request.merged == true
     runs-on: [ ubuntu-22.04 ]
     environment: prod
     
@@ -17,8 +21,10 @@ jobs:
       - name: Check out branch
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: master
+      
+      - name: Create release branch
+        run: git checkout -b release/latest
 
       - name: Set git user
         run: |
@@ -32,14 +38,23 @@ jobs:
           
       - name: Update version in package.json
         run: |
-          npm version patch -m "patch release %s"
-          git status
+          npm version ${{ inputs.release_type }} -m "${{ inputs.release_type }} release %s"
 
-      - name: Push changes
-        uses: ad-m/github-push-action@master
+      - name: Push new branch
+        run: git push origin release/latest
+
+      - name: Create pull request into main
+        uses: thomaseizinger/create-pull-request@1.0.0
         with:
-          branch: ${{ github.event.pull_request.head.ref }}
-          tags: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          head: release/latest
+          base: master
+          title: Update version in package.json
+          reviewers: ${{ github.event.issue.user.login }}
+          body: |
+              Hi!
+              This PR was created in response workflow running.
+              I've updated the version in package.json.
 
       - name: Publish package on GPR
         run: |
@@ -47,7 +62,7 @@ jobs:
           npm set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
           npm publish
 
-      # - name: Publish package on NPM
-      #   run: npm publish
-      #   env: 
-      #     NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
+      - name: Publish package on NPM
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
