@@ -49,7 +49,7 @@ library modular_permutation_argument_circuit2{
         uint256 h = 1;
         uint256 g = 1;
         
-        for(uint8 i = 0; i < permutation_size;){
+        for(uint256 i = 0; i < permutation_size;){
             uint256 tmp = addmod(
                 gamma, 
                 basic_marshalling.get_uint256_be(

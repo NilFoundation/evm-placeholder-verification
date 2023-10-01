@@ -21,6 +21,9 @@ import "../../types.sol";
 import "../../basic_marshalling.sol";
 import "../../interfaces/modular_gate_argument.sol";
 import "hardhat/console.sol";
+import "./gate_0.sol"; 
+import "./gate_1.sol"; 
+
 
 contract modular_gate_argument_circuit2 is IGateArgument{
     uint256 constant modulus = 52435875175126190479447740508185965837690552500527637822603658699938581184513;
@@ -30,39 +33,11 @@ contract modular_gate_argument_circuit2 is IGateArgument{
         bytes calldata blob,
         uint256 theta
     ) external view returns (uint256 F){
-		uint256 sum;
-		uint256 gate;
-		uint256 prod;
-		uint256 theta_acc=1;
-		gate = 0;
-		sum = 0;
-		prod = basic_marshalling.get_uint256_be(blob, 192);
-		sum = addmod(sum, prod, modulus);
-		prod = 52435875175126190479447740508185965837690552500527637822603658699938581184512;
-		prod = mulmod(prod, basic_marshalling.get_uint256_be(blob, 224), modulus);
-		sum = addmod(sum, prod, modulus);
-		prod = basic_marshalling.get_uint256_be(blob, 160);
-		sum = addmod(sum, prod, modulus);
-		gate = addmod(gate, mulmod(theta_acc, sum, modulus), modulus);
-		theta_acc = mulmod(theta_acc, theta, modulus);
-			gate = mulmod(gate, basic_marshalling.get_uint256_be(blob, 0), modulus);
-			F = addmod(F, gate, modulus);
+        uint256 theta_acc = 1;
+        uint256 eval;
 
-		gate = 0;
-		sum = 0;
-		prod = basic_marshalling.get_uint256_be(blob, 128);
-		sum = addmod(sum, prod, modulus);
-		prod = 52435875175126190479447740508185965837690552500527637822603658699938581184512;
-		prod = mulmod(prod, basic_marshalling.get_uint256_be(blob, 224), modulus);
-		sum = addmod(sum, prod, modulus);
-		prod = basic_marshalling.get_uint256_be(blob, 160);
-		prod = mulmod(prod, basic_marshalling.get_uint256_be(blob, 192), modulus);
-		sum = addmod(sum, prod, modulus);
-		gate = addmod(gate, mulmod(theta_acc, sum, modulus), modulus);
-		theta_acc = mulmod(theta_acc, theta, modulus);
-			gate = mulmod(gate, basic_marshalling.get_uint256_be(blob, 64), modulus);
-			F = addmod(F, gate, modulus);
-
+		(eval, theta_acc) = gate_circuit2_0.evaluate_gate_be( blob, theta, theta_acc ); F = addmod(F, eval, modulus);
+		(eval, theta_acc) = gate_circuit2_1.evaluate_gate_be( blob, theta, theta_acc ); F = addmod(F, eval, modulus);
 
     }
 }        

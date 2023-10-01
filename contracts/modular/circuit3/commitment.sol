@@ -26,7 +26,7 @@ import "../../containers/merkle_verifier.sol";
 import "../../algebra/polynomial.sol";
 import "hardhat/console.sol";
 
-contract modular_commitment_scheme_circuit3 {
+library modular_commitment_scheme_circuit3 {
     uint256 constant modulus = 28948022309329048855892746252171976963363056481941560715954676764349967630337;
     uint64 constant batches_num = 5;
     uint256 constant r = 2;
@@ -40,7 +40,7 @@ contract modular_commitment_scheme_circuit3 {
     uint256 constant lookup_point = 4;
     bytes constant   points_ids = hex"010101010101010103030303030103000000";
     uint256 constant omega = 199455130043951077247265858823823987229570523056509026484192158816218200659;
-    uint256 _etha;
+    uint256 constant _etha = 23625454313544905426346299048229678104684481021196451178545456502003633541374;
 
     struct commitment_state{
         bytes   leaf_data;
@@ -290,10 +290,11 @@ contract modular_commitment_scheme_circuit3 {
 
     function initialize(
         bytes32 tr_state_before
-    ) external returns(bytes32 tr_state_after){
+    ) internal returns(bytes32 tr_state_after){
         types.transcript_data memory tr_state;
         tr_state.current_challenge = tr_state_before;
-        _etha = transcript.get_field_challenge(tr_state, modulus);
+        uint256 etha = transcript.get_field_challenge(tr_state, modulus);
+        require(etha == _etha, "Wrong etha");
         tr_state_after = tr_state.current_challenge;
     }
 
@@ -416,7 +417,7 @@ contract modular_commitment_scheme_circuit3 {
         uint256[5] memory commitments,                   
         uint256 challenge,
         bytes32 transcript_state
-    ) external view returns (bool){
+    ) internal view returns (bool){
         types.transcript_data memory tr_state;
         tr_state.current_challenge = transcript_state;
         commitment_state memory state;

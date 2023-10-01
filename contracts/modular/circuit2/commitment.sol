@@ -26,7 +26,7 @@ import "../../containers/merkle_verifier.sol";
 import "../../algebra/polynomial.sol";
 import "hardhat/console.sol";
 
-contract modular_commitment_scheme_circuit2 {
+library modular_commitment_scheme_circuit2 {
     uint256 constant modulus = 52435875175126190479447740508185965837690552500527637822603658699938581184513;
     uint64 constant batches_num = 4;
     uint256 constant r = 3;
@@ -37,10 +37,10 @@ contract modular_commitment_scheme_circuit2 {
     uint256 constant unique_points = 5;
     uint256 constant permutation_point = 3;
     uint256 constant quotient_point = 1;
-    uint256 constant lookup_point = 94008216099072;
+    uint256 constant lookup_point = 94511721624960;
     bytes constant   points_ids = hex"02020202020202020404020200010101";
     uint256 constant omega = 14788168760825820622209131888203028446852016562542525606630160374691593895118;
-    uint256 _etha;
+    uint256 constant _etha = 12217208067492249031102872072655908974751031861422067257283053495957748658893;
 
     struct commitment_state{
         bytes   leaf_data;
@@ -289,10 +289,11 @@ contract modular_commitment_scheme_circuit2 {
 
     function initialize(
         bytes32 tr_state_before
-    ) external returns(bytes32 tr_state_after){
+    ) internal returns(bytes32 tr_state_after){
         types.transcript_data memory tr_state;
         tr_state.current_challenge = tr_state_before;
-        _etha = transcript.get_field_challenge(tr_state, modulus);
+        uint256 etha = transcript.get_field_challenge(tr_state, modulus);
+        require(etha == _etha, "Wrong etha");
         tr_state_after = tr_state.current_challenge;
     }
 
@@ -415,7 +416,7 @@ contract modular_commitment_scheme_circuit2 {
         uint256[5] memory commitments,                   
         uint256 challenge,
         bytes32 transcript_state
-    ) external view returns (bool){
+    ) internal view returns (bool){
         types.transcript_data memory tr_state;
         tr_state.current_challenge = transcript_state;
         commitment_state memory state;

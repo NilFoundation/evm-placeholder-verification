@@ -26,15 +26,6 @@ module.exports = async function() {
 
     for(k in circuits){
         let addrs = {};
-/*      let libs = losslessJSON.parse(fs.readFileSync("./contracts/zkllvm/"+circuits[k]+"/linked_libs_list.json", 'utf8'));
-        let deployedLib = {}
-        for (let lib of libs){
-            await deploy(lib, {
-                from: deployer,
-                log: true,
-            });
-            deployedLib[lib] = (await hre.deployments.get(lib)).address
-        }*/
         commitment_contract = await deploy("modular_commitment_scheme_" + circuits[k], {
             from: deployer,
             libraries : [], //deployedLib,
@@ -53,9 +44,18 @@ module.exports = async function() {
             log : true,
         });
 
+        let libs = losslessJSON.parse(fs.readFileSync("./contracts/modular/"+circuits[k]+"/gate_libs_list.json", 'utf8'));
+        let deployedLib = {}
+        for (let lib of libs){
+            await deploy(lib, {
+                from: deployer,
+                log: true,
+            });
+            deployedLib[lib] = (await hre.deployments.get(lib)).address
+        }
         gate_argument_contract = await deploy("modular_gate_argument_" + circuits[k], {
             from: deployer,
-            libraries : [], //deployedLib,
+            libraries : deployedLib,
             log : true,
         });
 

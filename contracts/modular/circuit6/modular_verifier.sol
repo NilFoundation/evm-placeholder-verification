@@ -66,8 +66,9 @@ contract modular_verifier_circuit6 is IModularVerifier{
         _gate_argument_address = gate_argument_address;
         _commitment_contract_address = commitment_contract_address;
 
-        ICommitmentScheme commitment_scheme = ICommitmentScheme(commitment_contract_address);
-        tr_state.current_challenge = commitment_scheme.initialize(tr_state.current_challenge);
+//        ICommitmentScheme commitment_scheme = ICommitmentScheme(commitment_contract_address);
+//        tr_state.current_challenge = commitment_scheme.initialize(tr_state.current_challenge);
+        tr_state.current_challenge = modular_commitment_scheme_circuit6.initialize(tr_state.current_challenge);
         transcript_state = tr_state.current_challenge;
     }
 
@@ -119,9 +120,11 @@ contract modular_verifier_circuit6 is IModularVerifier{
         {
             uint256 lookup_offset = table_offset + quotient_offset + uint256(uint8(blob[z_offset + basic_marshalling.get_length(blob, z_offset - 0x8) *0x20 + 0xf])) * 0x20;
             uint256[4] memory lookup_argument;
-            (lookup_argument, tr_state.current_challenge) = modular_lookup_argument_circuit6.verify(
+            ILookupArgument lookup_contract = ILookupArgument(_lookup_argument_address);
+            (lookup_argument, tr_state.current_challenge) = lookup_contract.verify(
+//            (lookup_argument, tr_state.current_challenge) = modular_lookup_argument_circuit6.verify(
                 blob[special_selectors_offset: table_offset + quotient_offset], 
-                blob[lookup_offset:lookup_offset + sorted_columns * 0x20], 
+                blob[lookup_offset:lookup_offset + sorted_columns * 0x60], 
                 basic_marshalling.get_uint256_be(blob, 0x81), 
                 state.l0,
                 tr_state.current_challenge
@@ -158,14 +161,14 @@ contract modular_verifier_circuit6 is IModularVerifier{
         bool b = true;
         //8. Commitment scheme verify_eval
         {
-            ICommitmentScheme commitment_scheme = ICommitmentScheme(_commitment_contract_address);
+//            ICommitmentScheme commitment_scheme = ICommitmentScheme(_commitment_contract_address);
             uint256[5] memory commitments;
             commitments[0] = uint256(vk2);
             for(uint16 i = 1; i < 5;){
                 commitments[i] = basic_marshalling.get_uint256_be(blob, 0x9 + (i-1)*(0x28));
                 unchecked{i++;}
             }
-            if(!commitment_scheme.verify_eval(
+            if(!modular_commitment_scheme_circuit6.verify_eval(
                 blob[z_offset - 0x8:], commitments, xi, tr_state.current_challenge
             )) {
                 console.log("Error from commitment scheme!");

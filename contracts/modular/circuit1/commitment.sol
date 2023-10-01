@@ -26,7 +26,7 @@ import "../../containers/merkle_verifier.sol";
 import "../../algebra/polynomial.sol";
 import "hardhat/console.sol";
 
-contract modular_commitment_scheme_circuit1 {
+library modular_commitment_scheme_circuit1 {
     uint256 constant modulus = 28948022309329048855892746252171976963363056481941560715954676764349967630337;
     uint64 constant batches_num = 4;
     uint256 constant r = 3;
@@ -37,10 +37,10 @@ contract modular_commitment_scheme_circuit1 {
     uint256 constant unique_points = 4;
     uint256 constant permutation_point = 2;
     uint256 constant quotient_point = 0;
-    uint256 constant lookup_point = 140728064387152;
+    uint256 constant lookup_point = 94511721702704;
     bytes constant   points_ids = hex"01010101010101010303010100000000";
     uint256 constant omega = 14450201850503471296781915119640920297985789873634237091629829669980153907901;
-    uint256 _etha;
+    uint256 constant _etha = 14062721881273474090606415031361994540585550571695842571456013353340629726555;
 
     struct commitment_state{
         bytes   leaf_data;
@@ -286,10 +286,11 @@ contract modular_commitment_scheme_circuit1 {
 
     function initialize(
         bytes32 tr_state_before
-    ) external returns(bytes32 tr_state_after){
+    ) internal returns(bytes32 tr_state_after){
         types.transcript_data memory tr_state;
         tr_state.current_challenge = tr_state_before;
-        _etha = transcript.get_field_challenge(tr_state, modulus);
+        uint256 etha = transcript.get_field_challenge(tr_state, modulus);
+        require(etha == _etha, "Wrong etha");
         tr_state_after = tr_state.current_challenge;
     }
 
@@ -412,7 +413,7 @@ contract modular_commitment_scheme_circuit1 {
         uint256[5] memory commitments,                   
         uint256 challenge,
         bytes32 transcript_state
-    ) external view returns (bool){
+    ) internal view returns (bool){
         types.transcript_data memory tr_state;
         tr_state.current_challenge = transcript_state;
         commitment_state memory state;

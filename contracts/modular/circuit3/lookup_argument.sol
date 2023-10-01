@@ -25,8 +25,8 @@ import "../../cryptography/transcript.sol";
 import "../../interfaces/modular_lookup_argument.sol";
 import "hardhat/console.sol";
 
-//contract modular_lookup_argument_circuit3 is ILookupArgument{
-library modular_lookup_argument_circuit3{
+contract modular_lookup_argument_circuit3 is ILookupArgument{
+//library modular_lookup_argument_circuit3{
     uint256 constant modulus = 28948022309329048855892746252171976963363056481941560715954676764349967630337;
     uint8 constant tables = 1;
     uint8 constant sorted_columns = 2;
@@ -59,7 +59,7 @@ library modular_lookup_argument_circuit3{
         uint256 lookup_commitment,
         uint256 l0,
         bytes32 tr_state_before // It's better than transfer all random values
-    ) internal view returns (uint256[4] memory F, bytes32 tr_state_after){
+    ) external view returns (uint256[4] memory F, bytes32 tr_state_after){
         bytes calldata blob = zvalues[0xc0:];
         lookup_state memory state;
         state.V_L_value = basic_marshalling.get_uint256_be(zvalues, 0xc0 + 544 + 0x40);

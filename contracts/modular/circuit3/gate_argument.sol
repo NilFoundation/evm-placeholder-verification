@@ -22,6 +22,7 @@ import "../../basic_marshalling.sol";
 import "../../interfaces/modular_gate_argument.sol";
 import "hardhat/console.sol";
 
+
 contract modular_gate_argument_circuit3 is IGateArgument{
     uint256 constant modulus = 28948022309329048855892746252171976963363056481941560715954676764349967630337;
 
@@ -30,10 +31,9 @@ contract modular_gate_argument_circuit3 is IGateArgument{
         bytes calldata blob,
         uint256 theta
     ) external view returns (uint256 F){
-		uint256 sum;
-		uint256 gate;
-		uint256 prod;
-		uint256 theta_acc=1;
+        uint256 theta_acc = 1;
+        uint256 eval;
+
 
     }
 }        
