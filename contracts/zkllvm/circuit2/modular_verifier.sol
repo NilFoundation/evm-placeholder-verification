@@ -55,7 +55,6 @@ contract modular_verifier_circuit2 is IModularVerifier{
         address gate_argument_address,
         address commitment_contract_address
     ) public{
-        console.log("Initialize");
         types.transcript_data memory tr_state;
         transcript.init_transcript(tr_state, hex"");
         transcript.update_transcript_b32(tr_state, vk1);
@@ -77,28 +76,77 @@ contract modular_verifier_circuit2 is IModularVerifier{
         uint256 Z_at_xi;
         uint256 l0;
         uint256[f_parts] F;
+        uint256 gas;
+        bool b;
+    }
+
+    // Public input columns
+    function public_input_direct(bytes calldata blob, uint256[] calldata public_input, verifier_state memory state) internal view 
+    returns (bool check){
+        check = true;
+
+        uint256 result = 0;
+        uint256 Omega = 1;
+
+        for(uint256 i = 0; i < public_input.length;){
+            if( public_input[i] != 0){
+                uint256 L = mulmod(
+                    Omega,
+                    field.inverse_static(
+                        addmod(state.xi, modulus - Omega, modulus),
+                        modulus
+                    ),
+                    modulus
+                );
+                    
+                result = addmod(
+                    result, 
+                    mulmod(
+                        public_input[i], L, modulus
+                    ), 
+                    modulus
+                );
+            }
+            Omega = mulmod(Omega, omega, modulus);
+            unchecked{i++;}
+        }
+        result = mulmod(
+            result, addmod(field.pow_small(state.xi, rows_amount, modulus), modulus - 1, modulus), modulus
+        );
+        result = mulmod(result, field.inverse_static(rows_amount, modulus), modulus);
+
+        // Input is proof_map.eval_proof_combined_value_offset
+        if( result != basic_marshalling.get_uint256_be(
+            blob, 256
+        )) check = false;
     }
 
     function verify(
-        bytes calldata blob
+        bytes calldata blob,
+        uint256[] calldata public_input
     ) public view{
         verifier_state memory state;
-        uint256 gas = gasleft();
-        uint256 xi = basic_marshalling.get_uint256_be(blob, 0x79);
-        state.Z_at_xi = addmod(field.pow_small(xi, rows_amount, modulus), modulus-1, modulus);
+        state.b = true;
+        state.gas = gasleft();
+        state.xi = basic_marshalling.get_uint256_be(blob, 0x79);
+        state.Z_at_xi = addmod(field.pow_small(state.xi, rows_amount, modulus), modulus-1, modulus);
         state.l0 = mulmod(
             state.Z_at_xi, 
-            field.inverse_static(mulmod(addmod(xi, modulus - 1, modulus), rows_amount, modulus), modulus), 
+            field.inverse_static(mulmod(addmod(state.xi, modulus - 1, modulus), rows_amount, modulus), modulus), 
             modulus
         );
 
-        //0. Check proof size
-        // No direct public input
+        //0. Direct public input check
+        if(public_input.length > 0) {
+            if (!public_input_direct(blob[865:865+352], public_input, state)) {
+                console.log("Wrong public input!");
+                state.b = false;
+            }
+        }
 
         //1. Init transcript        
         types.transcript_data memory tr_state;
         tr_state.current_challenge = transcript_state;
-        // TODO: Just do something with it
 
         {
             //2. Push variable_values commitment to transcript
@@ -140,7 +188,6 @@ contract modular_verifier_circuit2 is IModularVerifier{
             transcript.update_transcript_b32_by_offset_calldata(tr_state, blob, 0x59);
         }
 
-        bool b = true;
         //8. Commitment scheme verify_eval
         {
 //            ICommitmentScheme commitment_scheme = ICommitmentScheme(_commitment_contract_address);
@@ -151,10 +198,10 @@ contract modular_verifier_circuit2 is IModularVerifier{
                 unchecked{i++;}
             }
             if(!modular_commitment_scheme_circuit2.verify_eval(
-                blob[z_offset - 0x8:], commitments, xi, tr_state.current_challenge
+                blob[z_offset - 0x8:], commitments, state.xi, tr_state.current_challenge
             )) {
                 console.log("Error from commitment scheme!");
-                b = false;
+                state.b = false;
             }
         }
 
@@ -173,12 +220,12 @@ contract modular_verifier_circuit2 is IModularVerifier{
             }
             if( F_consolidated != mulmod(T_consolidated, state.Z_at_xi, modulus) ) {
                 console.log("Error. Table does't satisfy constraint system");
-                b = false;
+                state.b = false;
             }
-            if(b) console.log("SUCCESS!"); else console.log("FAILURE!");
+            if(state.b) console.log("SUCCESS!"); else console.log("FAILURE!");
         }
 
-        console.log("Gas for verification:", gas-gasleft());
+        console.log("Gas for verification:", state.gas-gasleft());
     }
 }            
         

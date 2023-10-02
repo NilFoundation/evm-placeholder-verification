@@ -25,6 +25,7 @@ interface IModularVerifier {
     ) external;
 
     function verify(        
-        bytes calldata blob
+        bytes calldata blob,
+        uint256[] calldata public_input
     ) external view;
 }

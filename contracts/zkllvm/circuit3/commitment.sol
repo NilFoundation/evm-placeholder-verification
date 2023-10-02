@@ -587,7 +587,6 @@ library modular_commitment_scheme_circuit3 {
             
             unchecked{i++;}
         }
-        console.log("EVALUATION PROOF verified");
         return true;
     }
 }        

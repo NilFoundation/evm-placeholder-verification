@@ -590,7 +590,6 @@ library modular_commitment_scheme_circuit6 {
             
             unchecked{i++;}
         }
-        console.log("EVALUATION PROOF verified");
         return true;
     }
 }        
