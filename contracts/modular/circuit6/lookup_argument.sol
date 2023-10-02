@@ -23,6 +23,9 @@ import "../../types.sol";
 import "../../basic_marshalling.sol";
 import "../../cryptography/transcript.sol";
 import "../../interfaces/modular_lookup_argument.sol";
+import "./lookup_0.sol"; 
+import "./lookup_1.sol"; 
+
 import "hardhat/console.sol";
 
 contract modular_lookup_argument_circuit6 is ILookupArgument{
@@ -87,44 +90,10 @@ contract modular_lookup_argument_circuit6 is ILookupArgument{
             state.beta = transcript.get_field_challenge(tr_state, modulus); //beta
             state.gamma = transcript.get_field_challenge(tr_state, modulus); //gamma
             state.factor = mulmod(addmod(1, state.beta, modulus), state.gamma, modulus);
-
-			uint256 sum;
-			uint256 prod;
-			state.selector_value=basic_marshalling.get_uint256_be(blob, 384);
-			l = mulmod( 1,state.selector_value, modulus);
-			state.theta_acc=state.theta;
-		sum = 0;
-		prod = basic_marshalling.get_uint256_be(blob, 544);
-		sum = addmod(sum, prod, modulus);
-
-
-			l = addmod( l, mulmod( mulmod(state.theta_acc, state.selector_value, modulus), sum, modulus), modulus);
-			state.theta_acc = mulmod(state.theta_acc, state.theta, modulus);
-state.g = mulmod(state.g, mulmod(addmod(1, state.beta, modulus), addmod(l,state.gamma, modulus), modulus), modulus);
-			l = mulmod( 2,state.selector_value, modulus);
-			state.theta_acc=state.theta;
-		sum = 0;
-		prod = basic_marshalling.get_uint256_be(blob, 576);
-		sum = addmod(sum, prod, modulus);
-
-
-			l = addmod( l, mulmod( mulmod(state.theta_acc, state.selector_value, modulus), sum, modulus), modulus);
-			state.theta_acc = mulmod(state.theta_acc, state.theta, modulus);
-state.g = mulmod(state.g, mulmod(addmod(1, state.beta, modulus), addmod(l,state.gamma, modulus), modulus), modulus);
-			state.selector_value=basic_marshalling.get_uint256_be(blob, 448);
-			l = mulmod( 2,state.selector_value, modulus);
-			state.theta_acc=state.theta;
-		sum = 0;
-		prod = basic_marshalling.get_uint256_be(blob, 544);
-		sum = addmod(sum, prod, modulus);
-		prod = basic_marshalling.get_uint256_be(blob, 512);
-		sum = addmod(sum, prod, modulus);
-
-
-			l = addmod( l, mulmod( mulmod(state.theta_acc, state.selector_value, modulus), sum, modulus), modulus);
-			state.theta_acc = mulmod(state.theta_acc, state.theta, modulus);
-state.g = mulmod(state.g, mulmod(addmod(1, state.beta, modulus), addmod(l,state.gamma, modulus), modulus), modulus);
-
+			(l, state.theta_acc) = lookup_circuit6_0.evaluate_gate_be( blob, state.theta, state.theta_acc, state.beta, state.gamma );
+			state.g = mulmod(state.g, l, modulus);
+			(l, state.theta_acc) = lookup_circuit6_1.evaluate_gate_be( blob, state.theta, state.theta_acc, state.beta, state.gamma );
+			state.g = mulmod(state.g, l, modulus);
 		state.selector_value=basic_marshalling.get_uint256_be(blob, 288);
 		state.shifted_selector_value=basic_marshalling.get_uint256_be(blob, 320);
 			l= mulmod( 1, state.selector_value, modulus);

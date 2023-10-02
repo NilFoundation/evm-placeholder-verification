@@ -18,7 +18,6 @@
 pragma solidity >=0.8.4;
 
 import "../../../contracts/basic_marshalling.sol";
-import "./gate_argument.sol";
 
 library gate_circuit4_0{
     uint256 constant modulus = 28948022309329048855892746252171976963363056481941560715954676764349967630337;

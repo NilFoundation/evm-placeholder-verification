@@ -37,7 +37,7 @@ library modular_commitment_scheme_circuit1 {
     uint256 constant unique_points = 4;
     uint256 constant permutation_point = 2;
     uint256 constant quotient_point = 0;
-    uint256 constant lookup_point = 94511721702704;
+    uint256 constant lookup_point = 94358033697232;
     bytes constant   points_ids = hex"01010101010101010303010100000000";
     uint256 constant omega = 14450201850503471296781915119640920297985789873634237091629829669980153907901;
     uint256 constant _etha = 14062721881273474090606415031361994540585550571695842571456013353340629726555;

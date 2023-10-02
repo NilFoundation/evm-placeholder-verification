@@ -28,7 +28,7 @@ library modular_permutation_argument_circuit1{
     uint256 constant permutation_size = 4;
     uint256 constant special_selectors_offset = 4 * 0x80;
     uint256 constant table_values_offset = 4 * 0x80 + 0xc0;
-    bytes constant zero_indices = hex"008000a000c000e000000020";
+    bytes constant zero_indices = hex"008000a000c000e000000040";
 
     function uint16_from_two_bytes(bytes1 b1, bytes1 b2) internal pure returns( uint256 result){
         unchecked{

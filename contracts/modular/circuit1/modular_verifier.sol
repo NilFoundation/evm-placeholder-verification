@@ -24,7 +24,6 @@ import "../../basic_marshalling.sol";
 import "../../interfaces/modular_verifier.sol";
 import "./commitment.sol";
 import "./gate_argument.sol";
-import "./lookup_argument.sol";
 import "./permutation_argument.sol";
 import "hardhat/console.sol";
 import "../../algebra/field.sol";

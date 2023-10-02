@@ -38,14 +38,25 @@ module.exports = async function() {
             log : true,
         });
 */
+        let deployedLookupLib = {}
+        if( fs.existsSync("./contracts/modular/"+circuits[k]+"/lookup_libs_list.json")) {
+            let lookup_libs = losslessJSON.parse(fs.readFileSync("./contracts/modular/"+circuits[k]+"/lookup_libs_list.json", 'utf8'));
+            for (let lib of lookup_libs){
+                await deploy(lib, {
+                    from: deployer,
+                    log: true,
+                });
+                deployedLookupLib[lib] = (await hre.deployments.get(lib)).address
+            }
+        }
         lookup_argument_contract = await deploy("modular_lookup_argument_" + circuits[k], {
             from: deployer,
-            libraries : [], //deployedLib,
+            libraries : deployedLookupLib,
             log : true,
         });
 
-        let libs = losslessJSON.parse(fs.readFileSync("./contracts/modular/"+circuits[k]+"/gate_libs_list.json", 'utf8'));
         let deployedLib = {}
+        let libs = losslessJSON.parse(fs.readFileSync("./contracts/modular/"+circuits[k]+"/gate_libs_list.json", 'utf8'));
         for (let lib of libs){
             await deploy(lib, {
                 from: deployer,
