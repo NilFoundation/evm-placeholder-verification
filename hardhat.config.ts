@@ -5,7 +5,6 @@ require("hardhat-deploy");
 require('hardhat-deploy-ethers');
 require('hardhat-contract-sizer');
 
-import './tasks/verify-zkllvm-output'
 import './tasks/modular-test'
 
 const SEPOLIA_PRIVATE_KEY="SEPOLIA_PRIVATE_KEY"

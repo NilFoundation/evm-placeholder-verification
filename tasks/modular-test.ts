@@ -20,10 +20,10 @@ function loadProof(proof_path){
 }
   
 
-task("modular-tests")
+task("verify-circuit-proof-all")
     .setAction(async (hre) => {
         console.log("Verify proof in modular style");
-        let modular_path = "../contracts/modular/";
+        let modular_path = "../contracts/zkllvm/";
         let circuits = get_subfolders(path.resolve(__dirname, modular_path));
 //        await deployments.fixture(['ModularVerifierFixture']);
 
@@ -58,11 +58,11 @@ task("modular-tests")
         }
 });
 
-task("modular-test")
+task("verify-circuit-proof")
     .addParam("test")
     .setAction(async (test, hre) => {
         console.log("Run modular verifier for:",test.test);
-        let modular_path = "../contracts/modular/";
+        let modular_path = "../contracts/zkllvm/";
 
         let circuit = test.test;
         let folder_path = modular_path + circuit;

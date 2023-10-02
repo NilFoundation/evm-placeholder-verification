@@ -22,7 +22,7 @@ module.exports = async function() {
     const {deployer, tokenOwner} = await getNamedAccounts();
 
 
-    let circuits = get_subfolders("./contracts/modular");
+    let circuits = get_subfolders("./contracts/zkllvm");
 
     for(k in circuits){
         let addrs = {};
@@ -39,8 +39,8 @@ module.exports = async function() {
         });
 */
         let deployedLookupLib = {}
-        if( fs.existsSync("./contracts/modular/"+circuits[k]+"/lookup_libs_list.json")) {
-            let lookup_libs = losslessJSON.parse(fs.readFileSync("./contracts/modular/"+circuits[k]+"/lookup_libs_list.json", 'utf8'));
+        if( fs.existsSync("./contracts/zkllvm/"+circuits[k]+"/lookup_libs_list.json")) {
+            let lookup_libs = losslessJSON.parse(fs.readFileSync("./contracts/zkllvm/"+circuits[k]+"/lookup_libs_list.json", 'utf8'));
             for (let lib of lookup_libs){
                 await deploy(lib, {
                     from: deployer,
@@ -56,7 +56,7 @@ module.exports = async function() {
         });
 
         let deployedLib = {}
-        let libs = losslessJSON.parse(fs.readFileSync("./contracts/modular/"+circuits[k]+"/gate_libs_list.json", 'utf8'));
+        let libs = losslessJSON.parse(fs.readFileSync("./contracts/zkllvm/"+circuits[k]+"/gate_libs_list.json", 'utf8'));
         for (let lib of libs){
             await deploy(lib, {
                 from: deployer,
