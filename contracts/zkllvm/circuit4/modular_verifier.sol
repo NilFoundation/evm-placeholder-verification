@@ -39,8 +39,8 @@ contract modular_verifier_circuit4 is IModularVerifier{
     address _permutation_argument_address;
     address _lookup_argument_address;
     address _commitment_contract_address;
-    uint64 constant sorted_columns = 2;
-    uint64   constant f_parts = 8;   // Individually on parts
+    uint64  constant sorted_columns = 2;
+    uint64  constant f_parts = 9;
     uint64  constant z_offset = 0xc9;
     uint64  constant table_offset = z_offset + 0x80 * 4 + 0xc0;
     uint64  constant table_end_offset = table_offset + 608;
@@ -48,6 +48,8 @@ contract modular_verifier_circuit4 is IModularVerifier{
     uint64  constant rows_amount = 8;
     uint256 constant omega = 199455130043951077247265858823823987229570523056509026484192158816218200659;
     uint256 constant special_selectors_offset = z_offset + 4 * 0x80;
+    
+    
 
     function initialize(
 //        address permutation_argument_address,
@@ -80,8 +82,7 @@ contract modular_verifier_circuit4 is IModularVerifier{
         bool b;
     }
 
-    // Public input columns
-    function public_input_direct(bytes calldata blob, uint256[] calldata public_input, verifier_state memory state) internal view 
+function public_input_direct(bytes calldata blob, uint256[] calldata public_input, verifier_state memory state) internal view 
     returns (bool check){
         check = true;
 
@@ -110,16 +111,12 @@ contract modular_verifier_circuit4 is IModularVerifier{
             Omega = mulmod(Omega, omega, modulus);
             unchecked{i++;}
         }
-        result = mulmod(
-            result, addmod(field.pow_small(state.xi, rows_amount, modulus), modulus - 1, modulus), modulus
-        );
-        result = mulmod(result, field.inverse_static(rows_amount, modulus), modulus);
+        result = mulmod(result, state.Z_at_xi, modulus);
 
         // Input is proof_map.eval_proof_combined_value_offset
-        if( result != basic_marshalling.get_uint256_be(
-            blob, 5903466939373624969
-        )) check = false;
+        if( result != mulmod(basic_marshalling.get_uint256_be(blob, 5464385338715482808), rows_amount, modulus)) check = false;
     }
+    
 
     function verify(
         bytes calldata blob,
@@ -136,13 +133,15 @@ contract modular_verifier_circuit4 is IModularVerifier{
             modulus
         );
 
-        //0. Direct public input check
+        
+        //Direct public input check
         if(public_input.length > 0) {
             if (!public_input_direct(blob[905:905+736], public_input, state)) {
                 console.log("Wrong public input!");
                 state.b = false;
             }
         }
+    
 
         //1. Init transcript        
         types.transcript_data memory tr_state;
@@ -192,14 +191,12 @@ contract modular_verifier_circuit4 is IModularVerifier{
             IGateArgument modular_gate_argument = IGateArgument(_gate_argument_address);
             state.F[7] = modular_gate_argument.verify(blob[table_offset:table_end_offset], transcript.get_field_challenge(tr_state, modulus));
         }
-
-        // No public input gate
-
+		//No public input gate
         uint256 F_consolidated;
         {
             //7. Push quotient to transcript
             for( uint8 i = 0; i < f_parts;){
-                F_consolidated = addmod(F_consolidated, mulmod(state.F[i],transcript.get_field_challenge(tr_state, modulus), modulus), modulus);
+                F_consolidated = addmod(F_consolidated, mulmod(state.F[i], transcript.get_field_challenge(tr_state, modulus), modulus), modulus);
                 unchecked{i++;}
             }
             uint256 points_num = basic_marshalling.get_length(blob, 0xa1 + 0x20);

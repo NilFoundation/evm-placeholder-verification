@@ -33,14 +33,14 @@ contract modular_verifier_circuit3 is IModularVerifier{
     uint256 constant modulus = 28948022309329048855892746252171976963363056481941560715954676764349967630337;
     bool    constant use_lookups = false;
     bytes32 constant vk1 = bytes32(0xc45106e20a95531a40e12ee49dc5b9e85fa30183f7c8ec3bce5f6a62694b1933);
-    bytes32 constant vk2 = bytes32(0xf7fb5af75b5d40139379a7c2b5c447c3e47a0b8ce22ac15c0f58af4fd764a54e);
+    bytes32 constant vk2 = bytes32(0x9f33d9e94144d6049ade1b89f77bb01396b4edbe4bed8d37155af107388540e4);
     bytes32 transcript_state;
     address _gate_argument_address;
     address _permutation_argument_address;
     address _lookup_argument_address;
     address _commitment_contract_address;
-    uint64 constant sorted_columns = 2;
-    uint64   constant f_parts = 8;   // Individually on parts
+    uint64  constant sorted_columns = 2;
+    uint64  constant f_parts = 9;
     uint64  constant z_offset = 0xc9;
     uint64  constant table_offset = z_offset + 0x80 * 4 + 0xc0;
     uint64  constant table_end_offset = table_offset + 544;
@@ -48,6 +48,8 @@ contract modular_verifier_circuit3 is IModularVerifier{
     uint64  constant rows_amount = 8;
     uint256 constant omega = 199455130043951077247265858823823987229570523056509026484192158816218200659;
     uint256 constant special_selectors_offset = z_offset + 4 * 0x80;
+    bytes constant public_input_columns = hex"01c001e0";
+    bytes constant public_input_rows = hex"0002";
 
     function initialize(
 //        address permutation_argument_address,
@@ -80,46 +82,49 @@ contract modular_verifier_circuit3 is IModularVerifier{
         bool b;
     }
 
-    // Public input columns
-    function public_input_direct(bytes calldata blob, uint256[] calldata public_input, verifier_state memory state) internal view 
-    returns (bool check){
-        check = true;
-
-        uint256 result = 0;
-        uint256 Omega = 1;
-
-        for(uint256 i = 0; i < public_input.length;){
-            if( public_input[i] != 0){
-                uint256 L = mulmod(
-                    Omega,
-                    field.inverse_static(
-                        addmod(state.xi, modulus - Omega, modulus),
-                        modulus
-                    ),
-                    modulus
-                );
-                    
-                result = addmod(
-                    result, 
-                    mulmod(
-                        public_input[i], L, modulus
-                    ), 
-                    modulus
-                );
+        function uint16_from_two_bytes(bytes1 b1, bytes1 b2) internal pure returns( uint256 result){
+            unchecked{
+                result = uint8(b1);
+                result = result << 8;
+                result += uint8(b2);
             }
-            Omega = mulmod(Omega, omega, modulus);
-            unchecked{i++;}
         }
-        result = mulmod(
-            result, addmod(field.pow_small(state.xi, rows_amount, modulus), modulus - 1, modulus), modulus
-        );
-        result = mulmod(result, field.inverse_static(rows_amount, modulus), modulus);
 
-        // Input is proof_map.eval_proof_combined_value_offset
-        if( result != basic_marshalling.get_uint256_be(
-            blob, 18333047875794663362
-        )) check = false;
-    }
+        // Function is optimized for the case when public input cells are placed in the first table row
+        function public_input_gate(
+            bytes calldata blob, uint256[] calldata public_input, verifier_state memory state, uint256 alpha
+        ) internal view returns (uint256 F){
+            for( uint256 i = 0; i < public_input.length; ){
+                uint256 l;
+
+                if(uint8(public_input_rows[i]) == 0){
+                    l = state.l0;
+                } else {
+                    uint256 Omega = field.pow_small(omega, uint8(public_input_rows[i]), modulus);
+                    l = mulmod(
+                        Omega,
+                        field.inverse_static(
+                            addmod(state.xi, modulus - Omega, modulus),
+                            modulus
+                        ),
+                        modulus
+                    );
+                    l = mulmod(l, state.Z_at_xi, modulus);
+                    l = mulmod(l, field.inverse_static(rows_amount, modulus), modulus);
+                }
+
+                l = mulmod(l, addmod(
+                    basic_marshalling.get_uint256_be(blob, uint16_from_two_bytes(public_input_columns[i<<1], public_input_columns[(i<<1)+1])), 
+                    modulus - public_input[i], 
+                    modulus
+                ), modulus);
+
+                F = mulmod(F, alpha, modulus);
+                F = addmod(F, l, modulus);
+                unchecked{i++;}
+            }
+        }
+    
 
     function verify(
         bytes calldata blob,
@@ -136,13 +141,7 @@ contract modular_verifier_circuit3 is IModularVerifier{
             modulus
         );
 
-        //0. Direct public input check
-        if(public_input.length > 0) {
-            if (!public_input_direct(blob[905:905+672], public_input, state)) {
-                console.log("Wrong public input!");
-                state.b = false;
-            }
-        }
+        
 
         //1. Init transcript        
         types.transcript_data memory tr_state;
@@ -193,13 +192,14 @@ contract modular_verifier_circuit3 is IModularVerifier{
             state.F[7] = modular_gate_argument.verify(blob[table_offset:table_end_offset], transcript.get_field_challenge(tr_state, modulus));
         }
 
-        // No public input gate
-
+        //Compute public input gate
+        state.F[8] = public_input_gate(blob[905:905+672], public_input, state, transcript.get_field_challenge(tr_state, modulus));
+    
         uint256 F_consolidated;
         {
             //7. Push quotient to transcript
             for( uint8 i = 0; i < f_parts;){
-                F_consolidated = addmod(F_consolidated, mulmod(state.F[i],transcript.get_field_challenge(tr_state, modulus), modulus), modulus);
+                F_consolidated = addmod(F_consolidated, mulmod(state.F[i], transcript.get_field_challenge(tr_state, modulus), modulus), modulus);
                 unchecked{i++;}
             }
             uint256 points_num = basic_marshalling.get_length(blob, 0xa1 + 0x20);
