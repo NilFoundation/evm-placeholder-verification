@@ -236,7 +236,6 @@ task("verify-circuit-proof")
         console.log("Verify :",proof_path);
         let proof  = loadProof(proof_path);
         let public_input = loadPublicInput(folder_path + "/input.json");
-        console.log(public_input);
         await verifier_contract.verify(proof, public_input, {gasLimit: 30_500_000});
         console.log("====================================");
 
