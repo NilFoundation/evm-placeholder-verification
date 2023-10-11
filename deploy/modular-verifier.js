@@ -56,13 +56,15 @@ module.exports = async function() {
         });
 
         let deployedLib = {}
-        let libs = losslessJSON.parse(fs.readFileSync("./contracts/zkllvm/"+circuits[k]+"/gate_libs_list.json", 'utf8'));
-        for (let lib of libs){
-            await deploy(lib, {
-                from: deployer,
-                log: true,
-            });
-            deployedLib[lib] = (await hre.deployments.get(lib)).address
+        if( fs.existsSync("./contracts/zkllvm/"+circuits[k]+"/gate_libs_list.json")) {
+            let libs = losslessJSON.parse(fs.readFileSync("./contracts/zkllvm/"+circuits[k]+"/gate_libs_list.json", 'utf8'));
+            for (let lib of libs){
+                await deploy(lib, {
+                    from: deployer,
+                    log: true,
+                });
+                deployedLib[lib] = (await hre.deployments.get(lib)).address
+            }
         }
         gate_argument_contract = await deploy("modular_gate_argument_" + circuits[k], {
             from: deployer,
