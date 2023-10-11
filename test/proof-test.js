@@ -84,4 +84,24 @@ describe('Proof Tests', function () {
             unifiedAdditionGate.address ,{gasLimit: 30_500_000}
         );
     });
+
+    it("template", async function () {
+        let configPath = "./data/template/circuit_params.json"
+        let proofPath = "./data/template/proof.bin"
+        let publicInputPath = "./data/template/public_input.json";
+        let params = getVerifierParams(configPath,proofPath, publicInputPath);
+        await deployments.fixture(['testPlaceholderAPIConsumerFixture', 'template_gate_argument_split_genFixture', 'placeholderVerifierFixture']);
+
+        let testPlaceholderAPI = await ethers.getContract('TestPlaceholderVerifier');
+        let templateGate = await ethers.getContract('template_gate_argument_split_genFixture');
+        let placeholderVerifier = await ethers.getContract('PlaceholderVerifier');
+        
+        await testPlaceholderAPI.initialize(placeholderVerifier.address);
+        await testPlaceholderAPI.verify(
+            params['proof'],params['init_params'], 
+            params['columns_rotations'], params['public_input'],
+            templateGate.address ,{gasLimit: 30_500_000}
+        );
+    });
+
 })
