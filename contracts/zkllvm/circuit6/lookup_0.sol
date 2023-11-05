@@ -21,8 +21,9 @@ import "../../../contracts/basic_marshalling.sol";
 
 library lookup_circuit6_0{
     uint256 constant modulus = 28948022309329048855892746252171976963363056481941560715954676764349967630337;
-    
-    function evaluate_gate_be(
+
+
+    function evaluate_lookup_0_be(
         bytes calldata blob,
         uint256 theta,
         uint256 theta_acc,
@@ -34,8 +35,9 @@ library lookup_circuit6_0{
         uint256 sum;
         uint256 prod;
 
+        g = 1;
+
 		selector_value=basic_marshalling.get_uint256_be(blob, 384);
-		g = 1;
 		l = mulmod( 1,selector_value, modulus);
 		theta_acc=theta;
 		sum = 0;
@@ -45,7 +47,7 @@ library lookup_circuit6_0{
 
 		l = addmod( l, mulmod( mulmod(theta_acc, selector_value, modulus), sum, modulus), modulus);
 		theta_acc = mulmod(theta_acc, theta, modulus);
-		g = mulmod(g, mulmod(addmod(1, beta, modulus), addmod(l,gamma, modulus), modulus), modulus);
+		g = mulmod(g, mulmod(addmod(1, beta, modulus), addmod(l, gamma, modulus), modulus), modulus);
 		l = mulmod( 2,selector_value, modulus);
 		theta_acc=theta;
 		sum = 0;
@@ -55,9 +57,44 @@ library lookup_circuit6_0{
 
 		l = addmod( l, mulmod( mulmod(theta_acc, selector_value, modulus), sum, modulus), modulus);
 		theta_acc = mulmod(theta_acc, theta, modulus);
-		g = mulmod(g, mulmod(addmod(1, beta, modulus), addmod(l,gamma, modulus), modulus), modulus);
+		g = mulmod(g, mulmod(addmod(1, beta, modulus), addmod(l, gamma, modulus), modulus), modulus);
+
 
         return( g, theta_acc );
     }
+
+    function evaluate_lookup_1_be(
+        bytes calldata blob,
+        uint256 theta,
+        uint256 theta_acc,
+        uint256 beta,
+        uint256 gamma
+    ) external pure returns (uint256 g, uint256) {
+        uint256 l;
+        uint256 selector_value;
+        uint256 sum;
+        uint256 prod;
+
+        g = 1;
+
+		selector_value=basic_marshalling.get_uint256_be(blob, 448);
+		l = mulmod( 2,selector_value, modulus);
+		theta_acc=theta;
+		sum = 0;
+		prod = basic_marshalling.get_uint256_be(blob, 544);
+		sum = addmod(sum, prod, modulus);
+		prod = basic_marshalling.get_uint256_be(blob, 512);
+		sum = addmod(sum, prod, modulus);
+
+
+		l = addmod( l, mulmod( mulmod(theta_acc, selector_value, modulus), sum, modulus), modulus);
+		theta_acc = mulmod(theta_acc, theta, modulus);
+		g = mulmod(g, mulmod(addmod(1, beta, modulus), addmod(l, gamma, modulus), modulus), modulus);
+
+
+        return( g, theta_acc );
+    }
+
+
 }
         

@@ -39,8 +39,8 @@ contract modular_verifier_circuit4 is IModularVerifier{
     address _permutation_argument_address;
     address _lookup_argument_address;
     address _commitment_contract_address;
-    uint64  constant sorted_columns = 2;
-    uint64  constant f_parts = 9;
+    uint64 constant sorted_columns = 2;
+    uint64   constant f_parts = 8;   // Individually on parts
     uint64  constant z_offset = 0xc9;
     uint64  constant table_offset = z_offset + 0x80 * 4 + 0xc0;
     uint64  constant table_end_offset = table_offset + 608;
@@ -48,12 +48,10 @@ contract modular_verifier_circuit4 is IModularVerifier{
     uint64  constant rows_amount = 8;
     uint256 constant omega = 199455130043951077247265858823823987229570523056509026484192158816218200659;
     uint256 constant special_selectors_offset = z_offset + 4 * 0x80;
-    
-    
 
     function initialize(
 //        address permutation_argument_address,
-        address lookup_argument_address, 
+        address lookup_argument_address,
         address gate_argument_address,
         address commitment_contract_address
     ) public{
@@ -82,7 +80,8 @@ contract modular_verifier_circuit4 is IModularVerifier{
         bool b;
     }
 
-function public_input_direct(bytes calldata blob, uint256[] calldata public_input, verifier_state memory state) internal view 
+    // Public input columns
+    function public_input_direct(bytes calldata blob, uint256[] calldata public_input, verifier_state memory state) internal view
     returns (bool check){
         check = true;
 
@@ -99,51 +98,53 @@ function public_input_direct(bytes calldata blob, uint256[] calldata public_inpu
                     ),
                     modulus
                 );
-                    
+
                 result = addmod(
-                    result, 
+                    result,
                     mulmod(
                         public_input[i], L, modulus
-                    ), 
+                    ),
                     modulus
                 );
             }
             Omega = mulmod(Omega, omega, modulus);
             unchecked{i++;}
         }
-        result = mulmod(result, state.Z_at_xi, modulus);
+        result = mulmod(
+            result, addmod(field.pow_small(state.xi, rows_amount, modulus), modulus - 1, modulus), modulus
+        );
+        result = mulmod(result, field.inverse_static(rows_amount, modulus), modulus);
 
         // Input is proof_map.eval_proof_combined_value_offset
-        if( result != mulmod(basic_marshalling.get_uint256_be(blob, 5464385338715482808), rows_amount, modulus)) check = false;
+        if( result != basic_marshalling.get_uint256_be(
+            blob, 512
+        )) check = false;
     }
-    
 
     function verify(
         bytes calldata blob,
         uint256[] calldata public_input
-    ) public view{
+    ) public view returns (bool result) {
         verifier_state memory state;
         state.b = true;
         state.gas = gasleft();
         state.xi = basic_marshalling.get_uint256_be(blob, 0xa1);
         state.Z_at_xi = addmod(field.pow_small(state.xi, rows_amount, modulus), modulus-1, modulus);
         state.l0 = mulmod(
-            state.Z_at_xi, 
-            field.inverse_static(mulmod(addmod(state.xi, modulus - 1, modulus), rows_amount, modulus), modulus), 
+            state.Z_at_xi,
+            field.inverse_static(mulmod(addmod(state.xi, modulus - 1, modulus), rows_amount, modulus), modulus),
             modulus
         );
 
-        
-        //Direct public input check
+        //0. Direct public input check
         if(public_input.length > 0) {
             if (!public_input_direct(blob[905:905+736], public_input, state)) {
                 console.log("Wrong public input!");
                 state.b = false;
             }
         }
-    
 
-        //1. Init transcript        
+        //1. Init transcript
         types.transcript_data memory tr_state;
         tr_state.current_challenge = transcript_state;
 
@@ -153,8 +154,8 @@ function public_input_direct(bytes calldata blob, uint256[] calldata public_inpu
 
             //3. Permutation argument
             uint256[3] memory permutation_argument = modular_permutation_argument_circuit4.verify(
-                blob[0xc9:905+736], 
-                transcript.get_field_challenge(tr_state, modulus), 
+                blob[0xc9:905+736],
+                transcript.get_field_challenge(tr_state, modulus),
                 transcript.get_field_challenge(tr_state, modulus),
                 state.l0
             );
@@ -163,16 +164,17 @@ function public_input_direct(bytes calldata blob, uint256[] calldata public_inpu
             state.F[2] = permutation_argument[2];
         }
 
+        //4. Lookup library call
         
         {
             uint256 lookup_offset = table_offset + quotient_offset + uint256(uint8(blob[z_offset + basic_marshalling.get_length(blob, z_offset - 0x8) *0x20 + 0xf])) * 0x20;
             uint256[4] memory lookup_argument;
+            uint256 lookup_commitment = basic_marshalling.get_uint256_be(blob, 0x81);
             ILookupArgument lookup_contract = ILookupArgument(_lookup_argument_address);
             (lookup_argument, tr_state.current_challenge) = lookup_contract.verify(
-//            (lookup_argument, tr_state.current_challenge) = modular_lookup_argument_circuit4.verify(
-                blob[special_selectors_offset: table_offset + quotient_offset], 
-                blob[lookup_offset:lookup_offset + sorted_columns * 0x60], 
-                basic_marshalling.get_uint256_be(blob, 0x81), 
+                blob[special_selectors_offset: table_offset + quotient_offset],
+                blob[lookup_offset:lookup_offset + sorted_columns * 0x60],
+                lookup_commitment,
                 state.l0,
                 tr_state.current_challenge
             );
@@ -190,13 +192,28 @@ function public_input_direct(bytes calldata blob, uint256[] calldata public_inpu
             //6. Gate argument
             IGateArgument modular_gate_argument = IGateArgument(_gate_argument_address);
             state.F[7] = modular_gate_argument.verify(blob[table_offset:table_end_offset], transcript.get_field_challenge(tr_state, modulus));
+            state.F[7] = mulmod(
+                state.F[7],
+                addmod(
+                    1,
+                    modulus - addmod(
+                        basic_marshalling.get_uint256_be(blob, special_selectors_offset),
+                        basic_marshalling.get_uint256_be(blob, special_selectors_offset + 0x60),
+                        modulus
+                    ),
+                    modulus
+                ),
+                modulus
+            );
         }
-		//No public input gate
+
+        // No public input gate
+
         uint256 F_consolidated;
         {
             //7. Push quotient to transcript
             for( uint8 i = 0; i < f_parts;){
-                F_consolidated = addmod(F_consolidated, mulmod(state.F[i], transcript.get_field_challenge(tr_state, modulus), modulus), modulus);
+                F_consolidated = addmod(F_consolidated, mulmod(state.F[i],transcript.get_field_challenge(tr_state, modulus), modulus), modulus);
                 unchecked{i++;}
             }
             uint256 points_num = basic_marshalling.get_length(blob, 0xa1 + 0x20);
@@ -226,8 +243,8 @@ function public_input_direct(bytes calldata blob, uint256[] calldata public_inpu
             uint256 factor = 1;
             for(uint64 i = 0; i < uint64(uint8(blob[z_offset + basic_marshalling.get_length(blob, z_offset - 0x8) *0x20 + 0xf]));){
                 T_consolidated = addmod(
-                    T_consolidated, 
-                    mulmod(basic_marshalling.get_uint256_be(blob, table_offset + quotient_offset + i *0x20), factor, modulus), 
+                    T_consolidated,
+                    mulmod(basic_marshalling.get_uint256_be(blob, table_offset + quotient_offset + i *0x20), factor, modulus),
                     modulus
                 );
                 factor = mulmod(factor, state.Z_at_xi + 1, modulus);
@@ -241,6 +258,7 @@ function public_input_direct(bytes calldata blob, uint256[] calldata public_inpu
         }
 
         console.log("Gas for verification:", state.gas-gasleft());
+        result = state.b;
     }
-}            
+}
         
