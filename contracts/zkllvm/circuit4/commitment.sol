@@ -425,6 +425,48 @@ library modular_commitment_scheme_circuit4 {
         types.transcript_data memory tr_state;
         tr_state.current_challenge = transcript_state;
         commitment_state memory state;
+
+        		{
+			uint256 poly_at_eta;
+			/* 1 - 2*permutation_size */
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 40);// 0
+			if(poly_at_eta != 0x2f5497c3241d226f7a598e125b70d4977a432d3256a5cca609eecd9708197ef7) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x68);// 0x1
+			if(poly_at_eta != 0x2ca6f6cfb491ac2d63bfc65bc93426f4fc7c1707955613eb6622712c287f7ad0) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0xa8);// 0x2
+			if(poly_at_eta != 0x1f42d20e86d85ce2f2bedfcaee04c2c88798a831cec778463324a315ca7d660d) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0xe8);// 0x3
+			if(poly_at_eta != 0x1c4e1a48a239d06ebdba5ef6a617cdea616e1700f74b6727cd5ccd92f472fe3f) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x128);// 0x4
+			if(poly_at_eta != 0x2f5497c3241d226f7a598e125b70d4977a432d3256a5cca609eecd9708197ef7) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x168);// 0x5
+			if(poly_at_eta != 0x2ca6f6cfb491ac2d63bfc65bc93426f4fc7c1707955613eb6622712c287f7ad0) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x1a8);// 0x6
+			if(poly_at_eta != 0x1f42d20e86d85ce2f2bedfcaee04c2c88798a831cec778463324a315ca7d660d) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x1e8);// 0x7
+			if(poly_at_eta != 0x1c4e1a48a239d06ebdba5ef6a617cdea616e1700f74b6727cd5ccd92f472fe3f) return false;
+			/* 2 - special selectors */
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x248);// 0x8
+			if(poly_at_eta != 0x213512f755aea8bd75050bd7d649b6613b649871744b991958a487efc18cae33) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x2a8);// 0x9
+			if(poly_at_eta != 0x1efa2279781ce1bd13c856bbc25d85030f7e4f6209ce07f8a25cc8572e6e973a) return false;
+			/* 3 - constant columns */
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x308);// 0xa
+			if(poly_at_eta != 0x243c65637777d1ee46c13fa6d368a503c6ea125afaa809f6121faf4f7e8634ec) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x368);// 0xb
+			if(poly_at_eta != 0x10f4eb1c5290c61346203e82423cee59a6035bfd481bad6865fea0ccb30cc012) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x3c8);// 0xc
+			if(poly_at_eta != 0x3a73f59d35fce36e759ee3b753f2f4d97d01cf186f5e7c532c780e32ceef3b1d) return false;
+			/* 4 - selector columns */
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x408);// 0xd
+			if(poly_at_eta != 0x294fd51015a092e0a6b142a1790ecb1bae622443b27626f464a54e0c2be735a0) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x448);// 0xe
+			if(poly_at_eta != 0x3fd0ca8f3234758577329d6c6758c49bf9aa4a2494805125375911931004ba96) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x4a8);// 0xf
+			if(poly_at_eta != 0x13cc23004f2aabbc9b7f05ca258e0b57a543e2bfb5ac023244bc9a46a0276b78) return false;
+		}
+
+
         {
             uint256 offset;
 

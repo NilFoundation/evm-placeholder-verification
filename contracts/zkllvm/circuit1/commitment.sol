@@ -37,7 +37,7 @@ library modular_commitment_scheme_circuit1 {
     uint256 constant unique_points = 4;
     uint256 constant permutation_point = 2;
     uint256 constant quotient_point = 0;
-    uint256 constant lookup_point = 140722672363728;
+    uint256 constant lookup_point = 0;
     bytes constant   points_ids = hex"01010101010101010303010100000000";
     uint256 constant omega = 14450201850503471296781915119640920297985789873634237091629829669980153907901;
     uint256 constant _etha = 14062721881273474090606415031361994540585550571695842571456013353340629726555;
@@ -421,6 +421,40 @@ library modular_commitment_scheme_circuit1 {
         types.transcript_data memory tr_state;
         tr_state.current_challenge = transcript_state;
         commitment_state memory state;
+
+        		{
+			uint256 poly_at_eta;
+			/* 1 - 2*permutation_size */
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 40);// 0
+			if(poly_at_eta != 0x1f1737f0f9693494b37fd517f70fe4d844c0e4dd11e9df8639a0be9abfccb55b) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x68);// 0x1
+			if(poly_at_eta != 0x1b7417b4df0e06e7817f2977d34f78391337465946f76b67edc9572bbeff8ac5) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0xa8);// 0x2
+			if(poly_at_eta != 0x94476885b462285877bcf57208d591d1b872dc6503b26d072945200bafdb5d7) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0xe8);// 0x3
+			if(poly_at_eta != 0x2e5650a9c85eac9ba56b0cb3a2c2bd9189a3e4df9127c2123ce59a03a6f48d33) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x128);// 0x4
+			if(poly_at_eta != 0x1f1737f0f9693494b37fd517f70fe4d844c0e4dd11e9df8639a0be9abfccb55b) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x168);// 0x5
+			if(poly_at_eta != 0x1b7417b4df0e06e7817f2977d34f78391337465946f76b67edc9572bbeff8ac5) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x1a8);// 0x6
+			if(poly_at_eta != 0x94476885b462285877bcf57208d591d1b872dc6503b26d072945200bafdb5d7) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x1e8);// 0x7
+			if(poly_at_eta != 0x2e5650a9c85eac9ba56b0cb3a2c2bd9189a3e4df9127c2123ce59a03a6f48d33) return false;
+			/* 2 - special selectors */
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x248);// 0x8
+			if(poly_at_eta != 0xf3114c664f481e6028c47f122b53b12f6aa455ea26f54aad80ad778950b2177) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x2a8);// 0x9
+			if(poly_at_eta != 0x2acd90c58b8637d005a76e69a474de1cc5f432a41724e855b2a0b19b71a52150) return false;
+			/* 3 - constant columns */
+			/* 4 - selector columns */
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x2e8);// 0xa
+			if(poly_at_eta != 0x277b3d077e65208b010bc2f62957e87b900bd1f007ef61acf14649463be06cbb) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x328);// 0xb
+			if(poly_at_eta != 0x308efe88baf9b3bc3787b68d279234d783ef3e4064de84b20dc2a1d72eb2e0e3) return false;
+		}
+
+
         {
             uint256 offset;
 
