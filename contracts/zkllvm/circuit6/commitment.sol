@@ -460,8 +460,9 @@ library modular_commitment_scheme_circuit6 {
             
         bytes calldata proof_of_work = blob[blob.length - 4:];
         transcript.update_transcript(tr_state, proof_of_work);
-        transcript.get_integral_challenge_be(tr_state, 4);
-            
+        uint256 p_o_w = transcript.get_integral_challenge_be(tr_state, 4);
+        if (p_o_w & 4294901760 != 0) return false;
+
                         
             unchecked{
                 offset += 0x8 + r;
