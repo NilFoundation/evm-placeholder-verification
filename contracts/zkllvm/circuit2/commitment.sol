@@ -37,7 +37,7 @@ library modular_commitment_scheme_circuit2 {
     uint256 constant unique_points = 5;
     uint256 constant permutation_point = 3;
     uint256 constant quotient_point = 1;
-    uint256 constant lookup_point = 94325795983600;
+    uint256 constant lookup_point = 140731511355584;
     bytes constant   points_ids = hex"02020202020202020404020200010101";
     uint256 constant omega = 14788168760825820622209131888203028446852016562542525606630160374691593895118;
     uint256 constant _etha = 12217208067492249031102872072655908974751031861422067257283053495957748658893;
@@ -250,8 +250,8 @@ library modular_commitment_scheme_circuit2 {
     }
 
     function compute_combined_Q(bytes calldata blob,commitment_state memory state) internal view returns(uint256[2] memory y){
-        for(uint256 p = 0; p < unique_points; ){
-            uint256[2] memory tmp;
+        uint256[2][unique_points] memory values;
+        {
             uint256 offset = state.initial_data_offset - state.poly_num * 0x40; // Save initial data offset for future use;
             uint256 cur = 0;
             for(uint256 b = 0; b < batches_num;){
@@ -263,17 +263,21 @@ library modular_commitment_scheme_circuit2 {
                     else if(b == 4) cur_point = lookup_point;
                     else console.log("Wrong index");
 
-                    tmp[0] = mulmod(tmp[0], state.theta, modulus);
-                    tmp[1] = mulmod(tmp[1], state.theta, modulus);
-
-                    if(cur_point == p){
-                        tmp[0] = addmod(tmp[0], basic_marshalling.get_uint256_be(blob, offset), modulus);
-                        tmp[1] = addmod(tmp[1], basic_marshalling.get_uint256_be(blob, offset + 0x20), modulus);
+                    for(uint256 k = 0; k < unique_points; ){
+                        values[k][0] = mulmod(values[k][0], state.theta, modulus);
+                        values[k][1] = mulmod(values[k][1], state.theta, modulus);
+                        unchecked{k++;}
                     }
+
+                    values[cur_point][0] = addmod(values[cur_point][0], basic_marshalling.get_uint256_be(blob, offset), modulus);
+                    values[cur_point][1] = addmod(values[cur_point][1], basic_marshalling.get_uint256_be(blob, offset + 0x20), modulus);
                     unchecked{offset += 0x40;j++; cur++;}
                 }
                 unchecked{b++;}
             }
+        }
+        for(uint256 p = 0; p < unique_points; ){
+            uint256[2] memory tmp = values[p];
             tmp[0] = mulmod(tmp[0], state.factors[p], modulus);
             tmp[1] = mulmod(tmp[1], state.factors[p], modulus);
             uint256 s = state.x;

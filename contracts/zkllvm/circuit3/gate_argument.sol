@@ -33,6 +33,7 @@ contract modular_gate_argument_circuit3 is IGateArgument{
     ) external view returns (uint256 F){
         uint256 theta_acc = 1;
         uint256 eval;
+        uint256 x;
 
 
     }
