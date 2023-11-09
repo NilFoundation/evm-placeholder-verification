@@ -254,8 +254,8 @@ library modular_commitment_scheme_circuit6 {
     }
 
     function compute_combined_Q(bytes calldata blob,commitment_state memory state) internal view returns(uint256[2] memory y){
-        for(uint256 p = 0; p < unique_points; ){
-            uint256[2] memory tmp;
+        uint256[2][unique_points] memory values;
+        {
             uint256 offset = state.initial_data_offset - state.poly_num * 0x40; // Save initial data offset for future use;
             uint256 cur = 0;
             for(uint256 b = 0; b < batches_num;){
@@ -267,17 +267,21 @@ library modular_commitment_scheme_circuit6 {
                     else if(b == 4) cur_point = lookup_point;
                     else console.log("Wrong index");
 
-                    tmp[0] = mulmod(tmp[0], state.theta, modulus);
-                    tmp[1] = mulmod(tmp[1], state.theta, modulus);
-
-                    if(cur_point == p){
-                        tmp[0] = addmod(tmp[0], basic_marshalling.get_uint256_be(blob, offset), modulus);
-                        tmp[1] = addmod(tmp[1], basic_marshalling.get_uint256_be(blob, offset + 0x20), modulus);
+                    for(uint256 k = 0; k < unique_points; ){
+                        values[k][0] = mulmod(values[k][0], state.theta, modulus);
+                        values[k][1] = mulmod(values[k][1], state.theta, modulus);
+                        unchecked{k++;}
                     }
+
+                    values[cur_point][0] = addmod(values[cur_point][0], basic_marshalling.get_uint256_be(blob, offset), modulus);
+                    values[cur_point][1] = addmod(values[cur_point][1], basic_marshalling.get_uint256_be(blob, offset + 0x20), modulus);
                     unchecked{offset += 0x40;j++; cur++;}
                 }
                 unchecked{b++;}
             }
+        }
+        for(uint256 p = 0; p < unique_points; ){
+            uint256[2] memory tmp = values[p];
             tmp[0] = mulmod(tmp[0], state.factors[p], modulus);
             tmp[1] = mulmod(tmp[1], state.factors[p], modulus);
             uint256 s = state.x;
@@ -424,6 +428,48 @@ library modular_commitment_scheme_circuit6 {
         types.transcript_data memory tr_state;
         tr_state.current_challenge = transcript_state;
         commitment_state memory state;
+
+        		{
+			uint256 poly_at_eta;
+			/* 1 - 2*permutation_size */
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 40);// 0
+			if(poly_at_eta != 0xd48b9f9a1f52577da4d5cb94d65e04052d79db412bde4a0173fa42abd6d4a45) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x68);// 0x1
+			if(poly_at_eta != 0x26ba1e029c9bb574382cf9e82fd61417bef7b8854687e04db1103e8b3227358) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0xa8);// 0x2
+			if(poly_at_eta != 0xc1a2960d0f0a8b4518e0e188ef2e6476bad69a9a60a76184755138b7fac40b8) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0xe8);// 0x3
+			if(poly_at_eta != 0x3c82cee414b34b8597c6467acabe7f651a6310503e344e7964a961b97e5d4398) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x128);// 0x4
+			if(poly_at_eta != 0xd48b9f9a1f52577da4d5cb94d65e04052d79db412bde4a0173fa42abd6d4a45) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x168);// 0x5
+			if(poly_at_eta != 0x26ba1e029c9bb574382cf9e82fd61417bef7b8854687e04db1103e8b3227358) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x1a8);// 0x6
+			if(poly_at_eta != 0xc1a2960d0f0a8b4518e0e188ef2e6476bad69a9a60a76184755138b7fac40b8) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x1e8);// 0x7
+			if(poly_at_eta != 0x3c82cee414b34b8597c6467acabe7f651a6310503e344e7964a961b97e5d4398) return false;
+			/* 2 - special selectors */
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x248);// 0x8
+			if(poly_at_eta != 0x38fb1266f415fbd2618cfb2426d85025c3e9ac6c13d4ce1cb5709b216b4da6b2) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x2a8);// 0x9
+			if(poly_at_eta != 0x1af710639a33a9ee25a99551d3fd807e70499333913a0f7ce486c5d6cd45a1b6) return false;
+			/* 3 - constant columns */
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x308);// 0xa
+			if(poly_at_eta != 0x378ae8b217281e98232cf4c6dc2b21498547a11fd3025f8ab5fc7ade97636da7) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x368);// 0xb
+			if(poly_at_eta != 0x2fb0a4b594cb133a84d3b178be4595d031abfaaf17d83f3aa7f7c86c6477497e) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x3c8);// 0xc
+			if(poly_at_eta != 0x39f429a1fa53e4b8ea5cf81151d917a9c6df281fe390dd60fc915b3d85c942d2) return false;
+			/* 4 - selector columns */
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x428);// 0xd
+			if(poly_at_eta != 0x24d458cd7f86fdba1387bf56c6d2174e370b3a80acf28f008c4d6010f5d0c592) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x468);// 0xe
+			if(poly_at_eta != 0x2c0ddd3571b65a3f78c96f8a052a2f5c1059f2586d8b149d986300e1c76cb79b) return false;
+			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x4a8);// 0xf
+			if(poly_at_eta != 0x24d458cd7f86fdba1387bf56c6d2174e370b3a80acf28f008c4d6010f5d0c592) return false;
+		}
+
+
         {
             uint256 offset;
 

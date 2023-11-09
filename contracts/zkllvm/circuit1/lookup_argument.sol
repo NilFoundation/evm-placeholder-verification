@@ -19,5 +19,4 @@
 pragma solidity >=0.8.4;
 
 library modular_lookup_argument_circuit1{
-}            
-        
+}

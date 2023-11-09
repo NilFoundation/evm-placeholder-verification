@@ -21,8 +21,9 @@ import "../../../contracts/basic_marshalling.sol";
 
 library lookup_circuit3_0{
     uint256 constant modulus = 28948022309329048855892746252171976963363056481941560715954676764349967630337;
-    
-    function evaluate_gate_be(
+
+
+    function evaluate_lookup_0_be(
         bytes calldata blob,
         uint256 theta,
         uint256 theta_acc,
@@ -34,8 +35,9 @@ library lookup_circuit3_0{
         uint256 sum;
         uint256 prod;
 
+        g = 1;
+
 		selector_value=basic_marshalling.get_uint256_be(blob, 288);
-		g = 1;
 		l = mulmod( 1,selector_value, modulus);
 		theta_acc=theta;
 		sum = 0;
@@ -59,9 +61,12 @@ library lookup_circuit3_0{
 
 		l = addmod( l, mulmod( mulmod(theta_acc, selector_value, modulus), sum, modulus), modulus);
 		theta_acc = mulmod(theta_acc, theta, modulus);
-		g = mulmod(g, mulmod(addmod(1, beta, modulus), addmod(l,gamma, modulus), modulus), modulus);
+		g = mulmod(g, mulmod(addmod(1, beta, modulus), addmod(l, gamma, modulus), modulus), modulus);
+
 
         return( g, theta_acc );
     }
+
+
 }
         
