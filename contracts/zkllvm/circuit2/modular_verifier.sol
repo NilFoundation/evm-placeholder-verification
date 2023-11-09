@@ -124,7 +124,7 @@ contract modular_verifier_circuit2 is IModularVerifier{
     function verify(
         bytes calldata blob,
         uint256[] calldata public_input
-    ) public view{
+    ) public view returns (bool result) {
         verifier_state memory state;
         state.b = true;
         state.gas = gasleft();
@@ -164,6 +164,7 @@ contract modular_verifier_circuit2 is IModularVerifier{
             state.F[2] = permutation_argument[2];
         }
 
+        //4. Lookup library call
                 //No lookups
 
         //5. Push permutation batch to transcript
@@ -239,6 +240,7 @@ contract modular_verifier_circuit2 is IModularVerifier{
         }
 
         console.log("Gas for verification:", state.gas-gasleft());
+        result = state.b;
     }
 }
         

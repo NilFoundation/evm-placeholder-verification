@@ -24,8 +24,8 @@ interface IModularVerifier {
         address commitment_contract_address
     ) external;
 
-    function verify(        
+    function verify(
         bytes calldata blob,
         uint256[] calldata public_input
-    ) external view;
+    ) external view returns (bool result);
 }
