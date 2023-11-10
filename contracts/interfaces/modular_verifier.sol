@@ -16,16 +16,51 @@
 //---------------------------------------------------------------------------//
 pragma solidity ^0.8.0;
 
+/**
+ * @dev Interface class to verify Placeholder proof
+ */
 interface IModularVerifier {
+
+    /**
+     * @dev Emitted when public input is wrong
+     */
+    event WrongPublicInput();
+
+    /**
+     * @dev Emitted when commitment is wrong
+     */
+    event WrongCommitment();
+
+    /**
+     * @dev Emitted when table does not satisfy constraint system
+     */
+    event ConstraintSystemNotSatisfied();
+
+    /**
+     * @dev Emitted when proof is verified
+     */
+    event ProofVerified();
+
+    /**
+     * @dev Emitted when proof verification failed
+     */
+    event ProofVerificationFailed();
+
+
+    /**
+     * @dev Initializes verifier
+     */
     function initialize(
-//        address permutation_argument_contract_address,
         address lookup_argument_contract_address,
         address gate_argument_contract_address,
         address commitment_contract_address
     ) external;
 
+    /**
+     * @dev Verifies proof
+     */
     function verify(
         bytes calldata blob,
         uint256[] calldata public_input
-    ) external view returns (bool result);
+    ) external returns (bool result);
 }

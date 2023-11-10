@@ -199,7 +199,12 @@ task("verify-circuit-proof-all")
             console.log("Verify :",proof_path);
             let proof  = loadProof(proof_path);
             let public_input = loadPublicInput(folder_path + "/input.json");
-            await verifier_contract.verify(proof, public_input, {gasLimit: 30_500_000});
+            let receipt = await(await verifier_contract.verify(proof, public_input, {gasLimit: 30_500_000})).wait();
+            console.log("Gas used: ⛽ ", receipt.gasUsed.toNumber());
+            console.log("Events received:");
+            for(const e of receipt.events) {
+                console.log(e.event);
+            }
             console.log("====================================");
 
 //            proof_path = folder_path + "/proof2.bin";
@@ -236,7 +241,12 @@ task("verify-circuit-proof")
         console.log("Verify :",proof_path);
         let proof  = loadProof(proof_path);
         let public_input = loadPublicInput(folder_path + "/input.json");
-        await verifier_contract.verify(proof, public_input, {gasLimit: 30_500_000});
+        let receipt = await (await verifier_contract.verify(proof, public_input, {gasLimit: 30_500_000})).wait();
+        console.log("Gas used: ⛽ ", receipt.gasUsed.toNumber());
+        console.log("Events received:");
+        for(const e of receipt.events) {
+            console.log(e.event);
+        }
         console.log("====================================");
 
 //            proof_path = folder_path + "/proof2.bin";
