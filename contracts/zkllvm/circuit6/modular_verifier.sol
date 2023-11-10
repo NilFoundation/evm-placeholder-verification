@@ -76,7 +76,6 @@ contract modular_verifier_circuit6 is IModularVerifier{
         uint256 Z_at_xi;
         uint256 l0;
         uint256[f_parts] F;
-        uint256 gas;
         bool b;
     }
 
@@ -124,10 +123,9 @@ contract modular_verifier_circuit6 is IModularVerifier{
     function verify(
         bytes calldata blob,
         uint256[] calldata public_input
-    ) public view returns (bool result) {
+    ) public returns (bool result) {
         verifier_state memory state;
         state.b = true;
-        state.gas = gasleft();
         state.xi = basic_marshalling.get_uint256_be(blob, 0xa1);
         state.Z_at_xi = addmod(field.pow_small(state.xi, rows_amount, modulus), modulus-1, modulus);
         state.l0 = mulmod(
@@ -139,7 +137,7 @@ contract modular_verifier_circuit6 is IModularVerifier{
         //0. Direct public input check
         if(public_input.length > 0) {
             if (!public_input_direct(blob[905:905+736], public_input, state)) {
-                console.log("Wrong public input!");
+                emit WrongPublicInput();
                 state.b = false;
             }
         }
@@ -216,7 +214,6 @@ contract modular_verifier_circuit6 is IModularVerifier{
                 F_consolidated = addmod(F_consolidated, mulmod(state.F[i],transcript.get_field_challenge(tr_state, modulus), modulus), modulus);
                 unchecked{i++;}
             }
-            uint256 points_num = basic_marshalling.get_length(blob, 0xa1 + 0x20);
             transcript.update_transcript_b32_by_offset_calldata(tr_state, blob, 0x59);
         }
 
@@ -232,7 +229,7 @@ contract modular_verifier_circuit6 is IModularVerifier{
             if(!modular_commitment_scheme_circuit6.verify_eval(
                 blob[z_offset - 0x8:], commitments, state.xi, tr_state.current_challenge
             )) {
-                console.log("Error from commitment scheme!");
+                emit WrongCommitment();
                 state.b = false;
             }
         }
@@ -251,13 +248,16 @@ contract modular_verifier_circuit6 is IModularVerifier{
                 unchecked{i++;}
             }
             if( F_consolidated != mulmod(T_consolidated, state.Z_at_xi, modulus) ) {
-                console.log("Error. Table does't satisfy constraint system");
+                emit ConstraintSystemNotSatisfied();
                 state.b = false;
             }
-            if(state.b) console.log("SUCCESS!"); else console.log("FAILURE!");
+            if(state.b) {
+                emit ProofVerified();
+            } else {
+                emit ProofVerificationFailed();
+            }
         }
 
-        console.log("Gas for verification:", state.gas-gasleft());
         result = state.b;
     }
 }
