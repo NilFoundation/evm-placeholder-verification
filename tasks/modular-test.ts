@@ -74,16 +74,31 @@ function loadFieldElement(element){
     return result;
 }
 
-function loadCurveElement(element){
+const limbs = (x: bigint, bits: number) => {
+    let result : BigInt[] = [];
+    while (bits > 0) {
+        result.push(x & 0xFFFFFFFFFFFFn);
+        x >>= 64n;
+        bits -= 64;
+    }
+    return result;
+}
+
+function loadCurveElement(element, bits = 256){
     let result = [];
-    if( element.isLosslessNumber ){
-        result.push(BigInt(element));
+    if( element.isLosslessNumber ) {
+        const l = limbs(BigInt(element), bits);
+        for (let e of l) result.push(e);
     } else if ( typeof(element) == 'string' ){
-        result.push(BigInt(element));
+        const l = limbs(BigInt(element), bits);
+        for (let e of l) result.push(e);
     } else {
-        for(let i in element){
-            let e  = loadFieldElement(element[i]);
-            for(let j in e) result.push(e[j]);
+        for(let i of element){
+            for(let j of loadFieldElement(i)) {
+                for (let e of limbs(BigInt(j), bits)) {
+                    result.push(e);
+                }
+            }
         }
     }
     return result;
@@ -144,12 +159,13 @@ function loadPublicInput(public_input_path){
         for(let i in public_input){
             let field = public_input[i];
             for(let k in field){
+                console.log("parsing: ", k);
                 let element;
                 if( k == 'field' ){
                     element = loadFieldElement(field[k]);
                 }
                 if( k == 'curve' ){
-                    element = loadCurveElement(field[k]);
+                    element = loadCurveElement(field[k], field["bits"]);
                 }
                 if( k == 'int' ){
                     element = loadIntegerElement(field[k]);
@@ -171,47 +187,52 @@ function loadPublicInput(public_input_path){
         return [];
 }
 
+const verify_circuit_proof = async (modular_path: string, circuit: string) => {
+    let folder_path = modular_path + circuit;
+    await deployments.fixture(['ModularVerifierFixture']);
+    //const permutation_argument_contract = await ethers.getContract("modular_permutation_argument_"+circuit);
+    const lookup_argument_contract = await ethers.getContract("modular_lookup_argument_"+circuit);
+    const gate_argument_contract = await ethers.getContract("modular_gate_argument_"+circuit);
+    const commitment_contract = await ethers.getContract("modular_commitment_scheme_"+circuit);
+
+    const verifier_contract = await ethers.getContract("modular_verifier_"+circuit);
+    await verifier_contract.initialize(
+        //permutation_argument_contract.address,
+        lookup_argument_contract.address,
+        gate_argument_contract.address,
+        commitment_contract.address
+    );
+
+    let proof_path = folder_path + "/proof.bin";
+    console.log("Verify :",proof_path);
+    let proof  = loadProof(proof_path);
+    let public_input = loadPublicInput(folder_path + "/public_input.json");
+    console.log("public input: ", public_input);
+    let receipt = await (await verifier_contract.verify(proof, public_input, {gasLimit: 30_500_000})).wait();
+    console.log("Gas used: ⛽ ", receipt.gasUsed.toNumber());
+    console.log("Events received:");
+    const event_icons : {[key:string] : string } = {
+        'WrongPublicInput' : '🤔',
+        'WrongCommitment' : '🤔',
+        'ConstraintSystemNotSatisfied' : '🤔',
+        'ProofVerified' : '✅',
+        'ProofVerificationFailed' : '🛑',
+    };
+
+    for(const e of receipt.events) {
+        //console.log(e);
+        console.log("%s: %s", e.event, event_icons[e.event]);
+    }
+    console.log("====================================");
+}
+
 task("verify-circuit-proof-all")
     .setAction(async (hre) => {
-        console.log("Verify proof in modular style");
+        console.log("Verify proofs of all circuits");
         let modular_path = "../contracts/zkllvm/";
         let circuits = get_subfolders(path.resolve(__dirname, modular_path));
-//        await deployments.fixture(['ModularVerifierFixture']);
-
         for(const k in circuits){
-            let circuit = circuits[k];
-            let folder_path = modular_path + circuit;
-            await deployments.fixture(['ModularVerifierFixture']);
-//            const permutation_argument_contract = await ethers.getContract("modular_permutation_argument_"+circuit);
-            const lookup_argument_contract = await ethers.getContract("modular_lookup_argument_"+circuit);
-            const gate_argument_contract = await ethers.getContract("modular_gate_argument_"+circuit);
-            const commitment_contract = await ethers.getContract("modular_commitment_scheme_"+circuit);
-
-            const verifier_contract = await ethers.getContract("modular_verifier_"+circuit);
-            await verifier_contract.initialize(
-//                permutation_argument_contract.address,
-                lookup_argument_contract.address,
-                gate_argument_contract.address,
-                commitment_contract.address
-            );
-
-            let proof_path = folder_path + "/proof.bin";
-            console.log("Verify :",proof_path);
-            let proof  = loadProof(proof_path);
-            let public_input = loadPublicInput(folder_path + "/input.json");
-            let receipt = await(await verifier_contract.verify(proof, public_input, {gasLimit: 30_500_000})).wait();
-            console.log("Gas used: ⛽ ", receipt.gasUsed.toNumber());
-            console.log("Events received:");
-            for(const e of receipt.events) {
-                console.log(e.event);
-            }
-            console.log("====================================");
-
-//            proof_path = folder_path + "/proof2.bin";
-//            console.log("Verify :",proof_path);
-//            proof  = loadProof(proof_path);
-//            await verifier_contract.verify(proof, {gasLimit: 30_500_000});
-
+            await verify_circuit_proof(modular_path, circuits[k]);
         }
 });
 
@@ -220,37 +241,6 @@ task("verify-circuit-proof")
     .setAction(async (test, hre) => {
         console.log("Run modular verifier for:",test.test);
         let modular_path = "../contracts/zkllvm/";
-
         let circuit = test.test;
-        let folder_path = modular_path + circuit;
-        await deployments.fixture(['ModularVerifierFixture']);
-//            const permutation_argument_contract = await ethers.getContract("modular_permutation_argument_"+circuit);
-        const lookup_argument_contract = await ethers.getContract("modular_lookup_argument_"+circuit);
-        const gate_argument_contract = await ethers.getContract("modular_gate_argument_"+circuit);
-        const commitment_contract = await ethers.getContract("modular_commitment_scheme_"+circuit);
-
-        const verifier_contract = await ethers.getContract("modular_verifier_"+circuit);
-        await verifier_contract.initialize(
-//                permutation_argument_contract.address,
-            lookup_argument_contract.address,
-            gate_argument_contract.address,
-            commitment_contract.address
-        );
-
-        let proof_path = folder_path + "/proof.bin";
-        console.log("Verify :",proof_path);
-        let proof  = loadProof(proof_path);
-        let public_input = loadPublicInput(folder_path + "/input.json");
-        let receipt = await (await verifier_contract.verify(proof, public_input, {gasLimit: 30_500_000})).wait();
-        console.log("Gas used: ⛽ ", receipt.gasUsed.toNumber());
-        console.log("Events received:");
-        for(const e of receipt.events) {
-            console.log(e.event);
-        }
-        console.log("====================================");
-
-//            proof_path = folder_path + "/proof2.bin";
-//            console.log("Verify :",proof_path);
-//            proof  = loadProof(proof_path);
-//            await verifier_contract.verify(proof, {gasLimit: 30_500_000});
+        await verify_circuit_proof(modular_path, circuit);
 });
