@@ -159,7 +159,6 @@ function loadPublicInput(public_input_path){
         for(let i in public_input){
             let field = public_input[i];
             for(let k in field){
-                console.log("parsing: ", k);
                 let element;
                 if( k == 'field' ){
                     element = loadFieldElement(field[k]);
@@ -204,24 +203,29 @@ const verify_circuit_proof = async (modular_path: string, circuit: string) => {
     );
 
     let proof_path = folder_path + "/proof.bin";
-    console.log("Verify :",proof_path);
+    console.log("Verify :", proof_path);
     let proof  = loadProof(proof_path);
     let public_input = loadPublicInput(folder_path + "/public_input.json");
-    console.log("public input: ", public_input);
     let receipt = await (await verifier_contract.verify(proof, public_input, {gasLimit: 30_500_000})).wait();
-    console.log("Gas used: ⛽ ", receipt.gasUsed.toNumber());
+    console.log("⛽Gas used: ", receipt.gasUsed.toNumber());
     console.log("Events received:");
-    const event_icons : {[key:string] : string } = {
-        'WrongPublicInput' : '🤔',
-        'WrongCommitment' : '🤔',
-        'ConstraintSystemNotSatisfied' : '🤔',
-        'ProofVerified' : '✅',
-        'ProofVerificationFailed' : '🛑',
+    const event_to_string = (event) => {
+        switch(event.event) {
+            case 'VerificationResult': {
+                if (BigInt(event.data) != 0n) {
+                    return '✅ProofVerified';
+                } else {
+                    return '🛑ProofVerificationFailed';
+                }
+            }
+                break;
+            default:
+                return '🤔'+event.event;
+        }
     };
 
     for(const e of receipt.events) {
-        //console.log(e);
-        console.log("%s: %s", e.event, event_icons[e.event]);
+        console.log(event_to_string(e));
     }
     console.log("====================================");
 }

@@ -251,12 +251,9 @@ contract modular_verifier_circuit6 is IModularVerifier{
                 emit ConstraintSystemNotSatisfied();
                 state.b = false;
             }
-            if(state.b) {
-                emit ProofVerified();
-            } else {
-                emit ProofVerificationFailed();
-            }
         }
+
+        emit VerificationResult(state.b);
 
         result = state.b;
     }

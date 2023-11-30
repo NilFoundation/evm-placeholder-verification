@@ -20,6 +20,11 @@ pragma solidity >=0.8.4;
 import "../types.sol";
 
 interface ICommitmentScheme {
+    /**
+     * @dev Emitted when proof does not contain valid eta point values
+     */
+    event WrongEtaPointValues();
+
     function initialize(
         bytes32 tr_state_before
     ) external returns(bytes32 tr_state_after);
