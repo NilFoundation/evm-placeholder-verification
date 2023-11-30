@@ -32,20 +32,19 @@ interface IModularVerifier {
     event WrongCommitment();
 
     /**
+     * @dev Emitted when proof does not contain valid eta point values
+     */
+    event WrongEtaPointValues();
+
+    /**
      * @dev Emitted when table does not satisfy constraint system
      */
     event ConstraintSystemNotSatisfied();
 
     /**
-     * @dev Emitted when proof is verified
+     * @dev Emitted when proof verification completed
      */
-    event ProofVerified();
-
-    /**
-     * @dev Emitted when proof verification failed
-     */
-    event ProofVerificationFailed();
-
+    event VerificationResult(bool result);
 
     /**
      * @dev Initializes verifier
