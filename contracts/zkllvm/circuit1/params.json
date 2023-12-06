@@ -4,7 +4,7 @@
     "rows_amount": "16",
     "usable_rows_amount": "13",
     "omega": "14450201850503471296781915119640920297985789873634237091629829669980153907901",
-    "verification_key": "d01dad89947ad38adc7e68ae52f8fb2a1c430fd535887b78fd3ac57a2cbc5f09 f347e1a5c5bec69f49b12f482b4eb2ba2687d9270cb998f29ba4ead18a440703",
+    "verification_key": "79e2a887f921eddebb5757d0186b49b8399ce63d0f04458dec59b032ca76a187 cc2d054528ca2282bfe586c5ccd4bba968132bd2615efc9d0a9b25930722ef00",
     "ar_params": [
         "3",
         "1",
@@ -48,7 +48,7 @@
             "17166126583027276163107155648953851600645935739886150467584901586847365754678"
         ],
         "grinding_params": {
-            "mask": "4294901760"
+            "mask": "4294934528"
         }
     }
 }
