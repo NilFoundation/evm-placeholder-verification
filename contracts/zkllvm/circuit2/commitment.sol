@@ -29,18 +29,18 @@ import "hardhat/console.sol";
 library modular_commitment_scheme_circuit2 {
     uint256 constant modulus = 52435875175126190479447740508185965837690552500527637822603658699938581184513;
     uint64 constant batches_num = 4;
-    uint256 constant r = 3;
+    uint256 constant r = 2;
     uint256 constant lambda = 1;
-    uint256 constant D0_size = 256;
-    uint256 constant max_degree = 15;
-    uint256 constant D0_omega = 36007022166693598376559747923784822035233416720563672082740011604939309541707;
+    uint256 constant D0_size = 128;
+    uint256 constant max_degree = 7;
+    uint256 constant D0_omega = 47309214877430199588914062438791732591241783999377560080318349803002842391998;
     uint256 constant unique_points = 5;
     uint256 constant permutation_point = 3;
     uint256 constant quotient_point = 1;
-    uint256 constant lookup_point = 0;
+    uint256 constant lookup_point = 4198358955428360095;
     bytes constant   points_ids = hex"02020202020202020404020200010101";
-    uint256 constant omega = 14788168760825820622209131888203028446852016562542525606630160374691593895118;
-    uint256 constant _etha = 12217208067492249031102872072655908974751031861422067257283053495957748658893;
+    uint256 constant omega = 23674694431658770659612952115660802947967373701506253797663184111817857449850;
+    uint256 constant _etha = 16144342667207310663168115290000665798698754276025400208440163075201405688938;
 
     struct commitment_state{
         bytes   leaf_data;
@@ -438,36 +438,29 @@ unchecked {
         tr_state.current_challenge = transcript_state;
         commitment_state memory state;
 
-        		{
-			uint256 poly_at_eta;
-			/* 1 - 2*permutation_size */
-			poly_at_eta = basic_marshalling.get_uint256_be(blob, 40);// 0
-			if(poly_at_eta != 0x1b02b1d914ea72056989679d7826ca1f9adbc9880002cf6daffb7f1fa3b332cd) return false;
-			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x68);// 0x1
-			if(poly_at_eta != 0x4925359c68cba0ddaf87fd463f6daed7e844deb500155000cfe079de79e6639a) return false;
-			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0xa8);// 0x2
-			if(poly_at_eta != 0x304dd9fa371b70eeffd08ccb957867d20aeb86e7009bc009af235519554cb932) return false;
-			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0xe8);// 0x3
-			if(poly_at_eta != 0x6a45a7312e851bf898402981030726b3a4f5684b04458845c9f753b35519105c) return false;
-			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x128);// 0x4
-			if(poly_at_eta != 0x1b02b1d914ea72056989679d7826ca1f9adbc9880002cf6daffb7f1fa3b332cd) return false;
-			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x168);// 0x5
-			if(poly_at_eta != 0x3d9bd931d08eee60195862ede438d303f80e10fc9093f2a0920d1f3d2bed12c9) return false;
-			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x1a8);// 0x6
-			if(poly_at_eta != 0x5d118568c35ccff0c8e14aeb77fcd0a05ba585f78d646348b66c554b10625e60) return false;
-			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x1e8);// 0x7
-			if(poly_at_eta != 0x3a68771f10abc9d88dbdf7ce531cd3044141f573048011fdb1b76e4ec34435a6) return false;
-			/* 2 - special selectors */
-			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x248);// 0x8
-			if(poly_at_eta != 0x3f1b4adcabfaa14cf2ee7ec3990f58d91ae75bfaaefe1327313d89eb23baf96f) return false;
-			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x2a8);// 0x9
-			if(poly_at_eta != 0x662761bdeda7376d374c58b68475ecfa30064120c27daa97edfbda94eecaeaff) return false;
-			/* 3 - constant columns */
-			/* 4 - selector columns */
-			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x2e8);// 0xa
-			if(poly_at_eta != 0x369369e984155e5f975bd41103c801ea569e500244152d768985604be0800b06) return false;
-			poly_at_eta = basic_marshalling.get_uint256_be(blob, 0x328);// 0xb
-			if(poly_at_eta != 0x3cd3d24de7686966f8fa3577ea539d516c0a16d46d0e2c283db58b157952ca53) return false;
+		/* eta points check */
+		{
+			uint256[12] memory points;
+			/* 1. 2*permutation_size */
+			points[0] = basic_marshalling.get_uint256_be(blob,0x28);
+			points[0x1] = basic_marshalling.get_uint256_be(blob,0x68);
+			points[0x2] = basic_marshalling.get_uint256_be(blob,0xa8);
+			points[0x3] = basic_marshalling.get_uint256_be(blob,0xe8);
+			points[0x4] = basic_marshalling.get_uint256_be(blob,0x128);
+			points[0x5] = basic_marshalling.get_uint256_be(blob,0x168);
+			points[0x6] = basic_marshalling.get_uint256_be(blob,0x1a8);
+			points[0x7] = basic_marshalling.get_uint256_be(blob,0x1e8);
+			/* 2. special selectors */
+			points[0x8] = basic_marshalling.get_uint256_be(blob,0x248);
+			points[0x9] = basic_marshalling.get_uint256_be(blob,0x2a8);
+			/* 3. constant columns */
+			/* 4. selector columns */
+			points[0xa] = basic_marshalling.get_uint256_be(blob,0x2e8);
+			points[0xb] = basic_marshalling.get_uint256_be(blob,0x328);
+			/* Check keccak(points) */
+			if ( bytes32(0x07f5a5a6264a7dce9168a9dc927495cf9a778f72e8b15598fcce1671331e89c6) != keccak256(abi.encode(points))) {
+				return false;
+			}
 		}
 
 

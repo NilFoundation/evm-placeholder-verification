@@ -33,7 +33,7 @@ contract modular_verifier_circuit6 is IModularVerifier{
     uint256 constant modulus = 28948022309329048855892746252171976963363056481941560715954676764349967630337;
     bool    constant use_lookups = false;
     bytes32 constant vk1 = bytes32(0xfea6e42db0467c50e77d424afd0d4a1ab72abd18869974ea22808fb0a672d668);
-    bytes32 constant vk2 = bytes32(0xf3734d9198dd0c50151dab1fd6c015aea84429f69a6cb747110987cbe064ecd7);
+    bytes32 constant vk2 = bytes32(0x160ed7c06a00a49da8eeb27a545fa9ba2619ac3c2c7d024c59dc80a405a12db4);
     bytes32 transcript_state;
     address _gate_argument_address;
     address _permutation_argument_address;

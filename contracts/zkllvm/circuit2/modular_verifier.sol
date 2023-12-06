@@ -32,8 +32,8 @@ import "../../algebra/field.sol";
 contract modular_verifier_circuit2 is IModularVerifier{
     uint256 constant modulus = 52435875175126190479447740508185965837690552500527637822603658699938581184513;
     bool    constant use_lookups = false;
-    bytes32 constant vk1 = bytes32(0x1154d6227897bca2848e9f5cb8eb7319c4c9f132830e93634656ba8282263a78);
-    bytes32 constant vk2 = bytes32(0xb024bd12fb5b07a167bc8a510f274a06946eac1240e823dd682ec71d18e04b4e);
+    bytes32 constant vk1 = bytes32(0xdf5209ad8762f94b28a73cd7586cfe3511910263bd427986f73d8df50a5b875b);
+    bytes32 constant vk2 = bytes32(0x467bea5db0ea69781be8939df7bee6936d3f96b624bb189c423b6021ba43c9d6);
     bytes32 transcript_state;
     address _gate_argument_address;
     address _permutation_argument_address;
@@ -45,8 +45,8 @@ contract modular_verifier_circuit2 is IModularVerifier{
     uint64  constant table_offset = z_offset + 0x80 * 4 + 0xc0;
     uint64  constant table_end_offset = table_offset + 288;
     uint64  constant quotient_offset = 352;
-    uint64  constant rows_amount = 16;
-    uint256 constant omega = 14788168760825820622209131888203028446852016562542525606630160374691593895118;
+    uint64  constant rows_amount = 8;
+    uint256 constant omega = 23674694431658770659612952115660802947967373701506253797663184111817857449850;
     uint256 constant special_selectors_offset = z_offset + 4 * 0x80;
 
     function initialize(
