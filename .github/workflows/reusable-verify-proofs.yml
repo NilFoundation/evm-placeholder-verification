@@ -1,0 +1,61 @@
+name: Verify Proofs (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      artifact-name:
+        type: string
+        description: 'Name of the artifact to extract'
+        required: true
+      test-names:
+        type: string
+        description: 'Names of the tests to run (one per line)'
+        required: true
+      evm-placeholder-verification-ref:
+        type: string
+        description: "Reference to evm-placeholder-verification repository to checkout at"
+        required: true
+      refs:
+        type: string
+        description: "Lines with repo names and refs (e.g. `org/repo: ref`)"
+        required: false
+
+jobs:
+  run-tests:
+    runs-on: [ ubuntu-22.04 ]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: 'NilFoundation/evm-placeholder-verification'
+          ref: ${{ inputs.evm-placeholder-verification-ref }}
+
+      - name: Checkout modules to specified refs
+        if: inputs.refs != ''
+        uses: NilFoundation/ci-cd/actions/recursive-checkout@v1.1.1
+        with:
+          paths: ${{ github.workspace }}/**
+          refs: ${{ inputs.refs }}
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3.6.0
+
+      - name: Install node dependencies
+        run: |
+          npm install
+
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: ./contracts/zkllvm
+
+      - name: Hardhat deploy
+        run: |
+          npx hardhat deploy
+
+      - name: Verification of zkllvm proofs
+        run: |
+          echo "${{ inputs.test-names }}" | awk '{$1=$1};1' | sed '/^$/d' | while read test_name
+          do
+            npx hardhat verify-circuit-proof --test "$test_name"
+          done
