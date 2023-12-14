@@ -17,7 +17,7 @@ on:
         required: true
       refs:
         type: string
-        description: "Lines with repo names and refs (e.g. `org/repo: ref`)"
+        description: "Lines with repo names and refs (e.g. `org/repo: ref`). Used for SyncWith handling"
         required: false
 
 jobs:
@@ -33,7 +33,7 @@ jobs:
         if: inputs.refs != ''
         uses: NilFoundation/ci-cd/actions/recursive-checkout@v1.1.1
         with:
-          paths: ${{ github.workspace }}/**
+          paths: ${{ github.workspace }} # There are no submodules, the only thing we could want to checkout is the current repo
           refs: ${{ inputs.refs }}
 
       - name: Setup Node.js environment
@@ -55,7 +55,13 @@ jobs:
 
       - name: Verification of zkllvm proofs
         run: |
-          echo "${{ inputs.test-names }}" | awk '{$1=$1};1' | sed '/^$/d' | while read test_name
+          failure_met=0
+          while read test_name
           do
-            npx hardhat verify-circuit-proof --test "$test_name"
-          done
+            npx hardhat verify-circuit-proof --test "$test_name" || failure_met=1
+          done < <(echo "${{ inputs.test-names }}" | awk '{$1=$1};1' | sed '/^$/d')
+
+          if [ $failure_met -eq 1 ]; then
+            echo "One or more verifications failed."
+            exit 1
+          fi
