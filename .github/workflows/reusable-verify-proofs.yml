@@ -44,7 +44,7 @@ jobs:
           npm install
 
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.artifact-name }}
           path: ./contracts/zkllvm
