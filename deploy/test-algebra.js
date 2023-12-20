@@ -6,6 +6,26 @@ module.exports = async function() {
     const {deploy} = deployments;
     const {deployer, tokenOwner} = await getNamedAccounts();
 
+    await deploy('test_2pi', {
+        from: deployer,
+        log : true,
+    });
+
+    await deploy('test_field3', {
+        from: deployer,
+        log : true,
+    });
+
+    await deploy('field3_gas_estimation', {
+        from: deployer,
+        log : true,
+    });
+
+    await deploy('test_uint512', {
+        from: deployer,
+        log : true,
+    });
+
     await deploy('TestFieldMath', {
         from: deployer,
         log : true,
