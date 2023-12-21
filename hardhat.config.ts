@@ -5,6 +5,8 @@ require("hardhat-deploy");
 require('hardhat-deploy-ethers');
 require('hardhat-contract-sizer');
 
+import "hardhat-gas-reporter"
+
 import './tasks/modular-test'
 
 const SEPOLIA_PRIVATE_KEY="SEPOLIA_PRIVATE_KEY"
@@ -41,4 +43,7 @@ module.exports = {
     apiKey: ETHERSCAN_KEY,
   },
   allowUnlimitedContractSize: true,
+  gasReporter : {
+      enabled: true
+  }
 };
