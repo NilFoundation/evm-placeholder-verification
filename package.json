@@ -24,6 +24,7 @@
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
     "@nomiclabs/hardhat-ethers": "^2.2.2",
     "@truffle/hdwallet-provider": "^2.0.1",
+    "@openzeppelin/hardhat-upgrades": "^1.28.0",
     "as-table": "1.0.55",
     "bip39": "^3.0.4",
     "dotenv": "^16.0.3",

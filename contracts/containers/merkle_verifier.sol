@@ -55,7 +55,7 @@ library merkle_verifier {
 
     function skip_merkle_proof_be(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 result_offset) {
-        unchecked { result_offset = offset + LAYERS_OFFSET; }
+        unchecked {result_offset = offset + LAYERS_OFFSET;}
         assembly {
             result_offset := add(
                 result_offset,
@@ -74,7 +74,7 @@ library merkle_verifier {
 
     function skip_merkle_proof_be_check(bytes calldata blob, uint256 offset)
     internal pure returns (uint256 result_offset) {
-        unchecked { result_offset = offset + LAYERS_OFFSET; }
+        unchecked {result_offset = offset + LAYERS_OFFSET;}
         require(result_offset < blob.length);
         assembly {
             result_offset := add(
@@ -100,7 +100,7 @@ library merkle_verifier {
         assembly {
             let depth := shr(LENGTH_RESTORING_SHIFT, calldataload(add(blob.offset, add(offset, DEPTH_OFFSET))))
 
-            // save leaf hash data to required position
+        // save leaf hash data to required position
             let pos := shr(
                 LENGTH_RESTORING_SHIFT,
                 calldataload(
@@ -231,12 +231,12 @@ library merkle_verifier {
         }
         result = (verified_data == root);
     }
-    
+
     // We store merkle root as an octet vector. At first length==0x20 is stored.
     // We should skip it.
     // TODO: this function should return bytes32
     function get_merkle_root_from_blob(bytes calldata blob, uint256 merkle_root_offset)
-    internal pure returns(uint256 root){
+    internal pure returns (uint256 root){
         assembly {
             root := calldataload(add(blob.offset, add(merkle_root_offset, 0x8)))
         }
@@ -244,7 +244,7 @@ library merkle_verifier {
 
     // TODO: This function should return bytes32
     function get_merkle_root_from_proof(bytes calldata blob, uint256 merkle_proof_offset)
-    internal pure returns(uint256 root){
+    internal pure returns (uint256 root){
         assembly {
             root := calldataload(add(blob.offset, add(merkle_proof_offset, ROOT_OFFSET)))
         }
@@ -265,7 +265,7 @@ library merkle_verifier {
     }
 
     function parse_verify_merkle_proof_bytes_be(bytes calldata blob, uint256 offset, bytes memory verified_data_bytes,
-                                                uint256 verified_data_bytes_len)
+        uint256 verified_data_bytes_len)
     internal pure returns (bool result) {
         bytes32 verified_data;
         assembly {

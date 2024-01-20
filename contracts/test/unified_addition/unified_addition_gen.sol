@@ -23,7 +23,7 @@ import "../../basic_marshalling.sol";
 import "../../commitments/batched_lpc_verifier.sol";
 import "../../interfaces/gate_argument.sol";
 
-contract UnifiedAdditionGate is IGateArgument{
+contract UnifiedAdditionGate is IGateArgument {
     uint256 constant GATES_N = 1;
 
     uint256 constant MODULUS_OFFSET = 0x0;
@@ -34,7 +34,7 @@ contract UnifiedAdditionGate is IGateArgument{
     uint256 constant GATES_EVALUATIONS_OFFSET = 0x40;
     uint256 constant THETA_ACC_OFFSET = 0x60;
     uint256 constant WITNESS_EVALUATIONS_OFFSET = 0x80;
-    uint256 constant SELECTOR_EVALUATIONS_OFFSET =0xa0;
+    uint256 constant SELECTOR_EVALUATIONS_OFFSET = 0xa0;
 
     // TODO: columns_rotations could be hard-coded
     // gate argument local variables may be different for different circuits
@@ -74,10 +74,10 @@ contract UnifiedAdditionGate is IGateArgument{
         local_vars.selector_evaluations = new uint256[](GATES_N);
         for (uint256 i = 0; i < GATES_N; i++) {
             local_vars.selector_evaluations[i] = batched_lpc_verifier.get_fixed_values_z_i_j_from_proof_be(
-                    blob,
-                    eval_proof_combined_value_offset,
-                    i + ar_params.permutation_columns + ar_params.permutation_columns + ar_params.constant_columns,
-                    0
+                blob,
+                eval_proof_combined_value_offset,
+                i + ar_params.permutation_columns + ar_params.permutation_columns + ar_params.constant_columns,
+                0
             );
         }
 
@@ -91,13 +91,13 @@ contract UnifiedAdditionGate is IGateArgument{
 
             function get_eval_i_by_rotation_idx(idx, rot_idx, ptr) -> result {
                 result := mload(add(add(mload(add(add(ptr, 0x20), mul(0x20, idx))), 0x20),
-                          mul(0x20, rot_idx)))
+                    mul(0x20, rot_idx)))
             }
 
             function get_selector_i(idx, ptr) -> result {
                 result := mload(add(add(ptr, 0x20), mul(0x20, idx)))
             }
-            
+
             let x1 := add(local_vars, CONSTRAINT_EVAL_OFFSET)
             let x2 := add(local_vars, WITNESS_EVALUATIONS_OFFSET)
             let x3 := get_eval_i_by_rotation_idx(0, 0, mload(x2))
@@ -154,7 +154,7 @@ contract UnifiedAdditionGate is IGateArgument{
             mstore(x1, addmod(mload(x1), mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000, mulmod(x3, mulmod(x4, mulmod(get_eval_i_by_rotation_idx(1, 0, mload(x2)), x3, modulus), modulus), modulus), modulus), modulus))
 
             mstore(x1, addmod(mload(x1), mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000, mulmod(x3, mulmod(x4, mulmod(get_eval_i_by_rotation_idx(1, 0, mload(x2)), x4, modulus), modulus), modulus), modulus), modulus))
-            // Last working string
+        // Last working string
             mstore(x1, addmod(mload(x1), mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000, mulmod(x3, mulmod(x4, mulmod(get_eval_i_by_rotation_idx(1, 0, mload(x2)), get_eval_i_by_rotation_idx(4, 0, mload(x2)), modulus), modulus), modulus), modulus), modulus))
             mstore(add(local_vars, GATE_EVAL_OFFSET), addmod(mload(add(local_vars, GATE_EVAL_OFFSET)), mulmod(mload(x1), theta_acc, modulus), modulus))
             theta_acc := mulmod(theta_acc, theta, modulus)
@@ -206,7 +206,7 @@ contract UnifiedAdditionGate is IGateArgument{
             mstore(add(local_vars, GATE_EVAL_OFFSET), addmod(mload(add(local_vars, GATE_EVAL_OFFSET)), mulmod(mload(x1), theta_acc, modulus), modulus))
             theta_acc := mulmod(theta_acc, theta, modulus)
             mstore(x1, 0)
-            //1st
+        //1st
             mstore(x1, addmod(mload(x1), get_eval_i_by_rotation_idx(5, 0, mload(x2)), modulus))
             mstore(x1, addmod(mload(x1), mulmod(x3, mulmod(get_eval_i_by_rotation_idx(8, 0, mload(x2)), get_eval_i_by_rotation_idx(5, 0, mload(x2)), modulus), modulus), modulus))
             mstore(x1, addmod(mload(x1), mulmod(0x40000000000000000000000000000000224698fc094cf91b992d30ed00000000, mulmod(x4, mulmod(get_eval_i_by_rotation_idx(8, 0, mload(x2)), get_eval_i_by_rotation_idx(5, 0, mload(x2)), modulus), modulus), modulus), modulus))

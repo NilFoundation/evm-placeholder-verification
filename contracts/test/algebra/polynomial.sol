@@ -140,7 +140,7 @@ contract TestPolynomial {
         coeffs_sum[18] = uint256(35421751487726592093113600554305470436997497989275001484151724878012223715200);
         coeffs_sum[19] = uint256(51247318461592091828807885904778616016408560728322067993790715232596969553727);
         uint256[] memory a_plus_b = polynomial.add_poly(coeffs_a, coeffs_b, modulus);
-        for (uint i = 0; i < 20; i++){
+        for (uint i = 0; i < 20; i++) {
             require(coeffs_sum[i] == a_plus_b[i], "Polynomial addition result is not correct");
         }
     }
@@ -228,7 +228,7 @@ contract TestPolynomial {
         coeffs_mul[33] = uint256(18846607898602946561630534830837489232188727774005472911573896473436323752210);
         uint256[] memory a_mul_b = polynomial.mul_poly(coeffs_a, coeffs_b, modulus);
         require(coeffs_mul.length == a_mul_b.length, "Polynomial multiplication result length is not correct");
-        for (uint i = 0; i < 34; i++){
+        for (uint i = 0; i < 34; i++) {
             require(coeffs_mul[i] == a_mul_b[i], "Polynomial multiplication result is not correct");
         }
     }

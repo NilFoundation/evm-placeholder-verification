@@ -17,7 +17,7 @@
 pragma solidity ^0.8.0;
 
 interface IGateArgument {
-    function verify(        
+    function verify(
         bytes calldata blob,
         uint256 theta
     ) external view returns (uint256 F);

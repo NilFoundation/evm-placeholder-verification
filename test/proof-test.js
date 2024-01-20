@@ -51,10 +51,10 @@ describe('Proof Tests', function () {
         return params;
     }
 
-    function loadPublicInput(public_input_path){
-        if(fs.existsSync(public_input_path)){
+    function loadPublicInput(public_input_path) {
+        if (fs.existsSync(public_input_path)) {
             return losslessJSON.parse(fs.readFileSync(jsonFile, 'utf8'));
-        } else 
+        } else
             return [];
     }
 
@@ -70,18 +70,18 @@ describe('Proof Tests', function () {
         let configPath = "./data/unified_addition/lambda2.json"
         let proofPath = "./data/unified_addition/lambda2.data"
         let publicInputPath = "./data/unified_addition/public_input.json";
-        let params = getVerifierParams(configPath,proofPath, publicInputPath);
+        let params = getVerifierParams(configPath, proofPath, publicInputPath);
         await deployments.fixture(['testPlaceholderAPIConsumerFixture', 'unifiedAdditionGateFixture', 'placeholderVerifierFixture']);
 
         let testPlaceholderAPI = await ethers.getContract('TestPlaceholderVerifier');
         let unifiedAdditionGate = await ethers.getContract('UnifiedAdditionGate');
         let placeholderVerifier = await ethers.getContract('PlaceholderVerifier');
-        
+
         await testPlaceholderAPI.initialize(placeholderVerifier.address);
         await testPlaceholderAPI.verify(
-            params['proof'],params['init_params'], 
+            params['proof'], params['init_params'],
             params['columns_rotations'], params['public_input'],
-            unifiedAdditionGate.address ,{gasLimit: 30_500_000}
+            unifiedAdditionGate.address, {gasLimit: 30_500_000}
         );
     });
 })

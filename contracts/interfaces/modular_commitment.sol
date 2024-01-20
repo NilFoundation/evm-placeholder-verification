@@ -23,7 +23,7 @@ interface ICommitmentScheme {
 
     function initialize(
         bytes32 tr_state_before
-    ) external returns(bytes32 tr_state_after);
+    ) external returns (bytes32 tr_state_after);
 
     // Append commitments
     function verify_eval(

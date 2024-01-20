@@ -22,7 +22,6 @@ pragma solidity >=0.8.4;
 import "./field.sol";
 import "../basic_marshalling.sol";
 
-
 /**
  * @title Turbo Plonk polynomial evaluation
  * @dev Implementation of Turbo Plonk's polynomial evaluation algorithms
@@ -33,8 +32,8 @@ library polynomial {
     uint256 constant LENGTH_OCTETS = 8;
 
     function multiply_poly_on_coeff(uint256[] memory coeffs, uint256 mul, uint256 modulus)
-    internal pure{
-        for(uint256 i = 0; i < coeffs.length; i++){
+    internal pure {
+        for (uint256 i = 0; i < coeffs.length; i++) {
             coeffs[i] = mulmod(coeffs[i], mul, modulus);
         }
     }
@@ -52,10 +51,10 @@ library polynomial {
         uint256 result;
         assembly {
             let cur_coefs := add(coeffs, mul(mload(coeffs), 0x20))
-            for { } gt(cur_coefs, coeffs) {} {
+            for {} gt(cur_coefs, coeffs) {} {
                 result := addmod(mulmod(result, point, modulus),
-                                mload(cur_coefs), // (i - 1) * 32
-                                modulus)
+                    mload(cur_coefs), // (i - 1) * 32
+                    modulus)
                 cur_coefs := sub(cur_coefs, 0x20)
             }
         }
@@ -68,10 +67,10 @@ library polynomial {
         for (uint256 i = len; i > 0;) {
             assembly {
                 result := addmod(mulmod(result, point, modulus),
-                                 calldataload(add(add(blob.offset, offset), shl(0x05, sub(i, 0x01)))), // (i - 1) * 32
-                                 modulus)
+                    calldataload(add(add(blob.offset, offset), shl(0x05, sub(i, 0x01)))), // (i - 1) * 32
+                    modulus)
             }
-            unchecked{ i--; }
+            unchecked{i--;}
         }
 //        assembly {
 //            let i := sub(add(blob.offset, add(offset, mul(len, 0x20))), 0x20)
@@ -94,16 +93,16 @@ library polynomial {
                     i := add(i, 0x20)
                 } {
                     mstore(
-                    add(add(result, 0x20), i),
-                    addmod(mload(add(add(a, 0x20), i)), mload(add(add(b, 0x20), i)), modulus)
+                        add(add(result, 0x20), i),
+                        addmod(mload(add(add(a, 0x20), i)), mload(add(add(b, 0x20), i)), modulus)
                     )
                 }
                 for {} lt(i, mul(mload(b), 0x20)) {
                     i := add(i, 0x20)
                 } {
                     mstore(
-                    add(add(result, 0x20), i),
-                    mload(add(b, add(0x20, i)))
+                        add(add(result, 0x20), i),
+                        mload(add(b, add(0x20, i)))
                     )
                 }
             }
@@ -115,16 +114,16 @@ library polynomial {
                     i := add(i, 0x20)
                 } {
                     mstore(
-                    add(add(result, 0x20), i),
-                    addmod(mload(add(add(a, 0x20), i)), mload(add(add(b, 0x20), i)), modulus)
+                        add(add(result, 0x20), i),
+                        addmod(mload(add(add(a, 0x20), i)), mload(add(add(b, 0x20), i)), modulus)
                     )
                 }
                 for {} lt(i, mul(mload(a), 0x20)) {
                     i := add(i, 0x20)
                 } {
                     mstore(
-                    add(add(result, 0x20), i),
-                    mload(add(a, add(0x20, i)))
+                        add(add(result, 0x20), i),
+                        mload(add(a, add(0x20, i)))
                     )
                 }
             }
@@ -138,15 +137,15 @@ library polynomial {
             for (uint256 j = 0; j < a.length;) {
                 assembly {
                     mstore(add(add(result, 0x20), mul(add(j, i), 0x20)),
-                           addmod(mload(add(add(result, 0x20), mul(add(j, i), 0x20))),
-                                   mulmod(mload(add(add(a, 0x20), mul(j, 0x20))),
-                                          mload(add(add(b, 0x20), mul(i, 0x20))), modulus),
-                                   modulus)
+                        addmod(mload(add(add(result, 0x20), mul(add(j, i), 0x20))),
+                            mulmod(mload(add(add(a, 0x20), mul(j, 0x20))),
+                                mload(add(add(b, 0x20), mul(i, 0x20))), modulus),
+                            modulus)
                     )
                 }
-                unchecked{ j++; }
+                unchecked{j++;}
             }
-            unchecked{ i++; }
+            unchecked{i++;}
         }
         return result;
     }
@@ -170,7 +169,7 @@ library polynomial {
                 thisTerm[0] = field.fdiv(modulus - xs[j], denominator, modulus);
                 thisTerm[1] = field.fdiv(uint256(1), denominator, modulus);
                 thisPoly = mul_poly(thisPoly, thisTerm, modulus);
-                unchecked{ j++; }
+                unchecked{j++;}
             }
             if (fxs.length + 1 >= i) {
                 uint256[] memory multiple = new uint256[](1);
@@ -178,12 +177,12 @@ library polynomial {
                 thisPoly = mul_poly(thisPoly, multiple, modulus);
             }
             result = add_poly(result, thisPoly, modulus);
-            unchecked { i++; }
+            unchecked {i++;}
         }
     }
 
     function interpolate_evaluate_by_2_points_neg_x(uint256 x, uint256 dblXInv, uint256 fX, uint256 fMinusX,
-                                                    uint256 evalPoint, uint256 modulus
+        uint256 evalPoint, uint256 modulus
     ) internal pure returns (uint256 result) {
         assembly {
             result := addmod(
@@ -317,9 +316,9 @@ library polynomial {
             result = interpolate_by_2_points(blob, x, fx_offset, modulus);
             return result;
         } else if (x.length == 3) {
-            uint256 y0 = field.fdiv(basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 0), field.fmul(field.fsub(x[0], x[1],modulus), field.fsub(x[0], x[2],modulus), modulus), modulus);
-            uint256 y1 = field.fdiv(basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 1), field.fmul(field.fsub(x[1], x[0],modulus), field.fsub(x[1], x[2],modulus), modulus), modulus);
-            uint256 y2 = field.fdiv(basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 2), field.fmul(field.fsub(x[2], x[0],modulus), field.fsub(x[2], x[1],modulus), modulus), modulus);
+            uint256 y0 = field.fdiv(basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 0), field.fmul(field.fsub(x[0], x[1], modulus), field.fsub(x[0], x[2], modulus), modulus), modulus);
+            uint256 y1 = field.fdiv(basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 1), field.fmul(field.fsub(x[1], x[0], modulus), field.fsub(x[1], x[2], modulus), modulus), modulus);
+            uint256 y2 = field.fdiv(basic_marshalling.get_i_uint256_from_vector(blob, fx_offset, 2), field.fmul(field.fsub(x[2], x[0], modulus), field.fsub(x[2], x[1], modulus), modulus), modulus);
 
             result = new uint256[](3);
             assembly {

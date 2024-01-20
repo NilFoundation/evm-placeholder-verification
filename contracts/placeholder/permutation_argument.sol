@@ -70,21 +70,21 @@ library permutation_argument {
                 add(local_vars, G_OFFSET),
                 mulmod(
                     mload(add(local_vars, G_OFFSET)),
-                    // column_polynomials_values[i] + beta * S_id[i].evaluate(challenge) + gamma
+                // column_polynomials_values[i] + beta * S_id[i].evaluate(challenge) + gamma
                     addmod(
-                        // column_polynomials_values[i]
+                    // column_polynomials_values[i]
                         column_polynomials_values_i,
-                        // beta * S_id[i].evaluate(challenge) + gamma
+                    // beta * S_id[i].evaluate(challenge) + gamma
                         addmod(
-                            // beta * S_id[i].evaluate(challenge)
+                        // beta * S_id[i].evaluate(challenge)
                             mulmod(
-                                // beta
+                            // beta
                                 mload(add(local_vars, BETA_OFFSET)),
-                                // S_id[i].evaluate(challenge)
+                            // S_id[i].evaluate(challenge)
                                 mload(add(local_vars, S_ID_I_OFFSET)),
                                 modulus
                             ),
-                            // gamma
+                        // gamma
                             mload(add(local_vars, GAMMA_OFFSET)),
                             modulus
                         ),
@@ -97,21 +97,21 @@ library permutation_argument {
                 add(local_vars, H_OFFSET),
                 mulmod(
                     mload(add(local_vars, H_OFFSET)),
-                    // column_polynomials_values[i] + beta * S_sigma[i].evaluate(challenge) + gamma
+                // column_polynomials_values[i] + beta * S_sigma[i].evaluate(challenge) + gamma
                     addmod(
-                        // column_polynomials_values[i]
+                    // column_polynomials_values[i]
                         column_polynomials_values_i,
-                        // beta * S_sigma[i].evaluate(challenge) + gamma
+                    // beta * S_sigma[i].evaluate(challenge) + gamma
                         addmod(
-                            // beta * S_sigma[i].evaluate(challenge)
+                        // beta * S_sigma[i].evaluate(challenge)
                             mulmod(
-                                // beta
+                            // beta
                                 mload(add(local_vars, BETA_OFFSET)),
-                                // S_sigma[i].evaluate(challenge)
+                            // S_sigma[i].evaluate(challenge)
                                 mload(add(local_vars, S_SIGMA_I_OFFSET)),
                                 modulus
                             ),
-                            // gamma
+                        // gamma
                             mload(add(local_vars, GAMMA_OFFSET)),
                             modulus
                         ),
@@ -159,7 +159,6 @@ library permutation_argument {
         local_vars.tmp2 = ar_params.public_input_columns;
         local_vars.tmp3 = ar_params.constant_columns;
 
-
         // 3. Calculate h_perm, g_perm at challenge pointa
         local_vars.g = 1;
         local_vars.h = 1;
@@ -173,7 +172,7 @@ library permutation_argument {
                 local_vars.idx2 < common_data.columns_rotations[local_vars.idx1].length;
                 local_vars.idx2++
             ) {
-                if (common_data.columns_rotations[local_vars.idx1][local_vars.idx2] == 0 ) {
+                if (common_data.columns_rotations[local_vars.idx1][local_vars.idx2] == 0) {
                     local_vars.zero_index = local_vars.idx2;
                 }
             }
@@ -215,7 +214,7 @@ library permutation_argument {
                         local_vars.zero_index
                     )
                 );
-            } else if ( local_vars.idx1 <  local_vars.tmp1 + local_vars.tmp2 + local_vars.tmp3 ) {
+            } else if (local_vars.idx1 < local_vars.tmp1 + local_vars.tmp2 + local_vars.tmp3) {
                 eval_permutations_at_challenge(
                     fri_params,
                     local_vars,
@@ -237,13 +236,13 @@ library permutation_argument {
         );
 
         local_vars.q_last_eval = batched_lpc_verifier.get_fixed_values_z_i_j_from_proof_be(
-            blob, 
+            blob,
             proof_map.eval_proof_combined_value_offset,       // special selector 0
             ar_params.permutation_columns + ar_params.permutation_columns + ar_params.constant_columns + ar_params.selector_columns,
             0
         );
         local_vars.q_blind_eval = batched_lpc_verifier.get_fixed_values_z_i_j_from_proof_be(
-            blob, 
+            blob,
             proof_map.eval_proof_combined_value_offset,       // special selector 1
             ar_params.permutation_columns + ar_params.permutation_columns + ar_params.constant_columns + ar_params.selector_columns + 1,
             0
@@ -256,7 +255,7 @@ library permutation_argument {
         assembly {
             let modulus := mload(fri_params)
 
-            // F[0]
+        // F[0]
             mstore(
                 add(F, 0x20),
                 mulmod(
@@ -273,7 +272,7 @@ library permutation_argument {
                     ),
                     addmod(
                         1,
-                        // one - perm_polynomial_value
+                    // one - perm_polynomial_value
                         sub(
                             modulus,
                             mload(add(local_vars, PERM_POLYNOMIAL_VALUE_OFFSET))
@@ -286,25 +285,25 @@ library permutation_argument {
         }
         assembly{
             let modulus := mload(fri_params)
-            // F[1]
+        // F[1]
             mstore(
                 add(F, 0x40),
-                // (one - preprocessed_data.q_last.evaluate(challenge) -
-                //  preprocessed_data.q_blind.evaluate(challenge)) *
-                //  (perm_polynomial_shifted_value * h - perm_polynomial_value * g)
+            // (one - preprocessed_data.q_last.evaluate(challenge) -
+            //  preprocessed_data.q_blind.evaluate(challenge)) *
+            //  (perm_polynomial_shifted_value * h - perm_polynomial_value * g)
                 mulmod(
-                    // one - preprocessed_data.q_last.evaluate(challenge) -
-                    //  preprocessed_data.q_blind.evaluate(challenge)
+                // one - preprocessed_data.q_last.evaluate(challenge) -
+                //  preprocessed_data.q_blind.evaluate(challenge)
                     addmod(
                         1,
-                        // -preprocessed_data.q_last.evaluate(challenge) - preprocessed_data.q_blind.evaluate(challenge)
+                    // -preprocessed_data.q_last.evaluate(challenge) - preprocessed_data.q_blind.evaluate(challenge)
                         addmod(
-                            // -preprocessed_data.q_last.evaluate(challenge)
+                        // -preprocessed_data.q_last.evaluate(challenge)
                             sub(
                                 modulus,
                                 mload(add(local_vars, Q_LAST_EVAL_OFFSET))
                             ),
-                            // -preprocessed_data.q_blind.evaluate(challenge)
+                        // -preprocessed_data.q_blind.evaluate(challenge)
                             sub(
                                 modulus,
                                 mload(add(local_vars, Q_BLIND_EVAL_OFFSET))
@@ -313,33 +312,33 @@ library permutation_argument {
                         ),
                         modulus
                     ),
-                    // perm_polynomial_shifted_value * h - perm_polynomial_value * g
+                // perm_polynomial_shifted_value * h - perm_polynomial_value * g
                     addmod(
-                        // perm_polynomial_shifted_value * h
+                    // perm_polynomial_shifted_value * h
                         mulmod(
-                            // perm_polynomial_shifted_value
+                        // perm_polynomial_shifted_value
                             mload(
                                 add(
                                     local_vars,
                                     PERM_POLYNOMIAL_SHIFTED_VALUE_OFFSET
                                 )
                             ),
-                            // h
+                        // h
                             mload(add(local_vars, H_OFFSET)),
                             modulus
                         ),
-                        // - perm_polynomial_value * g
+                    // - perm_polynomial_value * g
                         sub(
                             modulus,
                             mulmod(
-                                // perm_polynomial_value
+                            // perm_polynomial_value
                                 mload(
                                     add(
                                         local_vars,
                                         PERM_POLYNOMIAL_VALUE_OFFSET
                                     )
                                 ),
-                                // g
+                            // g
                                 mload(add(local_vars, G_OFFSET)),
                                 modulus
                             )
@@ -352,29 +351,29 @@ library permutation_argument {
         }
         assembly{
             let modulus := mload(fri_params)
-            // F[2]
+        // F[2]
             mstore(
                 add(F, 0x60),
-                // preprocessed_data.q_last.evaluate(challenge) *
-                //  (perm_polynomial_value.squared() - perm_polynomial_value)
+            // preprocessed_data.q_last.evaluate(challenge) *
+            //  (perm_polynomial_value.squared() - perm_polynomial_value)
                 mulmod(
-                    // preprocessed_data.q_last.evaluate(challenge)
+                // preprocessed_data.q_last.evaluate(challenge)
                     mload(add(local_vars, Q_LAST_EVAL_OFFSET)),
-                    // perm_polynomial_value.squared() - perm_polynomial_value
+                // perm_polynomial_value.squared() - perm_polynomial_value
                     addmod(
-                        // perm_polynomial_value.squared()
+                    // perm_polynomial_value.squared()
                         mulmod(
-                            // perm_polynomial_value
+                        // perm_polynomial_value
                             mload(
                                 add(local_vars, PERM_POLYNOMIAL_VALUE_OFFSET)
                             ),
-                            // perm_polynomial_value
+                        // perm_polynomial_value
                             mload(
                                 add(local_vars, PERM_POLYNOMIAL_VALUE_OFFSET)
                             ),
                             modulus
                         ),
-                        // -perm_polynomial_value
+                    // -perm_polynomial_value
                         sub(
                             modulus,
                             mload(add(local_vars, PERM_POLYNOMIAL_VALUE_OFFSET))

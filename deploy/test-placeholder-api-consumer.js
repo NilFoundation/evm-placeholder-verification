@@ -1,16 +1,15 @@
 const hre = require('hardhat')
-const { getNamedAccounts } = hre
+const {getNamedAccounts} = hre
 
-module.exports = async function() {
+module.exports = async function () {
     const {deployments, getNamedAccounts} = hre;
     const {deploy} = deployments;
     const {deployer, tokenOwner} = await getNamedAccounts();
 
-    let libs = [
-    ]
+    let libs = []
 
     let deployedLib = {}
-    for (let lib of libs){
+    for (let lib of libs) {
         await deploy(lib, {
             from: deployer,
             log: true,
@@ -20,8 +19,8 @@ module.exports = async function() {
 
     await deploy('TestPlaceholderVerifier', {
         from: deployer,
-        libraries : deployedLib,
-        log : true,
+        libraries: deployedLib,
+        log: true,
     })
 }
 

@@ -86,13 +86,12 @@ library bn254_crypto {
 
     function P2() internal pure returns (types.g2_point memory) {
         return types.g2_point({
-        x0 : 0x198e9393920d483a7260bfb731fb5d25f1aa493335a9e71297e485b7aef312c2,
-        x1 : 0x1800deef121f1e76426a00665e5c4479674322d4f75edadd46debd5cd992f6ed,
-        y0 : 0x090689d0585ff075ec9e99ad690c3395bc4b313370b38ef355acdadcd122975b,
-        y1 : 0x12c85ea5db8c6deb4aab71808dcb408fe3d1e7690c43d37b4ce6cc0166fa7daa
+            x0: 0x198e9393920d483a7260bfb731fb5d25f1aa493335a9e71297e485b7aef312c2,
+            x1: 0x1800deef121f1e76426a00665e5c4479674322d4f75edadd46debd5cd992f6ed,
+            y0: 0x090689d0585ff075ec9e99ad690c3395bc4b313370b38ef355acdadcd122975b,
+            y1: 0x12c85ea5db8c6deb4aab71808dcb408fe3d1e7690c43d37b4ce6cc0166fa7daa
         });
     }
-
 
     /// Evaluate the following pairing product:
     /// e(a1, a2).e(-b1, b2) == 1
@@ -122,12 +121,12 @@ library bn254_crypto {
             mstore(add(mPtr, 0x140), mload(add(b2, 0x40)))
             mstore(add(mPtr, 0x160), mload(add(b2, 0x60)))
             success := staticcall(
-            gas(),
-            8,
-            mPtr,
-            0x180,
-            0x00,
-            0x20
+                gas(),
+                8,
+                mPtr,
+                0x180,
+                0x00,
+                0x20
             )
             out := mload(0x00)
         }
@@ -152,8 +151,8 @@ library bn254_crypto {
 
             is_well_formed := and(
                 and(
-                and(lt(x, p), lt(y, p)),
-                not(or(iszero(x), iszero(y)))
+                    and(lt(x, p), lt(y, p)),
+                    not(or(iszero(x), iszero(y)))
                 ),
                 eq(mulmod(y, y, p), addmod(mulmod(x, mulmod(x, x, p), p), 3, p))
             )

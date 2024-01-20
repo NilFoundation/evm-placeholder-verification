@@ -37,7 +37,7 @@ library placeholder_proof_map_parser {
         //require(false, logging.uint2decstr(basic_marshalling.get_uint256_be(blob, proof_map.eval_proof_offset)));
         // TODO: add data structures for lookups
 
-        proof_map.eval_proof_lagrange_0_offset = basic_marshalling.skip_uint256_be_check(blob, proof_map.eval_proof_offset); 
+        proof_map.eval_proof_lagrange_0_offset = basic_marshalling.skip_uint256_be_check(blob, proof_map.eval_proof_offset);
         proof_map.eval_proof_combined_value_offset = basic_marshalling.skip_uint256_be_check(blob, proof_map.eval_proof_lagrange_0_offset);
         proof_size = batched_lpc_verifier.skip_proof_be(blob, proof_map.eval_proof_combined_value_offset);
     }

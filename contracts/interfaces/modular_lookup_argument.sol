@@ -17,7 +17,7 @@
 pragma solidity ^0.8.0;
 
 interface ILookupArgument {
-    function verify(        
+    function verify(
         bytes calldata blob, // Table values and permutations' values
         bytes calldata sorted, // Sorted batch values
         uint256 lookup_commitment, // Lookup commitment

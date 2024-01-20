@@ -135,7 +135,7 @@ library types {
         // Not actually part of the verification key, but we put it here to prevent stack depth errors
         uint256 zeta_pow_n;
     }
-    
+
     struct transcript_data {
         bytes32 current_challenge;
     }
@@ -167,33 +167,33 @@ library types {
         uint256 max_batch;      // variable for memory  initializing
 
         // These are local variables for FRI. But it's useful to allocate memory once
-        uint256[]    tmp_arr;
-        uint256[][]  evaluation_points;
-        uint256      z_offset;
+        uint256[] tmp_arr;
+        uint256[][] evaluation_points;
+        uint256 z_offset;
 
         // New fields
-        uint256       max_coset;
-        uint256       batches_num;
-        uint256[]     batches_sizes;
-        uint256       fri_proof_offset;         // fri_roots offset equals to fri_proof_offset + 0x20
-        uint256       fri_final_poly_offset;
-        uint256       fri_cur_query_offset;     // It'll be changed during verification process.
-                                                // It's set at the begining of the first query proof after parse functions running.
-        uint256       theta;
-        uint256       poly_num;
-        uint256[][]   combined_U;                // U polynomials for different evaluation points
-        uint256[][]   denominators;              // V polynomials for different evaluation points
-        uint256[]     factors;
-        uint256[]     eval_map;
-        uint256[][]   unique_eval_points;
-        uint256       different_points;
-        uint256[]     ys;
-        uint256[]     final_polynomial;         // It's loaded once while parsing fri proof
-        uint256[]     fri_roots;                // It should be bytes32
+        uint256 max_coset;
+        uint256 batches_num;
+        uint256[] batches_sizes;
+        uint256 fri_proof_offset;         // fri_roots offset equals to fri_proof_offset + 0x20
+        uint256 fri_final_poly_offset;
+        uint256 fri_cur_query_offset;     // It'll be changed during verification process.
+        // It's set at the begining of the first query proof after parse functions running.
+        uint256 theta;
+        uint256 poly_num;
+        uint256[][] combined_U;                // U polynomials for different evaluation points
+        uint256[][] denominators;              // V polynomials for different evaluation points
+        uint256[] factors;
+        uint256[] eval_map;
+        uint256[][] unique_eval_points;
+        uint256 different_points;
+        uint256[] ys;
+        uint256[] final_polynomial;         // It's loaded once while parsing fri proof
+        uint256[] fri_roots;                // It should be bytes32
     }
 
     struct fri_state_type {
-        bytes   b;
+        bytes b;
         //0x0
         uint256 x_index;
         //0x20
@@ -215,7 +215,7 @@ library types {
         //0x120
         uint256 query_id;
         //0x140
-        uint256[]     alphas;
+        uint256[] alphas;
         uint256[] values;
         uint256[] tmp_values;
         uint256 coset_size;
@@ -254,7 +254,7 @@ library types {
         uint256 rows_amount;
         // 0x20
         uint256 omega;
-        int256[][] columns_rotations; 
+        int256[][] columns_rotations;
     }
 
     struct placeholder_state_type {
@@ -320,7 +320,7 @@ library types {
         uint256 inversed_omega;
     }
 
-    struct arithmetization_params{
+    struct arithmetization_params {
         uint256 witness_columns;
         uint256 public_input_columns;
         uint256 constant_columns;

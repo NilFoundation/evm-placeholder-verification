@@ -17,7 +17,7 @@
 pragma solidity ^0.8.0;
 
 interface IModularPermutationArgument {
-    function verify(        
+    function verify(
         bytes calldata blob,
         uint256 beta,
         uint256 gamma

@@ -55,7 +55,7 @@ library transcript {
     }
 
     function update_transcript_b32_by_offset_calldata(types.transcript_data memory self, bytes calldata blob,
-                                                      uint256 offset)
+        uint256 offset)
     internal pure {
         require(offset < blob.length, "update_transcript_b32_by_offset: offset < blob.length");
         require(32 <= blob.length - offset, "update_transcript_b32_by_offset: 32 <= blob.length - offset");
@@ -72,7 +72,7 @@ library transcript {
         require(length <= 32);
         self.current_challenge = keccak256(abi.encodePacked(self.current_challenge));
         return (uint256(self.current_challenge) &
-               (((uint256(1) << (length * 8)) - 1) << (uint256(256) - length * 8))) >> (uint256(256) - length * 8);
+            (((uint256(1) << (length * 8)) - 1) << (uint256(256) - length * 8))) >> (uint256(256) - length * 8);
     }
 
     function get_field_challenge(types.transcript_data memory self, uint256 modulus)
@@ -88,7 +88,7 @@ library transcript {
             for (uint256 i = 0; i < challenges.length;) {
                 new_challenge = keccak256(abi.encode(new_challenge));
                 challenges[i] = uint256(new_challenge) % modulus;
-                unchecked{ i++; }
+                unchecked{i++;}
             }
             self.current_challenge = new_challenge;
         }
