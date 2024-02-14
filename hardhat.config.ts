@@ -11,6 +11,10 @@ import './tasks/modular-test'
 
 const SEPOLIA_PRIVATE_KEY = "SEPOLIA_PRIVATE_KEY"
 const SEPOLIA_ALCHEMY_KEY = "SEPOLIA_ALCHEMY_KEY"
+
+const PRODUCTION_PRIVATE_KEY = "PRODUCTION_PRIVATE_KEY"
+const PRODUCTION_ALCHEMY_KEY = "PRODUCTION_ALCHEMY_KEY"
+
 const ETHERSCAN_KEY = "ETHERSCAN_KEY"
 
 /** @type import('hardhat/config').HardhatUserConfig */
@@ -34,6 +38,10 @@ module.exports = {
         sepolia: {
             url: `https://eth-sepolia.g.alchemy.com/v2/${SEPOLIA_ALCHEMY_KEY}`,
             accounts: [SEPOLIA_PRIVATE_KEY]
+        },
+        production: {
+            url: `https://eth-mainnet.g.alchemy.com/v2/${PRODUCTION_ALCHEMY_KEY}`,
+            accounts: [PRODUCTION_PRIVATE_KEY]
         },
         localhost: {
             url: "http://127.0.0.1:8545",
