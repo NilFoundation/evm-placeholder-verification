@@ -60,131 +60,17 @@ function loadParamsFromFile(jsonFile: string | Buffer | URL | number) {
     return params;
 }
 
-function loadFieldElement(element: string | number | bigint | boolean) {
-    let result = [];
-    if (element.isLosslessNumber) {
-        result.push(BigInt(element));
-    } else if (typeof (element) == 'string') {
-        result.push(BigInt(element));
-    } else {
-        for (let i in element) {
-            let e = loadFieldElement(element[i]);
-            for (let j in e) result.push(e[j]);
-        }
-    }
-    return result;
-}
-
-const limbs = (x: bigint, bits: number) => {
-    let result: BigInt[] = [];
-    while (bits > 0) {
-        result.push(x & 0xFFFFFFFFFFFFn);
-        x >>= 64n;
-        bits -= 64;
-    }
-    return result;
-}
-
-function loadCurveElement(element: string | number | bigint | boolean, bits = 256) {
-    let result = [];
-    if (element.isLosslessNumber) {
-        const l = limbs(BigInt(element), bits);
-        for (let e of l) result.push(e);
-    } else if (typeof (element) == 'string') {
-        const l = limbs(BigInt(element), bits);
-        for (let e of l) result.push(e);
-    } else {
-        for (let i of element) {
-            for (let j of loadFieldElement(i)) {
-                for (let e of limbs(BigInt(j), bits)) {
-                    result.push(e);
-                }
-            }
-        }
-    }
-    return result;
-}
-
-function loadIntegerElement(public_input: string) {
-    let modulus = BigInt(28948022309329048855892746252171976963363056481941560715954676764349967630337);
-
-    let result = [];
-    let i = parseInt(public_input);
-    if (i < 0) {
-        result.push(modulus - BigInt(i));
-    } else {
-        result.push(BigInt(i));
-    }
-    return result;
-}
-
-function loadStringElement(public_input: { charCodeAt: (arg0: string) => any; }) {
-    let modulus = BigInt(28948022309329048855892746252171976963363056481941560715954676764349967630337);
-
-    let result = [];
-    for (let i in public_input) {
-        let c = public_input.charCodeAt(i);
-        result.push(BigInt(c));
-    }
-    return result;
-}
-
-
-function loadArray(public_input: { [x: string]: string | number | bigint | boolean; }) {
-    let result = [];
-
-    for (let i in public_input) {
-        let e = loadFieldElement(public_input[i]);
-        for (let j in e) result.push(e[j]);
-    }
-    return result;
-}
-
-function loadVector(public_input: { [x: string]: string | number | bigint | boolean; }) {
-    let result = [];
-
-    for (let i in public_input) {
-        let e = loadFieldElement(public_input[i]);
-        for (let j in e) {
-            result.push(e[j]);
-        }
-    }
-    return result;
-}
-
-function loadPublicInput(public_input_path: string | number | Buffer | URL) {
+function loadPublicInput(public_input_path: string) {
     public_input_path = path.resolve(__dirname, public_input_path)
     if (fs.existsSync(public_input_path)) {
-        let public_input = losslessJSON.parse(fs.readFileSync(public_input_path, 'utf8'));
+        let public_input = fs.readFileSync(public_input_path, 'utf8').trim();
         let result = [];
-        for (let i in public_input) {
-            let field = public_input[i];
-            for (let k in field) {
-                let element;
-                if (k == 'field') {
-                    element = loadFieldElement(field[k]);
-                }
-                if (k == 'curve') {
-                    element = loadCurveElement(field[k], field["bits"]);
-                }
-                if (k == 'int') {
-                    element = loadIntegerElement(field[k]);
-                }
-                if (k == 'string') {
-                    element = loadStringElement(field[k]);
-                }
-                if (k == 'array') {
-                    element = loadArray(field[k]);
-                }
-                if (k == 'vector') {
-                    element = loadVector(field[k]);
-                }
-                for (let e in element) result.push(element[e]);
-            }
+        for (let string_item of public_input.split(/\s+/)) {
+            result.push(BigInt(string_item))
         }
         return result;
     } else
-        return [];
+        return null;
 }
 
 const verify_circuit_proof = async (modular_path: string, circuit: string) => {
@@ -206,7 +92,11 @@ const verify_circuit_proof = async (modular_path: string, circuit: string) => {
     let proof_path = folder_path + "/proof.bin";
     console.log("Verify :", proof_path);
     let proof = loadProof(proof_path);
-    let public_input = loadPublicInput(folder_path + "/public_input.json");
+    let public_input = loadPublicInput(folder_path + "/public_input.inp");
+    if (public_input === null) {
+        console.log("Wrong public input format!");
+        return null;
+    }
     let receipt = await (await verifier_contract.verify(proof, public_input, {gasLimit: 30_500_000})).wait();
     console.log("⛽Gas used: ", receipt.gasUsed.toNumber());
     console.log("Events received:");
