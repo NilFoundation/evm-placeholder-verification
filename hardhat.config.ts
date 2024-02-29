@@ -9,11 +9,13 @@ require('hardhat-contract-sizer');
 
 import './tasks/modular-test'
 
-const SEPOLIA_PRIVATE_KEY = "SEPOLIA_PRIVATE_KEY"
-const SEPOLIA_ALCHEMY_KEY = "SEPOLIA_ALCHEMY_KEY"
+const DEFAULT_PRIVATE_KEY = "0x" + "0".repeat(64); // 32 bytes of zeros placeholder to pass config validation
 
-const PRODUCTION_PRIVATE_KEY = "PRODUCTION_PRIVATE_KEY"
-const PRODUCTION_ALCHEMY_KEY = "PRODUCTION_ALCHEMY_KEY"
+const SEPOLIA_PRIVATE_KEY = process.env.SEPOLIA_PRIVATE_KEY || DEFAULT_PRIVATE_KEY;
+const SEPOLIA_ALCHEMY_KEY = process.env.SEPOLIA_ALCHEMY_KEY || "";
+
+const PRODUCTION_PRIVATE_KEY = process.env.PRODUCTION_PRIVATE_KEY || DEFAULT_PRIVATE_KEY;
+const PRODUCTION_ALCHEMY_KEY = process.env.PRODUCTION_ALCHEMY_KEY || "";
 
 const ETHERSCAN_KEY = "ETHERSCAN_KEY"
 
