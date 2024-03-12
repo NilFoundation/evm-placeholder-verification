@@ -66,8 +66,11 @@ function loadPublicInput(public_input_path: string) {
         let public_input = fs.readFileSync(public_input_path, 'utf8').trim();
         let result = [];
         for (let string_item of public_input.split(/\s+/)) {
-            result.push(BigInt(string_item))
+            // If is necessary for the case if there is no numbers in the file
+            if( string_item != "")
+                result.push(BigInt(string_item))
         }
+        console.log(result)
         return result;
     } else
         return null;

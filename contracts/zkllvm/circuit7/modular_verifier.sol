@@ -29,24 +29,24 @@ import "./permutation_argument.sol";
 import "hardhat/console.sol";
 import "../../algebra/field.sol";
 
-contract modular_verifier_circuit4 is IModularVerifier{
+contract modular_verifier_circuit7 is IModularVerifier{
     uint256 constant modulus = 28948022309329048855892746252171976963363056481941560715954676764349967630337;
     bool    constant use_lookups = false;
-    bytes32 constant vk1 = bytes32(0x66e2e28111beacc81d039789ffd629de09f0af2bc4a7d04b5da9ef15449c82eb);
-    bytes32 constant vk2 = bytes32(0x716cec0d47c884efe528c1932a8df60ddcb8c021da2c78b261cc7a8c86c0aff1);
+    bytes32 constant vk1 = bytes32(0x6b17eec11b25e37049ac0545df61610db3cfb77038a6c6d51f911bc8cb7d2337);
+    bytes32 constant vk2 = bytes32(0x03e109082f5cde1f21a28b5973da21f7aed64de275d4195d8029ae3a121ac08f);
     bytes32 transcript_state;
     address _gate_argument_address;
     address _permutation_argument_address;
     address _lookup_argument_address;
     address _commitment_contract_address;
-    uint64 constant sorted_columns = 2;
+    uint64 constant sorted_columns = 9;
     uint64   constant f_parts = 8;   // Individually on parts
     uint64  constant z_offset = 0xc9;
     uint64  constant table_offset = z_offset + 0x80 * 4 + 0xc0;
-    uint64  constant table_end_offset = table_offset + 608;
-    uint64  constant quotient_offset = 736;
-    uint64  constant rows_amount = 8;
-    uint256 constant omega = 199455130043951077247265858823823987229570523056509026484192158816218200659;
+    uint64  constant table_end_offset = table_offset + 1440;
+    uint64  constant quotient_offset = 1568;
+    uint64  constant rows_amount = 16;
+    uint256 constant omega = 14450201850503471296781915119640920297985789873634237091629829669980153907901;
     uint256 constant special_selectors_offset = z_offset + 4 * 0x80;
 
     function initialize(
@@ -67,7 +67,7 @@ contract modular_verifier_circuit4 is IModularVerifier{
 
 //        ICommitmentScheme commitment_scheme = ICommitmentScheme(commitment_contract_address);
 //        tr_state.current_challenge = commitment_scheme.initialize(tr_state.current_challenge);
-        tr_state.current_challenge = modular_commitment_scheme_circuit4.initialize(tr_state.current_challenge);
+        tr_state.current_challenge = modular_commitment_scheme_circuit7.initialize(tr_state.current_challenge);
         transcript_state = tr_state.current_challenge;
     }
 
@@ -116,7 +116,7 @@ contract modular_verifier_circuit4 is IModularVerifier{
 
         // Input is proof_map.eval_proof_combined_value_offset
         if( result != basic_marshalling.get_uint256_be(
-            blob, 512
+            blob, 1120
         )) check = false;
     }
 
@@ -136,7 +136,7 @@ contract modular_verifier_circuit4 is IModularVerifier{
 
         //0. Direct public input check
         if(public_input.length > 0) {
-            if (!public_input_direct(blob[905:905+736], public_input, state)) {
+            if (!public_input_direct(blob[905:905+1568], public_input, state)) {
                 emit WrongPublicInput();
                 state.b = false;
             }
@@ -151,8 +151,8 @@ contract modular_verifier_circuit4 is IModularVerifier{
             transcript.update_transcript_b32_by_offset_calldata(tr_state, blob, 0x9);
 
             //3. Permutation argument
-            uint256[3] memory permutation_argument = modular_permutation_argument_circuit4.verify(
-                blob[0xc9:905+736],
+            uint256[3] memory permutation_argument = modular_permutation_argument_circuit7.verify(
+                blob[0xc9:905+1568],
                 transcript.get_field_challenge(tr_state, modulus),
                 transcript.get_field_challenge(tr_state, modulus),
                 state.l0
@@ -226,7 +226,7 @@ contract modular_verifier_circuit4 is IModularVerifier{
                 commitments[i] = basic_marshalling.get_uint256_be(blob, 0x9 + (i-1)*(0x28));
                 unchecked{i++;}
             }
-            if(!modular_commitment_scheme_circuit4.verify_eval(
+            if(!modular_commitment_scheme_circuit7.verify_eval(
                 blob[z_offset - 0x8:], commitments, state.xi, tr_state.current_challenge
             )) {
                 emit WrongCommitment();

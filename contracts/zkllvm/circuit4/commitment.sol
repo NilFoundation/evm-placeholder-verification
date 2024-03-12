@@ -34,17 +34,17 @@ library modular_commitment_scheme_circuit4 {
     uint256 constant D0_size = 128;
     uint256 constant max_degree = 7;
     uint256 constant D0_omega = 7356716530956153652314774863381845254278968224778478050456563329565810467774;
-    uint256 constant unique_points = 5;
-    uint256 constant permutation_point = 2;
-    uint256 constant quotient_point = 0;
-    uint256 constant lookup_point = 4;
-    bytes constant   points_ids = hex"01010101010101010303030303010103000000";
+    uint256 constant unique_points = 4;
     uint256 constant omega = 199455130043951077247265858823823987229570523056509026484192158816218200659;
-    uint256 constant _etha = 21408166461546097750498338983278817919292759452620061815139466303960054857463;
+    uint256 constant _eta = 850133242367294717247047710337156064369915212762097839080979253061321047676;
+    bytes constant point_ids = hex"000100010001000100010001000100010002010002010002010002010002010001000100020100000000020002000000000000000203000203"; // 1 byte -- point id
+    bytes constant poly_points_num = hex"001d0010000a0002"; // 2 byte lengths
+    bytes constant poly_ids = hex"00000040008000c001000140018001c002000240028002c003000340038003c004000440048004c005000540058005c006000640068006c0070000000040008000c001000140018001c002000240028002c003000340038003c002000240028002c0030003c004c0050006c0070006c00700"; // 2 byte poly_id 2 byte
 
     struct commitment_state{
         bytes   leaf_data;
         uint256 roots_offset;
+        uint256 query_proof_offset;
         uint256 initial_data_offset;
         uint256 initial_proof_offset;
         uint256 round_proof_offset;
@@ -60,244 +60,54 @@ library modular_commitment_scheme_circuit4 {
         uint256 domain_size;
         uint256[] final_polynomial;
         uint256 leaf_length;
-        uint256[][unique_points] denominators;
-        uint256[unique_points] factors;
-        uint256[][unique_points] combined_U;
-        uint256[][unique_points] unique_eval_points;
+        uint256[2][unique_points] denominators;
+        uint256[unique_points] U;
+        uint256[unique_points] unique_eval_points;
+        uint256[unique_points] theta_factors;
         uint256[2] y;
+        uint256[2] Q;
         uint256 j;
         uint256 offset;
+        uint16[][unique_points] poly_inds;
     }
 
-    function calculate_2points_interpolation(uint256[] memory xi, uint256[2] memory z)
-    internal pure returns(uint256[2] memory U){
-//        require( xi.length == 2 );
-unchecked {
-        U[0] = addmod(mulmod(z[0], xi[1], modulus),modulus - mulmod(z[1], xi[0], modulus), modulus);
-        U[1] = addmod(z[1], modulus - z[0], modulus);
-}
-    }
 
-//  coeffs for zs on each degree can be precomputed if necessary
-    function calculate_3points_interpolation(uint256[] memory xi, uint256[3] memory z)
-    internal pure returns(uint256[3] memory U){
-//        require( xi.length == 3 );
-unchecked {
-        z[0] = mulmod(z[0], addmod(xi[1], modulus - xi[2], modulus), modulus);
-        z[1] = mulmod(z[1], addmod(xi[2], modulus - xi[0], modulus), modulus);
-        z[2] = mulmod(z[2], addmod(xi[0], modulus - xi[1], modulus), modulus);
-
-        U[0] = mulmod(z[0], mulmod(xi[1], xi[2], modulus), modulus);
-        U[0] = addmod(U[0], mulmod(z[1], mulmod(xi[0], xi[2], modulus), modulus), modulus);
-        U[0] = addmod(U[0], mulmod(z[2], mulmod(xi[0], xi[1], modulus), modulus), modulus);
-
-        U[1] = modulus - mulmod(z[0], addmod(xi[1], xi[2], modulus), modulus);
-        U[1] = addmod(U[1], modulus - mulmod(z[1], addmod(xi[0], xi[2], modulus), modulus), modulus);
-        U[1] = addmod(U[1], modulus - mulmod(z[2], addmod(xi[0], xi[1], modulus), modulus), modulus);
-
-        U[2] = addmod(z[0], addmod(z[1], z[2], modulus), modulus);
-}
-    }
-
-    function prepare_eval_points(uint256[][unique_points] memory result, uint256 xi) internal view {
+    function prepare_eval_points(uint256[unique_points] memory result, uint256 xi, uint256 eta) internal view {
         uint256 inversed_omega = field.inverse_static(omega, modulus);
-		 result[0] = new uint256[](1);
-		 result[0][0] = xi;
-		 result[1] = new uint256[](2);
-		 result[1][0] = xi;
-		 result[1][1] = _etha;
-		 result[2] = new uint256[](2);
-		 result[2][0] = xi;
-		 result[2][1] = mulmod(xi, omega, modulus);
-		 result[3] = new uint256[](3);
-		 result[3][0] = xi;
-		 result[3][1] = mulmod(xi, omega, modulus);
-		 result[3][2] = _etha;
-		 result[4] = new uint256[](3);
-		 result[4][0] = xi;
-		 result[4][1] = mulmod(xi, omega, modulus);
-		 result[4][2] = mulmod(xi, field.pow_small(omega, 5, modulus), modulus);
+		result[0] = xi;
+		result[1] = eta;
+		result[2] = mulmod(xi, omega, modulus);
+		result[3] = mulmod(xi, field.pow_small(inversed_omega, 3, modulus), modulus);
 
     }
 
-    function prepare_U_V(bytes calldata blob, commitment_state memory state, uint256 xi) internal view returns(bool result){
-
-unchecked {
-        result = true;
-        uint64 ind = 0;
-        prepare_eval_points(state.unique_eval_points, xi);
-                // Prepare denominators
-        for( ind = 0; ind < state.unique_eval_points.length;){
-            state.denominators[ind] = new uint256[](state.unique_eval_points[ind].length + 1);
-            if( state.unique_eval_points[ind].length == 1 ){
-                state.factors[ind] = 1;
-                state.denominators[ind][0] = modulus - state.unique_eval_points[ind][0];
-                state.denominators[ind][1] = 1;
-            } else
-            if( state.unique_eval_points[ind].length == 2 ){
-                // xi1 - xi0
-                state.factors[ind] =
-                    addmod(state.unique_eval_points[ind][1], modulus - state.unique_eval_points[ind][0], modulus);
-                state.denominators[ind][2] = 1;
-
-                state.denominators[ind][1] =
-                    modulus - addmod(state.unique_eval_points[ind][0], state.unique_eval_points[ind][1], modulus);
-
-                state.denominators[ind][0] =
-                    mulmod(state.unique_eval_points[ind][0], state.unique_eval_points[ind][1], modulus);
-                state.denominators[ind][0] = mulmod(state.denominators[ind][0], state.factors[ind], modulus);
-                state.denominators[ind][1] = mulmod(state.denominators[ind][1], state.factors[ind], modulus);
-                state.denominators[ind][2] = mulmod(state.denominators[ind][2], state.factors[ind], modulus);
-            } else
-            if( state.unique_eval_points[ind].length == 3 ){
-                state.factors[ind] = modulus -
-                    mulmod(
-                        mulmod(
-                            addmod(state.unique_eval_points[ind][0], modulus - state.unique_eval_points[ind][1], modulus),
-                            addmod(state.unique_eval_points[ind][1], modulus - state.unique_eval_points[ind][2], modulus),
-                            modulus
-                        ),
-                        addmod(state.unique_eval_points[ind][2], modulus - state.unique_eval_points[ind][0], modulus),
-                        modulus
-                    );
-                state.denominators[ind][3] = 1;
-                state.denominators[ind][2] =
-                    modulus - addmod(
-                        state.unique_eval_points[ind][0],
-                        addmod(state.unique_eval_points[ind][1],state.unique_eval_points[ind][2], modulus),
-                        modulus
-                    );
-                state.denominators[ind][1] =
-                    addmod(
-                        mulmod(state.unique_eval_points[ind][0], state.unique_eval_points[ind][1], modulus),
-                        addmod(
-                            mulmod(state.unique_eval_points[ind][0], state.unique_eval_points[ind][2], modulus),
-                            mulmod(state.unique_eval_points[ind][1], state.unique_eval_points[ind][2], modulus),
-                            modulus
-                        ),
-                        modulus
-                    );
-                state.denominators[ind][0] =
-                    modulus - mulmod(
-                        state.unique_eval_points[ind][0],
-                        mulmod(state.unique_eval_points[ind][1],state.unique_eval_points[ind][2], modulus),
-                        modulus
-                    );
-                state.denominators[ind][0] = mulmod(state.denominators[ind][0], state.factors[ind], modulus);
-                state.denominators[ind][1] = mulmod(state.denominators[ind][1], state.factors[ind], modulus);
-                state.denominators[ind][2] = mulmod(state.denominators[ind][2], state.factors[ind], modulus);
-                state.denominators[ind][3] = mulmod(state.denominators[ind][3], state.factors[ind], modulus);
-            } else {
-                console.log("UNPROCESSED number of evaluation points");
-                return false;
-            }
-            ind++;
-        }
-
-        // Prepare combined U
-        for( uint256 ind = 0; ind < unique_points;){
-            uint256[] memory point = state.unique_eval_points[ind];
-            state.combined_U[ind] = new uint256[](state.unique_eval_points[ind].length);
-            uint64 cur = 0;
-            uint256 offset = 0x8;
-            for( uint256 k = 0; k < batches_num;){
-                for( uint256 i = 0; i < state.batch_sizes[k];){
-                    uint256 cur_point = 0;
-                    if(cur < points_ids.length ) cur_point = uint8(points_ids[cur]);
-                    else if(k == 2) cur_point = permutation_point;
-                    else if(k == 3) cur_point = quotient_point;
-                    else if(k == 4) cur_point = lookup_point;
-                    else console.log("Wrong index");
-
-                    polynomial.multiply_poly_on_coeff(
-                        state.combined_U[ind],
-                        state.theta,
-                        modulus
-                    );
-                    if( cur_point == ind ){
-                        if( point.length == 1 ){
-                            state.combined_U[ind][0] = addmod(
-                                state.combined_U[ind][0],
-                                basic_marshalling.get_uint256_be(blob, offset),
-                                modulus
-                            );
-                        }  else
-                        if( point.length == 2 ){
-                            uint256[2] memory tmp;
-                            tmp[0] = basic_marshalling.get_uint256_be(blob, offset);
-                            tmp[1] = basic_marshalling.get_uint256_be(blob, offset + 0x20);
-                            tmp = calculate_2points_interpolation(
-                                point, tmp);
-                            state.combined_U[ind][0] = addmod(state.combined_U[ind][0], tmp[0], modulus);
-                            state.combined_U[ind][1] = addmod(state.combined_U[ind][1], tmp[1], modulus);
-                        } else
-                        if( point.length == 3){
-                            uint256[3] memory tmp;
-                            tmp[0] = basic_marshalling.get_uint256_be(blob, offset);
-                            tmp[1] = basic_marshalling.get_uint256_be(blob, offset + 0x20);
-                            tmp[2] = basic_marshalling.get_uint256_be(blob, offset + 0x40);
-                            tmp = calculate_3points_interpolation(
-                                point, tmp);
-                            state.combined_U[ind][0] = addmod(state.combined_U[ind][0], tmp[0], modulus);
-                            state.combined_U[ind][1] = addmod(state.combined_U[ind][1], tmp[1], modulus);
-                            state.combined_U[ind][2] = addmod(state.combined_U[ind][2], tmp[2], modulus);
-                        } else {
-                            return false;
-                        }
-                    }
-                    offset += state.unique_eval_points[cur_point].length * 0x20;
-                    i++;cur++;
+    function prepare_Y(bytes calldata blob, uint256 offset, commitment_state memory state) internal pure {
+        unchecked{
+            state.y[0] = 0;
+            state.y[1] = 0;
+            for(uint256 cur_point = unique_points; cur_point > 0; ){
+                cur_point--;
+                for(uint256 cur_poly = state.poly_inds[cur_point].length; cur_poly > 0;){
+                    cur_poly--;
+                    uint256 cur_offset = state.poly_inds[cur_point][cur_poly];
+                    cur_offset = state.query_proof_offset + cur_offset;
+                    state.Q[0] = mulmod(state.Q[0], state.theta, modulus);
+                    state.Q[1] = mulmod(state.Q[1], state.theta, modulus);
+                    state.Q[0] = addmod(state.Q[0], basic_marshalling.get_uint256_be(blob, cur_offset), modulus);
+                    state.Q[1] = addmod(state.Q[1], basic_marshalling.get_uint256_be(blob, cur_offset + 0x20), modulus);
                 }
-                k++;
-            }
-            ind++;
-        }
-}
-    }
-
-    function compute_combined_Q(bytes calldata blob,commitment_state memory state) internal view returns(uint256[2] memory y){
-
-unchecked {
-        uint256[2][unique_points] memory values;
-        {
-            uint256 offset = state.initial_data_offset - state.poly_num * 0x40; // Save initial data offset for future use;
-            uint256 cur = 0;
-            for(uint256 b = 0; b < batches_num;){
-                for(uint256 j = 0; j < state.batch_sizes[b];){
-                    uint256 cur_point = 0;
-                    if(cur < points_ids.length ) cur_point = uint8(points_ids[cur]);
-                    else if(b == 2) cur_point = permutation_point;
-                    else if(b == 3) cur_point = quotient_point;
-                    else if(b == 4) cur_point = lookup_point;
-                    else console.log("Wrong index");
-
-                    for(uint256 k = 0; k < unique_points; ){
-                        values[k][0] = mulmod(values[k][0], state.theta, modulus);
-                        values[k][1] = mulmod(values[k][1], state.theta, modulus);
-                        k++;
-                    }
-
-                    values[cur_point][0] = addmod(values[cur_point][0], basic_marshalling.get_uint256_be(blob, offset), modulus);
-                    values[cur_point][1] = addmod(values[cur_point][1], basic_marshalling.get_uint256_be(blob, offset + 0x20), modulus);
-                    offset += 0x40;j++; cur++;
-                }
-                b++;
+                state.Q[0] = addmod(state.Q[0], modulus - state.U[cur_point], modulus);
+                state.Q[1] = addmod(state.Q[1], modulus - state.U[cur_point], modulus);
+                state.Q[0] = mulmod(state.Q[0], state.denominators[cur_point][0], modulus);
+                state.Q[1] = mulmod(state.Q[1], state.denominators[cur_point][1], modulus);
+                state.Q[0] = mulmod(state.Q[0], state.theta_factors[cur_point], modulus);
+                state.Q[1] = mulmod(state.Q[1], state.theta_factors[cur_point], modulus);
+                state.y[0] = addmod(state.y[0], state.Q[0], modulus);
+                state.y[1] = addmod(state.y[1], state.Q[1], modulus);
+                state.Q[0] = 0;
+                state.Q[1] = 0;
             }
         }
-        for(uint256 p = 0; p < unique_points; ){
-            uint256[2] memory tmp = values[p];
-            tmp[0] = mulmod(tmp[0], state.factors[p], modulus);
-            tmp[1] = mulmod(tmp[1], state.factors[p], modulus);
-            uint256 s = state.x;
-            tmp[0] = addmod(tmp[0], modulus - polynomial.evaluate(state.combined_U[p], s , modulus), modulus);
-            tmp[1] = addmod(tmp[1], modulus - polynomial.evaluate(state.combined_U[p], modulus - s, modulus), modulus);
-            tmp[0] = mulmod(tmp[0], field.inverse_static(polynomial.evaluate(state.denominators[p], s, modulus), modulus), modulus);
-            tmp[1] = mulmod(tmp[1], field.inverse_static(polynomial.evaluate(state.denominators[p], modulus - s, modulus), modulus), modulus);
-            y[0] = addmod(y[0], tmp[0], modulus);
-            y[1] = addmod(y[1], tmp[1], modulus);
-            p++;
-        }
-}
     }
 
     function initialize(
@@ -305,8 +115,8 @@ unchecked {
     ) internal returns(bytes32 tr_state_after){
         types.transcript_data memory tr_state;
         tr_state.current_challenge = tr_state_before;
-        uint256 etha = transcript.get_field_challenge(tr_state, modulus);
-        require(etha == _etha, "Wrong etha");
+        uint256 eta = transcript.get_field_challenge(tr_state, modulus);
+        require(eta == _eta, "Wrong eta");
         tr_state_after = tr_state.current_challenge;
     }
 
@@ -354,77 +164,75 @@ unchecked {
 
     function copy_pairs_and_check(bytes calldata blob, uint256 offset, bytes memory leaf, uint256 size, uint256 proof_offset)
     internal pure returns(bool b){
-unchecked {
-        uint256 offset2 = 0x20;
-        for(uint256 k = 0; k < size;){
-            assembly{
-                mstore(
-                    add(leaf, offset2),
-                    calldataload(add(blob.offset, offset))
-                )
-                mstore(
-                    add(leaf, add(offset2, 0x20)),
-                    calldataload(add(blob.offset, add(offset, 0x20)))
-                )
+        unchecked {
+            uint256 offset2 = 0x20;
+            for(uint256 k = 0; k < size;){
+                assembly{
+                    mstore(
+                        add(leaf, offset2),
+                        calldataload(add(blob.offset, offset))
+                    )
+                    mstore(
+                        add(leaf, add(offset2, 0x20)),
+                        calldataload(add(blob.offset, add(offset, 0x20)))
+                    )
+                }
+                k++; offset2 += 0x40; offset += 0x40;
             }
-            k++; offset2 += 0x40; offset += 0x40;
+            if( !merkle_verifier.parse_verify_merkle_proof_bytes_be(blob, proof_offset, leaf, offset2 - 0x20 )){
+                return false;
+            } else {
+                return true;
+            }
         }
-        if( !merkle_verifier.parse_verify_merkle_proof_bytes_be(blob, proof_offset, leaf, offset2 - 0x20 )){
-            return false;
-        } else {
-            return true;
-        }
-}
     }
 
     function copy_reverted_pairs_and_check(bytes calldata blob, uint256 offset, bytes memory leaf, uint256 size, uint256 proof_offset)
     internal pure returns(bool){
-unchecked {
-        uint256 offset2 = 0x20;
-        for(uint256 k = 0; k < size;){
-            assembly{
-                mstore(
-                    add(leaf, offset2),
-                    calldataload(add(blob.offset, add(offset, 0x20)))
-                )
-                mstore(
-                    add(leaf, add(offset2, 0x20)),
-                    calldataload(add(blob.offset, offset))
-                )
+        unchecked {
+            uint256 offset2 = 0x20;
+            for(uint256 k = 0; k < size;){
+                assembly{
+                    mstore(
+                        add(leaf, offset2),
+                        calldataload(add(blob.offset, add(offset, 0x20)))
+                    )
+                    mstore(
+                        add(leaf, add(offset2, 0x20)),
+                        calldataload(add(blob.offset, offset))
+                    )
+                }
+                k++; offset2 += 0x40; offset += 0x40;
             }
-            k++; offset2 += 0x40; offset += 0x40;
+            if( !merkle_verifier.parse_verify_merkle_proof_bytes_be(blob, proof_offset, leaf, offset2 - 0x20 )){
+                return false;
+            } else {
+                return true;
+            }
         }
-        if( !merkle_verifier.parse_verify_merkle_proof_bytes_be(blob, proof_offset, leaf, offset2 - 0x20 )){
-            return false;
-        } else {
-            return true;
-        }
-}
     }
 
     function colinear_check(uint256 x, uint256[2] memory y, uint256 alpha, uint256 colinear_value) internal pure returns(bool){
-
-unchecked {
-        uint256 tmp;
-        tmp = addmod(y[0], y[1], modulus);
-        tmp = mulmod(tmp, x, modulus);
-        tmp = addmod(
-            tmp,
-            mulmod(
-                alpha,
-                addmod(y[0], modulus-y[1], modulus),
+        unchecked {
+            uint256 tmp;
+            tmp = addmod(y[0], y[1], modulus);
+            tmp = mulmod(tmp, x, modulus);
+            tmp = addmod(
+                tmp,
+                mulmod(
+                    alpha,
+                    addmod(y[0], modulus-y[1], modulus),
+                    modulus
+                ),
                 modulus
-            ),
-            modulus
-        );
-        uint256 tmp1 = mulmod(colinear_value , 2, modulus);
-        tmp1 = mulmod(tmp1 , x, modulus);
-        if( tmp !=  tmp1 ){
-            console.log("Colinear check failed");
-            return false;
-        }
+            );
+            uint256 tmp1 = mulmod(colinear_value , 2, modulus);
+            tmp1 = mulmod(tmp1 , x, modulus);
+            if( tmp !=  tmp1 ){
+                return false;
+            }
         return true;
-}
+        }
     }
 
     function verify_eval(
@@ -439,40 +247,13 @@ unchecked {
         tr_state.current_challenge = transcript_state;
         commitment_state memory state;
 
-		/* eta points check */
-		{
-			uint256[16] memory points;
-			/* 1. 2*permutation_size */
-			points[0] = basic_marshalling.get_uint256_be(blob,0x28);
-			points[0x1] = basic_marshalling.get_uint256_be(blob,0x68);
-			points[0x2] = basic_marshalling.get_uint256_be(blob,0xa8);
-			points[0x3] = basic_marshalling.get_uint256_be(blob,0xe8);
-			points[0x4] = basic_marshalling.get_uint256_be(blob,0x128);
-			points[0x5] = basic_marshalling.get_uint256_be(blob,0x168);
-			points[0x6] = basic_marshalling.get_uint256_be(blob,0x1a8);
-			points[0x7] = basic_marshalling.get_uint256_be(blob,0x1e8);
-			/* 2. special selectors */
-			points[0x8] = basic_marshalling.get_uint256_be(blob,0x248);
-			points[0x9] = basic_marshalling.get_uint256_be(blob,0x2a8);
-			/* 3. constant columns */
-			points[0xa] = basic_marshalling.get_uint256_be(blob,0x308);
-			points[0xb] = basic_marshalling.get_uint256_be(blob,0x368);
-			points[0xc] = basic_marshalling.get_uint256_be(blob,0x3c8);
-			/* 4. selector columns */
-			points[0xd] = basic_marshalling.get_uint256_be(blob,0x408);
-			points[0xe] = basic_marshalling.get_uint256_be(blob,0x448);
-			points[0xf] = basic_marshalling.get_uint256_be(blob,0x4a8);
-			/* Check keccak(points) */
-			if ( bytes32(0x3cceb654ee4eca659357091f56c2baf512833ea985eb092292dc96e177d80c81) != keccak256(abi.encode(points))) {
-				return false;
-			}
-		}
-
-
         {
             uint256 offset;
 
-            if (challenge!= transcript.get_field_challenge(tr_state, modulus)) return false;
+            if (challenge!= transcript.get_field_challenge(tr_state, modulus)) {
+                console.log("Wrong challenge");
+                return false;
+            }
 
             for(uint8 i = 0; i < batches_num;){
                 transcript.update_transcript_b32(tr_state, bytes32(commitments[i]));
@@ -481,7 +262,7 @@ unchecked {
             state.theta = transcript.get_field_challenge(tr_state, modulus);
 
             state.points_num = basic_marshalling.get_length(blob, 0x0);
-            offset = 0x8 + state.points_num*0x20 + 0x8;
+            offset = 0x10 + state.points_num * 0x20;
             for(uint8 i = 0; i < batches_num;){
                 state.batch_sizes[i] = uint64(uint8(blob[offset + 0x1]));
                 if( state.batch_sizes[i] > state.max_batch ) state.max_batch = state.batch_sizes[i];
@@ -516,8 +297,8 @@ unchecked {
             offset += 0x8;
 
             state.initial_proof_offset = offset;
-            for(uint8 i = 0; i < lambda;){
-                for(uint j = 0; j < batches_num;){
+            for(uint256 i = 0; i < lambda;){
+                for(uint256 j = 0; j < batches_num;){
                     if(basic_marshalling.get_uint256_be(blob, offset + 0x10) != commitments[j] ) return false;
                     offset = merkle_verifier.skip_merkle_proof_be(blob, offset);
                     j++;
@@ -548,15 +329,71 @@ unchecked {
             return false;
         }
 
-        if( !prepare_U_V(blob, state, challenge) ) return false;
+        prepare_eval_points(state.unique_eval_points, challenge, _eta);
+        {
+            uint256 sum;
+
+            for(uint256 i = 0; i < state.unique_eval_points.length;){
+                state.theta_factors[i] = field.pow_small(state.theta, sum, modulus);
+                sum += (uint256(uint8(poly_points_num[2*i])) << 8) + uint256(uint8(poly_points_num[2*i + 1]));
+                i++;
+            }
+            uint256 off = point_ids.length * 0x20 - 0x18;
+            for(uint256 i = 0; i < point_ids.length;){
+                uint256 p = uint256(uint8(point_ids[point_ids.length - i - 1]));
+                state.U[p] = mulmod(state.U[p], state.theta, modulus);
+                state.U[p] = addmod(state.U[p], basic_marshalling.get_uint256_be(blob, off), modulus);
+                off -= 0x20;
+                i++;
+            }
+            for(uint256 i = 0; i < state.unique_eval_points.length;){
+                i++;
+            }
+        }
+			///* 1 - 2*permutation_size */
+		///* eta points check */
+		{
+			uint256[16] memory points;
+			points[0] = basic_marshalling.get_uint256_be(blob,0x28);
+			points[0x1] = basic_marshalling.get_uint256_be(blob,0x68);
+			points[0x2] = basic_marshalling.get_uint256_be(blob,0xa8);
+			points[0x3] = basic_marshalling.get_uint256_be(blob,0xe8);
+			points[0x4] = basic_marshalling.get_uint256_be(blob,0x128);
+			points[0x5] = basic_marshalling.get_uint256_be(blob,0x168);
+			points[0x6] = basic_marshalling.get_uint256_be(blob,0x1a8);
+			points[0x7] = basic_marshalling.get_uint256_be(blob,0x1e8);
+			points[0x8] = basic_marshalling.get_uint256_be(blob,0x248);
+			points[0x9] = basic_marshalling.get_uint256_be(blob,0x2a8);
+			points[0xa] = basic_marshalling.get_uint256_be(blob,0x308);
+			points[0xb] = basic_marshalling.get_uint256_be(blob,0x368);
+			points[0xc] = basic_marshalling.get_uint256_be(blob,0x3c8);
+			points[0xd] = basic_marshalling.get_uint256_be(blob,0x408);
+			points[0xe] = basic_marshalling.get_uint256_be(blob,0x448);
+			points[0xf] = basic_marshalling.get_uint256_be(blob,0x4a8);
+			// Check keccak(points) 
+			if ( bytes32(0x4b402a6a2a392ead02fb32e389da6ecd5108c68d8f270f0ad1084b1fc443bb4c) != keccak256(abi.encode(points))) {
+				return false;
+			}
+		}
+
+
+        uint64 cur = 0;
+        for(uint64 p = 0; p < unique_points; p++){
+            state.poly_inds[p] = new uint16[]((uint16(uint8(poly_points_num[2*p])) << 8) + uint16(uint8(poly_points_num[2*p + 1])));
+            for(uint64 i = 0; i < state.poly_inds[p].length; i++){
+                state.poly_inds[p][i] = (uint16(uint8(poly_ids[cur])) << 8) + uint16(uint8(poly_ids[cur + 1]));
+                cur+=2;
+            }
+        }
 
         state.leaf_data = new bytes(state.max_batch * 0x40 + 0x40);
-        for(uint256 i = 0; i < lambda;){
+        for(uint64 i = 0; i < lambda;){
             // Initial proofs
+            state.query_proof_offset = state.initial_data_offset;
             state.x_index = uint256(transcript.get_integral_challenge_be(tr_state, 8))  % D0_size;
             state.x = field.pow_small(D0_omega, state.x_index, modulus);
             state.domain_size = D0_size >> 1;
-            for(uint256 j = 0; j < batches_num;){
+            for(uint64 j = 0; j < batches_num;){
                 if( state.x_index < state.domain_size ){
                     if(!copy_pairs_and_check(blob, state.initial_data_offset, state.leaf_data, state.batch_sizes[j], state.initial_proof_offset)){
                         console.log("Error in initial mekle proof");
@@ -573,18 +410,23 @@ unchecked {
                 state.initial_proof_offset = merkle_verifier.skip_merkle_proof_be(blob, state.initial_proof_offset);
                 j++;
             }
-            {
-                state.y = compute_combined_Q(blob, state);
-                if( state.x_index < state.domain_size ){
-                    if( !copy_memory_pair_and_check(blob, state.round_proof_offset, state.leaf_data, state.y) ){
-                        console.log("Not validated!");
-                        return false;
-                    }
-                }else{
-                    if( !copy_reverted_memory_pair_and_check(blob, state.round_proof_offset, state.leaf_data, state.y) ){
-                        console.log("Not validated!");
-                        return false;
-                    }
+
+            for( uint64 p = 0; p < unique_points; p++){
+                state.denominators[p][0] = addmod(state.x, modulus - state.unique_eval_points[p], modulus);
+                state.denominators[p][1] = addmod(modulus - state.x, modulus - state.unique_eval_points[p], modulus);
+                state.denominators[p][0] = field.inverse_static(state.denominators[p][0], modulus);
+                state.denominators[p][1] = field.inverse_static(state.denominators[p][1], modulus);
+            }
+            prepare_Y(blob, state.query_proof_offset, state);
+            if( state.x_index < state.domain_size ){
+                if( !copy_memory_pair_and_check(blob, state.round_proof_offset, state.leaf_data, state.y) ){
+                    console.log("Not validated!");
+                    return false;
+                }
+            }else{
+                if( !copy_reverted_memory_pair_and_check(blob, state.round_proof_offset, state.leaf_data, state.y) ){
+                    console.log("Not validated!");
+                    return false;
                 }
             }
             if( !colinear_check(state.x, state.y, state.alphas[0], basic_marshalling.get_uint256_be(blob,state.round_data_offset)) ){
@@ -628,7 +470,6 @@ unchecked {
                 return false;
             }
             state.round_data_offset += 0x40;
-
             i++;
         }
         return true;
