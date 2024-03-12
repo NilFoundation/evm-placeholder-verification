@@ -26,20 +26,20 @@ import "../../containers/merkle_verifier.sol";
 import "../../algebra/polynomial.sol";
 import "hardhat/console.sol";
 
-library modular_commitment_scheme_circuit6 {
+library modular_commitment_scheme_circuit7 {
     uint256 constant modulus = 28948022309329048855892746252171976963363056481941560715954676764349967630337;
     uint64 constant batches_num = 5;
-    uint256 constant r = 2;
+    uint256 constant r = 3;
     uint256 constant lambda = 40;
-    uint256 constant D0_size = 128;
-    uint256 constant max_degree = 7;
-    uint256 constant D0_omega = 7356716530956153652314774863381845254278968224778478050456563329565810467774;
-    uint256 constant unique_points = 5;
-    uint256 constant omega = 199455130043951077247265858823823987229570523056509026484192158816218200659;
-    uint256 constant _eta = 803366558203218085262587658290616888718514568376672218431510937671123454021;
-    bytes constant point_ids = hex"0001000100010001000100010001000100020100020100020100020100020100020100010001030000000200020000000000000000000000000000000000000204000204000204000204000204000204000204"; // 1 byte -- point id
-    bytes constant poly_points_num = hex"002c0010000f00010007"; // 2 byte lengths
-    bytes constant poly_ids = hex"00000040008000c001000140018001c002000240028002c003000340038003c004000440048004c005000540058005c006000640068006c007000740078007c008000840088008c009000940098009c00a000a400a800ac000000040008000c001000140018001c002000240028002c003000340038003c002000240028002c003000340048004c00940098009c00a000a400a800ac004000940098009c00a000a400a800ac0"; // 2 byte poly_id 2 byte
+    uint256 constant D0_size = 256;
+    uint256 constant max_degree = 15;
+    uint256 constant D0_omega = 23692685744005816481424929253249866475360293751445976741406164118468705843520;
+    uint256 constant unique_points = 9;
+    uint256 constant omega = 14450201850503471296781915119640920297985789873634237091629829669980153907901;
+    uint256 constant _eta = 3220364210532353783132791604212137439743112382567031206832408370394102550017;
+    bytes constant point_ids = hex"000100010001000100010001000100010002010002010002010002010002010002010002010002010002010001000100010001000201000201030405060002070806000002000200000000000000000000000000000000000000000000000000000205000205000205000205000205000205000205000205000205"; // 1 byte -- point id
+    bytes constant poly_points_num = hex"003d0017001700010001000a000200010001"; // 2 byte lengths
+    bytes constant poly_ids = hex"00000040008000c001000140018001c002000240028002c003000340038003c004000440048004c005000540058005c006000640068006c007000740078007c008000840088008c009000940098009c00a000a400a800ac00b000b400b800bc00c000c400c800cc00d000d400d800dc00e000e400e800ec00f0000000040008000c001000140018001c002000240028002c003000340038003c004000440048004c005000540058002000240028002c003000340038003c004000540058005c0064006800d000d400d800dc00e000e400e800ec00f0005c005c005c00d000d400d800dc00e000e400e800ec00f0005c0060005c005c0"; // 2 byte poly_id 2 byte
 
     struct commitment_state{
         bytes   leaf_data;
@@ -77,8 +77,12 @@ library modular_commitment_scheme_circuit6 {
 		result[0] = xi;
 		result[1] = eta;
 		result[2] = mulmod(xi, omega, modulus);
-		result[3] = mulmod(xi, inversed_omega, modulus);
-		result[4] = mulmod(xi, field.pow_small(inversed_omega, 2, modulus), modulus);
+		result[3] = mulmod(xi, field.pow_small(inversed_omega, 7, modulus), modulus);
+		result[4] = mulmod(xi, field.pow_small(inversed_omega, 3, modulus), modulus);
+		result[5] = mulmod(xi, field.pow_small(inversed_omega, 2, modulus), modulus);
+		result[6] = mulmod(xi, inversed_omega, modulus);
+		result[7] = mulmod(xi, field.pow_small(omega, 2, modulus), modulus);
+		result[8] = mulmod(xi, field.pow_small(omega, 3, modulus), modulus);
 
     }
 
@@ -354,7 +358,7 @@ unchecked {
 			///* 1 - 2*permutation_size */
 		///* eta points check */
 		{
-			uint256[16] memory points;
+			uint256[23] memory points;
 			points[0] = basic_marshalling.get_uint256_be(blob,0x28);
 			points[0x1] = basic_marshalling.get_uint256_be(blob,0x68);
 			points[0x2] = basic_marshalling.get_uint256_be(blob,0xa8);
@@ -369,10 +373,17 @@ unchecked {
 			points[0xb] = basic_marshalling.get_uint256_be(blob,0x368);
 			points[0xc] = basic_marshalling.get_uint256_be(blob,0x3c8);
 			points[0xd] = basic_marshalling.get_uint256_be(blob,0x428);
-			points[0xe] = basic_marshalling.get_uint256_be(blob,0x468);
-			points[0xf] = basic_marshalling.get_uint256_be(blob,0x4a8);
+			points[0xe] = basic_marshalling.get_uint256_be(blob,0x488);
+			points[0xf] = basic_marshalling.get_uint256_be(blob,0x4e8);
+			points[0x10] = basic_marshalling.get_uint256_be(blob,0x548);
+			points[0x11] = basic_marshalling.get_uint256_be(blob,0x588);
+			points[0x12] = basic_marshalling.get_uint256_be(blob,0x5c8);
+			points[0x13] = basic_marshalling.get_uint256_be(blob,0x608);
+			points[0x14] = basic_marshalling.get_uint256_be(blob,0x648);
+			points[0x15] = basic_marshalling.get_uint256_be(blob,0x6a8);
+			points[0x16] = basic_marshalling.get_uint256_be(blob,0x708);
 			// Check keccak(points) 
-			if ( bytes32(0xc1a65c073a0bbd973cc775a5ac2a7b908038a41edb6796c6bc1efeae16cf0b8c) != keccak256(abi.encode(points))) {
+			if ( bytes32(0x913002db2afc1e6c2dd64efded0538c8acc9abda2906f020502ba40deeea53b8) != keccak256(abi.encode(points))) {
 				return false;
 			}
 		}

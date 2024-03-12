@@ -32,7 +32,7 @@ import "../../algebra/field.sol";
 contract modular_verifier_circuit1 is IModularVerifier{
     uint256 constant modulus = 28948022309329048855892746252171976963363056481941560715954676764349967630337;
     bool    constant use_lookups = false;
-    bytes32 constant vk1 = bytes32(0x79e2a887f921eddebb5757d0186b49b8399ce63d0f04458dec59b032ca76a187);
+    bytes32 constant vk1 = bytes32(0x2f5d36dffa0f87838bca40df1ce089a07848c4e5e8d2373b5ffe3db9a4cceadb);
     bytes32 constant vk2 = bytes32(0xcc2d054528ca2282bfe586c5ccd4bba968132bd2615efc9d0a9b25930722ef00);
     bytes32 transcript_state;
     address _gate_argument_address;
