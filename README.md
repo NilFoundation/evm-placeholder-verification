@@ -1,4 +1,4 @@
-# EVM Placeholder proof system verifier 
+# EVM Placeholder proof system verifier
 
 [![Discord](https://img.shields.io/discord/969303013749579846.svg?logo=discord&style=flat-square)](https://discord.gg/KmTAEjbmM3)
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=flat-square&logo=telegram&logoColor=dark)](https://t.me/nilfoundation)
@@ -51,6 +51,13 @@ cd evm-placeholder-verification
 
 ```bash
 npm i
+```
+
+## Configure Environment Variables
+Before deploying or verifying on-chain, configure your .env for RPC URLs and Private Key. Copy the evm.example file to .env and update it with your details:
+```bash
+cp env.example .env
+# Edit .env to include your private key and RPC URLs
 ```
 
 ## Compile contracts
