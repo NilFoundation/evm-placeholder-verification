@@ -109,7 +109,7 @@ const verify_circuit_proof = async (modular_path: string, circuit: string) => {
 
         let receipt = await txResponse.wait();
         console.log("Block Number:", receipt.blockNumber);
-        console.log("⛽Gas used: ", receipt.gasUsed.toNumber());
+        console.log("⛽ Gas used: ", receipt.gasUsed.toNumber());
         const get_verification_event_result = (event): boolean | null => {
             if (event.event == 'VerificationResult') {
                 return BigInt(event.data) != 0n;
@@ -119,7 +119,7 @@ const verify_circuit_proof = async (modular_path: string, circuit: string) => {
         const event_to_string = (event) => {
             const verification_result = get_verification_event_result(event);
             if (verification_result !== null) {
-                return verification_result ? '✅ProofVerified' : '🛑ProofVerificationFailed';
+                return verification_result ? '✅ ProofVerified' : '🛑 ProofVerificationFailed';
             }
             return '🤔' + event.event;
         };
