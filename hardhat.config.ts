@@ -7,9 +7,13 @@ require("hardhat-deploy");
 require('hardhat-deploy-ethers');
 require('hardhat-contract-sizer');
 
+import "dotenv/config";
 import './tasks/modular-test'
 
 const DEFAULT_PRIVATE_KEY = "0x" + "0".repeat(64); // 32 bytes of zeros placeholder to pass config validation
+
+const MUMBAI_PRIVATE_KEY = process.env.MUMBAI_PRIVATE_KEY || DEFAULT_PRIVATE_KEY;
+const MUMBAI_ALCHEMY_KEY = process.env.MUMBAI_ALCHEMY_KEY || "";
 
 const SEPOLIA_PRIVATE_KEY = process.env.SEPOLIA_PRIVATE_KEY || DEFAULT_PRIVATE_KEY;
 const SEPOLIA_ALCHEMY_KEY = process.env.SEPOLIA_ALCHEMY_KEY || "";
@@ -47,6 +51,10 @@ module.exports = {
         },
         localhost: {
             url: "http://127.0.0.1:8545",
+        },
+        mumbai: {
+            url: `https://polygon-mumbai.g.alchemy.com/v2/${MUMBAI_ALCHEMY_KEY}`,
+            accounts: [MUMBAI_PRIVATE_KEY]
         }
     },
     etherscan: {
