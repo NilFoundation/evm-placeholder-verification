@@ -197,11 +197,13 @@ library types {
         uint256 commitments_num;
         uint256 theta;
         uint256 theta_2;
+        uint256 points_num;
+        types.g2_point verification_key;
     }
 
     struct kzg_proof_type {
-        g1_point pi_1;
-        g1_point pi_2;
+        types.g1_point pi_1;
+        types.g1_point pi_2;
     }
 
     struct fri_state_type {

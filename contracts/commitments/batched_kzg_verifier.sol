@@ -21,37 +21,102 @@ import "./batched_fri_verifier.sol";
 import "../algebra/polynomial.sol";
 import "../basic_marshalling.sol";
 import "../algebra/bn254.sol";
+import "../../contracts/interfaces/modular_verifier.sol";
+
+import "hardhat/console.sol";
 
 library batched_kzg_verifier {
 
     function verify_proof(
-        /*
-        uint256[] memory commitments,
-        types.kzg_proof_type memory kzg_proof,
+        types.g1_point[] memory commitments,
+        uint256[] memory Z,
+        uint256[] memory U,
         types.transcript_data memory tr_state,
-        types.kzg_params_type memory kzg_params*/)
+        types.kzg_params_type memory kzg_params,
+        types.kzg_proof_type memory kzg_proof)
     internal view returns (bool result) {
+    unchecked {
 
-        types.g1_point memory a1 = bn254_crypto.new_g1(
-            13537094572093675138513973797244805699587981214733746302150278342976640424397,
-            9554926369995100646077410167290930878381045633071770559944038420370185418405);
+        uint256 i;
 
-        types.g2_point memory a2 = bn254_crypto.new_g2(
-            10857046999023057135944570762232829481370756359578518086990519993285655852781,
-            11559732032986387107991004021392285783925812861821192530917403151452391805634,
-            8495653923123431417604973247489272438418190587263600148770280649306958101930,
-            4082367875863433681332203403145435568316851327593401208105741076214120093531);
+        /* 1. send to transcript all commitments */
+        for (i = 0; i < kzg_params.commitments_num; ++i ) {
+            transcript.update_transcript_b32(tr_state, bytes32(commitments[i].x));
+            transcript.update_transcript_b32(tr_state, bytes32(commitments[i].y));
+        }
+        for (i = 0; i < kzg_params.points_num; ++i ) {
+            transcript.update_transcript_b32(tr_state, bytes32(Z[i]));
+        }
+        for (i = 0; i < kzg_params.points_num; ++i ) {
+            transcript.update_transcript_b32(tr_state, bytes32(U[i]));
+        }
+        /* TWICE ? */
+        for (i = 0; i < kzg_params.commitments_num; ++i ) {
+            transcript.update_transcript_b32(tr_state, bytes32(commitments[i].x));
+            transcript.update_transcript_b32(tr_state, bytes32(commitments[i].y));
+        }
+        for (i = 0; i < kzg_params.points_num; ++i ) {
+            transcript.update_transcript_b32(tr_state, bytes32(Z[i]));
+        }
+        for (i = 0; i < kzg_params.points_num; ++i ) {
+            transcript.update_transcript_b32(tr_state, bytes32(U[i]));
+        }
 
-        types.g1_point memory b1 = bn254_crypto.new_g1(
-            18537193526015835698554895901144353361264554539198746530791998564522770502405,
-            15073207450244909649956103901894317250233986784535780985960937295179118615068);
+        /* 2. challenge theta from transcript */
+        uint256 theta = transcript.get_field_challenge(tr_state, bn254_crypto.r_mod);
 
-        types.g2_point memory b2 = bn254_crypto.new_g2(
-            15512671280233143720612069991584289591749188907863576513414377951116606878472,
-            18551411094430470096460536606940536822990217226529861227533666875800903099477,
-            13376798835316611669264291046140500151806347092962367781523498857425536295743,
-            1711576522631428957817575436337311654689480489843856945284031697403898093784);
+        /* 3. send pi_1 to transcript */
+        transcript.update_transcript_b32(tr_state, bytes32(kzg_proof.pi_1.x));
+        transcript.update_transcript_b32(tr_state, bytes32(kzg_proof.pi_1.y));
 
-        return bn254_crypto.pairingProd2(a1,a2, b1,b2);
+        /* 4. challenge theta_2 from transcript */
+        uint256 theta_2 = transcript.get_field_challenge(tr_state, bn254_crypto.r_mod);
+
+        /* check theta and theta_2 values */
+        if(theta != kzg_params.theta) {
+            console.log("wrong theta: ", theta);
+            console.log("expecting  : ", kzg_params.theta);
+        }
+
+        if(theta_2 != kzg_params.theta_2) {
+            console.log("wrong theta_2 :", theta_2);
+            console.log("expecting     : ", kzg_params.theta_2);
+        }
+ 
+        /* 5. for a set of commitments construct F */
+
+        uint256 theta_i = 1;
+        types.g1_point memory F = bn254_crypto.new_g1(0,0);
+        uint256 rsum = 0;
+        uint256 tmp;
+        uint256 r_i;
+
+        for (i = 0; i < kzg_params.commitments_num; ++i) {
+            tmp = 13537094572093675138513973797244805699587981214733746302150278342976640424397;
+            r_i = mulmod(theta_i, tmp, bn254_crypto.r_mod);
+            types.g1_point memory f = bn254_crypto.ecmul(commitments[i], r_i);
+            F = bn254_crypto.ecadd(F, f);
+            tmp = 9554926369995100646077410167290930878381045633071770559944038420370185418405;
+            r_i = mulmod(r_i, tmp, bn254_crypto.r_mod);
+            rsum = addmod(rsum, r_i, bn254_crypto.r_mod);
+            theta_i = mulmod(theta_i, theta, bn254_crypto.r_mod);
+        }
+
+        types.g1_point memory F_last = bn254_crypto.ecmul(bn254_crypto.P1(), rsum);
+        F_last.x = bn254_crypto.p_mod - F_last.x;
+        F = bn254_crypto.ecadd(F, F_last);
+
+        tmp= 11559732032986387107991004021392285783925812861821192530917403151452391805634;
+        F_last = bn254_crypto.ecmul(kzg_proof.pi_1, tmp);
+        F_last.x = bn254_crypto.p_mod - F_last.x;
+        F = bn254_crypto.ecadd(F, F_last);
+
+        F_last = bn254_crypto.ecmul(kzg_proof.pi_1, theta_2);
+        F = bn254_crypto.ecadd(F, F_last);
+
+        types.g2_point memory g2 = bn254_crypto.P2();
+
+        return bn254_crypto.pairingProd2(F , g2, kzg_proof.pi_2, kzg_params.verification_key);
+    }
     }
 }
