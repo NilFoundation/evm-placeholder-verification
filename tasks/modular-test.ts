@@ -147,3 +147,15 @@ task("verify-circuit-proof")
         let circuit = test.test;
         process.exit((await verify_circuit_proof(modular_path, circuit)) ? 0 : 1);
     });
+
+task("verify-kzg")
+    .setAction(async (hre) => {
+        console.log("Verify KZG");
+        await deployments.fixture(['testKZGVerifierFixture']);
+        const v = await ethers.getContract('kzg_estimation');
+        const proof = [];
+        const public_input = [];
+        const receipt = await (await v.verify(proof, public_input, {gasLimit: 30_500_000})).wait();
+        console.log("⛽Gas used: ", receipt.gasUsed.toNumber());
+//        console.log(receipt);
+    });

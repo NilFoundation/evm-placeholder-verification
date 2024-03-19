@@ -93,8 +93,59 @@ library bn254_crypto {
         });
     }
 
+    // ECADD
+    function ecadd(types.g1_point memory a, types.g1_point memory b)
+        internal view returns(types.g1_point memory res)
+    {
+        validateG1Point(a);
+        validateG1Point(b);
+        bool success;
+
+        assembly {
+            let mPtr := mload(0x40)
+            mstore(mPtr, mload(a))
+            mstore(add(mPtr, 0x20), mload(add(a, 0x20)))
+            mstore(add(mPtr, 0x40), mload(b))
+            mstore(add(mPtr, 0x60), mload(add(b, 0x20)))
+            success := staticcall(
+                gas(),
+                6,
+                mPtr,
+                0x80,
+                mload(res),
+                0x40
+            )
+        }
+        require(success, "ECADD check failed!");
+    }
+
+    // ECMUL
+    function ecmul(types.g1_point memory a, uint256 s)
+        internal view returns(types.g1_point memory res)
+    {
+        validateG1Point(a);
+        bool success;
+
+        assembly {
+            let mPtr := mload(0x40)
+            mstore(mPtr, mload(a))
+            mstore(add(mPtr, 0x20), mload(add(a, 0x20)))
+            mstore(add(mPtr, 0x40), s)
+            success := staticcall(
+                gas(),
+                6,
+                mPtr,
+                0x60,
+                mload(res),
+                0x40
+            )
+        }
+        require(success, "ECMUL check failed!");
+    }
+
+
     /// Evaluate the following pairing product:
-    /// e(a1, a2).e(-b1, b2) == 1
+    /// e(a1, a2).e(b1, b2) == 1
     function pairingProd2(
         types.g1_point memory a1,
         types.g2_point memory a2,
