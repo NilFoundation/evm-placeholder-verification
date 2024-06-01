@@ -1,0 +1,17 @@
+# Things we don't want in a Docker image
+.env
+.git
+.github
+.idea
+
+# build artifacts
+coverage
+coverage.json
+node_modules
+typechain
+typechain-types
+
+# Hardhat files
+artifacts
+cache
+deployments

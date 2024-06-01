@@ -1,0 +1,23 @@
+name: run-docker-tests
+
+on:
+  pull_request:
+
+concurrency:
+  group: ${{
+    ( github.ref == 'refs/heads/master' &&
+    format('{0}/{1}', github.run_id, github.run_attempt) )
+    ||
+    format('{0}/{1}', github.workflow, github.ref) }}
+  cancel-in-progress: true
+
+
+jobs:
+  run-tests:
+    runs-on: [ ubuntu-22.04 ]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build a Docker image
+        run: docker build -t ghcr.io/nilfoundation/evm-placeholder-verifier:${{ github.sha }} .
+
