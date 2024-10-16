@@ -40,8 +40,7 @@ jobs:
         uses: actions/setup-node@v3.6.0
 
       - name: Install node dependencies
-        run: |
-          npm install
+        run: npm install
 
       - name: Download artifact
         uses: actions/download-artifact@v3
