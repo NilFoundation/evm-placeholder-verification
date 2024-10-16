@@ -1,0 +1,37 @@
+name: Verify Proofs from crypto3-transpiler
+
+on:
+  workflow_call:
+    inputs:
+      evm-placeholder-verification-ref:
+        type: string
+        description: "Reference to evm-placeholder-verification repository to checkout at"
+
+jobs:
+  verify-proofs:
+    runs-on: [self-hosted, Linux, X64, aws_autoscaling]
+    steps:
+      - name: Clean up after previous checkout
+        run: chmod +w -R ${GITHUB_WORKSPACE}; rm -rf ${GITHUB_WORKSPACE}/*;
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          repository: 'NilFoundation/evm-placeholder-verification'
+          ref: ${{ inputs.evm-placeholder-verification-ref }}
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install node dependencies
+        run: npm install
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: proofs
+          path: ./contracts/zkllvm
+      - name: Verify all proofs
+        run: |
+          ls -l -a ./contracts/zkllvm
+          npx hardhat deploy
+          npx hardhat verify-circuit-proof-all
+
