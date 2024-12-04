@@ -40,7 +40,9 @@ jobs:
         uses: actions/setup-node@v3.6.0
 
       - name: Install node dependencies
-        run: npm install
+        run: |
+          export UV_USE_IO_URING=0
+          npm install
 
       - name: Download artifact
         uses: actions/download-artifact@v3

@@ -42,6 +42,7 @@ jobs:
 
       - name: Install node dependencies
         run: |
+          export UV_USE_IO_URING=0
           npm install
 
       - name: Hadrhat tests
