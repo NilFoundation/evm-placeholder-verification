@@ -37,7 +37,7 @@ jobs:
           refs: ${{ inputs.refs }}
 
       - name: Setup Node.js environment
-        uses: actions/setup-node@v3.6.0
+        uses: actions/setup-node@v4.1.0
 
       - name: Install node dependencies
         run: |
@@ -45,7 +45,7 @@ jobs:
           npm install
 
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4.1.8
         with:
           name: ${{ inputs.artifact-name }}
           path: ./contracts/zkllvm
