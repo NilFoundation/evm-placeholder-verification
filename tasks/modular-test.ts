@@ -100,33 +100,43 @@ const verify_circuit_proof = async (modular_path: string, circuit: string) => {
         console.log("Wrong public input format!");
         return null;
     }
-    let receipt = await (await verifier_contract.verify(proof, public_input, {gasLimit: 30_500_000})).wait();
-    console.log("⛽Gas used: ", receipt.gasUsed.toNumber());
-    console.log("Events received:");
-    const get_verification_event_result = (event): boolean | null => {
-        if (event.event == 'VerificationResult') {
-            return BigInt(event.data) != 0n;
-        }
-        return null;
-    };
-    const event_to_string = (event) => {
-        const verification_result = get_verification_event_result(event);
-        if (verification_result !== null) {
-            return verification_result ? '✅ProofVerified' : '🛑ProofVerificationFailed';
-        }
-        return '🤔' + event.event;
-    };
+    try {
+        let txResponse = await verifier_contract.verify(proof, public_input, {
+            gasLimit: 15_000_000,
+            //gasPrice: ethers.utils.parseUnits('10', 'gwei')
+        });
+        console.log("Transaction Hash:", txResponse.hash);
 
-    let verification_result = null;
-    for (const e of receipt.events) {
-        const result = get_verification_event_result(e);
-        if (result !== null) {
-            verification_result = result;
+        let receipt = await txResponse.wait();
+        console.log("Block Number:", receipt.blockNumber);
+        console.log("⛽ Gas used: ", receipt.gasUsed.toNumber());
+        const get_verification_event_result = (event): boolean | null => {
+            if (event.event == 'VerificationResult') {
+                return BigInt(event.data) != 0n;
+            }
+            return null;
+        };
+        const event_to_string = (event) => {
+            const verification_result = get_verification_event_result(event);
+            if (verification_result !== null) {
+                return verification_result ? '✅ ProofVerified' : '🛑 ProofVerificationFailed';
+            }
+            return '🤔' + event.event;
+        };
+
+        let verification_result = null;
+        for (const e of receipt.events) {
+            const result = get_verification_event_result(e);
+            if (result !== null) {
+                verification_result = result;
+            }
+            console.log(event_to_string(e));
         }
-        console.log(event_to_string(e));
+        console.log("====================================");
+        return verification_result;
+    } catch (error) {
+        console.error("Error during transaction:", error.message);
     }
-    console.log("====================================");
-    return verification_result;
 }
 
 task("verify-circuit-proof-all")
