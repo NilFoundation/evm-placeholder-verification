@@ -192,6 +192,20 @@ library types {
         uint256[] fri_roots;                // It should be bytes32
     }
 
+
+    struct kzg_params_type {
+        uint256 commitments_num;
+        uint256 theta;
+        uint256 theta_2;
+        uint256 points_num;
+        types.g2_point verification_key;
+    }
+
+    struct kzg_proof_type {
+        types.g1_point pi_1;
+        types.g1_point pi_2;
+    }
+
     struct fri_state_type {
         bytes b;
         //0x0
