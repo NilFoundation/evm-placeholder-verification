@@ -14,13 +14,6 @@ module.exports = async function () {
     });
     console.log(counter_tx);
 
-    console.log("Deploy calldata")
-    let calldata_tx = await deploy('zkEVMCalldata', {
-        from: deployer,
-        log: true,
-    });
-    console.log(counter_tx);
-
     console.log("Deploy call counter")
     let call_counter_tx = await deploy("zkEVMCallCounter", {
         from: deployer,
@@ -76,6 +69,31 @@ module.exports = async function () {
         args: []
     });
     console.log(indexed_logs_tx);
+
+    console.log("Deploy revert cold access")
+    let revert_cold_tx = await deploy("zkEVMRevertCold", {
+        from: deployer,
+        log: true,
+        args: [dynamic_storage_tx.address]
+    });
+    console.log(revert_cold_tx);
+
+    console.log("Deploy revert cold access try catch")
+    let try_catch_cold_tx = await deploy("zkEVMTryCatchCold", {
+        from: deployer,
+        log: true,
+        args: [dynamic_storage_tx.address, revert_cold_tx.address]
+    });
+    console.log(try_catch_cold_tx);
+
+
+    console.log("Deploy keccak and calldatacopy example")
+    let keccak_tx = await deploy("zkEVMKeccak", {
+        from: deployer,
+        log: true,
+        args: []
+    });
+    console.log(keccak_tx);
 }
 
 module.exports.tags = ['testZKevmFixture']

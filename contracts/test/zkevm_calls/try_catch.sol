@@ -22,6 +22,7 @@ contract zkEVMTryCatch {
 
     function callInc() public returns (uint256 result){
         ICounter counter = ICounter(CounterAddr);
+        result = counter.inc();
         IRevert r = IRevert(RevertAddr);
         try r.callInc() {
             emit Success("Success");

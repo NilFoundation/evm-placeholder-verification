@@ -20,13 +20,6 @@ module.exports = async function () {
         log: true,
     });
 
-
-    console.log("Keccak test")
-    await deploy('zkEVMKeccak', {
-        from: deployer,
-        log: true,
-    });
-
     console.log("Memory initialization test")
     await deploy('zkEVMMemInit', {
         from: deployer,

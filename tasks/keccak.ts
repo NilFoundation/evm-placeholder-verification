@@ -117,7 +117,7 @@ const getStorageItems = async(address, keys) =>{
     return result;
 }
 
-const minimal_math = async ()=>{
+const keccak = async ()=>{
     let result = {};
     result["eth_accounts"] = {};
     result["accounts"] = {};
@@ -126,34 +126,59 @@ const minimal_math = async ()=>{
     // Step 1. Load ethereum accounts involved in your test
     const signer = await ethers.provider.getSigner();
     const signer_address = await signer.getAddress();
-    let eth_account_data = getEthereumAccount(signer_address);
+    let eth_account_data = await getEthereumAccount(signer_address);
     result["eth_accounts"][signer_address] = eth_account_data;
 
     // Step 2. Load contracts involved in your test
-    let counter = await ethers.getContract('zkEVMMinimalMath');
-    result["accounts"][counter.address] = await getAccount(counter.address, [
+    let keccak_contract = await ethers.getContract('zkEVMKeccak');
+    result["accounts"][keccak_contract.address] = await getAccount(keccak_contract.address, [
         "0x0000000000000000000000000000000000000000000000000000000000000000",
-        "0x0000000000000000000000000000000000000000000000000000000000000001",
-        "0x0000000000000000000000000000000000000000000000000000000000000002",
-        "0x0000000000000000000000000000000000000000000000000000000000000057"
+        "0x0000000000000000000000000000000000000000000000000000000000000001"
     ]);
 
-    // Step 3. Run transactions, traces and get receipts
-    // We won't fully simulate block logic, because it differs from cluster's
+    // Step 3. Two transactions in the first block
+    {
+        let tx1 = await keccak_contract.hash("Hello, world!", {gasLimit: 100_000});
+        let tx2 = await keccak_contract.hash("", {gasLimit: 100_000});
 
-    // Three counters in the first block
-    let tx1 = await counter.test_addition(2, 3, {gasLimit: 100_000});
+        let txReciept1 = await tx1.wait(1);
+        let txReciept2 = await tx2.wait(1);
 
-    let txReciept1 = await tx1.wait(1);
+        // console.log(txReciept1["blockHash"]);
+        // console.log(txReciept2["blockHash"]);
+        // console.log(txReciept3["blockHash"]);
 
-    let trace1 = await getTrace(tx1.hash);
-    result["blocks"][txReciept1["blockHash"]] = {};
-    result["blocks"][txReciept1["blockHash"]]["transactions"] = {};
-    result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash] = {};
-    result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash]["tx"] = tx1;
-    result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash]["reciept"] = txReciept1;
-    result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash]["trace"] = trace1;
+        let trace1 = await getTrace(tx1.hash);
+        result["blocks"][txReciept1["blockHash"]] = {};
+        result["blocks"][txReciept1["blockHash"]]["transactions"] = {};
+        result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash] = {};
+        result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash]["tx"] = tx1;
+        result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash]["reciept"] = txReciept1;
+        result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash]["trace"] = trace1;
 
+        let trace2 = await getTrace(tx2.hash);
+        if( txReciept2["blockHash"] != txReciept1["blockHash"] ) {
+            result["blocks"][txReciept2["blockHash"]] = {};
+            result["blocks"][txReciept2["blockHash"]]["transactions"] = {};
+        }
+        result["blocks"][txReciept2["blockHash"]]["transactions"][tx2.hash] = {};
+        result["blocks"][txReciept2["blockHash"]]["transactions"][tx2.hash]["tx"] = tx2;
+        result["blocks"][txReciept2["blockHash"]]["transactions"][tx2.hash]["reciept"] = txReciept2;
+        result["blocks"][txReciept2["blockHash"]]["transactions"][tx2.hash]["trace"] = trace2;
+    }
+
+    // Step 4. One transaction in the second block
+    {
+        let tx1 = await keccak_contract.hash("0x11223344556677889900aabbccddeeff0011223344556677889900aabbccddeeffgghh", {gasLimit: 100_000});
+        let txReciept1 = await tx1.wait(1);
+        let trace1 = await getTrace(tx1.hash);
+        result["blocks"][txReciept1["blockHash"]] = {};
+        result["blocks"][txReciept1["blockHash"]]["transactions"] = {};
+        result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash] = {};
+        result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash]["tx"] = tx1;
+        result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash]["reciept"] = txReciept1;
+        result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash]["trace"] = trace1;
+    }
     console.log(JSON.stringify(result));
 }
 

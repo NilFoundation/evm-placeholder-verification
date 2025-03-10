@@ -1,10 +1,12 @@
 pragma solidity >=0.8.4;
 
 contract zkEVMOverflow{
+    event Result(uint256 result);
+
     uint256 overflows;
 
-    function uncheckedAddition(uint8 a, uint8 b) public returns (bool result){
-        uint8 sum;
+    function uncheckedAddition(uint256 a, uint256 b) public returns (bool result){
+        uint256 sum;
         unchecked{
             sum = a+b;
         }
@@ -12,6 +14,7 @@ contract zkEVMOverflow{
             overflows++;
             result = true;
         }
+        emit Result(sum);
         return result;
     }
 }

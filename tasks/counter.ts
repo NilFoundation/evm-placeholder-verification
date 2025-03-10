@@ -117,6 +117,7 @@ const getStorageItems = async(address, keys) =>{
     return result;
 }
 
+
 const counter = async ()=>{
     let result = {};
     result["eth_accounts"] = {};

@@ -17,14 +17,6 @@ contract zkEVMRevert {
         ICounter counter = ICounter(CounterAddr);
         result = counter.inc();
         result = counter.inc();
-        result = counter.inc();
-        result = counter.inc();
-        result = counter.inc();
-        result = counter.inc();
-        result = counter.inc();
-        result = counter.inc();
-        result = counter.inc();
-        result = counter.inc();
         revert_counter += 1;
         require(false, "Wrong operation");
         return revert_counter;
