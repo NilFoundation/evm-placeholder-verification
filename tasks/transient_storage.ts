@@ -123,57 +123,47 @@ const transient_storage = async (hre) => {
     result["eth_accounts"] = {};
     result["accounts"] = {};
     result["blocks"] = {};
-  
-    // Step 1. Load ethereum accounts involved in your test
+
     const signer = await ethers.provider.getSigner();
     const signer_address = await signer.getAddress();
     let eth_account_data = await getEthereumAccount(signer_address);
     result["eth_accounts"][signer_address] = eth_account_data;
-  
-    // Step 2. Load contracts involved in your test
+
     let call_counter = await ethers.getContract('TransientStorageDemo');
     result["accounts"][call_counter.address] = await getAccount(call_counter.address, [
-      "0x0000000000000000000000000000000000000000000000000000000000000000",
-      "0x0000000000000000000000000000000000000000000000000000000000000001",
-      "0x0000000000000000000000000000000000000000000000000000000000000002"
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        "0x0000000000000000000000000000000000000000000000000000000000000002"
     ]);
-  
-    // Load the deployed TransientStorageTester contract
+
     let tester = await ethers.getContract('TransientStorageTester');
-  
-    // Step 3. Run transactions, traces and get receipts
-    // We won't fully simulate block logic, because it differs from cluster's
+    result["accounts"][tester.address] = await getAccount(tester.address, [
+        "0x0000000000000000000000000000000000000000000000000000000000000000"
+    ]);
+
     let tx, txReceipt, trace;
-  
-    // Replace the loop with a single call to testOverflow
     try {
-      tx = await tester.testOverflow(6, { gasLimit: 1_000_000 }); // Call 6 times to trigger revert
-      txReceipt = await tx.wait(1);
-      trace = await getTrace(tx.hash);
-    } catch (error) {
-      if (tx) { // Check if tx is defined before accessing tx.hash
-        txReceipt = await ethers.provider.getTransactionReceipt(tx.hash);
+        tx = await tester.testOverflow(6, { gasLimit: 1_000_000 });
+        txReceipt = await tx.wait(1);
         trace = await getTrace(tx.hash);
-      }
+    } catch (error) {
+        if (tx) {
+            txReceipt = await ethers.provider.getTransactionReceipt(tx.hash);
+            trace = await getTrace(tx.hash);
+        }
     }
-  
+
     if (tx && txReceipt) {
         result["blocks"][txReceipt["blockHash"]] = {};
         result["blocks"][txReceipt["blockHash"]]["transactions"] = {};
         result["blocks"][txReceipt["blockHash"]]["transactions"][tx.hash] = {};
-        // Serialize tx and txReceipt, converting BigNumber to strings
-        result["blocks"][txReceipt["blockHash"]]["transactions"][tx.hash]["tx"] = JSON.parse(
-          JSON.stringify(tx, (key, value) => (ethers.BigNumber.isBigNumber(value) ? value.toString() : value))
-        );
-        result["blocks"][txReceipt["blockHash"]]["transactions"][tx.hash]["reciept"] = JSON.parse(
-          JSON.stringify(txReceipt, (key, value) => (ethers.BigNumber.isBigNumber(value) ? value.toString() : value))
-        );
+        result["blocks"][txReceipt["blockHash"]]["transactions"][tx.hash]["tx"] = tx;
+        result["blocks"][txReceipt["blockHash"]]["transactions"][tx.hash]["reciept"] = txReceipt;
         result["blocks"][txReceipt["blockHash"]]["transactions"][tx.hash]["trace"] = trace;
-      }
-  
+    }
+
     console.log(JSON.stringify(result));
-  };
-  
+};
   module.exports = transient_storage;
 
 task("transient-storage")
