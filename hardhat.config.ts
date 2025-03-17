@@ -18,6 +18,7 @@ import './tasks/indexed_log'
 import './tasks/overflow'
 import './tasks/dynamic_storage_layout'
 import './tasks/try_catch.ts'
+import './tasks/transient_storage.ts'
 
 
 const DEFAULT_PRIVATE_KEY = "0x" + "0".repeat(64); // 32 bytes of zeros placeholder to pass config validation
@@ -33,15 +34,16 @@ const ETHERSCAN_KEY = "ETHERSCAN_KEY"
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
     solidity: {
-        version: "0.8.18",
+        version: "0.8.24",
         settings: {
             optimizer: {
                 enabled: true,
                 runs: 200,
             },
-            metadata:{
-                appendCBOR: false
-            }
+            metadata: {
+                appendCBOR: true
+            },
+            evmVersion: "cancun"
         },
     },
     namedAccounts: {
@@ -53,7 +55,8 @@ module.exports = {
             mining: {
                 auto: false,
                 interval: 1000
-            }
+            },
+            hardfork: "cancun" 
         },
         sepolia: {
             url: `https://eth-sepolia.g.alchemy.com/v2/${SEPOLIA_ALCHEMY_KEY}`,
@@ -69,7 +72,8 @@ module.exports = {
             mining: {
                 auto: false,
                 interval: 1000
-            }
+            },
+            hardfork: "cancun" 
         }
     },
     etherscan: {
