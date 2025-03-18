@@ -37,7 +37,9 @@ contract TransientStorageTester {
 
     function testOverflow(uint256 times) external {
         for (uint256 i = 0; i < times; i++) {
-            target.incrementCounters();
+            try target.incrementCounters(){ }
+            catch {}
         }
     }
 }
+

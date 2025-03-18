@@ -12,15 +12,13 @@ module.exports = async function () {
       from: deployer,
       log: true,
     });
-    console.log(counter_tx);
   
     console.log("Deploy tester");
     let tester_tx = await deploy('TransientStorageTester', {
       from: deployer,
-      args: [counter_tx.address], // Link to the deployed TransientStorageDemo
+      args: [counter_tx.address],
       log: true,
     });
-    console.log(tester_tx);
 
 }
 

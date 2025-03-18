@@ -41,7 +41,7 @@ module.exports = {
                 runs: 200,
             },
             metadata: {
-                appendCBOR: true
+                appendCBOR: false
             },
             evmVersion: "cancun"
         },
