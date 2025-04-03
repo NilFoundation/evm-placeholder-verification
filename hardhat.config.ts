@@ -19,6 +19,8 @@ import './tasks/overflow'
 import './tasks/dynamic_storage_layout'
 import './tasks/try_catch.ts'
 import './tasks/transient_storage.ts'
+import './tasks/sar.ts'
+import './tasks/scmp'
 
 
 const DEFAULT_PRIVATE_KEY = "0x" + "0".repeat(64); // 32 bytes of zeros placeholder to pass config validation
