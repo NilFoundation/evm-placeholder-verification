@@ -13,11 +13,12 @@ import './tasks/modular-test'
 import './tasks/counter'
 import './tasks/keccak'
 import './tasks/call_counter'
+import './tasks/call_keccak'
 import './tasks/delegatecall'
 import './tasks/indexed_log'
 import './tasks/overflow'
 import './tasks/dynamic_storage_layout'
-import './tasks/try_catch.ts'
+import './tasks/try_catch'
 
 
 const DEFAULT_PRIVATE_KEY = "0x" + "0".repeat(64); // 32 bytes of zeros placeholder to pass config validation
