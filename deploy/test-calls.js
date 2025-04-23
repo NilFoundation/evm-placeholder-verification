@@ -94,6 +94,22 @@ module.exports = async function () {
         args: []
     });
     console.log(keccak_tx);
+
+    console.log("Deploy keccak caller to test calldata inside CALLS")
+    let call_keccak_tx = await deploy("zkEVMCallKeccak", {
+        from: deployer,
+        log: true,
+        args: [keccak_tx.address]
+    });
+    console.log(call_keccak_tx);
+
+    console.log("Deploy exponentiation test")
+    let exp_tx = await deploy("zkEVMExp", {
+        from: deployer,
+        log: true,
+        args: []
+    });
+    console.log(exp_tx);
 }
 
 module.exports.tags = ['testZKevmFixture']

@@ -5,6 +5,7 @@ import losslessJSON from "lossless-json";
 import {URL} from "url";
 import { expect } from "chai";
 
+const util = require('util')
 const getNonce  = async(address) =>{
     const params = {
         method: "eth_getTransactionCount",
@@ -117,7 +118,6 @@ const getStorageItems = async(address, keys) =>{
     return result;
 }
 
-
 const loadBlock = async(blockHash) => {
     let result = {};
     let block = await ethers.provider.getBlock(blockHash);;
@@ -133,72 +133,44 @@ const loadBlock = async(blockHash) => {
     return result;
 }
 
-const keccak = async ()=>{
+const call_keccak = async (hre)=>{
     let result = {};
 
-    //Two transactions in the first block
-    {
-        // Step 1. Load ethereum accounts involved in your test
-        const signer = await ethers.provider.getSigner();
-        const signer_address = await signer.getAddress();
-        let eth_accounts = {};
-        eth_accounts[signer_address] = await getEthereumAccount(signer_address);
+    // Step 1. Load ethereum accounts involved in your test
+    const signer = await ethers.provider.getSigner();
+    const signer_address = await signer.getAddress();
+    let eth_account_data = await getEthereumAccount(signer_address);
+    let eth_accounts = {};
+    eth_accounts[signer_address] = eth_account_data;
 
-        // Step 2. Load contracts involved in your test
-        let keccak_contract = await ethers.getContract('zkEVMKeccak');
-        let accounts = {};
-        accounts[keccak_contract.address] = await getAccount(keccak_contract.address, [
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "0x0000000000000000000000000000000000000000000000000000000000000001"
-        ]);
+    // Step 2. Load contracts involved in your test
+    let accounts = {};
+    let call_keccak = await ethers.getContract('zkEVMCallKeccak');
+    accounts[call_keccak.address] = await getAccount(call_keccak.address, [
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        "0x0000000000000000000000000000000000000000000000000000000000000002"
+    ]);
+    let keccak = await ethers.getContract('zkEVMKeccak');
+    accounts[keccak.address] = await getAccount(keccak.address, [
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "0x0000000000000000000000000000000000000000000000000000000000000057"
+    ]);
 
-        let tx1 = await keccak_contract.hash("Hello, world!", {gasLimit: 100_000});
-        let tx2 = await keccak_contract.hash("", {gasLimit: 100_000});
+    // Step 3. Run transactions, traces and get receipts
+    // We won't fully simulate block logic, because it differs from cluster's
+    let tx = await call_keccak.callHash("Hello, world!", {gasLimit: 1_000_000});
+    let txReciept = await tx.wait(1);
+    let blockHash = txReciept["blockHash"];
 
-        let txReciept1 = await tx1.wait(1);
-        let txReciept2 = await tx2.wait(1);
+    result[blockHash] = await loadBlock(blockHash);
+    result[blockHash]["eth_accounts"] = eth_accounts;
+    result[blockHash]["accounts"] = accounts;
 
-        if( txReciept1["blockHash"] != txReciept2["blockHash"] ) {
-            return console.error("Two transactions in different blocks");
-        }
-        let blockHash = txReciept1["blockHash"];
-
-        // console.log(txReciept1["blockHash"]);
-        // console.log(txReciept2["blockHash"]);
-        // console.log(txReciept3["blockHash"]);
-        result[blockHash] = await loadBlock(blockHash);
-        result[blockHash]["eth_accounts"] = eth_accounts;
-        result[blockHash]["accounts"] = accounts;
-    }
-
-    // One transaction in the second block
-    {
-        // Step 1.  accounts involved in your test
-        const signer = await ethers.provider.getSigner();
-        const signer_address = await signer.getAddress();
-        let eth_accounts = {};
-        eth_accounts[signer_address] = await getEthereumAccount(signer_address);
-
-        // Step 2. Load contracts involved in your test
-        let keccak_contract = await ethers.getContract('zkEVMKeccak');
-        let accounts = {};
-        accounts[keccak_contract.address] = await getAccount(keccak_contract.address, [
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "0x0000000000000000000000000000000000000000000000000000000000000001"
-        ]);
-
-        let tx1 = await keccak_contract.hash("0x11223344556677889900aabbccddeeff0011223344556677889900aabbccddeeffgghh", {gasLimit: 100_000});
-        let txReciept1 = await tx1.wait(1);
-        let blockHash = txReciept1["blockHash"];
-
-        result[blockHash] = await loadBlock(blockHash);
-        result[blockHash]["eth_accounts"] = eth_accounts;
-        result[blockHash]["accounts"] = accounts;
-    }
     console.log(JSON.stringify(result));
 }
 
-task("zkevm-keccak")
+task("zkevm-call-keccak")
     .setAction(async (hre) => {
-        await keccak();
+        await call_keccak();
     });

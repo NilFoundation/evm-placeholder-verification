@@ -45,7 +45,6 @@ module.exports = async function () {
         from: deployer,
         log: true,
     });
-    console.log(tx);
 }
 
 module.exports.tags = ['testZKevmFixture']

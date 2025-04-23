@@ -7,9 +7,7 @@ require("hardhat-deploy");
 require('hardhat-deploy-ethers');
 require('hardhat-contract-sizer');
 
-
 import './tasks/minimal_math'
-import './tasks/modular-test'
 import './tasks/counter'
 import './tasks/keccak'
 import './tasks/call_counter'
@@ -19,7 +17,10 @@ import './tasks/indexed_log'
 import './tasks/overflow'
 import './tasks/dynamic_storage_layout'
 import './tasks/try_catch'
-
+import './tasks/transient_storage'
+import './tasks/sar'
+import './tasks/scmp'
+import './tasks/exp'
 
 const DEFAULT_PRIVATE_KEY = "0x" + "0".repeat(64); // 32 bytes of zeros placeholder to pass config validation
 
@@ -34,15 +35,16 @@ const ETHERSCAN_KEY = "ETHERSCAN_KEY"
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
     solidity: {
-        version: "0.8.18",
+        version: "0.8.24",
         settings: {
             optimizer: {
                 enabled: true,
                 runs: 200,
             },
-            metadata:{
+            metadata: {
                 appendCBOR: false
-            }
+            },
+            evmVersion: "cancun"
         },
     },
     namedAccounts: {
@@ -54,7 +56,8 @@ module.exports = {
             mining: {
                 auto: false,
                 interval: 1000
-            }
+            },
+            hardfork: "cancun"
         },
         sepolia: {
             url: `https://eth-sepolia.g.alchemy.com/v2/${SEPOLIA_ALCHEMY_KEY}`,
@@ -70,7 +73,8 @@ module.exports = {
             mining: {
                 auto: false,
                 interval: 1000
-            }
+            },
+            hardfork: "cancun"
         }
     },
     etherscan: {

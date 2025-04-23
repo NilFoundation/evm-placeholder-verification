@@ -117,90 +117,87 @@ const getStorageItems = async(address, keys) =>{
     return result;
 }
 
+const loadBlock = async(blockHash) => {
+    let result = {};
+    let block = await ethers.provider.getBlock(blockHash);;
+    result["block"] = block;
+    result["transactions"] = {};
+    for( let i = 0; i < block.transactions.length; i++){
+        let tx_hash = block.transactions[i];
+        result["transactions"][tx_hash] = {};
+        result["transactions"][tx_hash]["tx"] = await ethers.provider.getTransaction(tx_hash);
+        result["transactions"][tx_hash]["reciept"] = await ethers.provider.getTransactionReceipt(tx_hash);
+        result["transactions"][tx_hash]["trace"] = await getTrace(tx_hash);
+    }
+    return result;
+}
 
 const counter = async ()=>{
     let result = {};
-    result["eth_accounts"] = {};
-    result["accounts"] = {};
-    result["blocks"] = {};
-
-    // Step 1. Load ethereum accounts involved in your test
-    const signer = await ethers.provider.getSigner();
-    const signer_address = await signer.getAddress();
-    let eth_account_data = await getEthereumAccount(signer_address);
-    result["eth_accounts"][signer_address] = eth_account_data;
-
-    // Step 2. Load contracts involved in your test
-    let counter = await ethers.getContract('zkEVMCounter');
-    result["accounts"][counter.address] = await getAccount(counter.address, [
-        "0x0000000000000000000000000000000000000000000000000000000000000000",
-        "0x0000000000000000000000000000000000000000000000000000000000000057"
-    ]);
-
     // Step 3. Run transactions, traces and get receipts
     // We won't fully simulate block logic, because it differs from cluster's
 
-    // Three counters in the first block
+    // Two counters in the first block
     {
+        // Step 1. Load ethereum accounts involved in your test
+        const signer = await ethers.provider.getSigner();
+        const signer_address = await signer.getAddress();
+        let eth_accounts = {};
+        eth_accounts[signer_address]= await getEthereumAccount(signer_address);
+
+        // Step 2. Load contracts involved in your test
+        let counter = await ethers.getContract('zkEVMCounter');
+        let accounts = {};
+        accounts[counter.address] = await getAccount(counter.address, [
+            "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "0x0000000000000000000000000000000000000000000000000000000000000057"
+        ]);
+
         let tx1 = await counter.inc({gasLimit: 100_000});
         let tx2 = await counter.inc({gasLimit: 100_000});
 
         let txReciept1 = await tx1.wait(1);
         let txReciept2 = await tx2.wait(1);
 
-        // console.log(txReciept1["blockHash"]);
-        // console.log(txReciept2["blockHash"]);
-        // console.log(txReciept3["blockHash"]);
-
-        let trace1 = await getTrace(tx1.hash);
-        result["blocks"][txReciept1["blockHash"]] = {};
-        result["blocks"][txReciept1["blockHash"]]["transactions"] = {};
-        result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash] = {};
-        result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash]["tx"] = tx1;
-        result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash]["reciept"] = txReciept1;
-        result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash]["trace"] = trace1;
-
-
-        let trace2 = await getTrace(tx2.hash);
-        if( txReciept2["blockHash"] != txReciept1["blockHash"] ) {
-            result["blocks"][txReciept2["blockHash"]] = {};
-            result["blocks"][txReciept2["blockHash"]]["transactions"] = {};
+        if( txReciept1["blockHash"] != txReciept2["blockHash"] ) {
+            console.error("Two transactions in different blocks");
         }
-        result["blocks"][txReciept2["blockHash"]]["transactions"][tx2.hash] = {};
-        result["blocks"][txReciept2["blockHash"]]["transactions"][tx2.hash]["tx"] = tx2;
-        result["blocks"][txReciept2["blockHash"]]["transactions"][tx2.hash]["reciept"] = txReciept2;
-        result["blocks"][txReciept2["blockHash"]]["transactions"][tx2.hash]["trace"] = trace2;
+        let blockHash = txReciept1["blockHash"];
+
+        result[blockHash] = await loadBlock(blockHash);
+        result[blockHash]["eth_accounts"] = eth_accounts;
+        result[blockHash]["accounts"] = accounts;
     }
-    //  Three counters in the second block
+    //  Two counters in the second block
     {
+        // Step 1. Load ethereum accounts involved in your test
+        const signer = await ethers.provider.getSigner();
+        const signer_address = await signer.getAddress();
+        let eth_accounts = {};
+        eth_accounts[signer_address]= await getEthereumAccount(signer_address);
+
+        // Step 2. Load contracts involved in your test
+        let counter = await ethers.getContract('zkEVMCounter');
+        let accounts = {};
+        accounts[counter.address] = await getAccount(counter.address, [
+            "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "0x0000000000000000000000000000000000000000000000000000000000000057"
+        ]);
+
         let tx1 = await counter.inc({gasLimit: 100_000});
         let tx2 = await counter.inc({gasLimit: 100_000});
 
         let txReciept1 = await tx1.wait(1);
         let txReciept2 = await tx2.wait(1);
 
-        // console.log(txReciept1["blockHash"]);
-        // console.log(txReciept2["blockHash"]);
-        // console.log(txReciept3["blockHash"]);
-
-        let trace1 = await getTrace(tx1.hash);
-        result["blocks"][txReciept1["blockHash"]] = {};
-        result["blocks"][txReciept1["blockHash"]]["transactions"] = {};
-        result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash] = {};
-        result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash]["tx"] = tx1;
-        result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash]["reciept"] = txReciept1;
-        result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash]["trace"] = trace1;
-
-
-        let trace2 = await getTrace(tx2.hash);
-        if( txReciept2["blockHash"] != txReciept1["blockHash"] ) {
-            result["blocks"][txReciept2["blockHash"]] = {};
-            result["blocks"][txReciept2["blockHash"]]["transactions"] = {};
+        if( txReciept1["blockHash"] != txReciept2["blockHash"] ) {
+            console.error("Two transactions in different blocks");
         }
-        result["blocks"][txReciept2["blockHash"]]["transactions"][tx2.hash] = {};
-        result["blocks"][txReciept2["blockHash"]]["transactions"][tx2.hash]["tx"] = tx2;
-        result["blocks"][txReciept2["blockHash"]]["transactions"][tx2.hash]["reciept"] = txReciept2;
-        result["blocks"][txReciept2["blockHash"]]["transactions"][tx2.hash]["trace"] = trace2;
+        let blockHash = txReciept1["blockHash"];
+
+        result[blockHash] = await loadBlock(blockHash);
+        result[blockHash]["eth_accounts"] = eth_accounts;
+        result[blockHash]["accounts"] = accounts;
     }
     console.log(JSON.stringify(result));
 }

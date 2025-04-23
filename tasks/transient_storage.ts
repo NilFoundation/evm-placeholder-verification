@@ -5,6 +5,7 @@ import losslessJSON from "lossless-json";
 import {URL} from "url";
 import { expect } from "chai";
 
+const util = require('util')
 const getNonce  = async(address) =>{
     const params = {
         method: "eth_getTransactionCount",
@@ -117,59 +118,55 @@ const getStorageItems = async(address, keys) =>{
     return result;
 }
 
-const loadBlock = async(blockHash) => {
+const transient_storage = async (hre) => {
     let result = {};
-    let block = await ethers.provider.getBlock(blockHash);;
-    result["block"] = block;
-    result["transactions"] = {};
-    for( let i = 0; i < block.transactions.length; i++){
-        let tx_hash = block.transactions[i];
-        result["transactions"][tx_hash] = {};
-        result["transactions"][tx_hash]["tx"] = await ethers.provider.getTransaction(tx_hash);
-        result["transactions"][tx_hash]["reciept"] = await ethers.provider.getTransactionReceipt(tx_hash);
-        result["transactions"][tx_hash]["trace"] = await getTrace(tx_hash);
-    }
-    return result;
-}
+    result["eth_accounts"] = {};
+    result["accounts"] = {};
+    result["blocks"] = {};
 
-const minimal_math = async ()=>{
-    let result = {};
-    result = {};
-
-    // Step 1. Load ethereum accounts involved in your test
     const signer = await ethers.provider.getSigner();
     const signer_address = await signer.getAddress();
     let eth_account_data = await getEthereumAccount(signer_address);
-    eth_accounts[signer_address] = eth_account_data;
+    result["eth_accounts"][signer_address] = eth_account_data;
 
-    // Step 2. Load contracts involved in your test
-    let counter = await ethers.getContract('zkEVMMinimalMath');
-    accounts[counter.address] = await getAccount(counter.address, [
+    let call_counter = await ethers.getContract('TransientStorageDemo');
+    result["accounts"][call_counter.address] = await getAccount(call_counter.address, [
         "0x0000000000000000000000000000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000000000000000000000000001",
-        "0x0000000000000000000000000000000000000000000000000000000000000002",
-        "0x0000000000000000000000000000000000000000000000000000000000000057"
+        "0x0000000000000000000000000000000000000000000000000000000000000002"
     ]);
 
-    // Step 3. Run transactions, traces and get receipts
-    // We won't fully simulate block logic, because it differs from cluster's
+    let tester = await ethers.getContract('TransientStorageTester');
+    result["accounts"][tester.address] = await getAccount(tester.address, [
+        "0x0000000000000000000000000000000000000000000000000000000000000000"
+    ]);
 
-    // Three counters in the first block
-    let blockHashes = [];
-
-    let tx1 = await counter.test_addition(2, 3, {gasLimit: 100_000});
-    let txReciept1 = await tx1.wait(1);
-    blockHashes.push(txReciept1["blockHash"]);
-
-    for( let blockHash of blockHashes){
-        result[blockHash] = await loadBlock(blockHash)
-        result[blockHash]["eth_accounts"] = eth_accounts;
-        result[blockHash]["accounts"] = accounts;
+    let tx, txReceipt, trace;
+    try {
+        tx = await tester.testOverflow(6, { gasLimit: 1_000_000 });
+        txReceipt = await tx.wait(1);
+        trace = await getTrace(tx.hash);
+    } catch (error) {
+        if (tx) {
+            txReceipt = await ethers.provider.getTransactionReceipt(tx.hash);
+            trace = await getTrace(tx.hash);
+        }
     }
-    console.log(JSON.stringify(result));
-}
 
-task("zkevm-minimal-math")
+    if (tx && txReceipt) {
+        result["blocks"][txReceipt["blockHash"]] = {};
+        result["blocks"][txReceipt["blockHash"]]["transactions"] = {};
+        result["blocks"][txReceipt["blockHash"]]["transactions"][tx.hash] = {};
+        result["blocks"][txReceipt["blockHash"]]["transactions"][tx.hash]["tx"] = tx;
+        result["blocks"][txReceipt["blockHash"]]["transactions"][tx.hash]["reciept"] = txReceipt;
+        result["blocks"][txReceipt["blockHash"]]["transactions"][tx.hash]["trace"] = trace;
+    }
+
+    console.log(JSON.stringify(result));
+};
+  module.exports = transient_storage;
+
+task("transient-storage")
     .setAction(async (hre) => {
-        await minimal_math();
+        await transient_storage();
     });
