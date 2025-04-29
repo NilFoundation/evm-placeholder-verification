@@ -21,6 +21,11 @@ import './tasks/transient_storage'
 import './tasks/sar'
 import './tasks/scmp'
 import './tasks/exp'
+import './tasks/codecopy'
+import './tasks/mem'
+import './tasks/modular'
+import './tasks/precompiles'
+import './tasks/staticcall'
 
 const DEFAULT_PRIVATE_KEY = "0x" + "0".repeat(64); // 32 bytes of zeros placeholder to pass config validation
 
@@ -38,7 +43,7 @@ module.exports = {
         version: "0.8.24",
         settings: {
             optimizer: {
-                enabled: true,
+                enabled: false, /* Optimizer disables some opcodes (MSIZE, for example) */
                 runs: 200,
             },
             metadata: {

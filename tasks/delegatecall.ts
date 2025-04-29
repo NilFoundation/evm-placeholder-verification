@@ -118,27 +118,41 @@ const getStorageItems = async(address, keys) =>{
     return result;
 }
 
+const loadBlock = async(blockHash) => {
+    let result = {};
+    let block = await ethers.provider.getBlock(blockHash);;
+    result["block"] = block;
+    result["transactions"] = {};
+    for( let i = 0; i < block.transactions.length; i++){
+        let tx_hash = block.transactions[i];
+        result["transactions"][tx_hash] = {};
+        result["transactions"][tx_hash]["tx"] = await ethers.provider.getTransaction(tx_hash);
+        result["transactions"][tx_hash]["reciept"] = await ethers.provider.getTransactionReceipt(tx_hash);
+        result["transactions"][tx_hash]["trace"] = await getTrace(tx_hash);
+    }
+    return result;
+}
+
 const delegate_call = async (hre)=>{
     let result = {};
-    result["eth_accounts"] = {};
-    result["accounts"] = {};
-    result["blocks"] = {};
 
     // Step 1. Load ethereum accounts involved in your test
+    let eth_accounts = {};
     const signer = await ethers.provider.getSigner();
     const signer_address = await signer.getAddress();
     let eth_account_data = await getEthereumAccount(signer_address);
-    result["eth_accounts"][signer_address] = eth_account_data;
+    eth_accounts[signer_address] = eth_account_data;
 
     // Step 2. Load contracts involved in your test
+    let accounts = {};
     let delegatecall_counter = await ethers.getContract('zkEVMDelegateCall');
-    result["accounts"][delegatecall_counter.address] = await getAccount(delegatecall_counter.address, [
+    accounts[delegatecall_counter.address] = await getAccount(delegatecall_counter.address, [
         "0x0000000000000000000000000000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000000000000000000000000001",
         "0x0000000000000000000000000000000000000000000000000000000000000002"
     ]);
     let counter = await ethers.getContract('zkEVMCounter');
-    result["accounts"][counter.address] = await getAccount(counter.address, [
+    accounts[counter.address] = await getAccount(counter.address, [
         "0x0000000000000000000000000000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000000000000000000000000057"
     ]);
@@ -147,15 +161,11 @@ const delegate_call = async (hre)=>{
     // We won't fully simulate block logic, because it differs from cluster's
     let tx = await delegatecall_counter.call_and_delegate_call({gasLimit: 1_000_000});
     let txReciept = await tx.wait(1);
-    let trace = await getTrace(tx.hash);
+    let blockHash = txReciept["blockHash"];
 
-
-    result["blocks"][txReciept["blockHash"]] = {};
-    result["blocks"][txReciept["blockHash"]]["transactions"] = {};
-    result["blocks"][txReciept["blockHash"]]["transactions"][tx.hash] = {};
-    result["blocks"][txReciept["blockHash"]]["transactions"][tx.hash]["tx"] = tx;
-    result["blocks"][txReciept["blockHash"]]["transactions"][tx.hash]["reciept"] = txReciept;
-    result["blocks"][txReciept["blockHash"]]["transactions"][tx.hash]["trace"] = trace;
+    result[blockHash] = await loadBlock(blockHash);
+    result[blockHash]["eth_accounts"] = eth_accounts;
+    result[blockHash]["accounts"] = accounts;
 
     console.log(JSON.stringify(result));
 }

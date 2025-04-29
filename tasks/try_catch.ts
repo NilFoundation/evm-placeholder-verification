@@ -118,80 +118,134 @@ const getStorageItems = async(address, keys) =>{
     return result;
 }
 
+const loadBlock = async(blockHash) => {
+    let result = {};
+    let block = await ethers.provider.getBlock(blockHash);;
+    result["block"] = block;
+    result["transactions"] = {};
+    for( let i = 0; i < block.transactions.length; i++){
+        let tx_hash = block.transactions[i];
+        result["transactions"][tx_hash] = {};
+        result["transactions"][tx_hash]["tx"] = await ethers.provider.getTransaction(tx_hash);
+        result["transactions"][tx_hash]["reciept"] = await ethers.provider.getTransactionReceipt(tx_hash);
+        result["transactions"][tx_hash]["trace"] = await getTrace(tx_hash);
+    }
+    return result;
+}
+
 const try_catch = async (hre)=>{
     let result = {};
-    result["eth_accounts"] = {};
-    result["accounts"] = {};
-    result["blocks"] = {};
+    let eth_accounts = {};
+    let accounts = {};
 
     // Step 1. Load ethereum accounts involved in your test
     const signer = await ethers.provider.getSigner();
     const signer_address = await signer.getAddress();
     let eth_account_data = await getEthereumAccount(signer_address);
-    result["eth_accounts"][signer_address] = eth_account_data;
+    eth_accounts[signer_address] = eth_account_data;
 
     // Step 2. Load contracts involved in your test
     let try_catch = await ethers.getContract('zkEVMTryCatch');
-    result["accounts"][try_catch.address] = await getAccount(try_catch.address, [
+    accounts[try_catch.address] = await getAccount(try_catch.address, [
         "0x0000000000000000000000000000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000000000000000000000000001",
         "0x0000000000000000000000000000000000000000000000000000000000000002"
     ]);
     let revert = await ethers.getContract('zkEVMRevert');
-    result["accounts"][revert.address] = await getAccount(revert.address, [
+    accounts[revert.address] = await getAccount(revert.address, [
         "0x0000000000000000000000000000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000000000000000000000000001",
         "0x0000000000000000000000000000000000000000000000000000000000000002"
     ]);
     let counter = await ethers.getContract('zkEVMCounter');
-    result["accounts"][counter.address] = await getAccount(counter.address, [
+    accounts[counter.address] = await getAccount(counter.address, [
         "0x0000000000000000000000000000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000000000000000000000000057"
     ]);
 
     // Step 3. Run transactions, traces and get receipts
     // We won't fully simulate block logic, because it differs from cluster's
-    let tx = await try_catch.callInc({gasLimit: 30_000_000});
-    let txReciept = await tx.wait(1);
-    let trace = await getTrace(tx.hash);
+    let tx1 = await try_catch.callInc1({gasLimit: 5_000_000});
+    let txReciept1 = await tx1.wait(1);
+    let blockHash = txReciept1["blockHash"];
 
-    result["blocks"][txReciept["blockHash"]] = {};
-    result["blocks"][txReciept["blockHash"]]["transactions"] = {};
-    result["blocks"][txReciept["blockHash"]]["transactions"][tx.hash] = {};
-    result["blocks"][txReciept["blockHash"]]["transactions"][tx.hash]["tx"] = tx;
-    result["blocks"][txReciept["blockHash"]]["transactions"][tx.hash]["reciept"] = txReciept;
-    result["blocks"][txReciept["blockHash"]]["transactions"][tx.hash]["trace"] = trace;
+    result[blockHash] = await loadBlock(blockHash);
+    result[blockHash]["eth_accounts"] = eth_accounts;
+    result[blockHash]["accounts"] = accounts;
+
+    console.log(JSON.stringify(result));
+}
+
+const try_catch2 = async (hre)=>{
+    let result = {};
+    let eth_accounts = {};
+    let accounts = {};
+
+    // Step 1. Load ethereum accounts involved in your test
+    const signer = await ethers.provider.getSigner();
+    const signer_address = await signer.getAddress();
+    let eth_account_data = await getEthereumAccount(signer_address);
+    eth_accounts[signer_address] = eth_account_data;
+
+    // Step 2. Load contracts involved in your test
+    let try_catch = await ethers.getContract('zkEVMTryCatch');
+    accounts[try_catch.address] = await getAccount(try_catch.address, [
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        "0x0000000000000000000000000000000000000000000000000000000000000002"
+    ]);
+    let revert = await ethers.getContract('zkEVMRevert');
+    accounts[revert.address] = await getAccount(revert.address, [
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        "0x0000000000000000000000000000000000000000000000000000000000000002"
+    ]);
+    let counter = await ethers.getContract('zkEVMCounter');
+    accounts[counter.address] = await getAccount(counter.address, [
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "0x0000000000000000000000000000000000000000000000000000000000000057"
+    ]);
+
+    // Step 3. Run transactions, traces and get receipts
+    // We won't fully simulate block logic, because it differs from cluster's
+    let tx1 = await try_catch.callInc2({gasLimit: 5_000_000});
+    let txReciept1 = await tx1.wait(1);
+    let blockHash = txReciept1["blockHash"];
+
+    result[blockHash] = await loadBlock(blockHash);
+    result[blockHash]["eth_accounts"] = eth_accounts;
+    result[blockHash]["accounts"] = accounts;
 
     console.log(JSON.stringify(result));
 }
 
 const try_catch_cold = async (hre)=>{
     let result = {};
-    result["eth_accounts"] = {};
-    result["accounts"] = {};
-    result["blocks"] = {};
 
     // Step 1. Load ethereum accounts involved in your test
     const signer = await ethers.provider.getSigner();
     const signer_address = await signer.getAddress();
+
+    eth_accounts = {};
+    accounts = {};
     let eth_account_data = await getEthereumAccount(signer_address);
-    result["eth_accounts"][signer_address] = eth_account_data;
+    eth_accounts[signer_address] = eth_account_data;
 
     // Step 2. Load contracts involved in your test
     let try_catch = await ethers.getContract('zkEVMTryCatchCold');
-    result["accounts"][try_catch.address] = await getAccount(try_catch.address, [
+    accounts[try_catch.address] = await getAccount(try_catch.address, [
         "0x0000000000000000000000000000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000000000000000000000000001",
         "0x0000000000000000000000000000000000000000000000000000000000000002"
     ]);
     let revert = await ethers.getContract('zkEVMRevertCold');
-    result["accounts"][revert.address] = await getAccount(revert.address, [
+    accounts[revert.address] = await getAccount(revert.address, [
         "0x0000000000000000000000000000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000000000000000000000000001",
         "0x0000000000000000000000000000000000000000000000000000000000000002"
     ]);
     let dynamic_storage_layout = await ethers.getContract('zkEVMDynamicStorageLayout');
-    result["accounts"][dynamic_storage_layout.address] = await getAccount(dynamic_storage_layout.address, [
+    accounts[dynamic_storage_layout.address] = await getAccount(dynamic_storage_layout.address, [
         "0x0000000000000000000000000000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000000000000000000000000001",
         "0x0000000000000000000000000000000000000000000000000000000000000004"
@@ -201,30 +255,45 @@ const try_catch_cold = async (hre)=>{
     // We won't fully simulate block logic, because it differs from cluster's
     let tx1 = await dynamic_storage_layout.get_max({gasLimit: 1_000_000});
     let txReciept1 = await tx1.wait(1);
-    let trace1 = await getTrace(tx1.hash);
+    let blockHash = txReciept1["blockHash"];
 
-    // Get maximum key
-    result["blocks"][txReciept1["blockHash"]] = {};
-    result["blocks"][txReciept1["blockHash"]]["transactions"] = {};
-    result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash] = {};
-    result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash]["tx"] = tx1;
-    result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash]["reciept"] = txReciept1;
-    result["blocks"][txReciept1["blockHash"]]["transactions"][tx1.hash]["trace"] = trace1;
+    result[blockHash] = await loadBlock(blockHash);
+    result[blockHash]["eth_accounts"] = eth_accounts;
+    result[blockHash]["accounts"] = accounts;
 
     let max_num = BigInt(txReciept1.logs[0].data);
     let max = "0x" + (max_num+BigInt(1)).toString(16).padStart(64, '0');
-    result["accounts"][dynamic_storage_layout.address].storage[max+1] = "0x0000000000000000000000000000000000000000000000000000000000000000";
+
+    eth_accounts = {};
+    accounts = {};
+    eth_account_data = await getEthereumAccount(signer_address);
+    eth_accounts[signer_address] = eth_account_data;
+
+    // Step 2. Load contracts involved in your test
+    accounts[try_catch.address] = await getAccount(try_catch.address, [
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        "0x0000000000000000000000000000000000000000000000000000000000000002"
+    ]);
+    accounts[revert.address] = await getAccount(revert.address, [
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        "0x0000000000000000000000000000000000000000000000000000000000000002"
+    ]);
+    accounts[dynamic_storage_layout.address] = await getAccount(dynamic_storage_layout.address, [
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        "0x0000000000000000000000000000000000000000000000000000000000000004",
+        max
+    ]);
 
     let tx2 = await try_catch.access(max, 0x654321, {gasLimit: 30_000_000});
     let txReciept2 = await tx2.wait(1);
-    let trace2 = await getTrace(tx2.hash);
+    blockHash = txReciept2["blockHash"];
 
-    result["blocks"][txReciept2["blockHash"]] = {};
-    result["blocks"][txReciept2["blockHash"]]["transactions"] = {};
-    result["blocks"][txReciept2["blockHash"]]["transactions"][tx2.hash] = {};
-    result["blocks"][txReciept2["blockHash"]]["transactions"][tx2.hash]["tx"] = tx2;
-    result["blocks"][txReciept2["blockHash"]]["transactions"][tx2.hash]["reciept"] = txReciept2;
-    result["blocks"][txReciept2["blockHash"]]["transactions"][tx2.hash]["trace"] = trace2;
+    result[blockHash] = await loadBlock(blockHash);
+    result[blockHash]["eth_accounts"] = eth_accounts;
+    result[blockHash]["accounts"] = accounts;
 
     console.log(JSON.stringify(result));
 }
@@ -234,6 +303,10 @@ task("zkevm-try-catch")
         await try_catch();
     });
 
+task("zkevm-try-catch2")
+    .setAction(async (hre) => {
+        await try_catch2();
+    });
 
 task("zkevm-try-catch-cold")
     .setAction(async (hre) => {

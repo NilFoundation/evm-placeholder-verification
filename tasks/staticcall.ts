@@ -133,98 +133,44 @@ const loadBlock = async(blockHash) => {
     return result;
 }
 
-const transient_storage = async (hre) => {
+const static_call = async (hre)=>{
     let result = {};
-    let eth_accounts = {};
-    let accounts = {};
 
+    // Step 1. Load ethereum accounts involved in your test
     const signer = await ethers.provider.getSigner();
     const signer_address = await signer.getAddress();
     let eth_account_data = await getEthereumAccount(signer_address);
+    let eth_accounts = {};
     eth_accounts[signer_address] = eth_account_data;
 
-    let demo = await ethers.getContract('TransientStorageDemo');
-    accounts[demo.address] = await getAccount(demo.address, [
+    // Step 2. Load contracts involved in your test
+    let accounts = {};
+    let callee = await ethers.getContract('zkEVMExponentiator');
+    accounts[callee.address] = await getAccount(callee.address, [
         "0x0000000000000000000000000000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000000000000000000000000001",
         "0x0000000000000000000000000000000000000000000000000000000000000002"
     ]);
-
-    let tester = await ethers.getContract('TransientStorageTester');
-    accounts[tester.address] = await getAccount(tester.address, [
-        "0x0000000000000000000000000000000000000000000000000000000000000000"
-    ]);
-
-    let tx, txReceipt
-    try {
-        tx = await tester.testOverflow(4, { gasLimit: 30_000_000 });
-        txReceipt = await tx.wait(1);
-    } catch (error) {
-        if (tx) {
-            txReceipt = await ethers.provider.getTransactionReceipt(tx.hash);
-        }
-    }
-
-    if (tx && txReceipt) {
-        let blockHash = txReceipt["blockHash"];
-
-        result[blockHash] = await loadBlock(blockHash);
-        result[blockHash]["eth_accounts"] = eth_accounts;
-        result[blockHash]["accounts"] = accounts;
-    }
-
-    console.log(JSON.stringify(result));
-};
-
-
-const transient_storage_revert = async (hre) => {
-    let result = {};
-    let eth_accounts = {};
-    let accounts = {};
-
-    const signer = await ethers.provider.getSigner();
-    const signer_address = await signer.getAddress();
-    let eth_account_data = await getEthereumAccount(signer_address);
-    eth_accounts[signer_address] = eth_account_data;
-
-    let demo = await ethers.getContract('TransientStorageDemo');
-    accounts[demo.address] = await getAccount(demo.address, [
+    let caller = await ethers.getContract('zkEVMStaticCall');
+    accounts[caller.address] = await getAccount(caller.address, [
         "0x0000000000000000000000000000000000000000000000000000000000000000",
-        "0x0000000000000000000000000000000000000000000000000000000000000001",
-        "0x0000000000000000000000000000000000000000000000000000000000000002"
+        "0x0000000000000000000000000000000000000000000000000000000000000001"
     ]);
 
-    let tester = await ethers.getContract('TransientStorageTester');
-    accounts[tester.address] = await getAccount(tester.address, [
-        "0x0000000000000000000000000000000000000000000000000000000000000000"
-    ]);
+    // Step 3. Run transactions, traces and get receipts
+    // We won't fully simulate block logic, because it differs from cluster's
+    let tx = await caller.static_call(6, {gasLimit: 1_000_000});
+    let txReciept = await tx.wait(1);
+    let blockHash = txReciept["blockHash"];
 
-    let tx, txReceipt
-    try {
-        tx = await tester.testOverflow(6, { gasLimit: 30_000_000 });
-        txReceipt = await tx.wait(1);
-    } catch (error) {
-        if (tx) {
-            txReceipt = await ethers.provider.getTransactionReceipt(tx.hash);
-        }
-    }
-
-    if (tx && txReceipt) {
-        let blockHash = txReceipt["blockHash"];
-
-        result[blockHash] = await loadBlock(blockHash);
-        result[blockHash]["eth_accounts"] = eth_accounts;
-        result[blockHash]["accounts"] = accounts;
-    }
+    result[blockHash] = await loadBlock(blockHash);
+    result[blockHash]["eth_accounts"] = eth_accounts;
+    result[blockHash]["accounts"] = accounts;
 
     console.log(JSON.stringify(result));
-};
+}
 
-task("zkevm-transient-storage")
+task("zkevm-staticcall")
     .setAction(async (hre) => {
-        await transient_storage();
-    });
-task("zkevm-transient-storage-revert")
-    .setAction(async (hre) => {
-        await transient_storage_revert();
+        await static_call();
     });

@@ -110,6 +110,53 @@ module.exports = async function () {
         args: []
     });
     console.log(exp_tx);
+
+    console.log("Deploy codecopy test")
+    let code_copy_tx = await deploy("MinimalCodeCopy", {
+        from: deployer,
+        log: true,
+        args: []
+    });
+    console.log(code_copy_tx);
+
+    console.log("Deploy memory test")
+    let meminit_tx = await deploy("zkEVMMemInit", {
+        from: deployer,
+        log: true,
+        args: []
+    });
+    console.log(meminit_tx);
+
+    console.log("Deploy modular test")
+    let modular_tx = await deploy("zkEVMModular", {
+        from: deployer,
+        log: true,
+        args: []
+    });
+    console.log(modular_tx);
+
+    console.log("Deploy precompiles test")
+    let precompiles_tx = await deploy("zkEVMPrecompiles", {
+        from: deployer,
+        log: true,
+        args: []
+    });
+    console.log(precompiles_tx);
+
+    console.log("Deploy exponentiator for staticcall testing")
+    let exponentiator_tx = await deploy("zkEVMExponentiator", {
+        from: deployer,
+        log: true,
+        args: [3]
+    });
+    console.log(exponentiator_tx);
+
+    console.log("Deploy staticcall test")
+    let staticcall_tx = await deploy("zkEVMStaticCall", {
+        from: deployer,
+        log: true,
+        args: [exponentiator_tx.address]
+    });
 }
 
 module.exports.tags = ['testZKevmFixture']
