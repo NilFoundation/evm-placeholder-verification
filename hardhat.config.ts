@@ -26,6 +26,8 @@ import './tasks/mem'
 import './tasks/modular'
 import './tasks/precompiles'
 import './tasks/staticcall'
+import './tasks/log'
+
 
 const DEFAULT_PRIVATE_KEY = "0x" + "0".repeat(64); // 32 bytes of zeros placeholder to pass config validation
 

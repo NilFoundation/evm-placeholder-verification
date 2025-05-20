@@ -9,4 +9,7 @@ contract Logger {
         emit Log1(data1);  // Triggers LOG1
         emit Log4(data1, data2, data3, data4);  // Triggers LOG4
     }
+        function logSimple(bytes32 data) external {
+        emit Log1(data);  // Triggers LOG1
+    }
 }
