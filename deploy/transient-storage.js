@@ -20,6 +20,12 @@ module.exports = async function () {
       log: true,
     });
 
+    console.log("Deploy Logger");
+    let logger = await deploy('Logger', {
+      from: deployer,
+      log: true,
+    });
+
 }
 
 module.exports.tags = ['testTransientStorage']
