@@ -5,7 +5,6 @@ import losslessJSON from "lossless-json";
 import {URL} from "url";
 import { expect } from "chai";
 
-const util = require('util')
 const getNonce  = async(address) =>{
     const params = {
         method: "eth_getTransactionCount",
@@ -133,44 +132,38 @@ const loadBlock = async(blockHash) => {
     return result;
 }
 
-const call_counter = async (hre)=>{
+const large_calldata_key = async ()=>{
     let result = {};
-
-    // Step 1. Load ethereum accounts involved in your test
-    const signer = await ethers.provider.getSigner();
-    const signer_address = await signer.getAddress();
-    let eth_account_data = await getEthereumAccount(signer_address);
-    let eth_accounts = {};
-    eth_accounts[signer_address] = eth_account_data;
-
-    // Step 2. Load contracts involved in your test
-    let accounts = {};
-    let call_counter = await ethers.getContract('zkEVMCallCounter');
-    accounts[call_counter.address] = await getAccount(call_counter.address, [
-        "0x0000000000000000000000000000000000000000000000000000000000000000",
-        "0x0000000000000000000000000000000000000000000000000000000000000001",
-        "0x0000000000000000000000000000000000000000000000000000000000000002"
-    ]);
-    let counter = await ethers.getContract('zkEVMCounter');
-    accounts[counter.address] = await getAccount(counter.address, [
-        "0x0000000000000000000000000000000000000000000000000000000000000000",
-        "0x0000000000000000000000000000000000000000000000000000000000000057"
-    ]);
-
     // Step 3. Run transactions, traces and get receipts
     // We won't fully simulate block logic, because it differs from cluster's
-    let tx = await call_counter.callInc({gasLimit: 1_000_000});
-    let txReciept = await tx.wait(1);
-    let blockHash = txReciept["blockHash"];
 
-    result[blockHash] = await loadBlock(blockHash);
-    result[blockHash]["eth_accounts"] = eth_accounts;
-    result[blockHash]["accounts"] = accounts;
+    // Two counters in the first block
+    {
+        // Step 1. Load ethereum accounts involved in your test
+        const signer = await ethers.provider.getSigner();
+        const signer_address = await signer.getAddress();
+        let eth_accounts = {};
+        eth_accounts[signer_address]= await getEthereumAccount(signer_address);
 
+        // Step 2. Load contracts involved in your test
+        let large_calldata = await ethers.getContract('zkEVMLargeCalldataKey');
+        let accounts = {};
+        accounts[large_calldata.address] = await getAccount(large_calldata.address, [
+            "0x0000000000000000000000000000000000000000000000000000000000000000"
+        ]);
+
+        let tx1 = await large_calldata.callDataKey("0x11", {gasLimit: 100_000});
+        let txReciept1 = await tx1.wait(1);
+        let blockHash = txReciept1["blockHash"];
+
+        result[blockHash] = await loadBlock(blockHash);
+        result[blockHash]["eth_accounts"] = eth_accounts;
+        result[blockHash]["accounts"] = accounts;
+    }
     console.log(JSON.stringify(result));
 }
 
-task("zkevm-call-counter")
+task("zkevm-large-calldata-key")
     .setAction(async (hre) => {
-        await call_counter();
+        await large_calldata_key();
     });

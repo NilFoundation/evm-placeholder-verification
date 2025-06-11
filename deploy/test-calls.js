@@ -157,6 +157,27 @@ module.exports = async function () {
         log: true,
         args: [exponentiator_tx.address]
     });
+
+    console.log("Deploy large calldata key test")
+    let large_calldata_tx = await deploy("zkEVMLargeCalldataKey", {
+        from: deployer,
+        log: true,
+        args: []
+    });
+
+    console.log("Deploy large memory key test")
+    let large_memory_tx = await deploy("zkEVMLargeMemoryKey", {
+        from: deployer,
+        log: true,
+        args: []
+    });
+
+    console.log("Deploy call large memory key test")
+    let call_large_memory_tx = await deploy("zkEVMCallLargeMemoryKey", {
+        from: deployer,
+        log: true,
+        args: [large_memory_tx.address]
+    });
 }
 
 module.exports.tags = ['testZKevmFixture']

@@ -10,7 +10,7 @@ require('hardhat-contract-sizer');
 import './tasks/minimal_math'
 import './tasks/counter'
 import './tasks/keccak'
-import './tasks/call_counter'
+import './tasks/call_large_memory_key'
 import './tasks/call_keccak'
 import './tasks/delegatecall'
 import './tasks/indexed_log'
@@ -27,6 +27,9 @@ import './tasks/modular'
 import './tasks/precompiles'
 import './tasks/staticcall'
 import './tasks/log'
+import './tasks/large_calldata_key'
+import './tasks/large_memory_key'
+import './tasks/call_large_memory_key'
 
 
 const DEFAULT_PRIVATE_KEY = "0x" + "0".repeat(64); // 32 bytes of zeros placeholder to pass config validation
