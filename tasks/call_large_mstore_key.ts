@@ -133,28 +133,32 @@ const loadBlock = async(blockHash) => {
     return result;
 }
 
-const code_copy = async (hre)=>{
+const call_large_mstore_key = async (hre)=>{
     let result = {};
-    let eth_accounts = {};
-    let accounts = {};
 
     // Step 1. Load ethereum accounts involved in your test
     const signer = await ethers.provider.getSigner();
     const signer_address = await signer.getAddress();
     let eth_account_data = await getEthereumAccount(signer_address);
+    let eth_accounts = {};
     eth_accounts[signer_address] = eth_account_data;
 
     // Step 2. Load contracts involved in your test
-    let minimial_code_copy = await ethers.getContract('MinimalCodeCopy');
-    accounts[minimial_code_copy.address] = await getAccount(minimial_code_copy.address, [
+    let accounts = {};
+    let call_large_memory_key = await ethers.getContract('zkEVMCallLargeMstoreKey');
+    accounts[call_large_memory_key.address] = await getAccount(call_large_memory_key.address, [
         "0x0000000000000000000000000000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000000000000000000000000001",
         "0x0000000000000000000000000000000000000000000000000000000000000002"
     ]);
+    let large_memory_key = await ethers.getContract('zkEVMLargeMstoreKey');
+    accounts[large_memory_key.address] = await getAccount(large_memory_key.address, [
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+    ]);
 
     // Step 3. Run transactions, traces and get receipts
     // We won't fully simulate block logic, because it differs from cluster's
-    let tx = await minimial_code_copy.copyCode({gasLimit: 1_000_000});
+    let tx = await call_large_memory_key.callLargeMstoreKey({gasLimit: 30_000_000});
     let txReciept = await tx.wait(1);
     let blockHash = txReciept["blockHash"];
 
@@ -165,28 +169,32 @@ const code_copy = async (hre)=>{
     console.log(JSON.stringify(result));
 }
 
-const zerolength_copy = async (hre)=>{
+const call_large_mstore8_key = async (hre)=>{
     let result = {};
-    let eth_accounts = {};
-    let accounts = {};
 
     // Step 1. Load ethereum accounts involved in your test
     const signer = await ethers.provider.getSigner();
     const signer_address = await signer.getAddress();
     let eth_account_data = await getEthereumAccount(signer_address);
+    let eth_accounts = {};
     eth_accounts[signer_address] = eth_account_data;
 
     // Step 2. Load contracts involved in your test
-    let minimial_code_copy = await ethers.getContract('MinimalCodeCopy');
-    accounts[minimial_code_copy.address] = await getAccount(minimial_code_copy.address, [
+    let accounts = {};
+    let call_large_memory_key = await ethers.getContract('zkEVMCallLargeMstoreKey');
+    accounts[call_large_memory_key.address] = await getAccount(call_large_memory_key.address, [
         "0x0000000000000000000000000000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000000000000000000000000001",
         "0x0000000000000000000000000000000000000000000000000000000000000002"
     ]);
+    let large_memory_key = await ethers.getContract('zkEVMLargeMstoreKey');
+    accounts[large_memory_key.address] = await getAccount(large_memory_key.address, [
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+    ]);
 
     // Step 3. Run transactions, traces and get receipts
     // We won't fully simulate block logic, because it differs from cluster's
-    let tx = await minimial_code_copy.zeroLength({gasLimit: 1_000_000});
+    let tx = await call_large_memory_key.callLargeMstore8Key({gasLimit: 30_000_000});
     let txReciept = await tx.wait(1);
     let blockHash = txReciept["blockHash"];
 
@@ -197,11 +205,11 @@ const zerolength_copy = async (hre)=>{
     console.log(JSON.stringify(result));
 }
 
-task("zkevm-code-copy")
+task("zkevm-call-large-mstore-key")
     .setAction(async (hre) => {
-        await code_copy();
+        await call_large_mstore_key();
     });
-task("zkevm-zero-length-code-copy")
+task("zkevm-call-large-mstore8-key")
     .setAction(async (hre) => {
-        await zerolength_copy();
+        await call_large_mstore8_key();
     });

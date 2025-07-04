@@ -12,4 +12,13 @@ contract MinimalCodeCopy {
         n = n+1;
         return code;
     }
+
+    function zeroLength() external {
+        assembly {
+            codecopy(0xFFFF0000, 0, 0)
+            codecopy(0xFFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000, 0, 0)
+            codecopy(0xFFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000, 0xFFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000, 0)
+        }
+        n = n+1;
+    }
 }

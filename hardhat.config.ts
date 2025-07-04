@@ -29,7 +29,7 @@ import './tasks/staticcall'
 import './tasks/log'
 import './tasks/large_calldata_key'
 import './tasks/large_memory_key'
-import './tasks/call_large_memory_key'
+import './tasks/call_large_mstore_key'
 
 
 const DEFAULT_PRIVATE_KEY = "0x" + "0".repeat(64); // 32 bytes of zeros placeholder to pass config validation
